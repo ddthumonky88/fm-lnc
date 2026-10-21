@@ -137,13 +137,13 @@ Mở trình duyệt: `http://localhost:3000`
 
 1. Tạo project trên [railway.app](https://railway.app)
 2. Add **PostgreSQL** service
-3. Export DB local:
+3. Export DB local bằng `pg_dump`:
    ```bash
-   cd backend
-   node scripts/export_db.js
-   # Output: scripts/db_dump.sql
+   # Windows (pg_dump nằm tại D:\App\PostgreSQL\18\bin\)
+   $env:PGPASSWORD='your_password'
+   D:\App\PostgreSQL\18\bin\pg_dump.exe -h 127.0.0.1 -p 5432 -U postgres -d fm_lnc_db --no-owner --no-acl -F p -f "backend\scripts\db_dump_full.sql"
    ```
-4. Import `db_dump.sql` vào Railway PostgreSQL qua pgAdmin hoặc Railway CLI
+4. Import `db_dump_full.sql` vào Railway PostgreSQL qua pgAdmin hoặc Railway CLI
 
 ### Backend
 

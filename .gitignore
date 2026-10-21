@@ -5,6 +5,7 @@ frontend/node_modules/
 
 # DB dump (large file, deploy separately)
 backend/scripts/db_dump.sql
+backend/scripts/db_dump_full.sql
 
 # Production & Build outputs
 dist/
