@@ -1,0 +1,549 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
+
+@Injectable()
+export class LncParserService {
+  private readonly logger = new Logger(LncParserService.name);
+
+  constructor(private dataSource: DataSource) {}
+
+  async parseAndSeed(baseDir?: string) {
+    let dir = baseDir || process.env.LNC_FILES_DIR || path.resolve(__dirname, '../../../..');
+    
+    // Auto-detect if files are in parent or grandparent directory
+    if (!fs.existsSync(path.resolve(dir, 'FM24 - City & Nation.lnc'))) {
+      if (fs.existsSync(path.resolve(dir, '..', 'FM24 - City & Nation.lnc'))) {
+        dir = path.resolve(dir, '..');
+      } else if (fs.existsSync(path.resolve(dir, '../..', 'FM24 - City & Nation.lnc'))) {
+        dir = path.resolve(dir, '../..');
+      }
+    }
+
+    this.logger.log(`Starting parse & seed from: ${dir}`);
+
+    const fileCityNat = path.resolve(dir, 'FM24 - City & Nation.lnc');
+    const fileClubStadium = path.resolve(dir, 'FM24 - Club & Stadium.lnc');
+    const fileCompOther = path.resolve(dir, 'FM24 - Competition & Other.lnc');
+
+    if (!fs.existsSync(fileCityNat) || !fs.existsSync(fileClubStadium) || !fs.existsSync(fileCompOther)) {
+      throw new Error(`One or more .lnc files missing in directory ${dir}`);
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Confederations
+      const confeds = [
+        [1, 'Africa'],
+        [2, 'Asia'],
+        [3, 'Europe'],
+        [4, 'North America'],
+        [5, 'Oceania'],
+        [6, 'South America'],
+        [7, 'World'],
+      ];
+      for (const [id, name] of confeds) {
+        await queryRunner.query(
+          `INSERT INTO confederations (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name`,
+          [id, name],
+        );
+      }
+
+      const confedMap: Record<string, number> = {
+        CAF: 1, AFRICA: 1,
+        AFC: 2, ASIA: 2,
+        UEFA: 3, EUROPE: 3,
+        CONCACAF: 4, 'NORTH AMERICA': 4,
+        OFC: 5, OCEANIA: 5,
+        CONMEBOL: 6, 'SOUTH AMERICA': 6,
+        WORLD: 7, INTERNATIONAL: 7, FIFA: 7,
+        OTHER: 7,
+      };
+
+      // 2. Parse City & Nation
+      const cityNatLines = fs.readFileSync(fileCityNat, 'utf-8').split(/\r?\n/);
+      const nations: Record<number, any> = {};
+      const cities: Record<number, any> = {};
+      let curConfedId = 7;
+      let curNatCode: string | null = null;
+      let curNatName: string | null = null;
+      let curCityCat: string | null = null;
+
+      for (const l of cityNatLines) {
+        let line = l.trim();
+        if (!line) continue;
+        if (line.startsWith('#')) {
+          const h = line.replace(/^#+/, '').trim();
+          if (h.startsWith('NATION >')) {
+            const parts = h.split('>').map((p) => p.trim());
+            const cName = parts[1]?.toUpperCase() || 'OTHER';
+            curConfedId = confedMap[cName] || 7;
+            continue;
+          } else if (h.startsWith('CITY >')) {
+            const parts = h.split('>').map((p) => p.trim());
+            if (parts.length > 1) {
+              const m = parts[1].match(/\[([A-Z0-9]+)\]\s*(.*)/);
+              if (m) {
+                curNatCode = m[1].trim();
+                curNatName = m[2].trim();
+              } else {
+                curNatCode = null;
+                curNatName = parts[1].trim();
+              }
+            }
+            curCityCat = parts.length > 2 ? parts[2].trim() : null;
+            continue;
+          } else if (h.startsWith('=')) {
+            continue;
+          }
+        }
+
+        const isCommented = line.startsWith('#');
+        const cleanLine = isCommented ? line.replace(/^#+\s*/, '').trim() : line;
+
+        const m = cleanLine.match(/^"([^"]+)"\s+(\d+)\s+"([^"]*)"/);
+        if (m) {
+          const cmd = m[1];
+          const id = parseInt(m[2], 10);
+          const val = m[3].trim();
+          if (cmd === 'NATION_LONG_NAME_CHANGE' || cmd === 'NATION_SHORT_NAME_CHANGE' || cmd === 'NATION_3LETTER_NAME_CHANGE') {
+            if (!nations[id]) nations[id] = { confed_id: curConfedId, inactive_fields: new Set() };
+            if (!nations[id].inactive_fields) nations[id].inactive_fields = new Set();
+            if (cmd === 'NATION_LONG_NAME_CHANGE') {
+              nations[id].long_name = val;
+              if (isCommented) nations[id].inactive_fields.add('long_name');
+              else nations[id].inactive_fields.delete('long_name');
+            } else if (cmd === 'NATION_SHORT_NAME_CHANGE') {
+              nations[id].short_name = val;
+              if (isCommented) nations[id].inactive_fields.add('short_name');
+              else nations[id].inactive_fields.delete('short_name');
+            } else if (cmd === 'NATION_3LETTER_NAME_CHANGE') {
+              nations[id].three_letter_name = val;
+              if (isCommented) nations[id].inactive_fields.add('three_letter_name');
+              else nations[id].inactive_fields.delete('three_letter_name');
+            }
+          } else if (cmd === 'CITY_NAME_CHANGE') {
+            if (!cities[id]) {
+              cities[id] = {
+                name: val,
+                natCode: curNatCode,
+                natName: curNatName,
+                cat: curCityCat,
+                inactive_fields: new Set(),
+              };
+            }
+            if (!cities[id].inactive_fields) cities[id].inactive_fields = new Set();
+            cities[id].name = val;
+            if (isCommented) cities[id].inactive_fields.add('name');
+            else cities[id].inactive_fields.delete('name');
+          }
+        }
+      }
+
+      const codeToNationId: Record<string, number> = {};
+      const nameToNationId: Record<string, number> = {};
+
+      for (const [idStr, ndata] of Object.entries(nations)) {
+        const id = parseInt(idStr, 10);
+        const lName = ndata.long_name || `Nation ${id}`;
+        const sName = ndata.short_name || lName;
+        const code = ndata.three_letter_name || 'UNK';
+        const cid = ndata.confed_id || 7;
+
+        codeToNationId[code] = id;
+        nameToNationId[lName.toUpperCase()] = id;
+        nameToNationId[sName.toUpperCase()] = id;
+
+        const inactStr = ndata.inactive_fields && ndata.inactive_fields.size > 0
+          ? Array.from(ndata.inactive_fields).sort().join(',')
+          : null;
+
+        await queryRunner.query(
+          `INSERT INTO nations (id, long_name, short_name, three_letter_name, confederation_id, inactive_fields)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (id) DO UPDATE SET
+             long_name = EXCLUDED.long_name,
+             short_name = EXCLUDED.short_name,
+             three_letter_name = EXCLUDED.three_letter_name,
+             confederation_id = EXCLUDED.confederation_id,
+             inactive_fields = EXCLUDED.inactive_fields`,
+          [id, lName, sName, code, cid, inactStr],
+        );
+      }
+
+      for (const [idStr, cdata] of Object.entries(cities)) {
+        const id = parseInt(idStr, 10);
+        let natId = null;
+        if (cdata.natCode && codeToNationId[cdata.natCode]) {
+          natId = codeToNationId[cdata.natCode];
+        } else if (cdata.natName && nameToNationId[cdata.natName.toUpperCase()]) {
+          natId = nameToNationId[cdata.natName.toUpperCase()];
+        }
+
+        const inactStr = cdata.inactive_fields && cdata.inactive_fields.size > 0
+          ? Array.from(cdata.inactive_fields).sort().join(',')
+          : null;
+
+        await queryRunner.query(
+          `INSERT INTO cities (id, name, country_id, categories, inactive_fields)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (id) DO UPDATE SET
+             name = EXCLUDED.name,
+             country_id = EXCLUDED.country_id,
+             categories = EXCLUDED.categories,
+             inactive_fields = EXCLUDED.inactive_fields`,
+          [id, cdata.name, natId, cdata.cat, inactStr],
+        );
+      }
+
+      // 3. Competitions & Other
+      const compOtherLines = fs.readFileSync(fileCompOther, 'utf-8').split(/\r?\n/);
+      const comps: Record<number, any> = {};
+      const awards: Record<number, any> = {};
+      let curCompConfedId: number | null = null;
+      let curCompNatCode: string | null = null;
+      let curCompCat: string | null = null;
+
+      for (const l of compOtherLines) {
+        let line = l.trim();
+        if (!line) continue;
+        if (line.startsWith('#')) {
+          const h = line.replace(/^#+/, '').trim();
+          if (h.startsWith('COMP >')) {
+            const parts = h.split('>').map((p) => p.trim());
+            const cf = parts[1]?.toUpperCase() || 'OTHER';
+            curCompConfedId = confedMap[cf] || 7;
+            curCompNatCode = null;
+            if (parts.length > 2) {
+              const m = parts[2].match(/\[([A-Z0-9]+)\]/);
+              if (m) curCompNatCode = m[1].trim();
+            }
+            curCompCat = parts.length > 3 ? parts[3].trim() : null;
+            continue;
+          } else if (h.startsWith('AWARDS >')) {
+            const parts = h.split('>').map((p) => p.trim());
+            const cf = parts[1]?.toUpperCase() || 'OTHER';
+            curCompConfedId = confedMap[cf] || 7;
+            curCompNatCode = null;
+            if (parts.length >= 4) {
+              const m = parts[2].match(/\[([A-Za-z0-9]{3})\]/);
+              if (m) curCompNatCode = m[1].trim();
+              curCompCat = parts[3].trim();
+            } else if (parts.length === 3) {
+              curCompNatCode = null;
+              curCompCat = parts[2].trim();
+            } else {
+              curCompCat = null;
+            }
+            continue;
+          } else if (h.startsWith('STAGE >') || h.startsWith('PERSON >') || h.startsWith('PLAYER >') || h.startsWith('=')) {
+            continue;
+          }
+        }
+
+        const isCommented = line.startsWith('#');
+        const cleanLine = isCommented ? line.replace(/^#+\s*/, '').trim() : line;
+
+        if (cleanLine.includes('CHANGE_PLAYER_NAME')) {
+          const quotes = cleanLine.match(/"([^"]*)"/g)?.map((s) => s.replace(/"/g, ''));
+          const idMatch = cleanLine.match(/"CHANGE_PLAYER_NAME"\s+(\d+)/);
+          if (idMatch && quotes && quotes.length >= 4) {
+            const pid = parseInt(idMatch[1], 10);
+            await queryRunner.query(
+              `INSERT INTO people (id, first_name, common_name, second_name)
+               VALUES ($1, $2, $3, $4)
+               ON CONFLICT (id) DO UPDATE SET
+                 first_name = EXCLUDED.first_name,
+                 common_name = EXCLUDED.common_name,
+                 second_name = EXCLUDED.second_name`,
+              [pid, quotes[1], quotes[2], quotes[3]],
+            );
+          }
+          continue;
+        }
+
+        const colMatch = cleanLine.match(/^"COMP_COLOUR_CHANGE"\s+(\d+)\s+([0-9\s]+)\s+""/);
+        if (colMatch) {
+          const cid = parseInt(colMatch[1], 10);
+          const tokens = colMatch[2].trim().split(/\s+/);
+          if (!comps[cid]) {
+            comps[cid] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+          }
+          if (!comps[cid].inactive_fields) comps[cid].inactive_fields = new Set();
+          if (tokens.length >= 7) {
+            const offset = tokens.length >= 8 ? 2 : 1;
+            comps[cid].fg_color = `${tokens[offset]} ${tokens[offset + 1]} ${tokens[offset + 2]}`;
+            comps[cid].bg_color = `${tokens[offset + 3]} ${tokens[offset + 4]} ${tokens[offset + 5]}`;
+          }
+          if (isCommented) comps[cid].inactive_fields.add('colors');
+          else comps[cid].inactive_fields.delete('colors');
+          continue;
+        }
+
+        const m = cleanLine.match(/^"([^"]+)"\s+(\d+)\s+"([^"]*)"/);
+        if (m) {
+          const cmd = m[1];
+          const id = parseInt(m[2], 10);
+          const val = m[3].trim();
+          if (cmd === 'COMP_LONG_NAME_CHANGE' || cmd === 'COMP_SHORT_NAME_CHANGE' || cmd === 'COMP_3LETTER_NAME_CHANGE') {
+            if (!comps[id]) comps[id] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+            if (!comps[id].inactive_fields) comps[id].inactive_fields = new Set();
+            if (cmd === 'COMP_LONG_NAME_CHANGE') {
+              comps[id].long_name = val;
+              if (isCommented) comps[id].inactive_fields.add('long_name');
+              else comps[id].inactive_fields.delete('long_name');
+            }
+            if (cmd === 'COMP_SHORT_NAME_CHANGE') {
+              comps[id].short_name = val;
+              if (isCommented) comps[id].inactive_fields.add('short_name');
+              else comps[id].inactive_fields.delete('short_name');
+            }
+            if (cmd === 'COMP_3LETTER_NAME_CHANGE') {
+              comps[id].three_letter_name = val;
+              if (isCommented) comps[id].inactive_fields.add('three_letter_name');
+              else comps[id].inactive_fields.delete('three_letter_name');
+            }
+          } else if (cmd === 'AWARD_LONG_NAME_CHANGE' || cmd === 'AWARD_SHORT_NAME_CHANGE') {
+            if (!awards[id]) awards[id] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+            if (!awards[id].inactive_fields) awards[id].inactive_fields = new Set();
+            if (cmd === 'AWARD_LONG_NAME_CHANGE') {
+              awards[id].long_name = val;
+              if (isCommented) awards[id].inactive_fields.add('long_name');
+              else awards[id].inactive_fields.delete('long_name');
+            }
+            if (cmd === 'AWARD_SHORT_NAME_CHANGE') {
+              awards[id].short_name = val;
+              if (isCommented) awards[id].inactive_fields.add('short_name');
+              else awards[id].inactive_fields.delete('short_name');
+            }
+          } else if (cmd === 'STAGE_NAME_LONG_NAME_CHANGE') {
+            await queryRunner.query(
+              `INSERT INTO stages (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name`,
+              [id, val],
+            );
+          }
+        }
+      }
+
+      const compNameToId: Record<string, number> = {};
+      for (const [idStr, cdata] of Object.entries(comps)) {
+        const id = parseInt(idStr, 10);
+        const lName = cdata.long_name || `Competition ${id}`;
+        const sName = cdata.short_name || lName;
+        const code = cdata.three_letter_name || null;
+        const fg = cdata.fg_color || null;
+        const bg = cdata.bg_color || null;
+        const natId = cdata.nat_code ? codeToNationId[cdata.nat_code] || null : null;
+        const isInter = natId === null;
+
+        compNameToId[lName.toLowerCase()] = id;
+        compNameToId[sName.toLowerCase()] = id;
+
+        const inactStr = cdata.inactive_fields && cdata.inactive_fields.size > 0
+          ? Array.from(cdata.inactive_fields).sort().join(',')
+          : null;
+
+        await queryRunner.query(
+          `INSERT INTO competitions (id, long_name, short_name, three_letter_name, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+           ON CONFLICT (id) DO UPDATE SET
+             long_name = EXCLUDED.long_name,
+             short_name = EXCLUDED.short_name,
+             three_letter_name = EXCLUDED.three_letter_name,
+             fg_color = EXCLUDED.fg_color,
+             bg_color = EXCLUDED.bg_color,
+             confed_id = EXCLUDED.confed_id,
+             nation_id = EXCLUDED.nation_id,
+             categories = EXCLUDED.categories,
+             is_international = EXCLUDED.is_international,
+             inactive_fields = EXCLUDED.inactive_fields`,
+          [id, lName, sName, code, fg, bg, cdata.confed_id, natId, cdata.cat, isInter, inactStr],
+        );
+      }
+
+      for (const [idStr, adata] of Object.entries(awards)) {
+        const id = parseInt(idStr, 10);
+        const lName = adata.long_name || `Award ${id}`;
+        const sName = adata.short_name || lName;
+        const natId = adata.nat_code ? codeToNationId[adata.nat_code.toUpperCase()] || null : null;
+        let compId = null;
+        if (adata.cat) {
+          const compMatch = adata.cat.match(/\[(\d+)\]/);
+          if (compMatch) compId = parseInt(compMatch[1], 10);
+          else compId = compNameToId[adata.cat.toLowerCase()] || null;
+        }
+
+        const inactStr = adata.inactive_fields && adata.inactive_fields.size > 0
+          ? Array.from(adata.inactive_fields).sort().join(',')
+          : null;
+
+        await queryRunner.query(
+          `INSERT INTO awards (id, long_name, short_name, nation_id, comp_id, inactive_fields)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (id) DO UPDATE SET
+             long_name = EXCLUDED.long_name,
+             short_name = EXCLUDED.short_name,
+             nation_id = EXCLUDED.nation_id,
+             comp_id = EXCLUDED.comp_id,
+             inactive_fields = EXCLUDED.inactive_fields`,
+          [id, lName, sName, natId, compId, inactStr],
+        );
+      }
+
+      // 4. Club & Stadium
+      const clubStadiumLines = fs.readFileSync(fileClubStadium, 'utf-8').split(/\r?\n/);
+      const clubs: Record<number, any> = {};
+      const stadiums: Record<number, any> = {};
+      let curClubNatCode: string | null = null;
+      let curClubCompCat: string | null = null;
+      let curStadNatCode: string | null = null;
+
+      for (const l of clubStadiumLines) {
+        let line = l.trim();
+        if (!line) continue;
+        if (line.startsWith('#')) {
+          const h = line.replace(/^#+/, '').trim();
+          if (h.startsWith('CLUB >')) {
+            const parts = h.split('>').map((p) => p.trim());
+            curClubNatCode = null;
+            if (parts.length > 2) {
+              const m = parts[2].match(/\[([A-Z0-9]+)\]/);
+              if (m) curClubNatCode = m[1].trim();
+            }
+            curClubCompCat = parts.length > 3 ? parts[3].trim() : null;
+            continue;
+          } else if (h.startsWith('STADIUM >')) {
+            const parts = h.split('>').map((p) => p.trim());
+            curStadNatCode = null;
+            if (parts.length > 1) {
+              const m = parts[1].match(/\[([A-Z0-9]+)\]/);
+              if (m) curStadNatCode = m[1].trim();
+            }
+            continue;
+          } else if (h.startsWith('=')) {
+            continue;
+          }
+        }
+
+        // Check if commented command
+        const isCommented = line.startsWith('#');
+        const cleanLine = isCommented ? line.replace(/^#+\s*/, '').trim() : line;
+
+        let note: string | null = null;
+        let workingLine = cleanLine;
+        if (workingLine.includes('#')) {
+          const p = workingLine.split('#');
+          note = p.slice(1).join('#').trim();
+          workingLine = p[0].trim();
+        }
+
+        const m = workingLine.match(/^"([^"]+)"\s+(\d+)\s+"([^"]*)"/);
+        if (m) {
+          const cmd = m[1];
+          const id = parseInt(m[2], 10);
+          const val = m[3].trim();
+          if (cmd.startsWith('CLUB_')) {
+            if (!clubs[id]) {
+              clubs[id] = { nat_code: curClubNatCode, comp_cat: curClubCompCat, note, inactive_fields: new Set() };
+            }
+            if (!clubs[id].inactive_fields) clubs[id].inactive_fields = new Set();
+            if (cmd === 'CLUB_NAME_CHANGE') {
+              clubs[id].long_name = val;
+              if (isCommented) clubs[id].inactive_fields.add('long_name');
+              else clubs[id].inactive_fields.delete('long_name');
+            }
+            if (cmd === 'CLUB_SHORT_NAME_CHANGE') {
+              clubs[id].short_name = val;
+              if (isCommented) clubs[id].inactive_fields.add('short_name');
+              else clubs[id].inactive_fields.delete('short_name');
+            }
+            if (cmd === 'CLUB_3LETTER_NAME_CHANGE') {
+              clubs[id].three_letter_name = val;
+              if (isCommented) clubs[id].inactive_fields.add('three_letter_name');
+              else clubs[id].inactive_fields.delete('three_letter_name');
+            }
+            if (cmd === 'CLUB_6LETTER_NAME_CHANGE') {
+              clubs[id].six_letter_name = val;
+              if (isCommented) clubs[id].inactive_fields.add('six_letter_name');
+              else clubs[id].inactive_fields.delete('six_letter_name');
+            }
+            if (note && !clubs[id].note) clubs[id].note = note;
+          } else if (cmd === 'STADIUM_NAME_CHANGE') {
+            stadiums[id] = { name: val, nat_code: curStadNatCode, note, inactive: isCommented };
+          }
+        }
+      }
+
+      for (const [idStr, cdata] of Object.entries(clubs)) {
+        const id = parseInt(idStr, 10);
+        const lName = cdata.long_name || `Club ${id}`;
+        const sName = cdata.short_name || lName;
+        const natId = cdata.nat_code ? codeToNationId[cdata.nat_code] || null : null;
+        let compId = null;
+        if (cdata.comp_cat) {
+          const mCompId = cdata.comp_cat.match(/\[(\d+)\]/);
+          if (mCompId) {
+            compId = parseInt(mCompId[1], 10);
+          } else if (!cdata.comp_cat.includes('OTHER') && !cdata.comp_cat.includes('EXTINCT')) {
+            const clean = cdata.comp_cat.replace(/\s*\(\d+\/\d+\)/, '').replace(/\s*\(\d+\)/, '').trim().toLowerCase();
+            compId = compNameToId[clean] || compNameToId[cdata.comp_cat.toLowerCase()] || null;
+          }
+        }
+        const inactStr = cdata.inactive_fields && cdata.inactive_fields.size > 0
+          ? Array.from(cdata.inactive_fields).sort().join(',')
+          : null;
+        const isExtinct =
+          Boolean(cdata.comp_cat && cdata.comp_cat.includes('EXTINCT')) ||
+          Boolean(cdata.note?.toLowerCase().includes('extinct')) ||
+          Boolean(lName?.toLowerCase().includes('extinct'));
+
+        await queryRunner.query(
+          `INSERT INTO clubs (id, long_name, short_name, six_letter_name, three_letter_name, nation_id, comp_id, note, inactive_fields, is_extinct)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+           ON CONFLICT (id) DO UPDATE SET
+             long_name = EXCLUDED.long_name,
+             short_name = EXCLUDED.short_name,
+             six_letter_name = EXCLUDED.six_letter_name,
+             three_letter_name = EXCLUDED.three_letter_name,
+             nation_id = EXCLUDED.nation_id,
+             comp_id = EXCLUDED.comp_id,
+             note = EXCLUDED.note,
+             inactive_fields = EXCLUDED.inactive_fields,
+             is_extinct = EXCLUDED.is_extinct`,
+          [id, lName, sName, cdata.six_letter_name || null, cdata.three_letter_name || null, natId, compId, cdata.note || null, inactStr, isExtinct],
+        );
+      }
+
+      for (const [idStr, sdata] of Object.entries(stadiums)) {
+        const id = parseInt(idStr, 10);
+        const natId = sdata.nat_code ? codeToNationId[sdata.nat_code] || null : null;
+        const inactStr = sdata.inactive ? 'name' : null;
+
+        await queryRunner.query(
+          `INSERT INTO stadiums (id, name, nation_id, note, inactive_fields)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (id) DO UPDATE SET
+             name = EXCLUDED.name,
+             nation_id = EXCLUDED.nation_id,
+             note = EXCLUDED.note,
+             inactive_fields = EXCLUDED.inactive_fields`,
+          [id, sdata.name, natId, sdata.note || null, inactStr],
+        );
+      }
+
+      await queryRunner.commitTransaction();
+      this.logger.log('Database import completed successfully!');
+      return { success: true };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error('Error during database import', err);
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+}

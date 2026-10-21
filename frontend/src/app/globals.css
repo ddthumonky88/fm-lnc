@@ -1,0 +1,15 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --foreground-rgb: 51, 51, 51;
+  --background-start-rgb: 243, 244, 246;
+  --background-end-rgb: 243, 244, 246;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: #f3f4f6;
+  font-family: inherit;
+}

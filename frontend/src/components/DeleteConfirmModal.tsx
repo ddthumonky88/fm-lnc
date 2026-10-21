@@ -1,0 +1,57 @@
+'use client';
+
+import React from 'react';
+
+interface DeleteConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  itemName: string;
+  loading?: boolean;
+}
+
+export default function DeleteConfirmModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  itemName,
+  loading = false,
+}: DeleteConfirmModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden border border-gray-200">
+        <div className="bg-red-50 border-b border-red-200 px-5 py-3 flex items-center justify-between">
+          <h3 className="font-bold text-sm text-red-800">{title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none">
+            &times;
+          </button>
+        </div>
+        <div className="p-5">
+          <p className="text-xs text-gray-600 mb-4">
+            Bạn có chắc chắn muốn xóa bản ghi <strong className="text-gray-800">{itemName}</strong>? Thao tác này sẽ cập nhật cơ sở dữ liệu và file .LNC khi xuất.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={loading}
+              className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded shadow"
+            >
+              {loading ? 'Đang xóa...' : 'Xác Nhận Xóa'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,204 @@
+'use client';
+
+import React, { useState, useEffect, useCallback, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { message } from 'antd';
+import AppSidebar from './AppSidebar';
+import AppHeader from './AppHeader';
+import RecordModal from './RecordModal';
+import QuickSearchModal from './QuickSearchModal';
+import { AppContextProvider } from '../context/AppContext';
+import { reimportLnc, getExportUrl, fetchContinents } from '../services/api';
+import { RecordType, EntityType } from '../types';
+
+export default function AppLayout({ children }: { children: ReactNode }) {
+  const router = useRouter();
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [totalContinents, setTotalContinents] = useState(0);
+
+  // Global modals state
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [recordModalType, setRecordModalType] = useState<RecordType>(RecordType.CLUB);
+  const [editingRecord, setEditingRecord] = useState<any | null>(null);
+  const [defaultNationId, setDefaultNationId] = useState<number | undefined>(undefined);
+  const [defaultCompId, setDefaultCompId] = useState<number | undefined>(undefined);
+
+  // Header display state
+  const [currentHeaderTitle, setCurrentHeaderTitle] = useState('Confederations & Nations');
+  const [currentHeaderId, setCurrentHeaderId] = useState<number | undefined>(undefined);
+  const [breadcrumbs, setBreadcrumbs] = useState<any[]>([]);
+  const [backHref, setBackHref] = useState<string | (() => void) | null>(null);
+  const [headerLogo, setHeaderLogo] = useState<any | null>(null);
+
+  // Global refresh trigger signal
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const triggerRefresh = useCallback(() => {
+    setRefreshSignal((prev) => prev + 1);
+  }, []);
+
+  useEffect(() => {
+    fetchContinents()
+      .then((data) => setTotalContinents(data.length))
+      .catch(() => {});
+  }, [refreshSignal]);
+
+  const handleSyncLnc = useCallback(async () => {
+    if (confirm('Do you want to re-sync the database from original .LNC files?')) {
+      setIsSyncing(true);
+      const hide = message.loading('Scanning and importing data...', 0);
+      try {
+        await reimportLnc();
+        hide();
+        message.success('Database synced successfully!');
+        triggerRefresh();
+      } catch (e: any) {
+        hide();
+        message.error(e.message || 'Sync failed');
+      } finally {
+        setIsSyncing(false);
+      }
+    }
+  }, [triggerRefresh]);
+
+  const handleExportLnc = useCallback(() => {
+    window.open(getExportUrl(), '_blank');
+    message.success('Downloading updated .LNC file...');
+  }, []);
+
+  // Global shortcut listeners:
+  // - Search: Ctrl+K / Cmd+K
+  // - Sync .LNC: Alt+S or Ctrl+Shift+S
+  // - Export .LNC: Alt+E or Ctrl+Shift+E
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Search: Ctrl+K / Cmd+K
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchModalOpen(true);
+        return;
+      }
+
+      // Sync .LNC: Alt+S or Ctrl+Shift+S
+      if (
+        (e.altKey && e.key.toLowerCase() === 's') ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's')
+      ) {
+        e.preventDefault();
+        handleSyncLnc();
+        return;
+      }
+
+      // Export .LNC: Alt+E or Ctrl+Shift+E
+      if (
+        (e.altKey && e.key.toLowerCase() === 'e') ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'e')
+      ) {
+        e.preventDefault();
+        handleExportLnc();
+        return;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSyncLnc, handleExportLnc]);
+
+  const handleOpenRecordModal = useCallback(
+    (type: RecordType, initialData?: any, natId?: number, cId?: number) => {
+      setRecordModalType(type);
+      setEditingRecord(initialData || null);
+      setDefaultNationId(natId);
+      setDefaultCompId(cId);
+      setIsRecordModalOpen(true);
+    },
+    [],
+  );
+
+  return (
+    <AppContextProvider
+      headerTitle={currentHeaderTitle}
+      setHeaderTitle={setCurrentHeaderTitle}
+      headerId={currentHeaderId}
+      setHeaderId={setCurrentHeaderId}
+      breadcrumbs={breadcrumbs}
+      setBreadcrumbs={setBreadcrumbs}
+      backHref={backHref}
+      setBackHref={setBackHref}
+      headerLogo={headerLogo}
+      setHeaderLogo={setHeaderLogo}
+      onOpenRecordModal={handleOpenRecordModal}
+      onOpenSearchModal={() => setIsSearchModalOpen(true)}
+      refreshSignal={refreshSignal}
+      triggerRefresh={triggerRefresh}
+    >
+      <div className="flex min-h-screen bg-[#f3f4f6] text-[#333333] font-sans antialiased">
+        {/* Persistent Desktop & Responsive Mobile Sidebar */}
+        <AppSidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          isMobileOpen={mobileMenuOpen}
+          onCloseMobile={() => setMobileMenuOpen(false)}
+          onOpenSearchModal={() => setIsSearchModalOpen(true)}
+          onSync={handleSyncLnc}
+          onExport={handleExportLnc}
+          totalContinents={totalContinents}
+        />
+
+        {/* Main Content Column */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <AppHeader
+            collapsed={sidebarCollapsed}
+            onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onOpenSearchModal={() => setIsSearchModalOpen(true)}
+            onSync={handleSyncLnc}
+            isSyncing={isSyncing}
+            onExport={handleExportLnc}
+            onQuickAdd={(type) => handleOpenRecordModal(type)}
+            onRefresh={triggerRefresh}
+            currentStepTitle={currentHeaderTitle}
+            currentStepId={currentHeaderId}
+            breadcrumbs={breadcrumbs}
+            backHref={backHref}
+            headerLogo={headerLogo}
+          />
+
+          <main className="flex-1 w-full px-3 sm:px-4 lg:px-5 py-3 sm:py-4">
+            {children}
+          </main>
+        </div>
+
+        {/* Global Modals */}
+        <RecordModal
+          isOpen={isRecordModalOpen}
+          onClose={() => setIsRecordModalOpen(false)}
+          onSuccess={() => {
+            message.success('Record saved successfully!');
+            triggerRefresh();
+          }}
+          type={recordModalType}
+          initialData={editingRecord}
+          defaultNationId={defaultNationId}
+          defaultCompId={defaultCompId}
+        />
+
+        <QuickSearchModal
+          isOpen={isSearchModalOpen}
+          onClose={() => setIsSearchModalOpen(false)}
+          onSelectItem={(item, type) => {
+            if (type === EntityType.NATION || type === 'nation') {
+              router.push(`/?nationId=${item.id}&nationName=${encodeURIComponent(item.long_name)}`);
+            } else if (type === EntityType.COMPETITION || type === 'competition') {
+              router.push(`/?compId=${item.id}&compName=${encodeURIComponent(item.short_name || item.long_name)}`);
+            } else {
+              handleOpenRecordModal(type as RecordType, item);
+            }
+          }}
+        />
+      </div>
+    </AppContextProvider>
+  );
+}
