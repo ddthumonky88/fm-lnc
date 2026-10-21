@@ -17,6 +17,8 @@ import { HierarchyModule } from './hierarchy/hierarchy.module';
 import { RecordsModule } from './records/records.module';
 import { SearchModule } from './search/search.module';
 import { LogosModule } from './logos/logos.module';
+import { HealthController } from './health.controller';
+
 
 dotenv.config();
 
@@ -49,5 +51,6 @@ dotenv.config();
     RecordsModule,
     SearchModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
