@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY nest-cli.json ./
 RUN npm ci
 
 # Copy source
@@ -19,12 +20,12 @@ WORKDIR /app
 
 # Copy package files and install production only
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Copy built dist from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Expose port
+# Expose port (Render injects PORT env var automatically)
 EXPOSE 3001
 
 CMD ["node", "dist/main"]

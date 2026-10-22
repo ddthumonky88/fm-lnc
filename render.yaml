@@ -1,0 +1,44 @@
+services:
+  # ─── NestJS Backend Web Service ───────────────────────────────────────────
+  - type: web
+    name: fm-lnc-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: singapore          # gần Việt Nam nhất
+    plan: free
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: HOST
+        value: 0.0.0.0
+      - key: DB_HOST
+        fromDatabase:
+          name: fm-lnc-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: fm-lnc-db
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: fm-lnc-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: fm-lnc-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: fm-lnc-db
+          property: database
+      - key: NODE_ENV
+        value: production
+
+  # ─── PostgreSQL Database ───────────────────────────────────────────────────
+databases:
+  - name: fm-lnc-db
+    databaseName: fm_lnc_db
+    user: fm_user
+    region: singapore
+    plan: free
