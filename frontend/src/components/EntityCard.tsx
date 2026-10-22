@@ -551,7 +551,7 @@ export default function EntityCard({
                     isTitleInactive ? 'text-red-600' : 'text-gray-800'
                   }`}
                 >
-                  {data.long_name || title}
+                  {data.is_virtual ? '-' : (data.long_name || title)}
                 </span>
               </div>
 
@@ -564,7 +564,7 @@ export default function EntityCard({
                       isInactive('short_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
-                    {data.short_name || title}
+                    {data.is_virtual ? '-' : (data.short_name || title)}
                   </span>
                 </div>
               )}
@@ -593,16 +593,6 @@ export default function EntityCard({
                     }`}
                   >
                     {data.is_virtual ? '-' : (code3 || '-')}
-                  </span>
-                </div>
-              )}
-
-              {/* Clubs Count for Competition or Virtual */}
-              {(type === 'competition' || type === EntityType.COMPETITION || data.is_virtual) && (
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">Clubs:</span>
-                  <span className="font-bold text-[13px] leading-5 truncate text-blue-600">
-                    {data.clubsCount || 0} clubs
                   </span>
                 </div>
               )}
