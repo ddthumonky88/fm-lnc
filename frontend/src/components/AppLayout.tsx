@@ -41,7 +41,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    fetchContinents()
+    fetchContinents(refreshSignal > 0)
       .then((data) => setTotalContinents(data.length))
       .catch(() => {});
   }, [refreshSignal]);

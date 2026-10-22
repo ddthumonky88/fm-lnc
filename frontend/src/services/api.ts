@@ -121,10 +121,35 @@ export interface NationHubData {
   };
 }
 
-export async function fetchContinents(): Promise<ConfederationItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/continents`);
-  if (!res.ok) throw new Error('Failed to fetch continents');
-  return res.json();
+let continentsPromise: Promise<ConfederationItem[]> | null = null;
+let continentsCache: ConfederationItem[] | null = null;
+
+export function clearContinentsCache() {
+  continentsCache = null;
+  continentsPromise = null;
+}
+
+export async function fetchContinents(forceRefresh = false): Promise<ConfederationItem[]> {
+  if (!forceRefresh && continentsCache) {
+    return continentsCache;
+  }
+  if (!forceRefresh && continentsPromise) {
+    return continentsPromise;
+  }
+
+  continentsPromise = (async () => {
+    try {
+      const res = await fetch(`${getApiBase()}/hierarchy/continents`);
+      if (!res.ok) throw new Error('Failed to fetch continents');
+      const data: ConfederationItem[] = await res.json();
+      continentsCache = data;
+      return data;
+    } finally {
+      continentsPromise = null;
+    }
+  })();
+
+  return continentsPromise;
 }
 
 export async function fetchAllNations(confedId?: number, query?: string): Promise<NationItem[]> {
@@ -285,6 +310,7 @@ export async function deleteRecord(type: RecordType | string, id: number) {
 }
 
 export async function reimportLnc() {
+  clearContinentsCache();
   const res = await fetch(`${getApiBase()}/lnc/import`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
