@@ -121,45 +121,60 @@ export interface NationHubData {
   };
 }
 
-let continentsPromise: Promise<ConfederationItem[]> | null = null;
-let continentsCache: ConfederationItem[] | null = null;
+const inFlightRequests = new Map<string, Promise<any>>();
+const apiCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL_MS = 60 * 1000; // 60s in-memory cache
 
-export function clearContinentsCache() {
-  continentsCache = null;
-  continentsPromise = null;
+export function clearApiCache() {
+  apiCache.clear();
+  inFlightRequests.clear();
 }
 
-export async function fetchContinents(forceRefresh = false): Promise<ConfederationItem[]> {
-  if (!forceRefresh && continentsCache) {
-    return continentsCache;
-  }
-  if (!forceRefresh && continentsPromise) {
-    return continentsPromise;
+export function clearContinentsCache() {
+  clearApiCache();
+}
+
+async function cachedFetch<T>(url: string, forceRefresh = false, ttl = CACHE_TTL_MS): Promise<T> {
+  const now = Date.now();
+  if (!forceRefresh) {
+    const cached = apiCache.get(url);
+    if (cached && now - cached.timestamp < ttl) {
+      return cached.data as T;
+    }
   }
 
-  continentsPromise = (async () => {
+  if (!forceRefresh && inFlightRequests.has(url)) {
+    return inFlightRequests.get(url) as Promise<T>;
+  }
+
+  const promise = (async () => {
     try {
-      const res = await fetch(`${getApiBase()}/hierarchy/continents`);
-      if (!res.ok) throw new Error('Failed to fetch continents');
-      const data: ConfederationItem[] = await res.json();
-      continentsCache = data;
-      return data;
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
+      const data = await res.json();
+      apiCache.set(url, { data, timestamp: Date.now() });
+      return data as T;
     } finally {
-      continentsPromise = null;
+      inFlightRequests.delete(url);
     }
   })();
 
-  return continentsPromise;
+  inFlightRequests.set(url, promise);
+  return promise;
 }
 
-export async function fetchAllNations(confedId?: number, query?: string): Promise<NationItem[]> {
+export async function fetchContinents(forceRefresh = false): Promise<ConfederationItem[]> {
+  return cachedFetch<ConfederationItem[]>(`${getApiBase()}/hierarchy/continents`, forceRefresh);
+}
+
+export async function fetchAllNations(confedId?: number, query?: string, forceRefresh = false): Promise<NationItem[]> {
   const params = new URLSearchParams();
   if (confedId) params.append('confedId', String(confedId));
   if (query) params.append('q', query);
   const qStr = params.toString() ? `?${params.toString()}` : '';
-  const res = await fetch(`${getApiBase()}/hierarchy/nations${qStr}`);
-  if (!res.ok) throw new Error('Failed to fetch nations');
-  return res.json();
+  return cachedFetch<NationItem[]>(`${getApiBase()}/hierarchy/nations${qStr}`, forceRefresh);
 }
 
 export async function fetchAllCompetitions(options?: {
@@ -167,103 +182,73 @@ export async function fetchAllCompetitions(options?: {
   nationId?: number;
   query?: string;
   isInternational?: boolean;
-}): Promise<CompetitionItem[]> {
+}, forceRefresh = false): Promise<CompetitionItem[]> {
   const params = new URLSearchParams();
   if (options?.confedId) params.append('confedId', String(options.confedId));
   if (options?.nationId) params.append('nationId', String(options.nationId));
   if (options?.query) params.append('q', options.query);
   if (options?.isInternational !== undefined) params.append('isInternational', String(options.isInternational));
   const qStr = params.toString() ? `?${params.toString()}` : '';
-  const res = await fetch(`${getApiBase()}/hierarchy/competitions${qStr}`);
-  if (!res.ok) throw new Error('Failed to fetch competitions');
-  return res.json();
+  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions${qStr}`, forceRefresh);
 }
 
-export async function fetchNationsByContinent(confedId: number): Promise<NationItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/continents/${confedId}/nations`);
-  if (!res.ok) throw new Error('Failed to fetch nations');
-  return res.json();
+export async function fetchNationsByContinent(confedId: number, forceRefresh = false): Promise<NationItem[]> {
+  return cachedFetch<NationItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/nations`, forceRefresh);
 }
 
-export async function fetchIntCompetitions(confedId: number): Promise<CompetitionItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`);
-  if (!res.ok) throw new Error('Failed to fetch international competitions');
-  return res.json();
+export async function fetchIntCompetitions(confedId: number, forceRefresh = false): Promise<CompetitionItem[]> {
+  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`, forceRefresh);
 }
 
-export async function fetchNationHub(nationId: number): Promise<NationHubData> {
-  const res = await fetch(`${getApiBase()}/hierarchy/nations/${nationId}/hub`);
-  if (!res.ok) throw new Error('Failed to fetch nation hub');
-  return res.json();
+export async function fetchNationHub(nationId: number, forceRefresh = false): Promise<NationHubData> {
+  return cachedFetch<NationHubData>(`${getApiBase()}/hierarchy/nations/${nationId}/hub`, forceRefresh);
 }
 
-export async function fetchDomesticCompetitions(nationId: number): Promise<CompetitionItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/nations/${nationId}/competitions`);
-  if (!res.ok) throw new Error('Failed to fetch domestic competitions');
-  return res.json();
+export async function fetchDomesticCompetitions(nationId: number, forceRefresh = false): Promise<CompetitionItem[]> {
+  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/competitions`, forceRefresh);
 }
 
-export async function fetchIndependentClubs(nationId: number, isExtinct?: boolean): Promise<ClubItem[]> {
+export async function fetchIndependentClubs(nationId: number, isExtinct?: boolean, forceRefresh = false): Promise<ClubItem[]> {
   const query = isExtinct !== undefined ? `?extinct=${isExtinct}` : '';
-  const res = await fetch(`${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs${query}`);
-  if (!res.ok) throw new Error('Failed to fetch independent clubs');
-  return res.json();
+  return cachedFetch<ClubItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs${query}`, forceRefresh);
 }
 
-export async function fetchClubsInComp(compId: number): Promise<ClubItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/competitions/${compId}/clubs`);
-  if (!res.ok) throw new Error('Failed to fetch clubs in competition');
-  return res.json();
+export async function fetchClubsInComp(compId: number, forceRefresh = false): Promise<ClubItem[]> {
+  return cachedFetch<ClubItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/clubs`, forceRefresh);
 }
 
-export async function fetchCompetitionInfo(compId: number): Promise<CompetitionItem & { clubsCount: number; awardsCount: number }> {
-  const res = await fetch(`${getApiBase()}/hierarchy/competitions/${compId}/info`);
-  if (!res.ok) throw new Error('Failed to fetch competition info');
-  return res.json();
+export async function fetchCompetitionInfo(compId: number, forceRefresh = false): Promise<CompetitionItem & { clubsCount: number; awardsCount: number }> {
+  return cachedFetch<CompetitionItem & { clubsCount: number; awardsCount: number }>(`${getApiBase()}/hierarchy/competitions/${compId}/info`, forceRefresh);
 }
 
-export async function fetchStadiums(nationId: number): Promise<StadiumItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/nations/${nationId}/stadiums`);
-  if (!res.ok) throw new Error('Failed to fetch stadiums');
-  return res.json();
+export async function fetchStadiums(nationId: number, forceRefresh = false): Promise<StadiumItem[]> {
+  return cachedFetch<StadiumItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/stadiums`, forceRefresh);
 }
 
-export async function fetchCities(nationId: number): Promise<CityItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/nations/${nationId}/cities`);
-  if (!res.ok) throw new Error('Failed to fetch cities');
-  return res.json();
+export async function fetchCities(nationId: number, forceRefresh = false): Promise<CityItem[]> {
+  return cachedFetch<CityItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/cities`, forceRefresh);
 }
 
-export async function fetchAwards(nationId: number): Promise<AwardItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/nations/${nationId}/awards`);
-  if (!res.ok) throw new Error('Failed to fetch awards');
-  return res.json();
+export async function fetchAwards(nationId: number, forceRefresh = false): Promise<AwardItem[]> {
+  return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/awards`, forceRefresh);
 }
 
-export async function fetchAwardsInComp(compId: number): Promise<AwardItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/competitions/${compId}/awards`);
-  if (!res.ok) throw new Error('Failed to fetch awards in competition');
-  return res.json();
+export async function fetchAwardsInComp(compId: number, forceRefresh = false): Promise<AwardItem[]> {
+  return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/awards`, forceRefresh);
 }
 
-export async function fetchAllAwards(): Promise<AwardItem[]> {
-  const res = await fetch(`${getApiBase()}/hierarchy/awards`);
-  if (!res.ok) throw new Error('Failed to fetch awards');
-  return res.json();
+export async function fetchAllAwards(forceRefresh = false): Promise<AwardItem[]> {
+  return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/awards`, forceRefresh);
 }
 
-export async function fetchPlayers(query?: string): Promise<PlayerItem[]> {
+export async function fetchPlayers(query?: string, forceRefresh = false): Promise<PlayerItem[]> {
   const qStr = query ? `?q=${encodeURIComponent(query)}` : '';
-  const res = await fetch(`${getApiBase()}/hierarchy/players${qStr}`);
-  if (!res.ok) throw new Error('Failed to fetch players');
-  return res.json();
+  return cachedFetch<PlayerItem[]>(`${getApiBase()}/hierarchy/players${qStr}`, forceRefresh);
 }
 
-export async function fetchStages(query?: string): Promise<StageItem[]> {
+export async function fetchStages(query?: string, forceRefresh = false): Promise<StageItem[]> {
   const qStr = query ? `?q=${encodeURIComponent(query)}` : '';
-  const res = await fetch(`${getApiBase()}/hierarchy/stages${qStr}`);
-  if (!res.ok) throw new Error('Failed to fetch stages');
-  return res.json();
+  return cachedFetch<StageItem[]>(`${getApiBase()}/hierarchy/stages${qStr}`, forceRefresh);
 }
 
 export async function quickSearch(query: string) {
@@ -273,6 +258,7 @@ export async function quickSearch(query: string) {
 }
 
 export async function createRecord(type: RecordType | string, data: any) {
+  clearApiCache();
   const res = await fetch(`${getApiBase()}/records/${type}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -286,6 +272,7 @@ export async function createRecord(type: RecordType | string, data: any) {
 }
 
 export async function updateRecord(type: RecordType | string, id: number, data: any) {
+  clearApiCache();
   const res = await fetch(`${getApiBase()}/records/${type}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -299,6 +286,7 @@ export async function updateRecord(type: RecordType | string, id: number, data: 
 }
 
 export async function deleteRecord(type: RecordType | string, id: number) {
+  clearApiCache();
   const res = await fetch(`${getApiBase()}/records/${type}/${id}`, {
     method: 'DELETE',
   });
@@ -310,7 +298,7 @@ export async function deleteRecord(type: RecordType | string, id: number) {
 }
 
 export async function reimportLnc() {
-  clearContinentsCache();
+  clearApiCache();
   const res = await fetch(`${getApiBase()}/lnc/import`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
