@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tag, Button, Space, Tooltip, Popconfirm, Badge } from 'antd';
 import {
   TrophyOutlined,
@@ -15,10 +15,12 @@ import {
   UserOutlined,
   FlagOutlined,
   EyeOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
 import { getConfederationLogoUrl, getNationLogoUrl } from '../services/api';
+import RecordDetailModal from './RecordDetailModal';
 
 export { EntityType };
 
@@ -62,6 +64,8 @@ export default function EntityCard({
   onEdit,
   onDelete,
 }: EntityCardProps) {
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+
   // Determine Type Icon and badge styling
   const getIcon = () => {
     if (data.is_virtual) {
@@ -449,9 +453,23 @@ export default function EntityCard({
             )}
           </div>
 
-          {/* Right Header: Child navigation (Eye) + Action buttons */}
+          {/* Right Header: Child navigation (Eye) + Info button + Action buttons */}
           <div className="flex items-center gap-0.5 shrink-0">
             {renderChildButtons()}
+
+            {/* Info button on EVERY card */}
+            <Tooltip title="View Details / Thông tin chi tiết">
+              <Button
+                type="text"
+                shape="circle"
+                size="small"
+                icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsInfoOpen(true);
+                }}
+              />
+            </Tooltip>
 
             {(canEdit || canDelete) && (
               <div className="flex items-center gap-0.5 shrink-0">
@@ -630,6 +648,15 @@ export default function EntityCard({
           )}
         </div>
       </div>
+
+      {/* Record Info Detail Modal */}
+      <RecordDetailModal
+        isOpen={isInfoOpen}
+        onClose={() => setIsInfoOpen(false)}
+        data={data}
+        type={type}
+        onEdit={canEdit ? () => onEdit?.(data) : undefined}
+      />
     </div>
   );
 }
