@@ -93,7 +93,7 @@ export class HierarchyService {
     const raw = await this.compRepo.query(
       `SELECT c.*,
         n.three_letter_name as nation_three_letter,
-        n.name as nation_name,
+        n.long_name as nation_name,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
       FROM competitions c

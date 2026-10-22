@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Res, Body, Query, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { Response } from 'express';
 import { LncService } from './lnc.service';
 import { LncParserService } from './lnc-parser.service';
@@ -16,6 +17,7 @@ import {
 } from '../entities';
 import { Repository } from 'typeorm';
 
+@ApiTags('LNC')
 @Controller('api/lnc')
 export class LncController {
   constructor(
@@ -32,6 +34,8 @@ export class LncController {
     @InjectRepository(Stage) private stageRepo: Repository<Stage>,
   ) {}
 
+  @ApiOperation({ summary: 'Xuất dữ liệu toàn bộ ra file định dạng .LNC' })
+  @ApiQuery({ name: 'download', required: false, description: 'Nếu là true thì download file attachment' })
   @Get('export')
   async exportLnc(@Res() res: Response, @Query('download') download?: string) {
     const content = await this.lncService.exportLnc();
@@ -43,6 +47,8 @@ export class LncController {
     return res.status(HttpStatus.OK).send(content);
   }
 
+  @ApiOperation({ summary: 'Import dữ liệu từ file .lnc trên server' })
+  @ApiBody({ schema: { type: 'object', properties: { dir: { type: 'string', description: 'Đường dẫn thư mục lnc (tùy chọn)' } } } })
   @Post('import')
   async importLnc(@Body('dir') dir?: string) {
     await this.lncParserService.parseAndSeed(dir);
@@ -53,6 +59,7 @@ export class LncController {
     };
   }
 
+  @ApiOperation({ summary: 'Thống kê số lượng bản ghi trong database' })
   @Get('status')
   async getStatus() {
     const [

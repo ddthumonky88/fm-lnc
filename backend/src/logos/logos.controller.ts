@@ -1,11 +1,15 @@
 import { Controller, Get, Param, Query, Res, NotFoundException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Response } from 'express';
 import { LogosService } from './logos.service';
 
+@ApiTags('Logos')
 @Controller('api/logos')
 export class LogosController {
   constructor(private readonly logosService: LogosService) {}
 
+  @ApiOperation({ summary: 'Lấy logo Confederation' })
+  @ApiParam({ name: 'id', description: 'Confederation ID' })
   @Get('confederation/:id')
   getConfederationLogo(@Param('id') id: string, @Res() res: Response) {
     const filePath = this.logosService.getConfederationLogoPath(id);
@@ -18,6 +22,9 @@ export class LogosController {
     return res.sendFile(filePath);
   }
 
+  @ApiOperation({ summary: 'Lấy logo Nation' })
+  @ApiParam({ name: 'id', description: 'Nation ID' })
+  @ApiQuery({ name: 'code', required: false, description: 'Mã 3 chữ cái của quốc gia (nếu có)' })
   @Get('nation/:id')
   getNationLogo(
     @Param('id') id: string,
