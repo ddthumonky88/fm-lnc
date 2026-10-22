@@ -551,9 +551,7 @@ export default function EntityCard({
                     isTitleInactive ? 'text-red-600' : 'text-gray-800'
                   }`}
                 >
-                  {data.is_virtual
-                    ? (data.virtual_type === 'EXTINCT' ? 'Extinct Clubs' : 'Other Clubs')
-                    : title}
+                  {data.long_name || title}
                 </span>
               </div>
 
@@ -566,9 +564,7 @@ export default function EntityCard({
                       isInactive('short_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
-                    {data.is_virtual
-                      ? (data.short_name || (data.virtual_type === 'EXTINCT' ? 'Extinct Clubs' : 'Other Clubs'))
-                      : data.short_name}
+                    {data.short_name || title}
                   </span>
                 </div>
               )}
@@ -596,9 +592,7 @@ export default function EntityCard({
                       isInactive('three_letter_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
-                    {data.is_virtual
-                      ? (data.three_letter_name || (data.virtual_type === 'EXTINCT' ? 'EXT' : 'OTH'))
-                      : (code3 || '-')}
+                    {data.is_virtual ? '-' : (code3 || '-')}
                   </span>
                 </div>
               )}
