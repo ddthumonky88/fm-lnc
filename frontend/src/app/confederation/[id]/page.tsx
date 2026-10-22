@@ -247,14 +247,14 @@ function ConfederationDetailContent() {
                   onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec)}
                   emptyText="No international competitions found"
                   extraRight={
-                    <>
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
                       <Input
                         prefix={<SearchOutlined className="text-gray-400" />}
                         placeholder="Filter competitions..."
                         value={tableFilter}
                         onChange={(e) => setTableFilter(e.target.value)}
                         allowClear
-                        className="w-48 sm:w-64"
+                        className="flex-1 sm:w-64"
                       />
                       <Button
                         type="primary"
@@ -265,7 +265,7 @@ function ConfederationDetailContent() {
                       >
                         Add International Competition
                       </Button>
-                    </>
+                    </div>
                   }
                 />
               </div>

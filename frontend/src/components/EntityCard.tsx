@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Tag, Button, Space, Tooltip, Popconfirm, Badge } from 'antd';
 import {
   TrophyOutlined,
@@ -64,7 +65,9 @@ export default function EntityCard({
   onEdit,
   onDelete,
 }: EntityCardProps) {
+  const router = useRouter();
   const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
 
   // Determine Type Icon and badge styling
   const getIcon = () => {
@@ -248,12 +251,14 @@ export default function EntityCard({
       });
     } else if (type === EntityType.NATION || type === 'nation') {
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
-      if (count && count > 0) {
+      if (onNavigate) {
         onNavigate({
           level: 'NATION_HUB',
           id: data.id,
           title: `[${data.three_letter_name || ''}] ${data.long_name}`,
         });
+      } else if (data.id) {
+        router.push(`/nation/${data.id}`);
       }
     } else if (type === EntityType.COMPETITION || type === 'competition') {
       if ((data.clubsCount || 0) > 0) {
@@ -286,19 +291,7 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
-              if (count > 0) {
-                onNavigate?.({
-                  level: 'NATIONS',
-                  id: data.id,
-                  title: data.name,
-                });
-              } else {
-                onNavigate?.({
-                  level: 'INT_COMPETITIONS',
-                  id: data.id,
-                  title: data.name,
-                });
-              }
+              router.push(data.id ? `/nation?confedId=${data.id}` : '/nation');
             }}
           />
         </Tooltip>
@@ -307,10 +300,9 @@ export default function EntityCard({
 
     if (type === EntityType.NATION || type === 'nation') {
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
-      if (!count || count <= 0) return null;
 
       return (
-        <Tooltip title={`Competitions: ${count}`}>
+        <Tooltip title={`View Nation / Competitions (${count || 0})`}>
           <Button
             type="text"
             shape="circle"
@@ -318,7 +310,11 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
-              handleNavigateAction();
+              if (data.id) {
+                router.push(`/nation/${data.id}`);
+              } else {
+                router.push('/nation');
+              }
             }}
           />
         </Tooltip>
@@ -347,7 +343,11 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
-              handleNavigateAction();
+              if (onNavigate) {
+                handleNavigateAction();
+              } else if (data.id) {
+                router.push(`/comp/${data.id}`);
+              }
             }}
           />
         </Tooltip>
@@ -474,6 +474,7 @@ export default function EntityCard({
                 icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
                 onClick={(e) => {
                   e.stopPropagation();
+                  setModalMode('view');
                   setIsInfoOpen(true);
                 }}
               />
@@ -482,7 +483,7 @@ export default function EntityCard({
             {(canEdit || canDelete) && (
               <div className="flex items-center gap-0.5 shrink-0">
                 {canEdit && (
-                  <Tooltip title="Edit">
+                  <Tooltip title="Edit / Chỉnh sửa">
                     <Button
                       type="text"
                       shape="circle"
@@ -490,7 +491,8 @@ export default function EntityCard({
                       icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onEdit(data);
+                        setModalMode('edit');
+                        setIsInfoOpen(true);
                       }}
                     />
                   </Tooltip>
@@ -658,13 +660,13 @@ export default function EntityCard({
       </div>
     </div>
 
-    {/* Record Info Detail Modal */}
+    {/* Unified Record Detail + Edit Modal */}
     <RecordDetailModal
       isOpen={isInfoOpen}
       onClose={() => setIsInfoOpen(false)}
       data={data}
       type={type}
-      onEdit={canEdit ? () => onEdit?.(data) : undefined}
+      initialMode={modalMode}
     />
   </>
 );

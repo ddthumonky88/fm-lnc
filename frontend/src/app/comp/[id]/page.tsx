@@ -420,7 +420,7 @@ export default function CompetitionDetailPage() {
                 value={tableFilter}
                 onChange={(e) => setTableFilter(e.target.value)}
                 allowClear
-                className="w-48 sm:w-60"
+                className="flex-1 sm:w-60"
               />
               <Button
                 type="primary"

@@ -677,6 +677,7 @@ export default function LncSortitoutsiExplorer() {
                       `Showing ${range[0]} - ${range[1]} of ${total} records`,
                     size: 'small',
                   }}
+                  scroll={{ x: 'max-content' }}
                   size="middle"
                 />
               </div>
@@ -857,7 +858,7 @@ export default function LncSortitoutsiExplorer() {
                 type={EntityType.NATION}
                 columns={5}
                 loading={loading}
-                onNavigate={pushStep}
+                onNavigate={(step) => router.push(`/nation/${step.id}`)}
                 emptyText="No countries found"
                 defaultPageSize={20}
               />

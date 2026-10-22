@@ -307,14 +307,14 @@ export default function NationDetailPage() {
               onDelete={(rec) => handleDelete(RecordType.COMPETITION, rec.id)}
               emptyText="No domestic competitions found"
               extraRight={
-                <>
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
                   <Input
                     prefix={<SearchOutlined className="text-gray-400" />}
                     placeholder="Filter competitions..."
                     value={tableFilter}
                     onChange={(e) => setTableFilter(e.target.value)}
                     allowClear
-                    className="w-48 sm:w-64"
+                    className="flex-1 sm:w-64"
                   />
                   <Button
                     type="primary"
@@ -324,7 +324,7 @@ export default function NationDetailPage() {
                   >
                     Add Competition
                   </Button>
-                </>
+                </div>
               }
             />
           )}
@@ -343,7 +343,7 @@ export default function NationDetailPage() {
                     value={tableFilter}
                     onChange={(e) => setTableFilter(e.target.value)}
                     allowClear
-                    className="w-48 sm:w-64"
+                    className="flex-1 sm:w-64"
                   />
                   <Button
                     type="primary"
@@ -377,14 +377,14 @@ export default function NationDetailPage() {
               onDelete={(rec) => handleDelete(RecordType.CITY, rec.id)}
               emptyText="No cities found"
               extraRight={
-                <>
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
                   <Input
                     prefix={<SearchOutlined className="text-gray-400" />}
                     placeholder="Filter cities..."
                     value={tableFilter}
                     onChange={(e) => setTableFilter(e.target.value)}
                     allowClear
-                    className="w-48 sm:w-64"
+                    className="flex-1 sm:w-64"
                   />
                   <Button
                     type="primary"
@@ -393,7 +393,7 @@ export default function NationDetailPage() {
                   >
                     Add City
                   </Button>
-                </>
+                </div>
               }
             />
           )}
@@ -412,7 +412,7 @@ export default function NationDetailPage() {
                     value={tableFilter}
                     onChange={(e) => setTableFilter(e.target.value)}
                     allowClear
-                    className="w-48 sm:w-64"
+                    className="flex-1 sm:w-64"
                   />
                   <Button
                     type="primary"

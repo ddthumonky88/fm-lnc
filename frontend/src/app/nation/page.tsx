@@ -524,6 +524,7 @@ function NationExplorerContent() {
               pageSizeOptions: ['25', '50', '100', '200'],
               showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} nations`,
             }}
+            scroll={{ x: 'max-content' }}
             size="middle"
           />
         </div>
