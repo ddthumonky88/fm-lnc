@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Breadcrumb, Tag, Badge, Input, Button, message, Spin, Tabs, Space } from 'antd';
 import {
   SafetyOutlined,
@@ -15,6 +15,8 @@ import {
   fetchCompetitionInfo,
   fetchClubsInComp,
   fetchAwardsInComp,
+  fetchIndependentClubs,
+  fetchNationHub,
   getNationLogoUrl,
   getConfederationLogoUrl,
   deleteRecord,
@@ -28,6 +30,7 @@ import { useApp } from '../../../context/AppContext';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const {
     openRecordModal,
     setHeaderTitle,
@@ -38,7 +41,12 @@ export default function CompetitionDetailPage() {
     refreshSignal,
   } = useApp();
 
-  const compId = Number(params?.id);
+  const rawId = decodeURIComponent(String(params?.id || ''));
+  const isVirtualExtinct = rawId.toLowerCase() === 'extinct' || rawId === '[EXTINCT]';
+  const isVirtualOther = rawId.toLowerCase() === 'other' || rawId === '[OTHER]';
+  const isVirtual = isVirtualExtinct || isVirtualOther;
+  const nationIdParam = searchParams.get('nationId') ? Number(searchParams.get('nationId')) : undefined;
+  const compId = isVirtual ? undefined : Number(params?.id);
 
   const [compInfo, setCompInfo] = useState<(CompetitionItem & { clubsCount: number; awardsCount: number }) | null>(null);
   const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS'>('CLUBS');
@@ -49,9 +57,83 @@ export default function CompetitionDetailPage() {
 
   // Load Competition info and records
   const loadCompData = useCallback(async () => {
-    if (!compId) return;
     setLoading(true);
     try {
+      if (isVirtual) {
+        const targetNationId = nationIdParam;
+        if (!targetNationId) {
+          message.error('Nation ID is required for virtual competition');
+          setLoading(false);
+          return;
+        }
+
+        const [hub, clubsData] = await Promise.all([
+          fetchNationHub(targetNationId).catch(() => null),
+          fetchIndependentClubs(targetNationId, isVirtualExtinct).catch(() => []),
+        ]);
+
+        const nation = hub?.nation;
+        const confedId = nation?.confederation_id;
+        const confedName = nation?.confederation?.name || 'Confederation';
+        const nationName = nation?.long_name || 'Nation';
+        const nationCode = nation?.three_letter_name;
+
+        const virtualTitle = isVirtualExtinct ? '[EXTINCT] Extinct Clubs' : '[OTHER] Other Clubs';
+        const virtualShort = isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs';
+        const virtualTag = isVirtualExtinct ? '[EXTINCT]' : '[OTHER]';
+
+        setCompInfo({
+          id: virtualTag as any,
+          long_name: virtualTitle,
+          short_name: virtualShort,
+          three_letter_name: isVirtualExtinct ? 'EXT' : 'OTH',
+          nation_id: targetNationId,
+          nation_name: nationName,
+          nation_three_letter: nationCode,
+          confed_id: confedId,
+          categories: 'Other',
+          clubsCount: clubsData.length,
+          awardsCount: 0,
+        } as any);
+
+        setHeaderTitle(virtualTitle);
+        setHeaderId(virtualTag as any);
+
+        const crumbs: any[] = [
+          {
+            title: 'HOME',
+            href: '/',
+          },
+        ];
+        if (confedId) {
+          crumbs.push({
+            title: confedName,
+            href: `/confederation/${confedId}`,
+          });
+        }
+        crumbs.push({
+          title: nationCode ? `[${nationCode}] ${nationName}` : nationName,
+          href: `/nation/${targetNationId}`,
+        });
+        crumbs.push({
+          title: virtualTitle,
+        });
+
+        setBreadcrumbs(crumbs);
+        setBackHref(`/nation/${targetNationId}`);
+
+        setHeaderLogo({
+          url: getNationLogoUrl(targetNationId, nationCode),
+          alt: nationName,
+          isFlag: true,
+        });
+
+        setClubs(clubsData);
+        setAwards([]);
+        return;
+      }
+
+      if (!compId) return;
       const [info, clubsData, awardsData] = await Promise.all([
         fetchCompetitionInfo(compId).catch(() => null),
         fetchClubsInComp(compId).catch(() => []),
@@ -125,7 +207,17 @@ export default function CompetitionDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [compId, setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo]);
+  }, [
+    compId,
+    isVirtual,
+    isVirtualExtinct,
+    nationIdParam,
+    setHeaderTitle,
+    setHeaderId,
+    setBreadcrumbs,
+    setBackHref,
+    setHeaderLogo,
+  ]);
 
   useEffect(() => {
     loadCompData();
@@ -183,40 +275,47 @@ export default function CompetitionDetailPage() {
     );
   }, [awards, tableFilter]);
 
-  const tabItems = useMemo(() => [
-    {
-      key: 'CLUBS',
-      label: (
-        <Space size={4}>
-          <SafetyOutlined className="text-blue-500" />
-          <span className={activeTab === 'CLUBS' ? 'font-bold' : ''}>Clubs</span>
-          <Badge
-            count={clubs.length}
-            overflowCount={99999}
-            style={{ backgroundColor: activeTab === 'CLUBS' ? '#1d70b8' : '#94a3b8' }}
-          />
-        </Space>
-      ),
-    },
-    {
-      key: 'AWARDS',
-      label: (
-        <Space size={4}>
-          <StarOutlined className="text-yellow-500" />
-          <span className={activeTab === 'AWARDS' ? 'font-bold' : ''}>Awards</span>
-          <Badge
-            count={awards.length}
-            overflowCount={99999}
-            showZero
-            style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
-          />
-        </Space>
-      ),
-    },
-  ], [clubs.length, awards.length, activeTab]);
+  const tabItems = useMemo(() => {
+    const list = [
+      {
+        key: 'CLUBS',
+        label: (
+          <Space size={4}>
+            <SafetyOutlined className="text-blue-500" />
+            <span className={activeTab === 'CLUBS' ? 'font-bold' : ''}>Clubs</span>
+            <Badge
+              count={clubs.length}
+              overflowCount={99999}
+              style={{ backgroundColor: activeTab === 'CLUBS' ? '#1d70b8' : '#94a3b8' }}
+            />
+          </Space>
+        ),
+      },
+    ];
 
-  const compTitle = compInfo?.short_name || compInfo?.long_name || `Competition ${compId}`;
-  const nationId = compInfo?.nation_id || compInfo?.nation?.id;
+    if (!isVirtual) {
+      list.push({
+        key: 'AWARDS',
+        label: (
+          <Space size={4}>
+            <StarOutlined className="text-yellow-500" />
+            <span className={activeTab === 'AWARDS' ? 'font-bold' : ''}>Awards</span>
+            <Badge
+              count={awards.length}
+              overflowCount={99999}
+              showZero
+              style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
+            />
+          </Space>
+        ),
+      });
+    }
+
+    return list;
+  }, [clubs.length, awards.length, activeTab, isVirtual]);
+
+  const compTitle = compInfo?.short_name || compInfo?.long_name || (isVirtual ? (isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs') : `Competition ${compId}`);
+  const nationId = compInfo?.nation_id || compInfo?.nation?.id || nationIdParam;
   const nationName = compInfo?.nation_name || compInfo?.nation?.long_name;
   const nationCode = compInfo?.nation_three_letter || compInfo?.nation?.three_letter_name;
   const confedId = compInfo?.confed_id || compInfo?.confederation?.id;
@@ -250,6 +349,8 @@ export default function CompetitionDetailPage() {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
+              ) : isVirtual ? (
+                <SafetyOutlined className={`text-2xl ${isVirtualExtinct ? 'text-red-500' : 'text-blue-500'}`} />
               ) : (
                 <TrophyOutlined className="text-2xl text-amber-500" />
               )}
@@ -258,8 +359,17 @@ export default function CompetitionDetailPage() {
                   <h2 className="text-base sm:text-lg font-bold text-slate-800 m-0">
                     {compTitle}
                   </h2>
-                  <Tag color="cyan" className="m-0 font-bold text-xs">
-                    ID: {compId}
+                  <Tag
+                    color={
+                      isVirtual
+                        ? isVirtualExtinct
+                          ? 'volcano'
+                          : 'geekblue'
+                        : 'cyan'
+                    }
+                    className="m-0 font-bold text-xs"
+                  >
+                    {isVirtual ? (isVirtualExtinct ? '[EXTINCT]' : '[OTHER]') : `ID: ${compId}`}
                   </Tag>
                   {compInfo?.three_letter_name && (
                     <Tag color="purple" className="m-0 font-bold text-xs">
@@ -272,7 +382,13 @@ export default function CompetitionDetailPage() {
                     </Tag>
                   )}
                 </div>
-                {compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (
+                {isVirtual ? (
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    {isVirtualExtinct
+                      ? 'Danh sách các câu lạc bộ đã giải thể thuộc quốc gia này'
+                      : 'Danh sách các câu lạc bộ độc lập (chưa xếp vào giải đấu cụ thể)'}
+                  </div>
+                ) : compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (
                   <div className="text-xs text-slate-500 mt-0.5">{compInfo.long_name}</div>
                 )}
               </div>
@@ -311,7 +427,12 @@ export default function CompetitionDetailPage() {
                 icon={<PlusOutlined />}
                 onClick={() => {
                   if (activeTab === 'CLUBS') {
-                    openRecordModal(RecordType.CLUB, null, nationId, compId);
+                    openRecordModal(
+                      RecordType.CLUB,
+                      isVirtual ? { is_extinct: isVirtualExtinct, nation_id: nationId } : null,
+                      nationId,
+                      isVirtual ? undefined : compId,
+                    );
                   } else {
                     openRecordModal(RecordType.AWARD, null, nationId, compId);
                   }
@@ -330,9 +451,15 @@ export default function CompetitionDetailPage() {
               type={EntityType.CLUB}
               columns={4}
               loading={loading}
-              onEdit={(rec) => openRecordModal(RecordType.CLUB, rec, nationId, compId)}
+              onEdit={(rec) => openRecordModal(RecordType.CLUB, rec, nationId, isVirtual ? undefined : compId)}
               onDelete={(rec) => handleDeleteClub(rec.id)}
-              emptyText="No clubs found in this competition"
+              emptyText={
+                isVirtual
+                  ? isVirtualExtinct
+                    ? 'Không có câu lạc bộ giải thể nào trong quốc gia này'
+                    : 'Không có câu lạc bộ độc lập nào trong quốc gia này'
+                  : 'No clubs found in this competition'
+              }
               defaultPageSize={20}
             />
           ) : (

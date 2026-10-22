@@ -222,18 +222,58 @@ export default function EntityCard({
         }
       : null;
 
+  const isNavigable = Boolean(
+    onNavigate && (
+      data.is_virtual ||
+      (type === EntityType.NATION || type === 'nation' ? (data.totalComps || data.totalChildren || 0) > 0 : false) ||
+      (type === EntityType.COMPETITION || type === 'competition' ? (data.clubsCount || 0) > 0 || (data.awardsCount || 0) > 0 : false)
+    )
+  );
+
+  const handleNavigateAction = () => {
+    if (!onNavigate) return;
+    if (data.is_virtual) {
+      onNavigate({
+        level: 'INDEPENDENT_CLUBS',
+        id: data.virtual_type === 'EXTINCT' ? 'extinct' : 'other',
+        virtualId: data.id,
+        nationId: data.nation_id,
+        title: data.long_name || data.short_name,
+        metadata: { is_extinct: data.virtual_type === 'EXTINCT', nation_id: data.nation_id },
+      });
+    } else if (type === EntityType.NATION || type === 'nation') {
+      const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
+      if (count && count > 0) {
+        onNavigate({
+          level: 'NATION_HUB',
+          id: data.id,
+          title: `[${data.three_letter_name || ''}] ${data.long_name}`,
+        });
+      }
+    } else if (type === EntityType.COMPETITION || type === 'competition') {
+      if ((data.clubsCount || 0) > 0) {
+        onNavigate({
+          level: 'CLUBS_IN_COMP',
+          id: data.id,
+          title: `${data.short_name || data.long_name}`,
+        });
+      } else if ((data.awardsCount || 0) > 0) {
+        onNavigate({
+          level: 'COMP_AWARDS',
+          id: data.id,
+          title: `${data.short_name || data.long_name} - Awards`,
+        });
+      }
+    }
+  };
+
   const renderChildButtons = () => {
     if (type === EntityType.CONFEDERATION || type === 'confederation') {
-      const hasNations = (data.totalNations || 0) > 0;
-      const hasIntComps = (data.totalIntComps || 0) > 0;
-      if (!hasNations && !hasIntComps) return null;
-
-      const titleParts: string[] = [];
-      if (hasNations) titleParts.push(`Countries: ${data.totalNations}`);
-      if (hasIntComps) titleParts.push(`Int Comps: ${data.totalIntComps}`);
+      const count = data.totalNations || 0;
+      if (count <= 0) return null;
 
       return (
-        <Tooltip title={titleParts.join(' | ')}>
+        <Tooltip title={`Nations: ${count}`}>
           <Button
             type="text"
             shape="circle"
@@ -241,7 +281,7 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
-              if (hasNations) {
+              if (count > 0) {
                 onNavigate?.({
                   level: 'NATIONS',
                   id: data.id,
@@ -273,11 +313,7 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
-              onNavigate?.({
-                level: 'NATION_HUB',
-                id: data.id,
-                title: `[${data.three_letter_name || ''}] ${data.long_name}`,
-              });
+              handleNavigateAction();
             }}
           />
         </Tooltip>
@@ -306,26 +342,7 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
-              if (data.is_virtual) {
-                onNavigate?.({
-                  level: 'INDEPENDENT_CLUBS',
-                  id: data.nation_id,
-                  title: `${data.long_name || data.short_name}`,
-                  metadata: { is_extinct: data.virtual_type === 'EXTINCT' },
-                });
-              } else if ((data.clubsCount || 0) > 0) {
-                onNavigate?.({
-                  level: 'CLUBS_IN_COMP',
-                  id: data.id,
-                  title: `${data.short_name || data.long_name}`,
-                });
-              } else if (hasAwards) {
-                onNavigate?.({
-                  level: 'COMP_AWARDS',
-                  id: data.id,
-                  title: `${data.short_name || data.long_name} - Awards`,
-                });
-              }
+              handleNavigateAction();
             }}
           />
         </Tooltip>
@@ -335,9 +352,13 @@ export default function EntityCard({
     return null;
   };
 
-
   return (
-    <div className="bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col group h-full">
+    <div
+      onClick={handleNavigateAction}
+      className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col group h-full ${
+        isNavigable ? 'cursor-pointer' : ''
+      }`}
+    >
       <div>
         {/* Top Header Bar */}
         <div className="flex items-center justify-between gap-1 pb-2.5 mb-2.5 border-b border-gray-100">
@@ -363,18 +384,28 @@ export default function EntityCard({
               </Tooltip>
             )}
 
-            <Tag
-              color={
+            <Tooltip
+              title={
                 data.is_virtual || data.id === '[EXTINCT]' || data.id === '[OTHER]'
                   ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
-                    ? 'volcano'
-                    : 'geekblue'
-                  : 'blue'
+                    ? 'Câu lạc bộ đã giải thể (Extinct Clubs)'
+                    : 'Câu lạc bộ độc lập / chưa xếp giải (Other Clubs)'
+                  : undefined
               }
-              className="font-bold text-xs m-0 shrink-0"
             >
-              {data.id}
-            </Tag>
+              <Tag
+                color={
+                  data.is_virtual || data.id === '[EXTINCT]' || data.id === '[OTHER]'
+                    ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
+                      ? 'volcano'
+                      : 'geekblue'
+                    : 'blue'
+                }
+                className="font-bold text-xs m-0 shrink-0"
+              >
+                {data.id}
+              </Tag>
+            </Tooltip>
             {(bgInfo || fgInfo) && (
               <div className="flex items-center gap-1.5 shrink-0">
                 {bgInfo && (
@@ -520,12 +551,14 @@ export default function EntityCard({
                     isTitleInactive ? 'text-red-600' : 'text-gray-800'
                   }`}
                 >
-                  {data.is_virtual ? '-' : title}
+                  {data.is_virtual
+                    ? (data.virtual_type === 'EXTINCT' ? 'Extinct Clubs' : 'Other Clubs')
+                    : title}
                 </span>
               </div>
 
               {/* SN */}
-              {(hasThreeLetter || data.short_name) && (data.short_name || data.is_virtual) && (
+              {(hasThreeLetter || data.short_name || data.is_virtual) && (
                 <div className="flex items-baseline gap-1.5 min-w-0">
                   <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">SN:</span>
                   <span
@@ -533,7 +566,9 @@ export default function EntityCard({
                       isInactive('short_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
-                    {data.is_virtual ? '-' : data.short_name}
+                    {data.is_virtual
+                      ? (data.short_name || (data.virtual_type === 'EXTINCT' ? 'Extinct Clubs' : 'Other Clubs'))
+                      : data.short_name}
                   </span>
                 </div>
               )}
@@ -553,7 +588,7 @@ export default function EntityCard({
               )}
 
               {/* 3N */}
-              {(hasThreeLetter || data.three_letter_name) && (
+              {(hasThreeLetter || data.three_letter_name || data.is_virtual) && (
                 <div className="flex items-baseline gap-1.5 min-w-0">
                   <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">3N:</span>
                   <span
@@ -561,7 +596,19 @@ export default function EntityCard({
                       isInactive('three_letter_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
-                    {data.is_virtual ? '-' : (code3 || '-')}
+                    {data.is_virtual
+                      ? (data.three_letter_name || (data.virtual_type === 'EXTINCT' ? 'EXT' : 'OTH'))
+                      : (code3 || '-')}
+                  </span>
+                </div>
+              )}
+
+              {/* Clubs Count for Competition or Virtual */}
+              {(type === 'competition' || type === EntityType.COMPETITION || data.is_virtual) && (
+                <div className="flex items-baseline gap-1.5 min-w-0">
+                  <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">Clubs:</span>
+                  <span className="font-bold text-[13px] leading-5 truncate text-blue-600">
+                    {data.clubsCount || 0} clubs
                   </span>
                 </div>
               )}

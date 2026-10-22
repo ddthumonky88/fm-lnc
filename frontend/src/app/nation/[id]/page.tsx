@@ -257,10 +257,11 @@ export default function NationDetailPage() {
   }, [nationHub, activeTab]);
 
   const handleNavigate = (step: any) => {
-    if (step.level === 'CLUBS_IN_COMP' || step.level === 'COMP_AWARDS' || step.type === 'competition') {
-      router.push(`/comp/${step.id}`);
-    } else if (step.level === 'INDEPENDENT_CLUBS') {
-      // Direct club navigation
+    if (step.level === 'INDEPENDENT_CLUBS') {
+      const type = step.metadata?.is_extinct ? 'extinct' : 'other';
+      const nId = step.nationId || step.metadata?.nation_id || nationId;
+      router.push(`/comp/${type}?nationId=${nId}`);
+    } else if (step.level === 'CLUBS_IN_COMP' || step.level === 'COMP_AWARDS' || step.type === 'competition') {
       router.push(`/comp/${step.id}`);
     }
   };
