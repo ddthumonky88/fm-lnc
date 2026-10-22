@@ -36,7 +36,7 @@ tool/
 │       ├── comp/            # Quản lý Competitions
 │       ├── nation/          # Quản lý Nations
 │       └── confederation/   # Quản lý Confederations
-├── railway.toml        # Cấu hình deploy Railway.app
+├── render.yaml         # Cấu hình deploy Render.com
 └── README.md
 ```
 
@@ -131,34 +131,28 @@ Mở trình duyệt: `http://localhost:3000`
 
 ---
 
-## ☁️ Deploy lên Railway.app
+## ☁️ Deploy lên Render.com
 
 ### Database
 
-1. Tạo project trên [railway.app](https://railway.app)
-2. Add **PostgreSQL** service
-3. Export DB local bằng `pg_dump`:
+1. Vào [render.com](https://render.com) → **New** → **Blueprint**
+2. Kết nối GitHub repo `fm-lnc-manager-tool`
+3. Render tự đọc `render.yaml` và tạo sẵn **Web Service (BE)** + **PostgreSQL**
+4. Export DB local bằng `pg_dump`:
    ```bash
    # Windows (pg_dump nằm tại D:\App\PostgreSQL\18\bin\)
    $env:PGPASSWORD='your_password'
    D:\App\PostgreSQL\18\bin\pg_dump.exe -h 127.0.0.1 -p 5432 -U postgres -d fm_lnc_db --no-owner --no-acl -F p -f "backend\scripts\db_dump_full.sql"
    ```
-4. Import `db_dump_full.sql` vào Railway PostgreSQL qua pgAdmin hoặc Railway CLI
+5. Import `backend/scripts/db_dump_full.sql` vào Render PostgreSQL qua pgAdmin (dùng External Connection String từ dashboard)
 
 ### Backend
 
-1. Add service từ GitHub repo → chọn **Root Directory** = `backend`
-2. Railway tự detect Dockerfile
-3. Set environment variables:
-
-   ```
-   DB_HOST=${{Postgres.PGHOST}}
-   DB_PORT=${{Postgres.PGPORT}}
-   DB_USERNAME=${{Postgres.PGUSER}}
-   DB_PASSWORD=${{Postgres.PGPASSWORD}}
-   DB_NAME=${{Postgres.PGDATABASE}}
-   PORT=3001
-   ```
+- Render tự build Dockerfile từ `backend/` và wire **toàn bộ biến DB** từ PostgreSQL service tự động
+- Sau khi deploy, test:
+  ```
+  GET https://fm-lnc-backend.onrender.com/health
+  ```
 
 > **Lưu ý**: Tính năng đọc file `.lnc` trực tiếp và hiển thị logo chỉ hoạt động ở môi trường local (cần cài FM2024). Trên cloud, API chỉ serve data từ PostgreSQL.
 
