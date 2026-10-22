@@ -133,23 +133,26 @@ Mở trình duyệt: `http://localhost:3000`
 
 ## ☁️ Deploy lên Render.com
 
-### Database
+### Bước 1 — Tạo Services trên Render
 
 1. Vào [render.com](https://render.com) → **New** → **Blueprint**
 2. Kết nối GitHub repo `fm-lnc-manager-tool`
 3. Render tự đọc `render.yaml` và tạo sẵn **Web Service (BE)** + **PostgreSQL**
-4. Export DB local bằng `pg_dump`:
-   ```bash
-   # Windows (pg_dump nằm tại D:\App\PostgreSQL\18\bin\)
-   $env:PGPASSWORD='your_password'
-   D:\App\PostgreSQL\18\bin\pg_dump.exe -h 127.0.0.1 -p 5432 -U postgres -d fm_lnc_db --no-owner --no-acl -F p -f "backend\scripts\db_dump_full.sql"
-   ```
-5. Import `backend/scripts/db_dump_full.sql` vào Render PostgreSQL qua pgAdmin (dùng External Connection String từ dashboard)
+4. Chờ PostgreSQL service chạy xong → vào tab **"Info"** → copy **External Database URL**
 
-### Backend
+### Bước 2 — Import Database bằng DBeaver
 
-- Render tự build Dockerfile từ `backend/` và wire **toàn bộ biến DB** từ PostgreSQL service tự động
-- Sau khi deploy, test:
+1. Mở **DBeaver** → click **"New Database Connection"** → chọn **PostgreSQL**
+2. Chuyển sang tab **"URL"** → paste **External Database URL** từ Render
+3. Click **Test Connection** → OK → **Finish**
+4. Trong **Database Navigator**, click chuột phải vào database → **Tools** → **Execute Script**
+5. Chọn file `backend\scripts\db_dump_full.sql` → **Start**
+6. Chờ ~30 giây là xong (~28,000 records)
+
+### Bước 3 — Backend tự deploy
+
+- Render tự build Dockerfile từ `backend/` và wire **toàn bộ biến DB** từ PostgreSQL service
+- Sau khi deploy (~3-5 phút), test:
   ```
   GET https://fm-lnc-backend.onrender.com/health
   ```
