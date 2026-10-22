@@ -17,10 +17,8 @@ import {
   GlobalOutlined,
   AppstoreOutlined,
   CodeOutlined,
-  IdcardOutlined,
   DownOutlined,
   UpOutlined,
-  BgColorsOutlined,
 } from '@ant-design/icons';
 import { EntityType } from '../types';
 import { getConfederationLogoUrl, getNationLogoUrl } from '../services/api';
@@ -171,7 +169,7 @@ export default function RecordDetailModal({
     return <AppstoreOutlined className="text-gray-500" />;
   };
 
-  // Nation resolving: If it's a nation, data.id is the nation id!
+  // Nation resolving: If it's a nation, data.id is the nation id
   const nationId = isNation ? data.id : (data.nation_id || data.country_id || data.nation?.id);
   const nationName = isNation ? (data.long_name || data.name) : (data.nation_name || data.nation?.long_name || data.nation?.name);
   const nationCode = isNation ? (data.three_letter_name || data.code) : (data.nation_three_letter || data.nation?.three_letter_name);
@@ -215,7 +213,7 @@ export default function RecordDetailModal({
           Close
         </Button>,
       ]}
-      width={640}
+      width={600}
       destroyOnClose
       centered
       title={
@@ -225,7 +223,7 @@ export default function RecordDetailModal({
             <img
               src={getNationLogoUrl(nationId, nationCode)}
               alt={title}
-              className="w-13 h-8.5 object-cover rounded-md shadow-xs border border-slate-200/90 bg-white shrink-0"
+              className="w-12 h-8 object-cover rounded shadow-xs border border-slate-200/90 bg-white shrink-0"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
@@ -234,30 +232,30 @@ export default function RecordDetailModal({
             <img
               src={getConfederationLogoUrl(data.id)}
               alt={data.name || 'Confederation'}
-              className="w-10 h-10 object-contain rounded-lg p-1 bg-white shadow-xs border border-slate-200 shrink-0"
+              className="w-9 h-9 object-contain rounded-lg p-1 bg-white shadow-xs border border-slate-200 shrink-0"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
             />
           ) : (
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 border ${
+              className={`w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0 border ${
                 isComp
                   ? 'bg-amber-50 border-amber-200/70 text-amber-600'
                   : isClub
                   ? 'bg-blue-50 border-blue-200/70 text-blue-600'
                   : isPlayer
                   ? 'bg-purple-50 border-purple-200/70 text-purple-600'
-                  : 'bg-slate-100 border-slate-200 text-slate-700'
+                  : 'bg-slate-100 border border-slate-200 text-slate-700'
               }`}
             >
               {getTypeIcon()}
             </div>
           )}
 
-          {/* Title and Badges */}
+          {/* Title and Header Badges */}
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-lg text-slate-900 truncate m-0 leading-tight">
+            <h3 className="font-bold text-base text-slate-900 truncate m-0 leading-tight">
               {title}
             </h3>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -265,7 +263,7 @@ export default function RecordDetailModal({
               <button
                 type="button"
                 onClick={handleCopyId}
-                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors cursor-pointer group"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-mono font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors cursor-pointer group"
                 title="Click to copy FM ID"
               >
                 <span className="text-blue-400 font-medium">ID:</span>
@@ -284,417 +282,424 @@ export default function RecordDetailModal({
 
               {/* 3-Letter Code Badge */}
               {nationCode && (
-                <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="px-1.5 py-0.5 rounded text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
                   {nationCode}
                 </span>
-              )}
-
-              {data.is_international && (
-                <Tag color="purple" className="m-0 text-xs font-medium">
-                  International
-                </Tag>
-              )}
-
-              {(data.is_extinct || data.virtual_type === 'EXTINCT') && (
-                <Tag color="red" className="m-0 text-xs font-medium">
-                  Extinct
-                </Tag>
               )}
             </div>
           </div>
         </div>
       }
     >
-      <div className="py-2.5 space-y-3.5 max-h-[70vh] overflow-y-auto pr-1">
-        {/* Metric Highlight Tiles (if stats exist) */}
-        {(data.totalComps !== undefined ||
-          data.clubsCount !== undefined ||
-          data.awardsCount !== undefined ||
-          data.totalNations !== undefined ||
-          (data.totalChildren !== undefined && data.totalChildren > 0)) && (
-          <div className="grid grid-cols-2 gap-2.5">
-            {/* Nation's Total Competitions */}
-            {data.totalComps !== undefined && (
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100/40 border border-amber-200/80 rounded-xl p-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-500 text-white flex items-center justify-center text-base shadow-xs shrink-0">
-                  <TrophyOutlined />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                    Competitions in Nation
-                  </div>
-                  <div className="text-base font-black text-amber-950">
-                    {data.totalComps} Competitions
-                  </div>
-                </div>
-              </div>
-            )}
+      <div className="py-2.5 space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+        {/* Fields List formatted strictly as: [label]: [Value] */}
+        <div className="bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 space-y-2">
+          {/* ID */}
+          <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+            <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+              ID:
+            </span>
+            <div className="flex items-center gap-1.5 font-mono font-bold text-sm text-blue-600 min-w-0">
+              <span>{data.id}</span>
+              <Tooltip title="Copy ID">
+                <Button
+                  type="text"
+                  size="small"
+                  shape="circle"
+                  icon={copied ? <CheckOutlined className="text-emerald-600 text-xs" /> : <CopyOutlined className="text-slate-400 text-xs" />}
+                  onClick={handleCopyId}
+                  className="hover:bg-slate-200"
+                />
+              </Tooltip>
+            </div>
+          </div>
 
-            {/* Confederation's Total Nations */}
-            {data.totalNations !== undefined && (
-              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100/40 border border-cyan-200/80 rounded-xl p-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-base shadow-xs shrink-0">
-                  <FlagOutlined />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-cyan-700">
-                    Member Nations
-                  </div>
-                  <div className="text-base font-black text-cyan-950">
-                    {data.totalNations} Nations
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Type */}
+          <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+            <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+              Type:
+            </span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Tag color={getTypeColor()} className="m-0 font-semibold text-xs">
+                {getTypeLabel()}
+              </Tag>
+            </div>
+          </div>
 
-            {/* Competition's Clubs Count */}
-            {data.clubsCount !== undefined && (
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100/40 border border-blue-200/80 rounded-xl p-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-blue-500 text-white flex items-center justify-center text-base shadow-xs shrink-0">
-                  <SafetyOutlined />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
-                    Participating Clubs
-                  </div>
-                  <div className="text-base font-black text-blue-950">
-                    {data.clubsCount} Clubs
-                  </div>
-                </div>
+          {/* Names block: [label]: [Value] */}
+          {isPlayer ? (
+            <>
+              {/* FN */}
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  FN:
+                </span>
+                <span className="font-bold text-[13px] text-slate-800 break-words flex-1">
+                  {data.first_name || '-'}
+                </span>
               </div>
-            )}
 
-            {/* Competition's Awards Count */}
-            {data.awardsCount !== undefined && (
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100/40 border border-amber-200/80 rounded-xl p-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-500 text-white flex items-center justify-center text-base shadow-xs shrink-0">
-                  <StarOutlined />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                    Associated Awards
-                  </div>
-                  <div className="text-base font-black text-amber-950">
-                    {data.awardsCount} Awards
-                  </div>
-                </div>
+              {/* SN */}
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  SN:
+                </span>
+                <span className="font-bold text-[13px] text-slate-800 break-words flex-1">
+                  {data.second_name || '-'}
+                </span>
               </div>
-            )}
 
-            {/* Fallback Total Children for other types */}
-            {data.totalComps === undefined &&
-              data.clubsCount === undefined &&
-              data.totalNations === undefined &&
-              data.totalChildren !== undefined &&
-              data.totalChildren > 0 && (
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-700 text-white flex items-center justify-center text-base shadow-xs shrink-0">
-                    <AppstoreOutlined />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      Sub-Records
-                    </div>
-                    <div className="text-base font-black text-slate-800">
-                      {data.totalChildren}
-                    </div>
-                  </div>
+              {/* CN */}
+              {data.common_name && (
+                <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                  <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                    CN:
+                  </span>
+                  <span className="font-bold text-[13px] text-purple-700 italic break-words flex-1">
+                    {data.common_name}
+                  </span>
                 </div>
               )}
-          </div>
-        )}
-
-        {/* Associated Hierarchy Banner (For non-nations that belong to a nation) */}
-        {!isNation && nationId && (
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-            <div className="flex items-center gap-3">
-              <img
-                src={getNationLogoUrl(nationId, nationCode)}
-                alt={nationName || 'Nation'}
-                className="w-9 h-6 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Associated Nation
-                </div>
-                <div className="text-xs font-bold text-slate-800">
-                  {nationName}{' '}
-                  {nationCode && (
-                    <span className="font-mono text-slate-500 font-normal">({nationCode})</span>
+            </>
+          ) : isCity || isStadium ? (
+            <>
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  Name:
+                </span>
+                <span className="font-bold text-[13px] text-slate-800 break-words flex-1">
+                  {data.name || data.long_name || '-'}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* LN */}
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  LN:
+                </span>
+                <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                  <span
+                    className={`font-bold text-[13px] break-words ${
+                      isFieldInactive('long_name') ? 'line-through text-red-600' : 'text-slate-900'
+                    }`}
+                  >
+                    {data.is_virtual ? '-' : (data.long_name || data.name || title)}
+                  </span>
+                  {isFieldInactive('long_name') && (
+                    <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
+                      Inactive
+                    </span>
                   )}
                 </div>
               </div>
-            </div>
-            <span className="text-xs font-mono font-medium text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-              ID: {nationId}
-            </span>
-          </div>
-        )}
 
-        {/* Associated Competition for Clubs */}
-        {data.comp_id && (
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold shrink-0">
-                <TrophyOutlined />
-              </div>
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Assigned Competition
-                </div>
-                <div className="text-xs font-bold text-slate-800">
-                  {data.competition?.long_name || data.comp_name || `Competition ID: ${data.comp_id}`}
-                </div>
-              </div>
-            </div>
-            <span className="text-xs font-mono font-medium text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-              ID: {data.comp_id}
-            </span>
-          </div>
-        )}
-
-        {/* Names & Identification Cards */}
-        <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-2.5">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <IdcardOutlined className="text-blue-500 text-xs" />
-            <span>Names & Identifiers</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {isPlayer ? (
-              <>
-                <div className="bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                    First Name (FN)
-                  </div>
-                  <div className="text-sm font-bold text-slate-900">{data.first_name || '-'}</div>
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                    Second Name (SN)
-                  </div>
-                  <div className="text-sm font-bold text-slate-900">{data.second_name || '-'}</div>
-                </div>
-
-                {data.common_name && (
-                  <div className="sm:col-span-2 bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                      Common Name (CN)
-                    </div>
-                    <div className="text-sm font-bold text-purple-700 italic">
-                      {data.common_name}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : isCity || isStadium ? (
-              <>
-                <div className="sm:col-span-2 bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                    Name
-                  </div>
-                  <div className="text-sm font-bold text-slate-900">
-                    {data.name || data.long_name || '-'}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                {/* Long Name (LN) */}
-                <div className="sm:col-span-2 bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                    Long Name (LN)
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`text-sm font-bold ${
-                        isFieldInactive('long_name') ? 'line-through text-red-500' : 'text-slate-900'
-                      }`}
-                    >
-                      {data.is_virtual ? '-' : (data.long_name || data.name || title)}
-                    </span>
-                    {isFieldInactive('long_name') && (
-                      <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                        Inactive
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Short Name (SN) */}
-                <div className="bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                    Short Name (SN)
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`text-sm font-bold ${
-                        isFieldInactive('short_name') ? 'line-through text-red-500' : 'text-slate-900'
-                      }`}
-                    >
-                      {data.is_virtual ? '-' : (data.short_name || '-')}
-                    </span>
-                    {isFieldInactive('short_name') && (
-                      <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                        Inactive
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 3-Letter Code (3N) */}
-                <div className="bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                    3-Letter Code (3N)
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`font-mono text-sm font-bold ${
-                        isFieldInactive('three_letter_name')
-                          ? 'line-through text-red-500'
-                          : 'text-slate-900'
-                      }`}
-                    >
-                      {data.is_virtual ? '-' : (data.three_letter_name || nationCode || '-')}
-                    </span>
-                    {isFieldInactive('three_letter_name') && (
-                      <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                        Inactive
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 6-Letter Code (6N) */}
-                {(type === 'club' ||
-                  type === EntityType.CLUB ||
-                  data.six_letter_name !== undefined) && (
-                  <div className="sm:col-span-2 bg-white border border-slate-200 rounded-lg p-2.5 shadow-2xs">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                      6-Letter Code (6N)
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={`font-mono text-sm font-bold ${
-                          isFieldInactive('six_letter_name')
-                            ? 'line-through text-red-500'
-                            : 'text-slate-900'
-                        }`}
-                      >
-                        {data.six_letter_name || '-'}
-                      </span>
-                      {isFieldInactive('six_letter_name') && (
-                        <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                          Inactive
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Color Preview Block for Competitions / Clubs */}
-        {(bgInfo || fgInfo) && (
-          <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-3">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <BgColorsOutlined className="text-indigo-500 text-xs" />
-              <span>Color Configuration</span>
-            </div>
-
-            <div className="flex items-center gap-3.5 flex-wrap">
-              {/* Visual preview badge */}
-              <div
-                className="px-4 py-2 rounded-lg font-bold text-xs border border-black/15 shadow-2xs tracking-wide"
-                style={{
-                  backgroundColor: bgInfo ? bgInfo.css : '#ffffff',
-                  color: fgInfo ? fgInfo.css : '#000000',
-                }}
-              >
-                SAMPLE TEXT PREVIEW
-              </div>
-
-              {/* Background color chip */}
-              {bgInfo && (
-                <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs">
-                  <span
-                    className="w-4 h-4 rounded border border-black/20 shrink-0 shadow-2xs"
-                    style={{ backgroundColor: bgInfo.css }}
-                  />
-                  <div className="text-xs">
-                    <span className="text-slate-400 mr-1.5">BG:</span>
-                    <span className="font-mono font-bold text-slate-800">{bgInfo.hex}</span>
-                    <span className="text-slate-400 font-mono text-[11px] ml-1.5">
-                      ({data.bg_color})
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Foreground color chip */}
-              {fgInfo && (
-                <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs">
-                  <span
-                    className="w-4 h-4 rounded border border-black/20 shrink-0 shadow-2xs"
-                    style={{ backgroundColor: fgInfo.css }}
-                  />
-                  <div className="text-xs">
-                    <span className="text-slate-400 mr-1.5">FG:</span>
-                    <span className="font-mono font-bold text-slate-800">{fgInfo.hex}</span>
-                    <span className="text-slate-400 font-mono text-[11px] ml-1.5">
-                      ({data.fg_color})
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Categories / Scope / Notes */}
-        {(data.categories || data.note || inactiveList.length > 0) && (
-          <div className="space-y-2.5">
-            {/* Categories */}
-            {data.categories && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  {isCity ? 'Region:' : 'Categories:'}
+              {/* SN */}
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  SN:
                 </span>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {String(data.categories)
-                    .split(',')
-                    .map((cat: string, idx: number) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-200"
-                      >
-                        {cat.trim()}
-                      </span>
-                    ))}
+                <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                  <span
+                    className={`font-bold text-[13px] break-words ${
+                      isFieldInactive('short_name') ? 'line-through text-red-600' : 'text-slate-800'
+                    }`}
+                  >
+                    {data.is_virtual ? '-' : (data.short_name || '-')}
+                  </span>
+                  {isFieldInactive('short_name') && (
+                    <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
+                      Inactive
+                    </span>
+                  )}
                 </div>
+              </div>
+
+              {/* 3N */}
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  3N:
+                </span>
+                <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                  <span
+                    className={`font-mono font-bold text-[13px] ${
+                      isFieldInactive('three_letter_name')
+                        ? 'line-through text-red-600'
+                        : 'text-slate-800'
+                    }`}
+                  >
+                    {data.is_virtual ? '-' : (data.three_letter_name || nationCode || '-')}
+                  </span>
+                  {isFieldInactive('three_letter_name') && (
+                    <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
+                      Inactive
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 6N */}
+              {(type === 'club' ||
+                type === EntityType.CLUB ||
+                data.six_letter_name !== undefined) && (
+                <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                  <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                    6N:
+                  </span>
+                  <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                    <span
+                      className={`font-mono font-bold text-[13px] ${
+                        isFieldInactive('six_letter_name')
+                          ? 'line-through text-red-600'
+                          : 'text-slate-800'
+                      }`}
+                    >
+                      {data.six_letter_name || '-'}
+                    </span>
+                    {isFieldInactive('six_letter_name') && (
+                      <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Associated Nation: [label]: [Value] */}
+          {!isNation && nationId && (
+            <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Nation:
+              </span>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <img
+                  src={getNationLogoUrl(nationId, nationCode)}
+                  alt={nationName || 'Nation'}
+                  className="w-5 h-3.5 object-cover rounded-2xs border border-slate-300 shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <span className="font-bold text-[13px] text-slate-800 truncate">
+                  {nationName}
+                </span>
+                {nationCode && (
+                  <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                    {nationCode}
+                  </span>
+                )}
+                <span className="text-xs text-slate-400 font-mono ml-auto shrink-0">
+                  ID: {nationId}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Assigned Competition: [label]: [Value] */}
+          {data.comp_id && (
+            <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                League:
+              </span>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <TrophyOutlined className="text-amber-500 text-xs shrink-0" />
+                <span className="font-bold text-[13px] text-slate-800 truncate">
+                  {data.competition?.long_name || data.comp_name || `Competition ${data.comp_id}`}
+                </span>
+                <span className="text-xs text-slate-400 font-mono ml-auto shrink-0">
+                  ID: {data.comp_id}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Counts: [label]: [Value] */}
+          {/* Total Competitions for Nation */}
+          {data.totalComps !== undefined && (
+            <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Comps:
+              </span>
+              <span className="font-bold text-[13px] text-amber-700">
+                {data.totalComps} Competitions
+              </span>
+            </div>
+          )}
+
+          {/* Clubs Count for Competition */}
+          {data.clubsCount !== undefined && (
+            <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Clubs:
+              </span>
+              <span className="font-bold text-[13px] text-blue-700">
+                {data.clubsCount} Clubs
+              </span>
+            </div>
+          )}
+
+          {/* Awards Count for Competition */}
+          {data.awardsCount !== undefined && (
+            <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Awards:
+              </span>
+              <span className="font-bold text-[13px] text-amber-700">
+                {data.awardsCount} Awards
+              </span>
+            </div>
+          )}
+
+          {/* Total Nations for Confederation */}
+          {data.totalNations !== undefined && (
+            <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Nations:
+              </span>
+              <span className="font-bold text-[13px] text-cyan-700">
+                {data.totalNations} Member Nations
+              </span>
+            </div>
+          )}
+
+          {/* Fallback Total Children */}
+          {data.totalComps === undefined &&
+            data.clubsCount === undefined &&
+            data.totalNations === undefined &&
+            data.totalChildren !== undefined &&
+            data.totalChildren > 0 && (
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  Children:
+                </span>
+                <span className="font-bold text-[13px] text-slate-800">
+                  {data.totalChildren}
+                </span>
               </div>
             )}
 
-            {/* Note Callout */}
-            {data.note && (
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
-                <InfoCircleOutlined className="text-slate-400 text-sm mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                    Note
-                  </div>
-                  <p className="m-0 leading-relaxed italic">{data.note}</p>
-                </div>
+          {/* Colors: [label]: [Value] */}
+          {(bgInfo || fgInfo) && (
+            <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60 flex-wrap">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Colors:
+              </span>
+              <div className="flex items-center gap-2 flex-wrap flex-1">
+                {/* Sample badge */}
+                <span
+                  className="px-2 py-0.5 rounded text-xs font-bold border border-black/15 shadow-2xs"
+                  style={{
+                    backgroundColor: bgInfo ? bgInfo.css : '#ffffff',
+                    color: fgInfo ? fgInfo.css : '#000000',
+                  }}
+                >
+                  Sample
+                </span>
+
+                {/* BG */}
+                {bgInfo && (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded">
+                    <span
+                      className="w-3.5 h-3.5 rounded border border-black/20 shrink-0"
+                      style={{ backgroundColor: bgInfo.css }}
+                    />
+                    <span className="text-slate-400">BG:</span>
+                    <span className="font-mono font-bold text-slate-800">{bgInfo.hex}</span>
+                    <span className="text-slate-400 font-mono text-[11px]">({data.bg_color})</span>
+                  </span>
+                )}
+
+                {/* FG */}
+                {fgInfo && (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded">
+                    <span
+                      className="w-3.5 h-3.5 rounded border border-black/20 shrink-0"
+                      style={{ backgroundColor: fgInfo.css }}
+                    />
+                    <span className="text-slate-400">FG:</span>
+                    <span className="font-mono font-bold text-slate-800">{fgInfo.hex}</span>
+                    <span className="text-slate-400 font-mono text-[11px]">({data.fg_color})</span>
+                  </span>
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+
+          {/* Scope / Status: [label]: [Value] */}
+          {(data.is_international !== undefined || data.is_extinct !== undefined || isVirtual) && (
+            <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Status:
+              </span>
+              <div className="flex items-center gap-1.5 flex-wrap flex-1">
+                {data.is_international && (
+                  <Tag color="purple" className="m-0 text-xs font-medium">
+                    International Competition
+                  </Tag>
+                )}
+                {data.is_extinct && (
+                  <Tag color="red" className="m-0 text-xs font-medium">
+                    Extinct Club
+                  </Tag>
+                )}
+                {isVirtual && (
+                  <Tag color="orange" className="m-0 text-xs font-medium">
+                    {data.virtual_type === 'EXTINCT' ? 'Extinct Clubs Container' : 'Independent Clubs Container'}
+                  </Tag>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Categories: [label]: [Value] */}
+          {data.categories && (
+            <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                {isCity ? 'Region:' : 'Category:'}
+              </span>
+              <div className="flex items-center gap-1 flex-wrap flex-1">
+                {String(data.categories)
+                  .split(',')
+                  .map((cat: string, idx: number) => (
+                    <Tag color="cyan" key={idx} className="m-0 text-xs font-medium">
+                      {cat.trim()}
+                    </Tag>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Note: [label]: [Value] */}
+          {data.note && (
+            <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60 last:border-b-0">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Note:
+              </span>
+              <span className="text-xs text-slate-700 italic flex-1 break-words">
+                {data.note}
+              </span>
+            </div>
+          )}
+
+          {/* Inactive Fields: [label]: [Value] */}
+          {inactiveList.length > 0 && (
+            <div className="flex items-center gap-2 min-w-0 last:border-b-0">
+              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                Inactive:
+              </span>
+              <div className="flex items-center gap-1 flex-wrap flex-1">
+                {inactiveList.map((f: string, i: number) => (
+                  <Tag color="error" key={i} className="m-0 text-xs">
+                    {f}
+                  </Tag>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Collapsible Raw JSON Viewer */}
         <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
