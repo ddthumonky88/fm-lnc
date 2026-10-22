@@ -235,6 +235,7 @@ export default function EntityCard({
   );
 
   const handleNavigateAction = () => {
+    if (isInfoOpen) return;
     if (!onNavigate) return;
     if (data.is_virtual) {
       onNavigate({
@@ -357,12 +358,19 @@ export default function EntityCard({
   };
 
   return (
-    <div
-      onClick={handleNavigateAction}
-      className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col group h-full ${
-        isNavigable ? 'cursor-pointer' : ''
-      }`}
-    >
+    <>
+      <div
+        onClick={(e) => {
+          if (isInfoOpen) {
+            e.stopPropagation();
+            return;
+          }
+          handleNavigateAction();
+        }}
+        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col group h-full ${
+          isNavigable ? 'cursor-pointer' : ''
+        }`}
+      >
       <div>
         {/* Top Header Bar */}
         <div className="flex items-center justify-between gap-1 pb-2.5 mb-2.5 border-b border-gray-100">
@@ -648,15 +656,16 @@ export default function EntityCard({
           )}
         </div>
       </div>
-
-      {/* Record Info Detail Modal */}
-      <RecordDetailModal
-        isOpen={isInfoOpen}
-        onClose={() => setIsInfoOpen(false)}
-        data={data}
-        type={type}
-        onEdit={canEdit ? () => onEdit?.(data) : undefined}
-      />
     </div>
-  );
+
+    {/* Record Info Detail Modal */}
+    <RecordDetailModal
+      isOpen={isInfoOpen}
+      onClose={() => setIsInfoOpen(false)}
+      data={data}
+      type={type}
+      onEdit={canEdit ? () => onEdit?.(data) : undefined}
+    />
+  </>
+);
 }
