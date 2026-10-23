@@ -59,13 +59,25 @@ export default function AppSidebar({
   const isPlayersActive = pathname === '/players';
   const isStagesActive = pathname === '/stages';
 
-  const navItems = [
+  interface NavItem {
+    key: string;
+    title: string;
+    label: string;
+    icon: React.ReactNode;
+    active: boolean;
+    badge?: number;
+    badgeColor?: string;
+    onClick: () => void;
+  }
+
+  const navItems: NavItem[] = [
     {
       key: 'WORLD',
       title: 'World',
       label: 'World',
       icon: <GlobalOutlined className="text-base" />,
       active: isHierarchyActive,
+      badge: totalContinents > 0 ? totalContinents : undefined,
       badgeColor: '#1d70b8',
       onClick: () => {
         if (pathname !== '/') {
