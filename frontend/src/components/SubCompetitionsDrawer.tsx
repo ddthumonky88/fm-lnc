@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Drawer,
   Button,
   Tag,
-  Input,
   Empty,
   Spin,
   Tooltip,
@@ -15,7 +14,6 @@ import {
 } from 'antd';
 import {
   ApartmentOutlined,
-  SearchOutlined,
   PlusOutlined,
   LinkOutlined,
   ReloadOutlined,
@@ -49,7 +47,6 @@ export default function SubCompetitionsDrawer({
   const router = useRouter();
   const [subComps, setSubComps] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [filterText, setFilterText] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Load sub-competitions
@@ -80,23 +77,9 @@ export default function SubCompetitionsDrawer({
 
   useEffect(() => {
     if (isOpen && parentComp?.id) {
-      setFilterText('');
       loadSubCompetitions(false);
     }
   }, [isOpen, parentComp?.id, loadSubCompetitions]);
-
-  // Filtered children
-  const filteredChildren = useMemo(() => {
-    if (!filterText.trim()) return subComps;
-    const q = filterText.toLowerCase();
-    return subComps.filter((c) => {
-      const name = (c.long_name || c.short_name || '').toLowerCase();
-      const code = (c.three_letter_name || '').toLowerCase();
-      const idStr = String(c.id);
-      const cat = (c.categories || '').toLowerCase();
-      return name.includes(q) || code.includes(q) || idStr.includes(q) || cat.includes(q);
-    });
-  }, [subComps, filterText]);
 
   const handleDeleteChild = async (child: any) => {
     if (onDelete) {
@@ -121,32 +104,57 @@ export default function SubCompetitionsDrawer({
     <>
       <Drawer
         title={
-          <div className="flex items-center justify-between gap-3 pr-4">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
-                <ApartmentOutlined className="text-amber-600 text-base" />
-              </span>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-gray-800 truncate">
-                    Sub-Competitions
-                  </span>
-                  <Badge
-                    count={subComps.length}
-                    overflowCount={999}
-                    style={{ backgroundColor: '#d97706' }}
-                  />
-                </div>
-                <div className="text-xs text-gray-500 truncate font-normal">
-                  Parent: <strong className="text-amber-700">{parentTitle}</strong> (ID: {parentComp?.id})
-                </div>
+          <div className="flex items-center gap-3 py-1">
+            <span className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
+              <ApartmentOutlined className="text-amber-600 text-lg" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-sm text-gray-900 truncate">
+                  {parentTitle}
+                </span>
+                <Badge
+                  count={subComps.length}
+                  overflowCount={999}
+                  style={{ backgroundColor: '#d97706' }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                {parentComp?.id && (
+                  <Tag color="gold" className="m-0 font-mono font-bold text-[11px] leading-4">
+                    ID: {parentComp.id}
+                  </Tag>
+                )}
+                {parentComp?.three_letter_name && (
+                  <Tag color="blue" className="m-0 font-bold text-[11px] leading-4">
+                    {parentComp.three_letter_name}
+                  </Tag>
+                )}
+                {parentComp?.categories && (
+                  <Tag color="cyan" className="m-0 text-[11px] leading-4">
+                    {parentComp.categories}
+                  </Tag>
+                )}
               </div>
             </div>
-
+          </div>
+        }
+        extra={
+          <div className="flex items-center gap-2">
+            <Button
+              type="primary"
+              size="middle"
+              icon={<PlusOutlined />}
+              onClick={() => setIsAddModalOpen(true)}
+              style={{ backgroundColor: '#d97706', borderColor: '#d97706' }}
+              className="text-xs font-semibold"
+            >
+              Add Child Comp
+            </Button>
             {parentComp?.id && (
               <Tooltip title="Open Parent Competition Page">
                 <Button
-                  size="small"
+                  size="middle"
                   type="default"
                   icon={<LinkOutlined />}
                   onClick={() => {
@@ -159,6 +167,14 @@ export default function SubCompetitionsDrawer({
                 </Button>
               </Tooltip>
             )}
+            <Button
+              size="middle"
+              type="text"
+              icon={<ReloadOutlined className={loading ? 'animate-spin' : ''} />}
+              onClick={() => loadSubCompetitions(true)}
+              className="text-gray-500 hover:text-amber-600"
+              title="Reload sub-competitions"
+            />
           </div>
         }
         placement="right"
@@ -168,70 +184,7 @@ export default function SubCompetitionsDrawer({
         destroyOnClose
         className="sub-competitions-drawer"
       >
-        <div className="flex flex-col h-full gap-4">
-          {/* Parent Summary Card */}
-          {parentComp && (
-            <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <Tag color="gold" className="m-0 font-bold text-xs">
-                    ID: {parentComp.id}
-                  </Tag>
-                  {parentComp.three_letter_name && (
-                    <Tag color="blue" className="m-0 font-bold text-xs">
-                      {parentComp.three_letter_name}
-                    </Tag>
-                  )}
-                  {parentComp.categories && (
-                    <Tag color="cyan" className="m-0 text-xs">
-                      {parentComp.categories}
-                    </Tag>
-                  )}
-                </div>
-                <Button
-                  size="small"
-                  type="text"
-                  icon={<ReloadOutlined className={loading ? 'animate-spin' : ''} />}
-                  onClick={() => loadSubCompetitions(true)}
-                  className="text-gray-500 hover:text-amber-600"
-                  title="Reload sub-competitions"
-                />
-              </div>
-
-              <div className="text-xs text-gray-700">
-                <span className="font-semibold">{parentComp.long_name}</span>
-                {parentComp.short_name && parentComp.short_name !== parentComp.long_name && (
-                  <span className="text-gray-500 ml-1.5 font-normal">
-                    ({parentComp.short_name})
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Search Toolbar */}
-          <div className="flex items-center justify-between gap-2">
-            <Input
-              prefix={<SearchOutlined className="text-gray-400 text-xs" />}
-              placeholder="Filter sub-competitions..."
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-              allowClear
-              size="middle"
-              className="flex-1 text-xs"
-            />
-            <Button
-              type="primary"
-              size="middle"
-              icon={<PlusOutlined />}
-              onClick={() => setIsAddModalOpen(true)}
-              style={{ backgroundColor: '#d97706', borderColor: '#d97706' }}
-              className="shrink-0 text-xs font-semibold"
-            >
-              Add Child Comp
-            </Button>
-          </div>
-
+        <div className="flex flex-col h-full gap-3">
           {/* Sub-competitions List using shared EntityCard */}
           <div className="flex-1 overflow-y-auto pr-1">
             {loading && subComps.length === 0 ? (
@@ -239,25 +192,18 @@ export default function SubCompetitionsDrawer({
                 <Spin size="large" />
                 <span className="text-xs">Loading sub-competitions...</span>
               </div>
-            ) : filteredChildren.length === 0 ? (
+            ) : subComps.length === 0 ? (
               <div className="py-16 bg-gray-50/60 rounded-xl border border-gray-100">
-                <Empty
-                  description={
-                    filterText
-                      ? `No sub-competitions match "${filterText}"`
-                      : 'No sub-competitions found for this parent'
-                  }
-                />
+                <Empty description="No sub-competitions found for this parent" />
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2">
-                {filteredChildren.map((child) => (
+                {subComps.map((child) => (
                   <EntityCard
                     key={child.id}
                     type="competition"
                     data={{
                       ...child,
-                      // Ensure parent metadata is displayed properly
                       parent_id: child.parent_id || parentComp?.id,
                       parent_name:
                         child.parent_name ||
@@ -283,7 +229,7 @@ export default function SubCompetitionsDrawer({
           {/* Drawer Footer */}
           <div className="pt-3 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
             <span>
-              Showing <strong>{filteredChildren.length}</strong> of <strong>{subComps.length}</strong> sub-competitions
+              Total: <strong>{subComps.length}</strong> sub-competitions
             </span>
             <Button size="small" onClick={onClose}>
               Close
