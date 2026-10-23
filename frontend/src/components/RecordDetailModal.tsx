@@ -693,33 +693,6 @@ export default function RecordDetailModal({
               </div>
             )}
 
-            {/* Parent Competition (for competitions) */}
-            {isComp && (currentData.parent_id || currentData.parent_name) && (
-              <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Parent:
-                </span>
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <TrophyOutlined className="text-amber-600 text-xs shrink-0" />
-                  <span
-                    className={`font-bold text-[13px] truncate ${
-                      isFieldInactive('parent_id') ? 'line-through text-red-600' : 'text-slate-800'
-                    }`}
-                  >
-                    {currentData.parent_name || currentData.parent_long_name || `Competition ${currentData.parent_id}`}
-                  </span>
-                  {isFieldInactive('parent_id') && (
-                    <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                      Inactive
-                    </span>
-                  )}
-                  <span className="text-xs text-slate-400 font-mono ml-auto shrink-0">
-                    ID: {currentData.parent_id}
-                  </span>
-                </div>
-              </div>
-            )}
-
             {/* Sub-competitions count */}
             {isComp && currentData.childrenCount !== undefined && currentData.childrenCount > 0 && (
               <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
