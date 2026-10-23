@@ -302,8 +302,8 @@ export default function AppHeader({
             loading={isSyncing || isRefreshing}
             className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2.5 sm:px-3 h-8 sm:h-9 flex items-center gap-1.5 cursor-pointer"
           >
-            <span className="text-xs sm:text-sm font-semibold hidden xs:inline">Export / Sync</span>
-            <span className="text-xs sm:text-sm font-semibold xs:hidden">Actions</span>
+            <span className="text-xs sm:text-sm font-semibold hidden sm:inline">Export / Sync</span>
+            <span className="text-xs font-semibold sm:hidden">Export</span>
             <DownOutlined className="text-[10px] ml-0.5" />
           </Button>
         </Dropdown>

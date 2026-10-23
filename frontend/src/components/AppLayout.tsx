@@ -166,7 +166,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             headerLogo={headerLogo}
           />
 
-          <main className="flex-1 w-full px-3 sm:px-4 lg:px-5 py-3 sm:py-4">
+          <main className="flex-1 w-full px-3 sm:px-4 lg:px-5 py-3 sm:py-4 pb-20 lg:pb-4">
             {children}
           </main>
         </div>

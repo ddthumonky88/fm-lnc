@@ -77,7 +77,7 @@ export default function AppSidebar({
       label: 'World',
       icon: <GlobalOutlined className="text-base" />,
       active: isHierarchyActive,
-      badge: totalContinents > 0 ? totalContinents : undefined,
+      badge: undefined,
       badgeColor: '#1d70b8',
       onClick: () => {
         if (pathname !== '/') {
@@ -112,77 +112,80 @@ export default function AppSidebar({
     },
   ];
 
-  // Render sidebar inner content
-  const sidebarContent = (
-    <div className="flex flex-col h-full bg-[#0a1120] text-slate-300 border-r border-[#19263e] select-none">
-      {/* Brand Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-[#19263e] shrink-0">
-        <div
-          onClick={() => {
-            router.push('/');
-            if (isMobileOpen) onCloseMobile();
-          }}
-          className="flex items-center gap-3 cursor-pointer group overflow-hidden"
-        >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0 group-hover:scale-105 transition-transform">
-            <DatabaseOutlined className="text-lg" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0 transition-opacity duration-200">
-              <div className="font-bold text-sm text-white tracking-wide flex items-center gap-1.5">
-                <span>FM .LNC</span>
-                <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded">
-                  24.3
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-400 truncate">Database Manager</div>
+  // Helper to render sidebar content for desktop or mobile drawer
+  const renderSidebarContent = (isMobile: boolean = false) => {
+    const isCollapsed = isMobile ? false : collapsed;
+
+    return (
+      <div className="flex flex-col h-full bg-[#0a1120] text-slate-300 border-r border-[#19263e] select-none">
+        {/* Brand Header */}
+        <div className="h-16 px-4 flex items-center justify-between border-b border-[#19263e] shrink-0">
+          <div
+            onClick={() => {
+              router.push('/');
+              if (isMobile) onCloseMobile();
+            }}
+            className="flex items-center gap-3 cursor-pointer group overflow-hidden"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0 group-hover:scale-105 transition-transform">
+              <DatabaseOutlined className="text-lg" />
             </div>
+            {!isCollapsed && (
+              <div className="min-w-0 transition-opacity duration-200">
+                <div className="font-bold text-sm text-white tracking-wide flex items-center gap-1.5">
+                  <span>FM .LNC</span>
+                  <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded">
+                    24.3
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-400 truncate">Database Manager</div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile close button */}
+          {isMobile && (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 cursor-pointer text-base transition-colors"
+              aria-label="Close menu"
+            >
+              <CloseOutlined />
+            </button>
           )}
         </div>
 
-        {/* Mobile close button */}
-        {isMobileOpen && (
-          <button
-            type="button"
-            onClick={onCloseMobile}
-            className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800"
-          >
-            <CloseOutlined />
-          </button>
-        )}
-      </div>
+        {/* Navigation Items (World, Person, Stage) */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2.5 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800">
+          {navItems.map((item) => {
+            const active = item.active;
+            const buttonNode = (
+              <button
+                key={item.key}
+                type="button"
+                onClick={item.onClick}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all group relative cursor-pointer ${
+                  active
+                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                } ${isCollapsed ? 'justify-center px-0' : 'justify-between'}`}
+              >
+                <div className="flex items-center gap-3 truncate">
+                  <span
+                    className={`shrink-0 transition-colors ${
+                      active
+                        ? 'text-white'
+                        : 'text-slate-400 group-hover:text-blue-400'
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+                  {!isCollapsed && <span className="truncate font-semibold">{item.label}</span>}
+                </div>
 
-      {/* Navigation Items (World, Person, Stage) */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2.5 space-y-1 scrollbar-thin scrollbar-thumb-slate-800">
-        {navItems.map((item) => {
-          const active = item.active;
-          const buttonNode = (
-            <button
-              key={item.key}
-              type="button"
-              onClick={item.onClick}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group relative cursor-pointer ${
-                active
-                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-              } ${collapsed ? 'justify-center px-0' : 'justify-between'}`}
-            >
-              <div className="flex items-center gap-3 truncate">
-                <span
-                  className={`shrink-0 transition-colors ${
-                    active
-                      ? 'text-white'
-                      : 'text-slate-400 group-hover:text-blue-400'
-                  }`}
-                >
-                  {item.icon}
-                </span>
-                {!collapsed && <span className="truncate text-sm font-medium">{item.label}</span>}
-              </div>
-
-              {!collapsed && (
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {item.badge !== undefined && (
+                {!isCollapsed && item.badge !== undefined && (
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <Badge
                       count={item.badge}
                       overflowCount={999}
@@ -197,56 +200,58 @@ export default function AppSidebar({
                         borderColor: 'transparent',
                       }}
                     />
-                  )}
-                </div>
-              )}
-            </button>
-          );
-
-          if (collapsed) {
-            return (
-              <Tooltip key={item.key} placement="right" title={item.label}>
-                <div>{buttonNode}</div>
-              </Tooltip>
+                  </div>
+                )}
+              </button>
             );
-          }
 
-          return <div key={item.key}>{buttonNode}</div>;
-        })}
-      </div>
+            if (isCollapsed) {
+              return (
+                <Tooltip key={item.key} placement="right" title={item.label}>
+                  <div>{buttonNode}</div>
+                </Tooltip>
+              );
+            }
 
-      {/* Footer Info & Collapse Toggle */}
-      <div className="p-3 border-t border-[#19263e] shrink-0 bg-[#070d18]">
-        {!collapsed ? (
-          <div className="flex items-center justify-between text-[11px] text-slate-400">
-            <div className="flex items-center gap-1.5 truncate">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="truncate">Football Manager 2024</span>
+            return <div key={item.key}>{buttonNode}</div>;
+          })}
+        </div>
+
+        {/* Footer Info & Collapse Toggle (Collapse toggle only on desktop) */}
+        <div className="p-3 border-t border-[#19263e] shrink-0 bg-[#070d18]">
+          {!isCollapsed ? (
+            <div className="flex items-center justify-between text-[11px] text-slate-400">
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="truncate">Football Manager 2024</span>
+              </div>
+              {!isMobile && (
+                <button
+                  type="button"
+                  onClick={onToggleCollapse}
+                  className="hidden lg:flex items-center justify-center p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Collapse sidebar"
+                >
+                  <LeftOutlined className="text-xs" />
+                </button>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="hidden lg:flex items-center justify-center p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Collapse sidebar"
-            >
-              <LeftOutlined className="text-xs" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="hidden lg:flex items-center justify-center p-2 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Expand sidebar"
-            >
-              <RightOutlined className="text-xs" />
-            </button>
-          </div>
-        )}
+          ) : (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="hidden lg:flex items-center justify-center p-2 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Expand sidebar"
+              >
+                <RightOutlined className="text-xs" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <>
@@ -256,7 +261,7 @@ export default function AppSidebar({
           collapsed ? 'w-20' : 'w-64'
         }`}
       >
-        {sidebarContent}
+        {renderSidebarContent(false)}
       </aside>
 
       {/* Mobile Drawer Overlay */}
@@ -270,10 +275,42 @@ export default function AppSidebar({
 
           {/* Slide Drawer */}
           <div className="relative w-72 max-w-[85vw] h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
-            {sidebarContent}
+            {renderSidebarContent(true)}
           </div>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation Bar (World, Person, Stage) */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#0a1120]/95 backdrop-blur-md border-t border-[#19263e] px-2 py-1.5 flex items-center justify-around select-none shadow-2xl"
+        aria-label="Mobile Navigation"
+      >
+        {navItems.map((item) => {
+          const active = item.active;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={item.onClick}
+              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer relative ${
+                active
+                  ? 'text-blue-400 font-semibold bg-blue-500/10'
+                  : 'text-slate-400 hover:text-slate-200 active:bg-slate-800/40'
+              }`}
+            >
+              <span className={`text-lg transition-transform ${active ? 'scale-110 text-blue-400' : ''}`}>
+                {item.icon}
+              </span>
+              <span className="text-[11px] tracking-tight mt-0.5">
+                {item.label}
+              </span>
+              {active && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-0.5" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
     </>
   );
 }
