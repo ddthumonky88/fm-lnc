@@ -28,6 +28,7 @@ import {
   CompassOutlined,
   DatabaseOutlined,
   ArrowLeftOutlined,
+  DownOutlined,
 } from '@ant-design/icons';
 
 import { RecordType } from '../types';
@@ -121,6 +122,74 @@ export default function AppHeader({
       icon: <FlagOutlined className="text-rose-500" />,
       label: 'Add Stage',
       onClick: () => onQuickAdd(RecordType.STAGE),
+    },
+  ];
+
+  // Combined Header Action Items (Export, Sync, Refresh, Quick Add)
+  const actionMenuItems: MenuProps['items'] = [
+    {
+      key: 'export',
+      icon: <DownloadOutlined className="text-blue-600 text-sm" />,
+      label: (
+        <div className="flex items-center justify-between gap-6 py-1 min-w-[190px]">
+          <div className="flex flex-col">
+            <span className="font-semibold text-slate-800 text-xs sm:text-sm">Export .LNC</span>
+            <span className="text-[11px] text-slate-400">Write names to FM24 files</span>
+          </div>
+          <kbd className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+            Alt+E
+          </kbd>
+        </div>
+      ),
+      onClick: onExport,
+    },
+    {
+      key: 'sync',
+      icon: <SyncOutlined spin={isSyncing} className={isSyncing ? 'text-blue-600 text-sm' : 'text-slate-600 text-sm'} />,
+      label: (
+        <div className="flex items-center justify-between gap-6 py-1 min-w-[190px]">
+          <div className="flex flex-col">
+            <span className="font-semibold text-slate-800 text-xs sm:text-sm">Sync .LNC</span>
+            <span className="text-[11px] text-slate-400">Sync database with source</span>
+          </div>
+          <kbd className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+            Alt+S
+          </kbd>
+        </div>
+      ),
+      disabled: isSyncing,
+      onClick: onSync,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'refresh',
+      icon: <ReloadOutlined className={isRefreshing ? 'animate-spin text-blue-600 text-sm' : 'text-slate-600 text-sm'} />,
+      label: (
+        <div className="flex items-center justify-between gap-6 py-1 min-w-[190px]">
+          <div className="flex flex-col">
+            <span className="font-medium text-slate-700 text-xs sm:text-sm">Refresh View</span>
+            <span className="text-[11px] text-slate-400">Reload current page data</span>
+          </div>
+          <span className="text-[10px] text-slate-400 font-mono">F5</span>
+        </div>
+      ),
+      disabled: isRefreshing,
+      onClick: onRefresh,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'quick-add',
+      icon: <PlusOutlined className="text-emerald-600 text-sm" />,
+      label: (
+        <div className="py-0.5">
+          <span className="font-medium text-slate-700 text-xs sm:text-sm">Quick Add Record...</span>
+        </div>
+      ),
+      children: quickAddItems,
     },
   ];
 
@@ -220,45 +289,24 @@ export default function AppHeader({
         </button>
       </div>
 
-      {/* Right Section: Actions (Quick Add, Sync, Export, Refresh) */}
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-        {/* Refresh Current View */}
-        <Tooltip title="Refresh Current View">
-          <Button
-            type="text"
-            shape="circle"
-            size="small"
-            icon={<ReloadOutlined className={isRefreshing ? 'animate-spin text-blue-600' : 'text-slate-600'} />}
-            onClick={onRefresh}
-            className="hover:bg-slate-100 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center"
-          />
-        </Tooltip>
-
-        {/* Sync Button */}
-        <Tooltip title="Sync .LNC (Alt+S)">
-          <Button
-            icon={<SyncOutlined spin={isSyncing} className={isSyncing ? 'text-blue-600' : ''} />}
-            size="small"
-            onClick={onSync}
-            loading={isSyncing}
-            className="border-slate-300 hover:border-blue-500 font-medium px-2 sm:px-3 h-8 sm:h-9"
-          >
-            <span className="hidden sm:inline">Sync</span>
-          </Button>
-        </Tooltip>
-
-        {/* Export Button */}
-        <Tooltip title="Export .LNC (Alt+E)">
+      {/* Right Section: Actions Dropdown (Export, Sync, Refresh, Quick Add) */}
+      <div className="flex items-center gap-2 shrink-0">
+        <Dropdown
+          menu={{ items: actionMenuItems }}
+          placement="bottomRight"
+          trigger={['click']}
+        >
           <Button
             type="primary"
-            icon={<DownloadOutlined />}
-            size="small"
-            onClick={onExport}
-            className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2 sm:px-3 h-8 sm:h-9"
+            icon={<DownloadOutlined className="text-sm" />}
+            loading={isSyncing || isRefreshing}
+            className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2.5 sm:px-3 h-8 sm:h-9 flex items-center gap-1.5 cursor-pointer"
           >
-            <span className="hidden sm:inline">Export</span>
+            <span className="text-xs sm:text-sm font-semibold hidden xs:inline">Export / Sync</span>
+            <span className="text-xs sm:text-sm font-semibold xs:hidden">Actions</span>
+            <DownOutlined className="text-[10px] ml-0.5" />
           </Button>
-        </Tooltip>
+        </Dropdown>
       </div>
     </header>
   );

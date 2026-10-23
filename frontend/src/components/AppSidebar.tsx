@@ -61,90 +61,42 @@ export default function AppSidebar({
 
   const navItems = [
     {
-      group: 'EXPLORER',
-      items: [
-        {
-          key: HierarchyLevel.CONTINENTS,
-          title: 'Confederations & Nations',
-          label: 'Confederations & Nations',
-          icon: <GlobalOutlined className="text-base" />,
-          active: isHierarchyActive,
-          badge: totalContinents > 0 ? totalContinents : undefined,
-          badgeColor: '#1d70b8',
-          onClick: () => {
-            if (pathname !== '/') {
-              router.push('/');
-            } else if (onNavigateLevel) {
-              onNavigateLevel(HierarchyLevel.CONTINENTS, 'Confederations');
-            }
-            if (isMobileOpen) onCloseMobile();
-          },
-        },
-      ],
+      key: 'WORLD',
+      title: 'World',
+      label: 'World',
+      icon: <GlobalOutlined className="text-base" />,
+      active: isHierarchyActive,
+      badgeColor: '#1d70b8',
+      onClick: () => {
+        if (pathname !== '/') {
+          router.push('/');
+        } else if (onNavigateLevel) {
+          onNavigateLevel(HierarchyLevel.CONTINENTS, 'Confederations');
+        }
+        if (isMobileOpen) onCloseMobile();
+      },
     },
     {
-      group: 'GLOBAL ENTITIES',
-      items: [
-        {
-          key: HierarchyLevel.GLOBAL_PLAYERS,
-          title: 'Players / Staff',
-          label: 'Players & Staff',
-          icon: <UserOutlined className="text-base" />,
-          active: isPlayersActive,
-          onClick: () => {
-            router.push('/players');
-            if (isMobileOpen) onCloseMobile();
-          },
-        },
-        {
-          key: HierarchyLevel.GLOBAL_STAGES,
-          title: 'Tournament Stages',
-          label: 'Tournament Stages',
-          icon: <FlagOutlined className="text-base" />,
-          active: isStagesActive,
-          onClick: () => {
-            router.push('/stages');
-            if (isMobileOpen) onCloseMobile();
-          },
-        },
-      ],
+      key: 'PERSON',
+      title: 'Person',
+      label: 'Person',
+      icon: <UserOutlined className="text-base" />,
+      active: isPlayersActive,
+      onClick: () => {
+        router.push('/players');
+        if (isMobileOpen) onCloseMobile();
+      },
     },
     {
-      group: 'DATABASE TOOLS',
-      items: [
-        {
-          key: 'SEARCH',
-          label: 'Quick Search',
-          icon: <SearchOutlined className="text-base" />,
-          extra: (
-            <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-slate-800 text-slate-400 rounded border border-slate-700">
-              ⌘K
-            </kbd>
-          ),
-          onClick: () => {
-            onOpenSearchModal();
-            if (isMobileOpen) onCloseMobile();
-          },
-        },
-        {
-          key: 'SYNC',
-          label: 'Sync .LNC Files',
-          icon: <SyncOutlined className="text-base" />,
-          onClick: () => {
-            onSync();
-            if (isMobileOpen) onCloseMobile();
-          },
-        },
-        {
-          key: 'EXPORT',
-          label: 'Export .LNC',
-          icon: <DownloadOutlined className="text-base" />,
-          onClick: () => {
-            onExport();
-            if (isMobileOpen) onCloseMobile();
-          },
-        },
-      ],
+      key: 'STAGE',
+      title: 'Stage',
+      label: 'Stage',
+      icon: <FlagOutlined className="text-base" />,
+      active: isStagesActive,
+      onClick: () => {
+        router.push('/stages');
+        if (isMobileOpen) onCloseMobile();
+      },
     },
   ];
 
@@ -188,80 +140,67 @@ export default function AppSidebar({
         )}
       </div>
 
-      {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2.5 space-y-5 scrollbar-thin scrollbar-thumb-slate-800">
-        {navItems.map((section, sIdx) => (
-          <div key={sIdx} className="space-y-1">
-            {!collapsed ? (
-              <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                {section.group}
-              </div>
-            ) : (
-              <div className="w-6 mx-auto border-t border-[#19263e] my-2" />
-            )}
-
-            {section.items.map((item) => {
-              const active = 'active' in item && item.active;
-              const buttonNode = (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={item.onClick}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group relative cursor-pointer ${
+      {/* Navigation Items (World, Person, Stage) */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2.5 space-y-1 scrollbar-thin scrollbar-thumb-slate-800">
+        {navItems.map((item) => {
+          const active = item.active;
+          const buttonNode = (
+            <button
+              key={item.key}
+              type="button"
+              onClick={item.onClick}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group relative cursor-pointer ${
+                active
+                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              } ${collapsed ? 'justify-center px-0' : 'justify-between'}`}
+            >
+              <div className="flex items-center gap-3 truncate">
+                <span
+                  className={`shrink-0 transition-colors ${
                     active
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                  } ${collapsed ? 'justify-center px-0' : 'justify-between'}`}
+                      ? 'text-white'
+                      : 'text-slate-400 group-hover:text-blue-400'
+                  }`}
                 >
-                  <div className="flex items-center gap-3 truncate">
-                    <span
-                      className={`shrink-0 transition-colors ${
-                        active
-                          ? 'text-white'
-                          : 'text-slate-400 group-hover:text-blue-400'
-                      }`}
-                    >
-                      {item.icon}
-                    </span>
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                  </div>
+                  {item.icon}
+                </span>
+                {!collapsed && <span className="truncate text-sm font-medium">{item.label}</span>}
+              </div>
 
-                  {!collapsed && (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {'badge' in item && item.badge !== undefined && (
-                        <Badge
-                          count={item.badge}
-                          overflowCount={999}
-                          style={{
-                            backgroundColor: active ? '#1e40af' : (item.badgeColor || '#334155'),
-                            color: '#ffffff',
-                            fontSize: '10px',
-                            height: '18px',
-                            lineHeight: '18px',
-                            minWidth: '18px',
-                            padding: '0 5px',
-                            borderColor: 'transparent',
-                          }}
-                        />
-                      )}
-                      {'extra' in item && item.extra}
-                    </div>
+              {!collapsed && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {item.badge !== undefined && (
+                    <Badge
+                      count={item.badge}
+                      overflowCount={999}
+                      style={{
+                        backgroundColor: active ? '#1e40af' : (item.badgeColor || '#334155'),
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        height: '18px',
+                        lineHeight: '18px',
+                        minWidth: '18px',
+                        padding: '0 5px',
+                        borderColor: 'transparent',
+                      }}
+                    />
                   )}
-                </button>
-              );
+                </div>
+              )}
+            </button>
+          );
 
-              if (collapsed) {
-                return (
-                  <Tooltip key={item.key} placement="right" title={item.label}>
-                    <div>{buttonNode}</div>
-                  </Tooltip>
-                );
-              }
+          if (collapsed) {
+            return (
+              <Tooltip key={item.key} placement="right" title={item.label}>
+                <div>{buttonNode}</div>
+              </Tooltip>
+            );
+          }
 
-              return buttonNode;
-            })}
-          </div>
-        ))}
+          return <div key={item.key}>{buttonNode}</div>;
+        })}
       </div>
 
       {/* Footer Info & Collapse Toggle */}
