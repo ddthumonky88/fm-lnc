@@ -57,9 +57,10 @@ export default function CityGroupView({
 
     // Sort categories alphabetically, but put [OTHER] and [REMOVE] at the end
     const getCategoryRank = (key: string): number => {
+      if (!key) return 5;
       const upper = key.trim().toUpperCase();
-      if (upper === '[REMOVE]' || upper === 'REMOVE' || upper.includes('REMOVE')) return 4;
-      if (upper === '[OTHER]' || upper === 'OTHER' || upper === '[OTHERS]' || upper === 'OTHERS' || upper.includes('OTHER')) return 3;
+      if (upper === '[REMOVE]' || upper === 'REMOVE' || upper.includes('REMOVE')) return 6;
+      if (upper === '[OTHER]' || upper === 'OTHER' || upper === '[OTHERS]' || upper === 'OTHERS' || upper.includes('OTHER')) return 4;
       if (upper.startsWith('[')) return 2;
       return 1;
     };
@@ -73,14 +74,26 @@ export default function CityGroupView({
       return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     });
 
-    const resultGroups: CityCategoryGroup[] = sortedKeys.map((key) => ({
-      key,
-      label: key,
-      isUncategorized: false,
-      items: map.get(key)!,
-    }));
+    const resultGroups: CityCategoryGroup[] = sortedKeys.map((key) => {
+      const groupItems = (map.get(key) || []).sort((a, b) => {
+        const nameA = a.long_name || a.name || a.short_name || '';
+        const nameB = b.long_name || b.name || b.short_name || '';
+        return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+      });
+      return {
+        key,
+        label: key,
+        isUncategorized: false,
+        items: groupItems,
+      };
+    });
 
     if (uncategorizedItems.length > 0) {
+      uncategorizedItems.sort((a, b) => {
+        const nameA = a.long_name || a.name || a.short_name || '';
+        const nameB = b.long_name || b.name || b.short_name || '';
+        return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+      });
       resultGroups.push({
         key: '__uncategorized__',
         label: 'Uncategorized',
@@ -96,6 +109,38 @@ export default function CityGroupView({
         label: `${g.label} (${g.items.length})`,
       })),
     };
+  }, [items]);
+
+  // Sort all items by region (categories), with REMOVE always at the end
+  const sortedAllItems = useMemo(() => {
+    const getCategoryRank = (key: string): number => {
+      if (!key) return 5;
+      const upper = key.trim().toUpperCase();
+      if (upper === '[REMOVE]' || upper === 'REMOVE' || upper.includes('REMOVE')) return 6;
+      if (upper === '[OTHER]' || upper === 'OTHER' || upper === '[OTHERS]' || upper === 'OTHERS' || upper.includes('OTHER')) return 4;
+      if (upper.startsWith('[')) return 2;
+      return 1;
+    };
+
+    return [...items].sort((a, b) => {
+      const catA = (a.categories || '').trim();
+      const catB = (b.categories || '').trim();
+
+      const rankA = getCategoryRank(catA);
+      const rankB = getCategoryRank(catB);
+      if (rankA !== rankB) {
+        return rankA - rankB;
+      }
+
+      if (catA && catB && catA !== catB) {
+        const catCmp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
+        if (catCmp !== 0) return catCmp;
+      }
+
+      const nameA = a.long_name || a.name || a.short_name || '';
+      const nameB = b.long_name || b.name || b.short_name || '';
+      return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+    });
   }, [items]);
 
   if (loading) {
@@ -119,7 +164,7 @@ export default function CityGroupView({
   if (groups.length <= 1) {
     return (
       <CardGrid
-        items={items}
+        items={sortedAllItems}
         type="city"
         onNavigate={onNavigate}
         onEdit={onEdit}
@@ -201,9 +246,9 @@ export default function CityGroupView({
           />
         </div>
       ) : (
-        /* All Regions: do not group, render single unified grid */
+        /* All Regions: do not group, render single unified grid sorted by region */
         <CardGrid
-          items={items}
+          items={sortedAllItems}
           type="city"
           onNavigate={onNavigate}
           onEdit={onEdit}

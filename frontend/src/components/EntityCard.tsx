@@ -286,7 +286,7 @@ export default function EntityCard({
       if (count <= 0) return null;
 
       return (
-        <Tooltip title={`Nations: ${count}`}>
+        <Tooltip title={`Nations: ${count}`} trigger="hover" destroyTooltipOnHide>
           <Button
             type="text"
             shape="circle"
@@ -294,6 +294,7 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
+              (e.currentTarget as HTMLElement)?.blur();
               router.push(data.id ? `/nation?confedId=${data.id}` : '/nation');
             }}
           />
@@ -305,7 +306,7 @@ export default function EntityCard({
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
 
       return (
-        <Tooltip title={`Details`}>
+        <Tooltip title={`Details`} trigger="hover" destroyTooltipOnHide>
           <Button
             type="text"
             shape="circle"
@@ -313,6 +314,7 @@ export default function EntityCard({
             icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
+              (e.currentTarget as HTMLElement)?.blur();
               if (data.id) {
                 router.push(`/nation/${data.id}`);
               } else {
@@ -342,7 +344,7 @@ export default function EntityCard({
       return (
         <div className="flex items-center gap-0.5">
           {hasChildren && (
-            <Tooltip title={`Sub-Competitions (${childrenCnt})`}>
+            <Tooltip title={`Sub-Competitions (${childrenCnt})`} trigger="hover" destroyTooltipOnHide>
               <Button
                 type="text"
                 shape="circle"
@@ -350,13 +352,14 @@ export default function EntityCard({
                 icon={<ApartmentOutlined style={{ color: '#d97706', fontSize: 13 }} />}
                 onClick={(e) => {
                   e.stopPropagation();
+                  (e.currentTarget as HTMLElement)?.blur();
                   onViewChildren?.(data);
                 }}
               />
             </Tooltip>
           )}
           {(hasClubs || hasAwards) && (
-            <Tooltip title={titleParts.join(' | ')}>
+            <Tooltip title={titleParts.join(' | ')} trigger="hover" destroyTooltipOnHide>
               <Button
                 type="text"
                 shape="circle"
@@ -364,6 +367,7 @@ export default function EntityCard({
                 icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
                 onClick={(e) => {
                   e.stopPropagation();
+                  (e.currentTarget as HTMLElement)?.blur();
                   if (onNavigate) {
                     handleNavigateAction();
                   } else if (data.id) {
@@ -390,18 +394,18 @@ export default function EntityCard({
           }
           handleNavigateAction();
         }}
-        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
+        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg px-3 py-2 sm:px-3.5 sm:py-2.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
           isNavigable ? 'cursor-pointer' : ''
         }`}
       >
       <div>
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between gap-1 pb-2 sm:pb-2.5 mb-2 sm:mb-2.5 border-b border-gray-100">
+        <div className="flex items-center justify-between gap-1 pb-1.5 mb-1.5 border-b border-gray-100">
           <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 flex-wrap">
             {/* Nation in Header: flag + nation_3letter (before ID) */}
             {nationInfo && (
               <Tooltip title={nationInfo.name || 'Nation'}>
-                <div className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-xs text-slate-600 transition-colors">
+                <div className="flex items-center gap-1 shrink-0 px-1.5 py-0 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-xs text-slate-600 transition-colors">
                   <img
                     src={getNationLogoUrl(nationInfo.id, nationInfo.code)}
                     alt={nationInfo.name || 'Nation'}
@@ -436,7 +440,7 @@ export default function EntityCard({
                       : 'geekblue'
                     : 'blue'
                 }
-                className="font-bold text-xs m-0 shrink-0"
+                className="font-bold text-[11px] sm:text-xs m-0 shrink-0 leading-tight px-1.5 py-0"
               >
                 {data.id}
               </Tag>
@@ -491,25 +495,25 @@ export default function EntityCard({
         </div>
 
         {/* Fields List formatted as [label]: {value} */}
-        <div className="space-y-1 mb-2 text-xs">
+        <div className="space-y-1 mb-1 text-xs">
           {type === 'player' || type === EntityType.PLAYER ? (
             <>
               <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">FN:</span>
-                <span className="font-bold text-[13px] leading-5 truncate text-gray-800">
+                <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">FN:</span>
+                <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-800">
                   {data.first_name || '-'}
                 </span>
               </div>
               <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">SN:</span>
-                <span className="font-bold text-[13px] leading-5 truncate text-gray-800">
+                <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">SN:</span>
+                <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-800">
                   {data.second_name || '-'}
                 </span>
               </div>
               {data.common_name && (
                 <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">CN:</span>
-                  <span className="font-bold text-[13px] leading-5 truncate text-gray-700 italic">
+                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">CN:</span>
+                  <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-700 italic">
                     {data.common_name}
                   </span>
                 </div>
@@ -518,9 +522,9 @@ export default function EntityCard({
           ) : type === 'city' || type === EntityType.CITY || type === 'stadium' || type === EntityType.STADIUM ? (
             <>
               <div className="flex items-start gap-1.5 min-w-0">
-                <span className="w-12 text-gray-400 font-medium text-xs shrink-0 select-none pt-0.5">Name:</span>
+                <span className="w-10 sm:w-12 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none pt-0.5">Name:</span>
                 <span
-                  className={`font-bold text-[13px] leading-[18px] line-clamp-2 break-words ${
+                  className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words ${
                     isTitleInactive ? 'text-red-600' : 'text-gray-800'
                   }`}
                   style={{
@@ -537,9 +541,9 @@ export default function EntityCard({
               </div>
               {data.categories && (
                 <div className="flex items-start gap-1.5 min-w-0 mt-1">
-                  <span className="w-12 text-gray-400 font-medium text-xs shrink-0 select-none pt-0.5">Region:</span>
+                  <span className="w-10 sm:w-12 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none pt-0.5">Region:</span>
                   <span
-                    className="font-bold text-[13px] leading-[18px] line-clamp-2 break-words text-gray-800"
+                    className="font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words text-gray-800"
                     style={{
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -558,9 +562,9 @@ export default function EntityCard({
             <>
               {/* LN */}
               <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">LN:</span>
+                <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">LN:</span>
                 <span
-                  className={`font-bold text-[13px] leading-5 truncate ${
+                  className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
                     isTitleInactive ? 'text-red-600' : 'text-gray-800'
                   }`}
                 >
@@ -571,9 +575,9 @@ export default function EntityCard({
               {/* SN */}
               {(hasThreeLetter || data.short_name || data.is_virtual) && (
                 <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">SN:</span>
+                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">SN:</span>
                   <span
-                    className={`font-bold text-[13px] leading-5 truncate ${
+                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
                       isInactive('short_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
@@ -585,9 +589,9 @@ export default function EntityCard({
               {/* 6N */}
               {(type === 'club' || type === EntityType.CLUB || data.six_letter_name) && (
                 <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">6N:</span>
+                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">6N:</span>
                   <span
-                    className={`font-bold text-[13px] leading-5 truncate ${
+                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
                       isInactive('six_letter_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
@@ -599,9 +603,9 @@ export default function EntityCard({
               {/* 3N */}
               {(hasThreeLetter || data.three_letter_name || data.is_virtual) && (
                 <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">3N:</span>
+                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">3N:</span>
                   <span
-                    className={`font-bold text-[13px] leading-5 truncate ${
+                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
                       isInactive('three_letter_name') ? 'text-red-600' : 'text-gray-800'
                     }`}
                   >
@@ -613,8 +617,8 @@ export default function EntityCard({
               {/* Stage Type */}
               {(type === 'stage' || type === EntityType.STAGE) && (
                 <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">Type:</span>
-                  <span className="font-bold text-[13px] leading-5 truncate text-gray-800">Tournament Stage</span>
+                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">Type:</span>
+                  <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-800">Tournament Stage</span>
                 </div>
               )}
             </>
@@ -623,10 +627,10 @@ export default function EntityCard({
           {/* Category for other types */}
           {type !== 'city' && data.categories && (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="w-14 text-gray-400 font-medium text-xs shrink-0 select-none">Category:</span>
+              <span className="w-14 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">Category:</span>
               <div className="flex items-center gap-1 flex-wrap">
                 {data.categories.split(',').map((cat: string, idx: number) => (
-                  <Tag color="cyan" key={idx} className="m-0 text-xs font-normal">
+                  <Tag color="cyan" key={idx} className="m-0 text-[10.5px] sm:text-xs font-normal">
                     {cat.trim()}
                   </Tag>
                 ))}
@@ -634,12 +638,10 @@ export default function EntityCard({
             </div>
           )}
 
-
-
           {/* Note */}
           {data.note && (
-            <div className="flex items-baseline gap-1.5 text-xs text-gray-500 min-w-0">
-              <span className="w-8 text-gray-400 font-medium text-xs shrink-0 select-none">Note:</span>
+            <div className="flex items-baseline gap-1.5 text-[11px] sm:text-xs text-gray-500 min-w-0">
+              <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">Note:</span>
               <span className="truncate text-gray-600" title={data.note}>{data.note}</span>
             </div>
           )}
@@ -647,11 +649,16 @@ export default function EntityCard({
       </div>
 
       {/* Card Footer: Action Buttons (Eye, Info, Edit, Delete) */}
-      <div className="pt-2 mt-auto border-t border-gray-100 flex items-center justify-end gap-0.5">
+      <div className="pt-1 mt-auto border-t border-gray-100 flex items-center justify-end gap-0.5">
         {renderChildButtons()}
 
         {/* Info button on EVERY card */}
-        <Tooltip title="Info">
+        <Tooltip
+          title="Info"
+          trigger="hover"
+          destroyTooltipOnHide
+          open={isInfoOpen ? false : undefined}
+        >
           <Button
             type="text"
             shape="circle"
@@ -659,6 +666,7 @@ export default function EntityCard({
             icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
             onClick={(e) => {
               e.stopPropagation();
+              (e.currentTarget as HTMLElement)?.blur();
               setModalMode('view');
               setIsInfoOpen(true);
             }}
@@ -668,7 +676,12 @@ export default function EntityCard({
         {(canEdit || canDelete) && (
           <div className="flex items-center gap-0.5 shrink-0">
             {canEdit && (
-              <Tooltip title="Edit">
+              <Tooltip
+                title="Edit"
+                trigger="hover"
+                destroyTooltipOnHide
+                open={isInfoOpen ? false : undefined}
+              >
                 <Button
                   type="text"
                   shape="circle"
@@ -676,6 +689,7 @@ export default function EntityCard({
                   icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
                   onClick={(e) => {
                     e.stopPropagation();
+                    (e.currentTarget as HTMLElement)?.blur();
                     setModalMode('edit');
                     setIsInfoOpen(true);
                   }}
@@ -691,14 +705,17 @@ export default function EntityCard({
                 cancelText="Cancel"
                 okButtonProps={{ danger: true }}
               >
-                <Tooltip title="Delete">
+                <Tooltip title="Delete" trigger="hover" destroyTooltipOnHide>
                   <Button
                     type="text"
                     shape="circle"
                     size="small"
                     danger
                     icon={<DeleteOutlined style={{ fontSize: 13 }} />}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      (e.currentTarget as HTMLElement)?.blur();
+                    }}
                   />
                 </Tooltip>
               </Popconfirm>

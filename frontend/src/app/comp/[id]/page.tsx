@@ -319,9 +319,9 @@ export default function CompetitionDetailPage() {
       {
         key: 'CLUBS',
         label: (
-          <Space size={4}>
+          <Space size={4} title="Clubs">
             <SafetyOutlined className="text-blue-500" />
-            <span className={activeTab === 'CLUBS' ? 'font-bold' : ''}>Clubs</span>
+            <span className={`hidden sm:inline ${activeTab === 'CLUBS' ? 'font-bold' : ''}`}>Clubs</span>
             <Badge
               count={clubs.length}
               overflowCount={99999}
@@ -336,9 +336,9 @@ export default function CompetitionDetailPage() {
       list.push({
         key: 'AWARDS',
         label: (
-          <Space size={4}>
+          <Space size={4} title="Awards">
             <StarOutlined className="text-yellow-500" />
-            <span className={activeTab === 'AWARDS' ? 'font-bold' : ''}>Awards</span>
+            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>Awards</span>
             <Badge
               count={awards.length}
               overflowCount={99999}
@@ -353,9 +353,9 @@ export default function CompetitionDetailPage() {
         list.push({
           key: 'SUB_COMPS',
           label: (
-            <Space size={4}>
+            <Space size={4} title="Sub-Competitions">
               <TrophyOutlined className="text-amber-500" />
-              <span className={activeTab === 'SUB_COMPS' ? 'font-bold' : ''}>Sub-Competitions</span>
+              <span className={`hidden sm:inline ${activeTab === 'SUB_COMPS' ? 'font-bold' : ''}`}>Sub-Competitions</span>
               <Badge
                 count={subComps.length}
                 overflowCount={99999}
@@ -541,12 +541,21 @@ export default function CompetitionDetailPage() {
                   }
                 }}
                 className="bg-blue-600 shrink-0"
+                title={
+                  activeTab === 'CLUBS'
+                    ? 'Add Club'
+                    : activeTab === 'AWARDS'
+                    ? 'Add Award'
+                    : 'Add Sub-Competition'
+                }
               >
-                {activeTab === 'CLUBS'
-                  ? 'Add Club'
-                  : activeTab === 'AWARDS'
-                  ? 'Add Award'
-                  : 'Add Sub-Competition'}
+                <span className="hidden sm:inline">
+                  {activeTab === 'CLUBS'
+                    ? 'Add Club'
+                    : activeTab === 'AWARDS'
+                    ? 'Add Award'
+                    : 'Add Sub-Competition'}
+                </span>
               </Button>
             </div>
           </div>

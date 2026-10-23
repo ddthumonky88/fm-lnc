@@ -237,9 +237,9 @@ export default function NationDetailPage() {
       {
         key: 'DOMESTIC_COMPS',
         label: (
-          <Space size={4}>
+          <Space size={4} title="Competitions">
             <TrophyOutlined className="text-amber-500" />
-            <span className={activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}>Competitions</span>
+            <span className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}>Competitions</span>
             <Badge
               count={nationHub?.counts?.domesticComps || 0}
               overflowCount={99999}
@@ -251,9 +251,9 @@ export default function NationDetailPage() {
       {
         key: 'STADIUMS',
         label: (
-          <Space size={4}>
+          <Space size={4} title="Stadiums">
             <BankOutlined className="text-emerald-500" />
-            <span className={activeTab === 'STADIUMS' ? 'font-bold' : ''}>Stadiums</span>
+            <span className={`hidden sm:inline ${activeTab === 'STADIUMS' ? 'font-bold' : ''}`}>Stadiums</span>
             <Badge
               count={nationHub?.counts?.stadiums || 0}
               overflowCount={99999}
@@ -265,9 +265,9 @@ export default function NationDetailPage() {
       {
         key: 'CITIES',
         label: (
-          <Space size={4}>
+          <Space size={4} title="Cities">
             <EnvironmentOutlined className="text-indigo-500" />
-            <span className={activeTab === 'CITIES' ? 'font-bold' : ''}>Cities</span>
+            <span className={`hidden sm:inline ${activeTab === 'CITIES' ? 'font-bold' : ''}`}>Cities</span>
             <Badge
               count={nationHub?.counts?.cities || 0}
               overflowCount={99999}
@@ -282,9 +282,9 @@ export default function NationDetailPage() {
       list.push({
         key: 'AWARDS',
         label: (
-          <Space size={4}>
+          <Space size={4} title="Awards">
             <StarOutlined className="text-yellow-500" />
-            <span className={activeTab === 'AWARDS' ? 'font-bold' : ''}>Awards</span>
+            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>Awards</span>
             <Badge
               count={nationHub?.counts?.awards || 0}
               overflowCount={99999}
@@ -396,8 +396,9 @@ export default function NationDetailPage() {
                     icon={<PlusOutlined />}
                     className="shrink-0 bg-blue-600"
                     onClick={() => openRecordModal(RecordType.COMPETITION, null, nationId)}
+                    title="Add Competition"
                   >
-                    Add Competition
+                    <span className="hidden sm:inline">Add Competition</span>
                   </Button>
                 </div>
               }
@@ -424,8 +425,9 @@ export default function NationDetailPage() {
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() => openRecordModal(RecordType.STADIUM, null, nationId)}
+                    title="Add Stadium"
                   >
-                    Add Stadium
+                    <span className="hidden sm:inline">Add Stadium</span>
                   </Button>
                 </div>
               </div>
@@ -465,8 +467,9 @@ export default function NationDetailPage() {
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() => openRecordModal(RecordType.CITY, null, nationId)}
+                    title="Add City"
                   >
-                    Add City
+                    <span className="hidden sm:inline">Add City</span>
                   </Button>
                 </div>
               }
@@ -493,8 +496,9 @@ export default function NationDetailPage() {
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() => openRecordModal(RecordType.AWARD, null, nationId)}
+                    title="Add Award"
                   >
-                    Add Award
+                    <span className="hidden sm:inline">Add Award</span>
                   </Button>
                 </div>
               </div>

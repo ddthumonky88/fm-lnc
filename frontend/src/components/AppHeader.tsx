@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Button,
   Dropdown,
@@ -73,6 +73,26 @@ export default function AppHeader({
   headerLogo,
 }: AppHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const [isMobileBreadcrumbsOpen, setIsMobileBreadcrumbsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileBreadcrumbsOpen(false);
+  }, [pathname, breadcrumbs]);
+
+  const effectiveBreadcrumbs: BreadcrumbStep[] = useMemo(() => {
+    if (breadcrumbs && breadcrumbs.length > 0) {
+      return breadcrumbs;
+    }
+    if (currentStepTitle && currentStepTitle !== 'HOME' && currentStepTitle !== 'Confederations & Nations') {
+      return [
+        { title: 'HOME', href: '/' },
+        { title: currentStepTitle },
+      ];
+    }
+    return [];
+  }, [breadcrumbs, currentStepTitle]);
+
   // Quick Add Dropdown Menu items
   const quickAddItems: MenuProps['items'] = [
     {
@@ -194,61 +214,105 @@ export default function AppHeader({
   ];
 
   return (
-    <header className="sticky top-0 z-30 h-14 sm:h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs px-2.5 sm:px-6 flex items-center justify-between gap-1.5 sm:gap-3 transition-all">
-      {/* Left Section: Sidebar Toggle & Breadcrumb Context */}
-      <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-        {/* Desktop Sidebar Toggle */}
-        <Tooltip title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}>
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all">
+      {/* Main Header Row */}
+      <div className="h-14 sm:h-16 px-2.5 sm:px-6 flex items-center justify-between gap-1.5 sm:gap-3">
+        {/* Left Section: Sidebar Toggle */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Desktop Sidebar Toggle */}
+          <Tooltip title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}>
+            <button
+              type="button"
+              onClick={onToggleSidebar}
+              className="hidden lg:flex items-center justify-center w-8 h-8 rounded text-slate-700 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Toggle Sidebar"
+            >
+              <MenuOutlined className="text-lg" />
+            </button>
+          </Tooltip>
+
+          {/* Mobile Hamburger Button */}
           <button
             type="button"
-            onClick={onToggleSidebar}
-            className="hidden lg:flex items-center justify-center w-8 h-8 rounded text-slate-700 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
-            aria-label="Toggle Sidebar"
+            onClick={onToggleMobileMenu}
+            className="flex lg:hidden items-center justify-center w-8 h-8 rounded text-slate-700 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+            aria-label="Open Navigation Menu"
           >
-            <MenuOutlined className="text-lg" />
+            <MenuOutlined className="text-base sm:text-lg" />
           </button>
-        </Tooltip>
+        </div>
 
-        {/* Mobile Hamburger Button */}
-        <button
-          type="button"
-          onClick={onToggleMobileMenu}
-          className="flex lg:hidden items-center justify-center w-8 h-8 rounded text-slate-700 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
-          aria-label="Open Navigation Menu"
-        >
-          <MenuOutlined className="text-base sm:text-lg" />
-        </button>
+        {/* Center Section: Quick Search Bar */}
+        <div className="flex-1 max-w-[140px] xs:max-w-[200px] sm:max-w-md mx-auto">
+          <button
+            type="button"
+            onClick={onOpenSearchModal}
+            className="w-full h-8 sm:h-9 px-2 sm:px-3 rounded-lg bg-slate-50 hover:bg-slate-100/90 border border-slate-200 hover:border-blue-400/60 flex items-center justify-between text-xs sm:text-sm text-slate-500 hover:text-slate-700 transition-all cursor-pointer group shadow-2xs"
+          >
+            <div className="flex items-center gap-1.5 sm:gap-2 truncate">
+              <SearchOutlined className="text-slate-400 group-hover:text-blue-600 transition-colors text-xs sm:text-sm shrink-0" />
+              <span className="truncate hidden sm:inline">Search club, comp, nation, ID...</span>
+              <span className="truncate sm:hidden">Search...</span>
+            </div>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 bg-white rounded border border-slate-200 shadow-2xs group-hover:border-slate-300">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </button>
+        </div>
 
-        {/* Compact Clean Breadcrumbs: HOME > {CONFEDERATION} > {NATION} > {COMP} */}
-        {breadcrumbs && breadcrumbs.length > 0 ? (
-          <div className="flex items-center gap-1 text-[11px] sm:text-[13px] font-bold uppercase tracking-tight min-w-0">
-            {breadcrumbs.map((crumb, idx) => {
-              const isLast = idx === breadcrumbs.length - 1;
+        {/* Right Section: Actions Dropdown (Export, Sync, Refresh, Quick Add) */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Dropdown
+            menu={{ items: actionMenuItems }}
+            placement="bottomRight"
+            trigger={['click']}
+          >
+            <Button
+              type="primary"
+              icon={<DownloadOutlined className="text-sm" />}
+              loading={isSyncing || isRefreshing}
+              className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2.5 sm:px-3 h-8 sm:h-9 flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+              title="Export & Sync Menu"
+            >
+              <span className="text-xs sm:text-sm font-semibold hidden sm:inline">Export / Sync</span>
+              <DownOutlined className="text-[9px] text-blue-200 ml-0.5" />
+            </Button>
+          </Dropdown>
+        </div>
+      </div>
+
+      {/* Dedicated Breadcrumbs Bar (below main header) */}
+      {effectiveBreadcrumbs.length > 1 && (
+        <div className="bg-white border-t border-slate-100 px-3 sm:px-6 py-1.5 sm:py-2 transition-all">
+          {/* Desktop Breadcrumbs: full horizontal path (sm and up) */}
+          <div className="hidden sm:flex items-center gap-1.5 text-xs sm:text-[13px] font-bold uppercase tracking-tight flex-wrap">
+            {effectiveBreadcrumbs.map((crumb, idx) => {
+              const isLast = idx === effectiveBreadcrumbs.length - 1;
               return (
                 <React.Fragment key={idx}>
                   {idx > 0 && (
                     <span className="text-[#1d70b8] font-bold select-none px-0.5">&gt;</span>
                   )}
                   {isLast ? (
-                    <span className="font-bold text-[#0f3b6c] whitespace-nowrap truncate max-w-[80px] xs:max-w-[120px] sm:max-w-[200px]">
+                    <span className="font-bold text-[#0f3b6c] whitespace-nowrap">
                       {crumb.title}
                     </span>
                   ) : crumb.href ? (
                     <a
                       onClick={() => router.push(crumb.href!)}
-                      className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap truncate max-w-[60px] xs:max-w-[90px] sm:max-w-none"
+                      className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap"
                     >
                       {crumb.title}
                     </a>
                   ) : crumb.onClick ? (
                     <a
                       onClick={crumb.onClick}
-                      className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap truncate max-w-[60px] xs:max-w-[90px] sm:max-w-none"
+                      className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap"
                     >
                       {crumb.title}
                     </a>
                   ) : (
-                    <span className="text-[#1d70b8] font-bold whitespace-nowrap truncate max-w-[60px] xs:max-w-[90px] sm:max-w-none">
+                    <span className="text-[#1d70b8] font-bold whitespace-nowrap">
                       {crumb.title}
                     </span>
                   )}
@@ -256,58 +320,68 @@ export default function AppHeader({
               );
             })}
           </div>
-        ) : (
-          <div className="flex items-center gap-1 text-[11px] sm:text-[13px] font-bold uppercase tracking-tight text-[#1d70b8] shrink-0">
-            <span>HOME</span>
-            {currentStepTitle && currentStepTitle !== 'HOME' && (
-              <>
-                <span className="text-[#1d70b8] font-bold select-none px-0.5">&gt;</span>
-                <span className="text-[#0f3b6c] font-bold truncate max-w-[100px] xs:max-w-[160px] xl:max-w-[320px]">
-                  {currentStepTitle}
-                </span>
-              </>
+
+          {/* Mobile Breadcrumbs Sub-bar (sm:hidden) */}
+          <div className="sm:hidden">
+            <button
+              type="button"
+              onClick={() => setIsMobileBreadcrumbsOpen((prev) => !prev)}
+              className="w-full text-[#1d70b8] hover:text-[#0f3b6c] text-[11px] font-semibold tracking-wide uppercase cursor-pointer flex items-center justify-between select-none"
+            >
+              <span>{isMobileBreadcrumbsOpen ? 'HIDE BREADCRUMBS' : 'VIEW BREADCRUMBS'}</span>
+              <DownOutlined
+                className={`text-[9px] text-[#1d70b8] transition-transform duration-200 ${
+                  isMobileBreadcrumbsOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {isMobileBreadcrumbsOpen && (
+              <div className="mt-2 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1 text-[11px] font-bold uppercase tracking-tight">
+                {effectiveBreadcrumbs.map((crumb, idx) => {
+                  const isLast = idx === effectiveBreadcrumbs.length - 1;
+                  return (
+                    <React.Fragment key={idx}>
+                      {idx > 0 && (
+                        <span className="text-[#1d70b8] font-bold select-none px-0.5">&gt;</span>
+                      )}
+                      {isLast ? (
+                        <span className="font-bold text-[#0f3b6c] break-all">
+                          {crumb.title}
+                        </span>
+                      ) : crumb.href ? (
+                        <a
+                          onClick={() => {
+                            router.push(crumb.href!);
+                            setIsMobileBreadcrumbsOpen(false);
+                          }}
+                          className="text-[#1d70b8] hover:underline font-bold cursor-pointer"
+                        >
+                          {crumb.title}
+                        </a>
+                      ) : crumb.onClick ? (
+                        <a
+                          onClick={() => {
+                            crumb.onClick!();
+                            setIsMobileBreadcrumbsOpen(false);
+                          }}
+                          className="text-[#1d70b8] hover:underline font-bold cursor-pointer"
+                        >
+                          {crumb.title}
+                        </a>
+                      ) : (
+                        <span className="text-[#1d70b8] font-bold">
+                          {crumb.title}
+                        </span>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
             )}
           </div>
-        )}
-      </div>
-
-      {/* Center Section: Quick Search Bar */}
-      <div className="flex-1 max-w-[140px] xs:max-w-[200px] sm:max-w-md mx-auto">
-        <button
-          type="button"
-          onClick={onOpenSearchModal}
-          className="w-full h-8 sm:h-9 px-2 sm:px-3 rounded-lg bg-slate-50 hover:bg-slate-100/90 border border-slate-200 hover:border-blue-400/60 flex items-center justify-between text-xs sm:text-sm text-slate-500 hover:text-slate-700 transition-all cursor-pointer group shadow-2xs"
-        >
-          <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-            <SearchOutlined className="text-slate-400 group-hover:text-blue-600 transition-colors text-xs sm:text-sm shrink-0" />
-            <span className="truncate hidden sm:inline">Search club, comp, nation, ID...</span>
-            <span className="truncate sm:hidden">Search...</span>
-          </div>
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 bg-white rounded border border-slate-200 shadow-2xs group-hover:border-slate-300">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </button>
-      </div>
-
-      {/* Right Section: Actions Dropdown (Export, Sync, Refresh, Quick Add) */}
-      <div className="flex items-center gap-2 shrink-0">
-        <Dropdown
-          menu={{ items: actionMenuItems }}
-          placement="bottomRight"
-          trigger={['click']}
-        >
-          <Button
-            type="primary"
-            icon={<DownloadOutlined className="text-sm" />}
-            loading={isSyncing || isRefreshing}
-            className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2.5 sm:px-3 h-8 sm:h-9 flex items-center gap-1 sm:gap-1.5 cursor-pointer"
-            title="Export & Sync Menu"
-          >
-            <span className="text-xs sm:text-sm font-semibold hidden sm:inline">Export / Sync</span>
-            <DownOutlined className="text-[9px] text-blue-200 ml-0.5" />
-          </Button>
-        </Dropdown>
-      </div>
+        </div>
+      )}
     </header>
   );
 }

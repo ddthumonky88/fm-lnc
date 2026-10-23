@@ -310,109 +310,37 @@ export default function RecordDetailModal({
         </div>
       )}
       width="100%"
-      style={{ maxWidth: 600 }}
+      style={{ maxWidth: 560 }}
       destroyOnHidden
       centered
-      className="mobile-modal-edge w-full max-w-full sm:max-w-[600px] mx-auto"
+      className="w-full max-w-[calc(100vw-32px)] sm:max-w-[560px] mx-auto"
       title={
-        <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 pr-6">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            {/* Main Flag or Logo / Icon */}
-            {isNation && nationId ? (
-              <img
-                src={getNationLogoUrl(nationId, nationCode)}
-                alt={title}
-                className="w-10 sm:w-12 h-7 sm:h-8 object-cover rounded shadow-xs border border-slate-200/90 bg-white shrink-0"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : isConfed ? (
-              <img
-                src={getConfederationLogoUrl(currentData.id)}
-                alt={currentData.name || 'Confederation'}
-                className="w-8 sm:w-9 h-8 sm:h-9 object-contain rounded-lg p-1 bg-white shadow-xs border border-slate-200 shrink-0"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div
-                className={`w-8 sm:w-9 h-8 sm:h-9 rounded-lg flex items-center justify-center text-sm sm:text-base shrink-0 border ${
-                  isComp
-                    ? 'bg-amber-50 border-amber-200/70 text-amber-600'
-                    : isClub
-                    ? 'bg-blue-50 border-blue-200/70 text-blue-600'
-                    : isPlayer
-                    ? 'bg-purple-50 border-purple-200/70 text-purple-600'
-                    : 'bg-slate-100 border border-slate-200 text-slate-700'
-                }`}
-              >
-                {getTypeIcon()}
-              </div>
-            )}
-
-            {/* Title and Header Badges */}
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-sm sm:text-base text-slate-900 truncate m-0 leading-tight">
-                {mode === 'create' ? `Add New ${getTypeLabel()}` : mode === 'edit' ? `Edit: ${title}` : title}
-              </h3>
-              <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
-                {/* FM ID */}
-                {!isCreate && (
-                  <button
-                    type="button"
-                    onClick={handleCopyId}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors cursor-pointer group"
-                    title="Click to copy FM ID"
-                  >
-                    <span className="text-blue-400 font-medium">ID:</span>
-                    <span>{currentData.id}</span>
-                    {copied ? (
-                      <CheckOutlined className="text-emerald-600 text-[10px]" />
-                    ) : (
-                      <CopyOutlined className="text-blue-400 group-hover:text-blue-600 text-[10px]" />
-                    )}
-                  </button>
-                )}
-
-                {/* Type Badge */}
-                <Tag color={getTypeColor()} className="m-0 font-semibold text-[11px] border-0">
-                  {getTypeLabel()}
+        <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 pr-6 min-w-0">
+          {mode === 'create' ? (
+            <span className="font-bold text-sm sm:text-base text-slate-900">
+              Add New {getTypeLabel()}
+            </span>
+          ) : (
+            <>
+              {currentData.id !== undefined && currentData.id !== null && (
+                <Tag
+                  color="blue"
+                  className="font-mono font-bold text-xs sm:text-[13px] m-0 shrink-0 cursor-pointer hover:opacity-80"
+                  onClick={handleCopyId}
+                  title="Click to copy ID"
+                >
+                  {copied ? 'Copied!' : currentData.id}
                 </Tag>
-
-                {/* 3-Letter Code Badge */}
-                {nationCode && (
-                  <span className="px-1.5 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                    {nationCode}
+              )}
+              <span className="font-bold text-sm sm:text-base text-slate-900 truncate">
+                {title}
+                {currentData.short_name && currentData.short_name !== title && (
+                  <span className="text-slate-500 font-semibold ml-1">
+                    ({currentData.short_name})
                   </span>
                 )}
-              </div>
-            </div>
-          </div>
-
-          {/* Mode Switcher Toggle in Header */}
-          {canEdit && mode === 'view' && (
-            <Button
-              type="primary"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => setMode('edit')}
-              className="shrink-0 text-xs font-medium shadow-xs"
-            >
-              <span className="hidden sm:inline">Edit</span>
-            </Button>
-          )}
-
-          {canEdit && mode === 'edit' && !isCreate && (
-            <Button
-              size="small"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => setMode('view')}
-              className="shrink-0 text-xs font-medium"
-            >
-              <span className="hidden sm:inline">Details</span>
-            </Button>
+              </span>
+            </>
           )}
         </div>
       }
@@ -428,7 +356,7 @@ export default function RecordDetailModal({
                 className="font-medium px-3 sm:px-4 h-9 shadow-sm"
                 title="Edit"
               >
-                <span className="hidden sm:inline">Edit</span>
+                <span>Edit</span>
               </Button>
             )}
             <Button
@@ -473,7 +401,7 @@ export default function RecordDetailModal({
         )
       }
     >
-      <div className="py-2.5 max-h-[72vh] overflow-y-auto pr-1">
+      <div className="py-2.5 max-h-[70vh] overflow-y-auto pl-0.5 pr-3.5 sm:pr-4 modal-scroll-container">
         {errorMessage && (
           <div className="bg-red-50 text-red-600 border border-red-200 rounded p-2.5 text-xs mb-3">
             {errorMessage}
@@ -659,24 +587,8 @@ export default function RecordDetailModal({
                   Nation:
                 </span>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <img
-                    src={getNationLogoUrl(nationId, nationCode)}
-                    alt={nationName || 'Nation'}
-                    className="w-5 h-3.5 object-cover rounded-2xs border border-slate-300 shrink-0"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
                   <span className="font-bold text-[13px] text-slate-800 truncate">
                     {nationName}
-                  </span>
-                  {nationCode && (
-                    <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
-                      {nationCode}
-                    </span>
-                  )}
-                  <span className="text-xs text-slate-400 font-mono ml-auto shrink-0">
-                    ID: {nationId}
                   </span>
                 </div>
               </div>
@@ -878,7 +790,7 @@ export default function RecordDetailModal({
           </div>
         ) : (
           /* 2. EDIT / CREATE MODE: INLINE FORM */
-          <form onSubmit={handleSave} className="space-y-3.5">
+          <form onSubmit={handleSave} className="space-y-3.5 pr-1">
             {/* FM Unique ID */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">

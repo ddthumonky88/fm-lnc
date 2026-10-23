@@ -772,9 +772,9 @@ export default function LncSortitoutsiExplorer() {
                       {
                         key: 'NATIONS',
                         label: (
-                          <Space>
+                          <Space size={4} title="Countries">
                             <GlobalOutlined />
-                            <span>Countries</span>
+                            <span className="hidden sm:inline">Countries</span>
                             <Badge
                               count={currentConfed.totalNations}
                               overflowCount={99999}
@@ -786,9 +786,9 @@ export default function LncSortitoutsiExplorer() {
                       {
                         key: 'INT_COMPETITIONS',
                         label: (
-                          <Space>
+                          <Space size={4} title="International Competitions">
                             <TrophyOutlined />
-                            <span className="font-semibold">International Competitions</span>
+                            <span className="hidden sm:inline font-semibold">International Competitions</span>
                             <Badge
                               count={currentConfed.totalIntComps}
                               overflowCount={99999}
@@ -869,9 +869,9 @@ export default function LncSortitoutsiExplorer() {
                       {
                         key: 'NATIONS',
                         label: (
-                          <Space>
+                          <Space size={4} title="Countries">
                             <GlobalOutlined />
-                            <span className="font-semibold">Countries</span>
+                            <span className="hidden sm:inline font-semibold">Countries</span>
                             <Badge
                               count={currentConfed.totalNations}
                               overflowCount={99999}
@@ -883,9 +883,9 @@ export default function LncSortitoutsiExplorer() {
                       {
                         key: 'INT_COMPETITIONS',
                         label: (
-                          <Space>
+                          <Space size={4} title="International Competitions">
                             <TrophyOutlined />
-                            <span>International Competitions</span>
+                            <span className="hidden sm:inline">International Competitions</span>
                             <Badge
                               count={currentConfed.totalIntComps}
                               overflowCount={99999}
@@ -969,9 +969,9 @@ export default function LncSortitoutsiExplorer() {
                     items={visibleNationTabs.map((tab) => ({
                       key: tab.key,
                       label: (
-                        <Space size={4}>
+                        <Space size={4} title={tab.label}>
                           {tab.icon}
-                          <span className="font-semibold text-xs sm:text-sm">{tab.label}</span>
+                          <span className="hidden sm:inline font-semibold text-xs sm:text-sm">{tab.label}</span>
                           <Badge
                             count={tab.count}
                             overflowCount={99999}
@@ -1088,8 +1088,9 @@ export default function LncSortitoutsiExplorer() {
                                 setRecordModalType(currentRecordType);
                                 setIsRecordModalOpen(true);
                               }}
+                              title={currentNationTabObj?.addLabel || 'Add City'}
                             >
-                              {currentNationTabObj?.addLabel || 'Add City'}
+                              <span className="hidden sm:inline">{currentNationTabObj?.addLabel || 'Add City'}</span>
                             </Button>
                           </>
                         }
@@ -1251,8 +1252,11 @@ export default function LncSortitoutsiExplorer() {
                             setRecordModalType(currentRecordType);
                             setIsRecordModalOpen(true);
                           }}
+                          title={currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
                         >
-                          {currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
+                          <span className="hidden sm:inline">
+                            {currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
+                          </span>
                         </Button>
                       </div>
                     </div>
@@ -1286,22 +1290,41 @@ export default function LncSortitoutsiExplorer() {
                           setRecordModalType(currentRecordType);
                           setIsRecordModalOpen(true);
                         }}
+                        title={
+                          currentRecordType === RecordType.PLAYER
+                            ? 'Add Player'
+                            : currentRecordType === RecordType.STAGE
+                            ? 'Add Stage'
+                            : currentRecordType === RecordType.AWARD
+                            ? 'Add Award'
+                            : currentRecordType === RecordType.CLUB
+                            ? 'Add Club'
+                            : currentRecordType === RecordType.COMPETITION
+                            ? 'Add Competition'
+                            : currentRecordType === RecordType.STADIUM
+                            ? 'Add Stadium'
+                            : currentRecordType === RecordType.CITY
+                            ? 'Add City'
+                            : 'Add Record'
+                        }
                       >
-                        {currentRecordType === RecordType.PLAYER
-                          ? 'Add Player'
-                          : currentRecordType === RecordType.STAGE
-                          ? 'Add Stage'
-                          : currentRecordType === RecordType.AWARD
-                          ? 'Add Award'
-                          : currentRecordType === RecordType.CLUB
-                          ? 'Add Club'
-                          : currentRecordType === RecordType.COMPETITION
-                          ? 'Add Competition'
-                          : currentRecordType === RecordType.STADIUM
-                          ? 'Add Stadium'
-                          : currentRecordType === RecordType.CITY
-                          ? 'Add City'
-                          : 'Add Record'}
+                        <span className="hidden sm:inline">
+                          {currentRecordType === RecordType.PLAYER
+                            ? 'Add Player'
+                            : currentRecordType === RecordType.STAGE
+                            ? 'Add Stage'
+                            : currentRecordType === RecordType.AWARD
+                            ? 'Add Award'
+                            : currentRecordType === RecordType.CLUB
+                            ? 'Add Club'
+                            : currentRecordType === RecordType.COMPETITION
+                            ? 'Add Competition'
+                            : currentRecordType === RecordType.STADIUM
+                            ? 'Add Stadium'
+                            : currentRecordType === RecordType.CITY
+                            ? 'Add City'
+                            : 'Add Record'}
+                        </span>
                       </Button>
                     </div>
                   </div>
@@ -1338,8 +1361,9 @@ export default function LncSortitoutsiExplorer() {
                             setRecordModalType(currentRecordType);
                             setIsRecordModalOpen(true);
                           }}
+                          title="Add Competition"
                         >
-                          Add Competition
+                          <span className="hidden sm:inline">Add Competition</span>
                         </Button>
                       </>
                     }
@@ -1375,8 +1399,9 @@ export default function LncSortitoutsiExplorer() {
                             setRecordModalType(currentRecordType);
                             setIsRecordModalOpen(true);
                           }}
+                          title="Add City"
                         >
-                          Add City
+                          <span className="hidden sm:inline">Add City</span>
                         </Button>
                       </>
                     }

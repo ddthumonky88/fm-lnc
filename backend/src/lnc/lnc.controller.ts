@@ -18,7 +18,7 @@ import {
 import { Repository } from 'typeorm';
 
 @ApiTags('LNC')
-@Controller('api/lnc')
+@Controller(['api/lnc', 'api/fm'])
 export class LncController {
   constructor(
     private readonly lncService: LncService,

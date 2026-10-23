@@ -1,18 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  basePath: '/lnc',
+  basePath: '/fm',
   async redirects() {
     return [
       {
         source: '/',
-        destination: '/lnc',
+        destination: '/fm',
         basePath: false,
         permanent: false,
       },
       {
+        source: '/lnc',
+        destination: '/fm',
+        basePath: false,
+        permanent: true,
+      },
+      {
+        source: '/lnc/:path*',
+        destination: '/fm/:path*',
+        basePath: false,
+        permanent: true,
+      },
+      {
         source: '/confederation',
-        destination: '/lnc',
+        destination: '/fm',
         basePath: false,
         permanent: true,
       },

@@ -179,9 +179,11 @@ function ConfederationDetailContent() {
                 {
                   key: 'NATIONS',
                   label: (
-                    <Space size={4}>
+                    <Space size={4} title="Countries">
                       <GlobalOutlined />
-                      <span className={activeTab === 'NATIONS' ? 'font-semibold' : ''}>Countries</span>
+                      <span className={`hidden sm:inline ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}>
+                        Countries
+                      </span>
                       <Badge
                         count={nations.length}
                         overflowCount={99999}
@@ -195,9 +197,9 @@ function ConfederationDetailContent() {
                 {
                   key: 'INT_COMPETITIONS',
                   label: (
-                    <Space size={4}>
+                    <Space size={4} title="International Competitions">
                       <TrophyOutlined />
-                      <span className={activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}>
+                      <span className={`hidden sm:inline ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}>
                         International Competitions
                       </span>
                       <Badge
@@ -271,8 +273,9 @@ function ConfederationDetailContent() {
                         onClick={() => openRecordModal(RecordType.COMPETITION, null)}
                         style={{ backgroundColor: '#059669', borderColor: '#059669' }}
                         className="shrink-0"
+                        title="Add International Competition"
                       >
-                        Add International Competition
+                        <span className="hidden sm:inline">Add International Competition</span>
                       </Button>
                     </div>
                   }
