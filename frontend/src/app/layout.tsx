@@ -8,6 +8,7 @@ import AppLayout from '../components/AppLayout';
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
+  variable: '--font-inter',
   display: 'swap',
 });
 
@@ -28,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.className}>
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en" className={`${inter.className} ${inter.variable}`}>
+      <body className={`${inter.className} ${inter.variable} antialiased`}>
         <AntdRegistry>
           <ConfigProvider
             locale={enUS}
@@ -37,7 +38,7 @@ export default function RootLayout({
               token: {
                 colorPrimary: '#1d70b8',
                 borderRadius: 6,
-                fontFamily: inter.style.fontFamily,
+                fontFamily: `var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
               },
             }}
           >

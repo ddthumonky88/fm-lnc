@@ -138,9 +138,9 @@ export default function SubCompetitionsDrawer({
         onClose={onClose}
         open={isOpen}
         destroyOnClose
-        className="sub-competitions-drawer"
+        className="sub-competitions-drawer font-sans"
       >
-        <div className="flex flex-col h-full gap-3">
+        <div className="flex flex-col h-full gap-3 font-sans">
           {/* Sub-competitions List using shared EntityCard */}
           <div className="flex-1 overflow-y-auto pr-1">
             {loading && subComps.length === 0 ? (
