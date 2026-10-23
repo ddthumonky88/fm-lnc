@@ -390,7 +390,7 @@ export default function EntityCard({
           }
           handleNavigateAction();
         }}
-        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col group h-full ${
+        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
           isNavigable ? 'cursor-pointer' : ''
         }`}
       >
@@ -483,67 +483,11 @@ export default function EntityCard({
               </div>
             )}
           </div>
-
-          {/* Right Header: Child navigation (Eye) + Info button + Action buttons */}
-          <div className="flex items-center gap-0.5 shrink-0">
-            {renderChildButtons()}
-
-            {/* Info button on EVERY card */}
-            <Tooltip title="Info">
-              <Button
-                type="text"
-                shape="circle"
-                size="small"
-                icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setModalMode('view');
-                  setIsInfoOpen(true);
-                }}
-              />
-            </Tooltip>
-
-            {(canEdit || canDelete) && (
-              <div className="flex items-center gap-0.5 shrink-0">
-                {canEdit && (
-                  <Tooltip title="Edit">
-                    <Button
-                      type="text"
-                      shape="circle"
-                      size="small"
-                      icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setModalMode('edit');
-                        setIsInfoOpen(true);
-                      }}
-                    />
-                  </Tooltip>
-                )}
-                {canDelete && (
-                  <Popconfirm
-                    title="Delete Record"
-                    description={`Are you sure you want to delete "${title}"?`}
-                    onConfirm={() => onDelete(data)}
-                    okText="Delete"
-                    cancelText="Cancel"
-                    okButtonProps={{ danger: true }}
-                  >
-                    <Tooltip title="Delete">
-                      <Button
-                        type="text"
-                        shape="circle"
-                        size="small"
-                        danger
-                        icon={<DeleteOutlined style={{ fontSize: 13 }} />}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </Tooltip>
-                  </Popconfirm>
-                )}
-              </div>
-            )}
-          </div>
+          {data.is_extinct && (
+            <Tag color="red" className="m-0 text-[10px] font-semibold shrink-0">
+              Extinct
+            </Tag>
+          )}
         </div>
 
         {/* Fields List formatted as [label]: {value} */}
@@ -682,6 +626,67 @@ export default function EntityCard({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Card Footer: Action Buttons (Eye, Info, Edit, Delete) */}
+      <div className="pt-2 mt-auto border-t border-gray-100 flex items-center justify-end gap-0.5">
+        {renderChildButtons()}
+
+        {/* Info button on EVERY card */}
+        <Tooltip title="Info">
+          <Button
+            type="text"
+            shape="circle"
+            size="small"
+            icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalMode('view');
+              setIsInfoOpen(true);
+            }}
+          />
+        </Tooltip>
+
+        {(canEdit || canDelete) && (
+          <div className="flex items-center gap-0.5 shrink-0">
+            {canEdit && (
+              <Tooltip title="Edit">
+                <Button
+                  type="text"
+                  shape="circle"
+                  size="small"
+                  icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setModalMode('edit');
+                    setIsInfoOpen(true);
+                  }}
+                />
+              </Tooltip>
+            )}
+            {canDelete && (
+              <Popconfirm
+                title="Delete Record"
+                description={`Are you sure you want to delete "${title}"?`}
+                onConfirm={() => onDelete(data)}
+                okText="Delete"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true }}
+              >
+                <Tooltip title="Delete">
+                  <Button
+                    type="text"
+                    shape="circle"
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined style={{ fontSize: 13 }} />}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </Tooltip>
+              </Popconfirm>
+            )}
+          </div>
+        )}
       </div>
     </div>
 

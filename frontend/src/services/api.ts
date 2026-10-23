@@ -230,6 +230,34 @@ export async function fetchCompetitionInfo(compId: string, forceRefresh = false)
   return cachedFetch<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }>(`${getApiBase()}/hierarchy/competitions/${compId}/info`, forceRefresh);
 }
 
+export async function fetchConfederationInfo(confedId: string, forceRefresh = false): Promise<ConfederationItem & { totalNations: number; totalIntComps: number; totalComps: number; totalClubs: number; totalStadiums: number; totalCities: number; totalAwards: number }> {
+  return cachedFetch<any>(`${getApiBase()}/hierarchy/continents/${confedId}/info`, forceRefresh);
+}
+
+export async function fetchNationInfo(nationId: string, forceRefresh = false): Promise<NationItem & { counts: any }> {
+  return cachedFetch<any>(`${getApiBase()}/hierarchy/nations/${nationId}/info`, forceRefresh);
+}
+
+export async function fetchClubInfo(clubId: string, forceRefresh = false): Promise<ClubItem & { competition_name?: string; parent_competition_name?: string; nation_name?: string; nation_three_letter?: string }> {
+  return cachedFetch<any>(`${getApiBase()}/hierarchy/clubs/${clubId}/info`, forceRefresh);
+}
+
+export async function fetchCityInfo(cityId: string, forceRefresh = false): Promise<CityItem & { nation_name?: string; nation_three_letter?: string }> {
+  return cachedFetch<any>(`${getApiBase()}/hierarchy/cities/${cityId}/info`, forceRefresh);
+}
+
+export async function fetchAwardInfo(awardId: string, forceRefresh = false): Promise<AwardItem & { nation_name?: string; nation_three_letter?: string; competition_name?: string }> {
+  return cachedFetch<any>(`${getApiBase()}/hierarchy/awards/${awardId}/info`, forceRefresh);
+}
+
+export async function fetchStadiumInfo(stadiumId: string, forceRefresh = false): Promise<StadiumItem & { nation_name?: string; nation_three_letter?: string }> {
+  return cachedFetch<any>(`${getApiBase()}/hierarchy/stadiums/${stadiumId}/info`, forceRefresh);
+}
+
+export async function fetchEntityInfo(type: string, id: string, forceRefresh = false): Promise<any> {
+  return cachedFetch<any>(`${getApiBase()}/records/${type}/${id}/info`, forceRefresh);
+}
+
 export async function fetchSubCompetitions(compId: string, forceRefresh = false): Promise<CompetitionItem[]> {
   return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/sub-competitions`, forceRefresh);
 }

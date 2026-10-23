@@ -12,9 +12,11 @@ import {
 } from '../entities';
 import { RecordsService } from './records.service';
 import { RecordsController } from './records.controller';
+import { HierarchyModule } from '../hierarchy/hierarchy.module';
 
 @Module({
   imports: [
+    HierarchyModule,
     TypeOrmModule.forFeature([
       Nation,
       City,

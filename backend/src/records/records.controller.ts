@@ -1,11 +1,26 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { RecordsService, RecordType } from './records.service';
+import { HierarchyService } from '../hierarchy/hierarchy.service';
 
 @ApiTags('Records')
 @Controller('api/records')
 export class RecordsController {
-  constructor(private readonly recordsService: RecordsService) {}
+  constructor(
+    private readonly recordsService: RecordsService,
+    private readonly hierarchyService: HierarchyService,
+  ) {}
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết kèm quan hệ và số liệu của 1 bản ghi' })
+  @ApiParam({ name: 'type', description: 'Loại entity (confederation, nation, comp, club, city, award, stadium)' })
+  @ApiParam({ name: 'id', description: 'ID của bản ghi' })
+  @Get(':type/:id/info')
+  getInfo(
+    @Param('type') type: string,
+    @Param('id') id: string,
+  ) {
+    return this.hierarchyService.getEntityInfo(type, id);
+  }
 
   @ApiOperation({ summary: 'Lấy chi tiết 1 bản ghi' })
   @ApiParam({ name: 'type', description: 'Loại entity (nations, clubs, competitions, stadiums, cities, awards, people, stages)' })

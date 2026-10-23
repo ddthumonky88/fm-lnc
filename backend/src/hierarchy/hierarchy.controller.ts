@@ -81,12 +81,64 @@ export class HierarchyController {
     return this.hierarchyService.getAwardsByCompetition(id);
   }
 
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Confederation (Châu lục)' })
+  @ApiParam({ name: 'id', description: 'Confederation ID' })
+  @Get('continents/:id/info')
+  getContinentInfo(@Param('id') id: string) {
+    return this.hierarchyService.getContinentInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Confederation (Châu lục) - alias' })
+  @ApiParam({ name: 'id', description: 'Confederation ID' })
+  @Get('confederations/:id/info')
+  getConfederationInfo(@Param('id') id: string) {
+    return this.hierarchyService.getContinentInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Nation' })
+  @ApiParam({ name: 'id', description: 'Nation ID' })
+  @Get('nations/:id/info')
+  getNationInfo(@Param('id') id: string) {
+    return this.hierarchyService.getNationInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Club' })
+  @ApiParam({ name: 'id', description: 'Club ID' })
+  @Get('clubs/:id/info')
+  getClubInfo(@Param('id') id: string) {
+    return this.hierarchyService.getClubInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một City' })
+  @ApiParam({ name: 'id', description: 'City ID' })
+  @Get('cities/:id/info')
+  getCityInfo(@Param('id') id: string) {
+    return this.hierarchyService.getCityInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Award' })
+  @ApiParam({ name: 'id', description: 'Award ID' })
+  @Get('awards/:id/info')
+  getAwardInfo(@Param('id') id: string) {
+    return this.hierarchyService.getAwardInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Stadium' })
+  @ApiParam({ name: 'id', description: 'Stadium ID' })
+  @Get('stadiums/:id/info')
+  getStadiumInfo(@Param('id') id: string) {
+    return this.hierarchyService.getStadiumInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Competition' })
+  @ApiParam({ name: 'id', description: 'Competition ID' })
   @Get('competitions/:id/info')
   getCompetitionInfo(@Param('id') id: string) {
     return this.hierarchyService.getCompetitionInfo(id);
   }
 
   @ApiOperation({ summary: 'Lấy danh sách Sub-competitions trực thuộc giải đấu cha' })
+  @ApiParam({ name: 'id', description: 'Competition ID cha' })
   @Get('competitions/:id/sub-competitions')
   getSubCompetitions(@Param('id') id: string) {
     return this.hierarchyService.getSubCompetitions(id);

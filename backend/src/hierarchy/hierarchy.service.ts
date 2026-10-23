@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import {
@@ -58,7 +58,7 @@ export class HierarchyService {
   async getNationsByContinent(confedId: string) {
     const raw = await this.nationRepo.query(
       `SELECT n.id, n.long_name, n.short_name, n.three_letter_name, n.confederation_id,
-        (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id)::int as total_comps,
+        (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id AND (c.parent_id IS NULL OR c.parent_id = ''))::int as total_comps,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.nation_id = n.id)::int as total_clubs,
         (SELECT COUNT(*) FROM stadiums s WHERE s.nation_id = n.id)::int as total_stadiums,
         (SELECT COUNT(*) FROM cities ci WHERE ci.country_id = n.id)::int as total_cities,
@@ -102,7 +102,7 @@ export class HierarchyService {
       FROM competitions c
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
-      WHERE c.confed_id = $1 AND (c.is_international = true OR c.nation_id IS NULL)
+      WHERE c.confed_id = $1 AND (c.is_international = true OR c.nation_id IS NULL) AND (c.parent_id IS NULL OR c.parent_id = '')
       ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
       [String(confedId)],
     );
@@ -149,7 +149,7 @@ export class HierarchyService {
       cities,
       awards,
     ] = await Promise.all([
-      this.compRepo.count({ where: { nation_id: String(nationId) } }),
+      this.compRepo.count({ where: { nation_id: String(nationId), parent_id: IsNull() } }),
       this.clubRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
       this.clubRepo.count({ where: { nation_id: String(nationId) } }),
       this.stadiumRepo.count({ where: { nation_id: String(nationId) } }),
@@ -186,7 +186,7 @@ export class HierarchyService {
       FROM competitions c
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
-      WHERE c.nation_id = $1
+      WHERE c.nation_id = $1 AND (c.parent_id IS NULL OR c.parent_id = '')
       ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
       [strNationId],
     );
@@ -337,7 +337,9 @@ export class HierarchyService {
       where: { id: strId },
       relations: ['nation', 'confederation', 'parent'],
     });
-    if (!comp) return null;
+    if (!comp) {
+      throw new NotFoundException(`Competition with ID ${compId} not found`);
+    }
     const [clubsCount, awardsCount, childrenCount] = await Promise.all([
       this.clubRepo.count({ where: { comp_id: strId } }),
       this.awardRepo.count({ where: { comp_id: strId } }),
@@ -545,4 +547,219 @@ export class HierarchyService {
       totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
     }));
   }
+
+  async getContinentInfo(confedId: string) {
+    const strId = String(confedId);
+    const confed = await this.confedRepo.findOne({ where: { id: strId } });
+    if (!confed) {
+      throw new NotFoundException(`Confederation with ID ${confedId} not found`);
+    }
+
+    const [totalNations, totalIntComps, totalComps, totalClubs, totalStadiums, totalCities, totalAwards] =
+      await Promise.all([
+        this.nationRepo.count({ where: { confederation_id: strId } }),
+        this.compRepo
+          .createQueryBuilder('comp')
+          .where('comp.confed_id = :cid', { cid: strId })
+          .andWhere('(comp.is_international = true OR comp.nation_id IS NULL)')
+          .andWhere('(comp.parent_id IS NULL OR comp.parent_id = \'\')')
+          .getCount(),
+        this.compRepo
+          .createQueryBuilder('comp')
+          .leftJoin('comp.nation', 'nation')
+          .where('comp.confed_id = :cid OR nation.confederation_id = :cid', { cid: strId })
+          .getCount(),
+        this.clubRepo
+          .createQueryBuilder('club')
+          .innerJoin('club.nation', 'nation')
+          .where('nation.confederation_id = :cid', { cid: strId })
+          .getCount(),
+        this.stadiumRepo
+          .createQueryBuilder('stadium')
+          .innerJoin('stadium.nation', 'nation')
+          .where('nation.confederation_id = :cid', { cid: strId })
+          .getCount(),
+        this.cityRepo
+          .createQueryBuilder('city')
+          .innerJoin('city.nation', 'nation')
+          .where('nation.confederation_id = :cid', { cid: strId })
+          .getCount(),
+        this.awardRepo
+          .createQueryBuilder('award')
+          .innerJoin('award.nation', 'nation')
+          .where('nation.confederation_id = :cid', { cid: strId })
+          .getCount(),
+      ]);
+
+    return {
+      ...confed,
+      totalNations,
+      totalIntComps,
+      totalComps,
+      totalClubs,
+      totalStadiums,
+      totalCities,
+      totalAwards,
+    };
+  }
+
+  async getNationInfo(nationId: string) {
+    const strId = String(nationId);
+    const nation = await this.nationRepo.findOne({
+      where: { id: strId },
+      relations: ['confederation'],
+    });
+    if (!nation) {
+      throw new NotFoundException(`Nation with ID ${nationId} not found`);
+    }
+
+    const [
+      domesticComps,
+      totalComps,
+      independentClubs,
+      extinctClubs,
+      allClubs,
+      stadiums,
+      cities,
+      awards,
+      totalAwards,
+    ] = await Promise.all([
+      this.compRepo.count({ where: { nation_id: strId, parent_id: IsNull() } }),
+      this.compRepo.count({ where: { nation_id: strId } }),
+      this.clubRepo
+        .createQueryBuilder('c')
+        .where('c.nation_id = :nid', { nid: strId })
+        .andWhere('c.comp_id IS NULL')
+        .andWhere('(c.is_extinct = false OR c.is_extinct IS NULL)')
+        .getCount(),
+      this.clubRepo.count({ where: { nation_id: strId, is_extinct: true } }),
+      this.clubRepo.count({ where: { nation_id: strId } }),
+      this.stadiumRepo.count({ where: { nation_id: strId } }),
+      this.cityRepo.count({ where: { country_id: strId } }),
+      this.awardRepo.count({ where: { nation_id: strId, comp_id: IsNull() } }),
+      this.awardRepo.count({ where: { nation_id: strId } }),
+    ]);
+
+    return {
+      ...nation,
+      confederation_name: nation.confederation?.name || null,
+      counts: {
+        domesticComps: domesticComps + 2, // +2 cho [OTHER] và [EXTINCT]
+        parentComps: domesticComps,
+        totalComps,
+        independentClubs,
+        extinctClubs,
+        allClubs,
+        stadiums,
+        cities,
+        awards,
+        totalAwards,
+      },
+    };
+  }
+
+  async getClubInfo(clubId: string) {
+    const strId = String(clubId);
+    const club = await this.clubRepo.findOne({
+      where: { id: strId },
+      relations: ['nation', 'competition', 'competition.parent'],
+    });
+    if (!club) {
+      throw new NotFoundException(`Club with ID ${clubId} not found`);
+    }
+
+    return {
+      ...club,
+      competition_name: club.competition?.short_name || club.competition?.long_name || null,
+      parent_competition_name:
+        club.competition?.parent?.short_name || club.competition?.parent?.long_name || null,
+      nation_name: club.nation?.long_name || null,
+      nation_three_letter: club.nation?.three_letter_name || null,
+    };
+  }
+
+  async getCityInfo(cityId: string) {
+    const strId = String(cityId);
+    const city = await this.cityRepo.findOne({
+      where: { id: strId },
+      relations: ['nation'],
+    });
+    if (!city) {
+      throw new NotFoundException(`City with ID ${cityId} not found`);
+    }
+
+    return {
+      ...city,
+      nation_name: city.nation?.long_name || null,
+      nation_three_letter: city.nation?.three_letter_name || null,
+    };
+  }
+
+  async getAwardInfo(awardId: string) {
+    const strId = String(awardId);
+    const award = await this.awardRepo.findOne({
+      where: { id: strId },
+      relations: ['nation', 'competition'],
+    });
+    if (!award) {
+      throw new NotFoundException(`Award with ID ${awardId} not found`);
+    }
+
+    return {
+      ...award,
+      nation_name: award.nation?.long_name || null,
+      nation_three_letter: award.nation?.three_letter_name || null,
+      competition_name: award.competition?.short_name || award.competition?.long_name || null,
+    };
+  }
+
+  async getStadiumInfo(stadiumId: string) {
+    const strId = String(stadiumId);
+    const stadium = await this.stadiumRepo.findOne({
+      where: { id: strId },
+      relations: ['nation'],
+    });
+    if (!stadium) {
+      throw new NotFoundException(`Stadium with ID ${stadiumId} not found`);
+    }
+
+    return {
+      ...stadium,
+      nation_name: stadium.nation?.long_name || null,
+      nation_three_letter: stadium.nation?.three_letter_name || null,
+    };
+  }
+
+  async getEntityInfo(type: string, id: string) {
+    switch (type.toLowerCase()) {
+      case 'confederation':
+      case 'confederations':
+      case 'continent':
+      case 'continents':
+        return this.getContinentInfo(id);
+      case 'nation':
+      case 'nations':
+        return this.getNationInfo(id);
+      case 'competition':
+      case 'competitions':
+      case 'comp':
+      case 'comps':
+        return this.getCompetitionInfo(id);
+      case 'club':
+      case 'clubs':
+        return this.getClubInfo(id);
+      case 'city':
+      case 'cities':
+        return this.getCityInfo(id);
+      case 'award':
+      case 'awards':
+        return this.getAwardInfo(id);
+      case 'stadium':
+      case 'stadiums':
+        return this.getStadiumInfo(id);
+      default:
+        throw new BadRequestException(`Info not supported for entity type: ${type}`);
+    }
+  }
 }
+
