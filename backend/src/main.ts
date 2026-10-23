@@ -2,11 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 import * as os from 'os';
+import { runStartupMigrations } from './database/startup-migrations';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+
+  // Run automated startup migrations (ensure schema & parent_id logic are up to date on any environment)
+  try {
+    const dataSource = app.get(DataSource);
+    await runStartupMigrations(dataSource, logger);
+  } catch (err) {
+    logger.error('Failed to run startup migrations:', err);
+  }
 
   // Enable CORS for frontend (origin: true phản chiếu origin gọi tới, tương thích cả localhost và IP LAN)
   app.enableCors({

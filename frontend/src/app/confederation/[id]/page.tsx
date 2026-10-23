@@ -54,9 +54,18 @@ function ConfederationDetailContent() {
     setLoading(true);
     try {
       const [continents, nationsData, intCompsData] = await Promise.all([
-        fetchContinents(),
-        fetchNationsByContinent(confedId),
-        fetchIntCompetitions(confedId),
+        fetchContinents().catch((err) => {
+          console.error('Failed to fetch continents:', err);
+          return [];
+        }),
+        fetchNationsByContinent(confedId).catch((err) => {
+          console.error('Failed to fetch nations:', err);
+          return [];
+        }),
+        fetchIntCompetitions(confedId).catch((err) => {
+          console.error('Failed to fetch international competitions:', err);
+          return [];
+        }),
       ]);
 
       const found = continents.find((c) => String(c.id) === String(confedId));
