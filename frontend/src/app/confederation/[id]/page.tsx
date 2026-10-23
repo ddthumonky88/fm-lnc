@@ -38,7 +38,7 @@ function ConfederationDetailContent() {
     refreshSignal,
   } = useApp();
 
-  const confedId = Number(params?.id);
+  const confedId = params?.id ? String(params.id) : '';
   const initialTab = searchParams.get('tab') === 'int' ? 'INT_COMPETITIONS' : 'NATIONS';
 
   const [confederation, setConfederation] = useState<ConfederationItem | null>(null);
@@ -59,7 +59,7 @@ function ConfederationDetailContent() {
         fetchIntCompetitions(confedId),
       ]);
 
-      const found = continents.find((c) => c.id === confedId);
+      const found = continents.find((c) => String(c.id) === String(confedId));
       if (found) {
         setConfederation(found);
         setHeaderTitle(found.name);

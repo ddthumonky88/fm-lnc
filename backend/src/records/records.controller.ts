@@ -13,7 +13,7 @@ export class RecordsController {
   @Get(':type/:id')
   getOne(
     @Param('type') type: RecordType,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
   ) {
     return this.recordsService.getRecord(type, id);
   }
@@ -34,7 +34,7 @@ export class RecordsController {
   @Put(':type/:id')
   update(
     @Param('type') type: RecordType,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() body: any,
   ) {
     return this.recordsService.updateRecord(type, id, body);
@@ -46,7 +46,7 @@ export class RecordsController {
   @Delete(':type/:id')
   remove(
     @Param('type') type: RecordType,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
   ) {
     return this.recordsService.deleteRecord(type, id);
   }

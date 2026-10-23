@@ -5,8 +5,8 @@ import { BigIntTransformer } from './transformer';
 
 @Entity('confederations')
 export class Confederation {
-  @PrimaryColumn({ type: 'bigint', transformer: BigIntTransformer })
-  id: number;
+  @PrimaryColumn({ type: 'varchar', length: 64 })
+  id: string;
 
   @Column({ type: 'varchar', length: 255 })
   name: string;

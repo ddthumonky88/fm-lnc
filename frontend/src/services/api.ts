@@ -13,18 +13,18 @@ export function getApiBase(): string {
 }
 
 export interface ConfederationItem {
-  id: number;
+  id: string;
   name: string;
   totalNations: number;
   totalIntComps: number;
 }
 
 export interface NationItem {
-  id: number;
+  id: string;
   long_name: string;
   short_name: string;
   three_letter_name: string;
-  confederation_id: number;
+  confederation_id: string;
   confederation_name?: string;
   confederation?: ConfederationItem;
   totalChildren?: number;
@@ -36,76 +36,85 @@ export interface NationItem {
 }
 
 export interface CompetitionItem {
-  id: number;
+  id: string;
   long_name: string;
   short_name: string;
   three_letter_name: string;
   fg_color?: string;
   bg_color?: string;
-  confed_id?: number;
+  confed_id?: string;
   confed_name?: string;
-  nation_id?: number;
+  nation_id?: string;
   nation_name?: string;
   nation_three_letter?: string;
+  parent_id?: string;
+  parent_name?: string;
+  parent_long_name?: string;
+  parent_short_name?: string;
+  childrenCount?: number;
   categories?: string;
   is_international?: boolean;
   note?: string;
   inactive_fields?: string;
   nation?: NationItem;
   confederation?: ConfederationItem;
+  parent?: CompetitionItem;
+  is_virtual?: boolean;
+  virtual_type?: string;
   clubsCount?: number;
   awardsCount?: number;
   totalChildren?: number;
 }
 
 export interface ClubItem {
-  id: number;
+  id: string;
   long_name: string;
   short_name: string;
   six_letter_name?: string;
   three_letter_name?: string;
-  nation_id?: number;
-  comp_id?: number;
+  nation_id?: string;
+  comp_id?: string;
   note?: string;
+  is_extinct?: boolean;
   nation?: NationItem;
   competition?: CompetitionItem;
 }
 
 export interface StadiumItem {
-  id: number;
+  id: string;
   name: string;
-  nation_id?: number;
+  nation_id?: string;
   note?: string;
   nation?: NationItem;
 }
 
 export interface CityItem {
-  id: number;
+  id: string;
   name: string;
-  country_id?: number;
+  country_id?: string;
   categories?: string;
   nation?: NationItem;
 }
 
 export interface AwardItem {
-  id: number;
+  id: string;
   long_name: string;
   short_name: string;
-  nation_id?: number;
-  comp_id?: number;
+  nation_id?: string;
+  comp_id?: string;
   nation?: NationItem;
   competition?: CompetitionItem;
 }
 
 export interface PlayerItem {
-  id: number;
+  id: string;
   first_name: string;
   common_name?: string;
   second_name: string;
 }
 
 export interface StageItem {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -169,7 +178,7 @@ export async function fetchContinents(forceRefresh = false): Promise<Confederati
   return cachedFetch<ConfederationItem[]>(`${getApiBase()}/hierarchy/continents`, forceRefresh);
 }
 
-export async function fetchAllNations(confedId?: number, query?: string, forceRefresh = false): Promise<NationItem[]> {
+export async function fetchAllNations(confedId?: string, query?: string, forceRefresh = false): Promise<NationItem[]> {
   const params = new URLSearchParams();
   if (confedId) params.append('confedId', String(confedId));
   if (query) params.append('q', query);
@@ -178,8 +187,8 @@ export async function fetchAllNations(confedId?: number, query?: string, forceRe
 }
 
 export async function fetchAllCompetitions(options?: {
-  confedId?: number;
-  nationId?: number;
+  confedId?: string;
+  nationId?: string;
   query?: string;
   isInternational?: boolean;
 }, forceRefresh = false): Promise<CompetitionItem[]> {
@@ -192,48 +201,52 @@ export async function fetchAllCompetitions(options?: {
   return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions${qStr}`, forceRefresh);
 }
 
-export async function fetchNationsByContinent(confedId: number, forceRefresh = false): Promise<NationItem[]> {
+export async function fetchNationsByContinent(confedId: string, forceRefresh = false): Promise<NationItem[]> {
   return cachedFetch<NationItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/nations`, forceRefresh);
 }
 
-export async function fetchIntCompetitions(confedId: number, forceRefresh = false): Promise<CompetitionItem[]> {
+export async function fetchIntCompetitions(confedId: string, forceRefresh = false): Promise<CompetitionItem[]> {
   return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`, forceRefresh);
 }
 
-export async function fetchNationHub(nationId: number, forceRefresh = false): Promise<NationHubData> {
+export async function fetchNationHub(nationId: string, forceRefresh = false): Promise<NationHubData> {
   return cachedFetch<NationHubData>(`${getApiBase()}/hierarchy/nations/${nationId}/hub`, forceRefresh);
 }
 
-export async function fetchDomesticCompetitions(nationId: number, forceRefresh = false): Promise<CompetitionItem[]> {
+export async function fetchDomesticCompetitions(nationId: string, forceRefresh = false): Promise<CompetitionItem[]> {
   return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/competitions`, forceRefresh);
 }
 
-export async function fetchIndependentClubs(nationId: number, isExtinct?: boolean, forceRefresh = false): Promise<ClubItem[]> {
+export async function fetchIndependentClubs(nationId: string, isExtinct?: boolean, forceRefresh = false): Promise<ClubItem[]> {
   const query = isExtinct !== undefined ? `?extinct=${isExtinct}` : '';
   return cachedFetch<ClubItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs${query}`, forceRefresh);
 }
 
-export async function fetchClubsInComp(compId: number, forceRefresh = false): Promise<ClubItem[]> {
+export async function fetchClubsInComp(compId: string, forceRefresh = false): Promise<ClubItem[]> {
   return cachedFetch<ClubItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/clubs`, forceRefresh);
 }
 
-export async function fetchCompetitionInfo(compId: number, forceRefresh = false): Promise<CompetitionItem & { clubsCount: number; awardsCount: number }> {
-  return cachedFetch<CompetitionItem & { clubsCount: number; awardsCount: number }>(`${getApiBase()}/hierarchy/competitions/${compId}/info`, forceRefresh);
+export async function fetchCompetitionInfo(compId: string, forceRefresh = false): Promise<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }> {
+  return cachedFetch<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }>(`${getApiBase()}/hierarchy/competitions/${compId}/info`, forceRefresh);
 }
 
-export async function fetchStadiums(nationId: number, forceRefresh = false): Promise<StadiumItem[]> {
+export async function fetchSubCompetitions(compId: string, forceRefresh = false): Promise<CompetitionItem[]> {
+  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/sub-competitions`, forceRefresh);
+}
+
+export async function fetchStadiums(nationId: string, forceRefresh = false): Promise<StadiumItem[]> {
   return cachedFetch<StadiumItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/stadiums`, forceRefresh);
 }
 
-export async function fetchCities(nationId: number, forceRefresh = false): Promise<CityItem[]> {
+export async function fetchCities(nationId: string, forceRefresh = false): Promise<CityItem[]> {
   return cachedFetch<CityItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/cities`, forceRefresh);
 }
 
-export async function fetchAwards(nationId: number, forceRefresh = false): Promise<AwardItem[]> {
+export async function fetchAwards(nationId: string, forceRefresh = false): Promise<AwardItem[]> {
   return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/awards`, forceRefresh);
 }
 
-export async function fetchAwardsInComp(compId: number, forceRefresh = false): Promise<AwardItem[]> {
+export async function fetchAwardsInComp(compId: string, forceRefresh = false): Promise<AwardItem[]> {
   return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/awards`, forceRefresh);
 }
 
@@ -271,7 +284,7 @@ export async function createRecord(type: RecordType | string, data: any) {
   return res.json();
 }
 
-export async function updateRecord(type: RecordType | string, id: number, data: any) {
+export async function updateRecord(type: RecordType | string, id: string, data: any) {
   clearApiCache();
   const res = await fetch(`${getApiBase()}/records/${type}/${id}`, {
     method: 'PUT',
@@ -285,7 +298,7 @@ export async function updateRecord(type: RecordType | string, id: number, data: 
   return res.json();
 }
 
-export async function deleteRecord(type: RecordType | string, id: number) {
+export async function deleteRecord(type: RecordType | string, id: string) {
   clearApiCache();
   const res = await fetch(`${getApiBase()}/records/${type}/${id}`, {
     method: 'DELETE',
@@ -311,11 +324,11 @@ export function getExportUrl(): string {
   return `${getApiBase()}/lnc/export?download=true`;
 }
 
-export function getConfederationLogoUrl(id: number | string): string {
+export function getConfederationLogoUrl(id: string): string {
   return `${getApiBase()}/logos/confederation/${id}`;
 }
 
-export function getNationLogoUrl(id: number | string, code?: string): string {
+export function getNationLogoUrl(id: string, code?: string): string {
   const query = code ? `?code=${encodeURIComponent(code)}` : '';
   return `${getApiBase()}/logos/nation/${id}${query}`;
 }

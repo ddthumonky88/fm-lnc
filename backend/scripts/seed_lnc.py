@@ -37,81 +37,82 @@ def seed():
     DROP TABLE IF EXISTS confederations CASCADE;
 
     CREATE TABLE confederations (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL
     );
 
     CREATE TABLE nations (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         long_name VARCHAR(255) NOT NULL,
         short_name VARCHAR(255) NOT NULL,
         three_letter_name VARCHAR(50) NOT NULL,
-        confederation_id BIGINT,
+        confederation_id VARCHAR(64),
         inactive_fields TEXT
     );
 
     CREATE TABLE cities (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        country_id BIGINT,
+        country_id VARCHAR(64),
         categories VARCHAR(255),
         inactive_fields TEXT
     );
 
     CREATE TABLE competitions (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         long_name VARCHAR(255) NOT NULL,
         short_name VARCHAR(255) NOT NULL,
         three_letter_name VARCHAR(50),
         fg_color VARCHAR(100),
         bg_color VARCHAR(100),
-        confed_id BIGINT,
-        nation_id BIGINT,
+        confed_id VARCHAR(64),
+        nation_id VARCHAR(64),
         categories VARCHAR(255),
         is_international BOOLEAN DEFAULT FALSE,
+        parent_id VARCHAR(64),
         note TEXT,
         inactive_fields TEXT
     );
 
     CREATE TABLE clubs (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         long_name VARCHAR(255) NOT NULL,
         short_name VARCHAR(255) NOT NULL,
         six_letter_name VARCHAR(50),
         three_letter_name VARCHAR(50),
-        nation_id BIGINT,
-        comp_id BIGINT,
+        nation_id VARCHAR(64),
+        comp_id VARCHAR(64),
         note TEXT,
         inactive_fields TEXT,
         is_extinct BOOLEAN DEFAULT FALSE
     );
 
     CREATE TABLE stadiums (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        nation_id BIGINT,
+        nation_id VARCHAR(64),
         note TEXT,
         inactive_fields TEXT
     );
 
     CREATE TABLE awards (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         long_name VARCHAR(255) NOT NULL,
         short_name VARCHAR(255) NOT NULL,
-        nation_id BIGINT,
-        comp_id BIGINT,
+        nation_id VARCHAR(64),
+        comp_id VARCHAR(64),
         inactive_fields TEXT
     );
 
     CREATE TABLE people (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
         common_name VARCHAR(255) DEFAULT '',
         second_name VARCHAR(255) NOT NULL
     );
 
     CREATE TABLE stages (
-        id BIGINT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL
     );
     """)
@@ -301,6 +302,15 @@ def seed():
                     continue
 
                 # Commented command for competition / awards
+                m_parent_comm = re.match(r'^#\s*"COMP_PARENT_ID"\s+(\d+)\s+(\d+)', l)
+                if m_parent_comm:
+                    cid, pid = int(m_parent_comm.group(1)), int(m_parent_comm.group(2))
+                    if cid not in comps:
+                        comps[cid] = {'confed_id': cur_confed_id, 'nation_code': cur_nat_code, 'category': cur_cat, 'inactive_fields': set()}
+                    comps[cid]['parent_id'] = pid
+                    comps[cid].setdefault('inactive_fields', set()).add('parent_id')
+                    continue
+
                 m_col_comm = re.match(r'^#\s*"COMP_COLOUR_CHANGE"\s+(\d+)\s+([0-9\s]+)\s+""', l)
                 if m_col_comm:
                     cid, col_tokens = int(m_col_comm.group(1)), m_col_comm.group(2).strip().split()
@@ -349,6 +359,15 @@ def seed():
                         'common_name': quotes[2].strip(),
                         'second_name': quotes[3].strip()
                     }
+                continue
+
+            m_parent = re.match(r'^"COMP_PARENT_ID"\s+(\d+)\s+(\d+)', l)
+            if m_parent:
+                cid, pid = int(m_parent.group(1)), int(m_parent.group(2))
+                if cid not in comps:
+                    comps[cid] = {'confed_id': cur_confed_id, 'nation_code': cur_nat_code, 'category': cur_cat, 'inactive_fields': set()}
+                comps[cid]['parent_id'] = pid
+                comps[cid].setdefault('inactive_fields', set()).discard('parent_id')
                 continue
 
             m_col = re.match(r'^"COMP_COLOUR_CHANGE"\s+(\d+)\s+([0-9\s]+)\s+""', l)
@@ -420,15 +439,16 @@ def seed():
         conf_id = cdata.get('confed_id')
         nat_id = code_to_nation_id.get(cdata.get('nation_code'))
         is_inter = (nat_id is None)
+        parent_id = cdata.get('parent_id')
         inact_set = cdata.get('inactive_fields')
         inact_str = ','.join(sorted(inact_set)) if inact_set else None
-        comps_batch.append((cid, lname, sname, code, fg, bg, conf_id, nat_id, cdata.get('category'), is_inter, inact_str))
+        comps_batch.append((cid, lname, sname, code, fg, bg, conf_id, nat_id, cdata.get('category'), is_inter, inact_str, parent_id))
         comp_name_to_id[lname.lower()] = cid
         comp_name_to_id[sname.lower()] = cid
 
     execute_batch(cur, """
-        INSERT INTO competitions (id, long_name, short_name, three_letter_name, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO competitions (id, long_name, short_name, three_letter_name, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields, parent_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """, comps_batch, page_size=1000)
     conn.commit()
 

@@ -24,12 +24,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [recordModalType, setRecordModalType] = useState<RecordType>(RecordType.CLUB);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
-  const [defaultNationId, setDefaultNationId] = useState<number | undefined>(undefined);
-  const [defaultCompId, setDefaultCompId] = useState<number | undefined>(undefined);
+  const [defaultNationId, setDefaultNationId] = useState<string | number | undefined>(undefined);
+  const [defaultCompId, setDefaultCompId] = useState<string | number | undefined>(undefined);
 
   // Header display state
   const [currentHeaderTitle, setCurrentHeaderTitle] = useState('Confederations & Nations');
-  const [currentHeaderId, setCurrentHeaderId] = useState<number | undefined>(undefined);
+  const [currentHeaderId, setCurrentHeaderId] = useState<string | number | undefined>(undefined);
   const [breadcrumbs, setBreadcrumbs] = useState<any[]>([]);
   const [backHref, setBackHref] = useState<string | (() => void) | null>(null);
   const [headerLogo, setHeaderLogo] = useState<any | null>(null);
@@ -107,7 +107,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }, [handleSyncLnc, handleExportLnc]);
 
   const handleOpenRecordModal = useCallback(
-    (type: RecordType, initialData?: any, natId?: number, cId?: number) => {
+    (type: RecordType, initialData?: any, natId?: string | number, cId?: string | number) => {
       setRecordModalType(type);
       setEditingRecord(initialData || null);
       setDefaultNationId(natId);

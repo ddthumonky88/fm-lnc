@@ -87,6 +87,11 @@ export class LncService {
         .filter(Boolean);
       const isInactive = (f: string) => inactList.includes(f);
 
+      if (comp.parent_id) {
+        const pfxParent = isInactive('parent_id') ? '#' : '';
+        out += `${pfxParent}"COMP_PARENT_ID"\t\t${comp.id}\t\t ${comp.parent_id}\t\t\t\t\t\t""\n`;
+      }
+
       if (comp.fg_color && comp.bg_color) {
         const pfx = isInactive('colors') ? '#' : '';
         out += `${pfx}"COMP_COLOUR_CHANGE"\t\t${comp.id}\t\t0 ${comp.fg_color} ${comp.bg_color}\t\t""\n`;
@@ -251,26 +256,26 @@ export class LncService {
       );
     }
 
-    const confedMap: Record<string, number> = {
-      CAF: 1, AFRICA: 1,
-      AFC: 2, ASIA: 2,
-      UEFA: 3, EUROPE: 3,
-      CONCACAF: 4, 'NORTH AMERICA': 4,
-      OFC: 5, OCEANIA: 5,
-      CONMEBOL: 6, 'SOUTH AMERICA': 6,
-      WORLD: 7, INTERNATIONAL: 7, FIFA: 7,
-      OTHER: 7,
+    const confedMap: Record<string, string> = {
+      CAF: '1', AFRICA: '1',
+      AFC: '2', ASIA: '2',
+      UEFA: '3', EUROPE: '3',
+      CONCACAF: '4', 'NORTH AMERICA': '4',
+      OFC: '5', OCEANIA: '5',
+      CONMEBOL: '6', 'SOUTH AMERICA': '6',
+      WORLD: '7', INTERNATIONAL: '7', FIFA: '7',
+      OTHER: '7',
     };
 
     // Ensure confederations
     const confeds = [
-      { id: 1, name: 'Africa' },
-      { id: 2, name: 'Asia' },
-      { id: 3, name: 'Europe' },
-      { id: 4, name: 'North America' },
-      { id: 5, name: 'Oceania' },
-      { id: 6, name: 'South America' },
-      { id: 7, name: 'World' },
+      { id: '1', name: 'Africa' },
+      { id: '2', name: 'Asia' },
+      { id: '3', name: 'Europe' },
+      { id: '4', name: 'North America' },
+      { id: '5', name: 'Oceania' },
+      { id: '6', name: 'South America' },
+      { id: '7', name: 'World' },
     ];
     for (const c of confeds) {
       await this.confedRepo.save(c);
@@ -279,12 +284,12 @@ export class LncService {
     // 1. FM24 - City & Nation.lnc
     const contentCityNat = fs.readFileSync(fileCityNation, 'utf-8');
     const linesCityNat = contentCityNat.split(/\r?\n/);
-    let curConfedId = 7;
+    let curConfedId = '7';
     let curNationCode: string | null = null;
     let curNationName: string | null = null;
     let curCityCat: string | null = null;
 
-    const nationsMap: Map<number, Partial<Nation>> = new Map();
+    const nationsMap: Map<string, Partial<Nation>> = new Map();
     const citiesList: Partial<City>[] = [];
 
     for (const rawLine of linesCityNat) {
@@ -295,7 +300,7 @@ export class LncService {
         if (h.startsWith('NATION >')) {
           const parts = h.split('>').map((p) => p.trim());
           const cName = parts[1]?.toUpperCase() || 'OTHER';
-          curConfedId = confedMap[cName] || 7;
+          curConfedId = confedMap[cName] || '7';
         } else if (h.startsWith('CITY >')) {
           const parts = h.split('>').map((p) => p.trim());
           if (parts.length > 1) {
@@ -316,7 +321,7 @@ export class LncService {
       const match = line.match(/^"([^"]+)"\s+(\d+)\s+"([^"]*)"/);
       if (match) {
         const cmd = match[1];
-        const id = parseInt(match[2], 10);
+        const id = match[2];
         const val = match[3].trim();
 
         if (cmd === 'NATION_LONG_NAME_CHANGE') {
@@ -335,7 +340,7 @@ export class LncService {
           citiesList.push({
             id,
             name: val,
-            categories: curCityCat || null,
+            categories: curCityCat || undefined,
             // Nation resolved later
             country_id: curNationCode as any,
           });
@@ -343,23 +348,24 @@ export class LncService {
       }
     }
 
-    const codeToNationId: Record<string, number> = {};
-    const nameToNationId: Record<string, number> = {};
+    const codeToNationId: Record<string, string> = {};
+    const nameToNationId: Record<string, string> = {};
 
-    const nationsArray = Array.from(nationsMap.values()).map((n) => {
+    const nationsArray: Nation[] = Array.from(nationsMap.values()).map((n) => {
       const longName = n.long_name || `Nation ${n.id}`;
       const shortName = n.short_name || longName;
       const code = n.three_letter_name || 'UNK';
-      codeToNationId[code] = n.id as number;
-      nameToNationId[longName.toUpperCase()] = n.id as number;
-      nameToNationId[shortName.toUpperCase()] = n.id as number;
+      const idStr = String(n.id);
+      codeToNationId[code] = idStr;
+      nameToNationId[longName.toUpperCase()] = idStr;
+      nameToNationId[shortName.toUpperCase()] = idStr;
       return {
-        id: n.id,
+        id: idStr,
         long_name: longName,
         short_name: shortName,
         three_letter_name: code,
-        confederation_id: n.confederation_id || 7,
-      };
+        confederation_id: n.confederation_id ? String(n.confederation_id) : '7',
+      } as Nation;
     });
 
     // Chunked saves
@@ -368,12 +374,12 @@ export class LncService {
       await this.nationRepo.save(nationsArray.slice(i, i + chunkSize));
     }
 
-    const citiesArray = citiesList.map((c) => ({
-      id: c.id,
+    const citiesArray: City[] = citiesList.map((c) => ({
+      id: String(c.id),
       name: c.name,
       categories: c.categories,
-      country_id: codeToNationId[c.country_id as any] || null,
-    }));
+      country_id: (c.country_id && codeToNationId[c.country_id as any]) || undefined,
+    } as City));
 
     for (let i = 0; i < citiesArray.length; i += chunkSize) {
       await this.cityRepo.save(citiesArray.slice(i, i + chunkSize));

@@ -15,6 +15,7 @@ import {
   fetchCompetitionInfo,
   fetchClubsInComp,
   fetchAwardsInComp,
+  fetchSubCompetitions,
   fetchIndependentClubs,
   fetchNationHub,
   getNationLogoUrl,
@@ -29,6 +30,7 @@ import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 
 export default function CompetitionDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
   const {
@@ -45,13 +47,14 @@ export default function CompetitionDetailPage() {
   const isVirtualExtinct = rawId.toLowerCase() === 'extinct' || rawId === '[EXTINCT]';
   const isVirtualOther = rawId.toLowerCase() === 'other' || rawId === '[OTHER]';
   const isVirtual = isVirtualExtinct || isVirtualOther;
-  const nationIdParam = searchParams.get('nationId') ? Number(searchParams.get('nationId')) : undefined;
-  const compId = isVirtual ? undefined : Number(params?.id);
+  const nationIdParam = searchParams.get('nationId') || undefined;
+  const compId = isVirtual ? undefined : rawId;
 
-  const [compInfo, setCompInfo] = useState<(CompetitionItem & { clubsCount: number; awardsCount: number }) | null>(null);
-  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS'>('CLUBS');
+  const [compInfo, setCompInfo] = useState<(CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }) | null>(null);
+  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS' | 'SUB_COMPS'>('CLUBS');
   const [clubs, setClubs] = useState<ClubItem[]>([]);
   const [awards, setAwards] = useState<AwardItem[]>([]);
+  const [subComps, setSubComps] = useState<CompetitionItem[]>([]);
   const [tableFilter, setTableFilter] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -83,7 +86,7 @@ export default function CompetitionDetailPage() {
         const virtualTag = isVirtualExtinct ? '[EXTINCT]' : '[OTHER]';
 
         setCompInfo({
-          id: virtualTag as any,
+          id: virtualTag,
           long_name: virtualTitle,
           short_name: virtualShort,
           three_letter_name: isVirtualExtinct ? 'EXT' : 'OTH',
@@ -94,10 +97,11 @@ export default function CompetitionDetailPage() {
           categories: 'Other',
           clubsCount: clubsData.length,
           awardsCount: 0,
+          childrenCount: 0,
         } as any);
 
         setHeaderTitle(virtualTitle);
-        setHeaderId(virtualTag as any);
+        setHeaderId(virtualTag);
 
         const crumbs: any[] = [
           {
@@ -130,14 +134,16 @@ export default function CompetitionDetailPage() {
 
         setClubs(clubsData);
         setAwards([]);
+        setSubComps([]);
         return;
       }
 
       if (!compId) return;
-      const [info, clubsData, awardsData] = await Promise.all([
+      const [info, clubsData, awardsData, subCompsData] = await Promise.all([
         fetchCompetitionInfo(compId).catch(() => null),
         fetchClubsInComp(compId).catch(() => []),
         fetchAwardsInComp(compId).catch(() => []),
+        fetchSubCompetitions(compId).catch(() => []),
       ]);
 
       if (info) {
@@ -170,13 +176,21 @@ export default function CompetitionDetailPage() {
             href: `/nation/${nationId}`,
           });
         }
+        if (info.parent_id) {
+          crumbs.push({
+            title: info.parent_name || `Parent (${info.parent_id})`,
+            href: `/comp/${info.parent_id}${nationId ? `?nationId=${nationId}` : ''}`,
+          });
+        }
         crumbs.push({
           title: compTitle,
         });
 
         setBreadcrumbs(crumbs);
         setBackHref(
-          nationId
+          info.parent_id
+            ? `/comp/${info.parent_id}${nationId ? `?nationId=${nationId}` : ''}`
+            : nationId
             ? `/nation/${nationId}`
             : confedId
             ? `/confederation/${confedId}`
@@ -201,6 +215,7 @@ export default function CompetitionDetailPage() {
       }
       setClubs(clubsData);
       setAwards(awardsData);
+      setSubComps(subCompsData);
     } catch (err: any) {
       console.error(err);
       message.error(err.message || 'Failed to load competition details');
@@ -229,7 +244,7 @@ export default function CompetitionDetailPage() {
     };
   }, [loadCompData, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
 
-  const handleDeleteClub = async (id: number) => {
+  const handleDeleteClub = async (id: string) => {
     try {
       await deleteRecord(RecordType.CLUB, id);
       message.success('Club deleted');
@@ -240,11 +255,22 @@ export default function CompetitionDetailPage() {
     }
   };
 
-  const handleDeleteAward = async (id: number) => {
+  const handleDeleteAward = async (id: string) => {
     try {
       await deleteRecord(RecordType.AWARD, id);
       message.success('Award deleted');
       setAwards((prev) => prev.filter((a) => a.id !== id));
+      loadCompData();
+    } catch (err: any) {
+      message.error(err.message || 'Delete failed');
+    }
+  };
+
+  const handleDeleteComp = async (id: string) => {
+    try {
+      await deleteRecord(RecordType.COMPETITION, id);
+      message.success('Competition deleted');
+      setSubComps((prev) => prev.filter((c) => c.id !== id));
       loadCompData();
     } catch (err: any) {
       message.error(err.message || 'Delete failed');
@@ -275,8 +301,20 @@ export default function CompetitionDetailPage() {
     );
   }, [awards, tableFilter]);
 
+  const filteredSubComps = useMemo(() => {
+    if (!tableFilter.trim()) return subComps;
+    const q = tableFilter.toLowerCase();
+    return subComps.filter(
+      (c) =>
+        c.long_name.toLowerCase().includes(q) ||
+        (c.short_name && c.short_name.toLowerCase().includes(q)) ||
+        (c.three_letter_name && c.three_letter_name.toLowerCase().includes(q)) ||
+        String(c.id).includes(q),
+    );
+  }, [subComps, tableFilter]);
+
   const tabItems = useMemo(() => {
-    const list = [
+    const list: any[] = [
       {
         key: 'CLUBS',
         label: (
@@ -309,10 +347,27 @@ export default function CompetitionDetailPage() {
           </Space>
         ),
       });
+
+      if (subComps.length > 0 || (compInfo?.childrenCount && compInfo.childrenCount > 0)) {
+        list.push({
+          key: 'SUB_COMPS',
+          label: (
+            <Space size={4}>
+              <TrophyOutlined className="text-amber-500" />
+              <span className={activeTab === 'SUB_COMPS' ? 'font-bold' : ''}>Sub-Competitions</span>
+              <Badge
+                count={subComps.length}
+                overflowCount={99999}
+                style={{ backgroundColor: activeTab === 'SUB_COMPS' ? '#f59e0b' : '#94a3b8' }}
+              />
+            </Space>
+          ),
+        });
+      }
     }
 
     return list;
-  }, [clubs.length, awards.length, activeTab, isVirtual]);
+  }, [clubs.length, awards.length, subComps.length, compInfo?.childrenCount, activeTab, isVirtual]);
 
   const compTitle = compInfo?.short_name || compInfo?.long_name || (isVirtual ? (isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs') : `Competition ${compId}`);
   const nationId = compInfo?.nation_id || compInfo?.nation?.id || nationIdParam;
@@ -371,6 +426,20 @@ export default function CompetitionDetailPage() {
                   >
                     {isVirtual ? (isVirtualExtinct ? '[EXTINCT]' : '[OTHER]') : `ID: ${compId}`}
                   </Tag>
+                  {compInfo?.parent_id && (
+                    <Tag
+                      color="orange"
+                      className="m-0 font-bold text-xs cursor-pointer hover:opacity-80"
+                      onClick={() => router.push(`/comp/${compInfo.parent_id}${nationId ? `?nationId=${nationId}` : ''}`)}
+                    >
+                      Parent: {compInfo.parent_name || compInfo.parent_id}
+                    </Tag>
+                  )}
+                  {compInfo?.childrenCount !== undefined && compInfo.childrenCount > 0 && (
+                    <Tag color="gold" className="m-0 font-bold text-xs">
+                      {compInfo.childrenCount} Sub-Competitions
+                    </Tag>
+                  )}
                   {compInfo?.three_letter_name && (
                     <Tag color="purple" className="m-0 font-bold text-xs">
                       {compInfo.three_letter_name}
@@ -385,8 +454,8 @@ export default function CompetitionDetailPage() {
                 {isVirtual ? (
                   <div className="text-xs text-slate-500 mt-0.5">
                     {isVirtualExtinct
-                      ? 'Danh sách các câu lạc bộ đã giải thể thuộc quốc gia này'
-                      : 'Danh sách các câu lạc bộ độc lập (chưa xếp vào giải đấu cụ thể)'}
+                      ? 'List of extinct clubs in this nation'
+                      : 'List of independent clubs (not assigned to a specific competition)'}
                   </div>
                 ) : compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (
                   <div className="text-xs text-slate-500 mt-0.5">{compInfo.long_name}</div>
@@ -409,14 +478,26 @@ export default function CompetitionDetailPage() {
           {/* Sub Toolbar: Count, Filter, Add */}
           <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
             <div className="text-xs text-gray-500">
-              Total: <strong className="text-gray-800">
-                {activeTab === 'CLUBS' ? filteredClubs.length : filteredAwards.length}
-              </strong> {activeTab === 'CLUBS' ? 'clubs' : 'awards'}
+              Total:{' '}
+              <strong className="text-gray-800">
+                {activeTab === 'CLUBS'
+                  ? filteredClubs.length
+                  : activeTab === 'AWARDS'
+                  ? filteredAwards.length
+                  : filteredSubComps.length}
+              </strong>{' '}
+              {activeTab === 'CLUBS' ? 'clubs' : activeTab === 'AWARDS' ? 'awards' : 'sub-competitions'}
             </div>
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <Input
                 prefix={<SearchOutlined className="text-gray-400" />}
-                placeholder={activeTab === 'CLUBS' ? 'Filter clubs...' : 'Filter awards...'}
+                placeholder={
+                  activeTab === 'CLUBS'
+                    ? 'Filter clubs...'
+                    : activeTab === 'AWARDS'
+                    ? 'Filter awards...'
+                    : 'Filter sub-competitions...'
+                }
                 value={tableFilter}
                 onChange={(e) => setTableFilter(e.target.value)}
                 allowClear
@@ -433,13 +514,24 @@ export default function CompetitionDetailPage() {
                       nationId,
                       isVirtual ? undefined : compId,
                     );
-                  } else {
+                  } else if (activeTab === 'AWARDS') {
                     openRecordModal(RecordType.AWARD, null, nationId, compId);
+                  } else {
+                    openRecordModal(
+                      RecordType.COMPETITION,
+                      { parent_id: compId, nation_id: nationId, confed_id: confedId },
+                      nationId,
+                      compId,
+                    );
                   }
                 }}
                 className="bg-blue-600 shrink-0"
               >
-                {activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
+                {activeTab === 'CLUBS'
+                  ? 'Add Club'
+                  : activeTab === 'AWARDS'
+                  ? 'Add Award'
+                  : 'Add Sub-Competition'}
               </Button>
             </div>
           </div>
@@ -452,25 +544,36 @@ export default function CompetitionDetailPage() {
               columns={4}
               loading={loading}
               onEdit={(rec) => openRecordModal(RecordType.CLUB, rec, nationId, isVirtual ? undefined : compId)}
-              onDelete={(rec) => handleDeleteClub(rec.id)}
+              onDelete={(rec) => handleDeleteClub(String(rec.id))}
               emptyText={
                 isVirtual
                   ? isVirtualExtinct
-                    ? 'Không có câu lạc bộ giải thể nào trong quốc gia này'
-                    : 'Không có câu lạc bộ độc lập nào trong quốc gia này'
+                    ? 'No extinct clubs found in this nation'
+                    : 'No independent clubs found in this nation'
                   : 'No clubs found in this competition'
               }
               defaultPageSize={20}
             />
-          ) : (
+          ) : activeTab === 'AWARDS' ? (
             <CardGrid
               items={filteredAwards}
               type={EntityType.AWARD}
               columns={4}
               loading={loading}
               onEdit={(rec) => openRecordModal(RecordType.AWARD, rec, nationId, compId)}
-              onDelete={(rec) => handleDeleteAward(rec.id)}
+              onDelete={(rec) => handleDeleteAward(String(rec.id))}
               emptyText="No awards found in this competition"
+              defaultPageSize={20}
+            />
+          ) : (
+            <CardGrid
+              items={filteredSubComps}
+              type={EntityType.COMPETITION}
+              columns={4}
+              loading={loading}
+              onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec, nationId)}
+              onDelete={(rec) => handleDeleteComp(String(rec.id))}
+              emptyText="No sub-competitions found"
               defaultPageSize={20}
             />
           )}

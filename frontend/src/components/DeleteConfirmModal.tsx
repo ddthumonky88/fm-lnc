@@ -32,7 +32,7 @@ export default function DeleteConfirmModal({
         </div>
         <div className="p-5">
           <p className="text-xs text-gray-600 mb-4">
-            Bạn có chắc chắn muốn xóa bản ghi <strong className="text-gray-800">{itemName}</strong>? Thao tác này sẽ cập nhật cơ sở dữ liệu và file .LNC khi xuất.
+            Are you sure you want to delete <strong className="text-gray-800">{itemName}</strong>? This action will update the database and exported .LNC files.
           </p>
           <div className="flex justify-end gap-2">
             <button
@@ -40,14 +40,14 @@ export default function DeleteConfirmModal({
               disabled={loading}
               className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded"
             >
-              Hủy
+              Cancel
             </button>
             <button
               onClick={onConfirm}
               disabled={loading}
               className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded shadow"
             >
-              {loading ? 'Đang xóa...' : 'Xác Nhận Xóa'}
+              {loading ? 'Deleting...' : 'Confirm Delete'}
             </button>
           </div>
         </div>

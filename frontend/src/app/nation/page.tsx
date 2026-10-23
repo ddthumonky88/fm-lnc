@@ -43,13 +43,11 @@ function NationExplorerContent() {
   const searchParams = useSearchParams();
   const { setHeaderTitle, setHeaderId, refreshSignal } = useApp();
 
-  const initialConfed = searchParams.get('confedId')
-    ? parseInt(searchParams.get('confedId')!, 10)
-    : undefined;
+  const initialConfed = searchParams.get('confedId') || undefined;
 
   const [nations, setNations] = useState<NationItem[]>([]);
   const [confederations, setConfederations] = useState<ConfederationItem[]>([]);
-  const [selectedConfed, setSelectedConfed] = useState<number | undefined>(initialConfed);
+  const [selectedConfed, setSelectedConfed] = useState<string | undefined>(initialConfed);
   const [filterText, setFilterText] = useState('');
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
@@ -116,8 +114,8 @@ function NationExplorerContent() {
         key: 'id',
         width: 90,
         align: 'left',
-        sorter: (a, b) => a.id - b.id,
-        render: (id: number) => (
+        sorter: (a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+        render: (id: string) => (
           <Tag color="blue" className="font-mono font-semibold m-0 text-xs">
             {id}
           </Tag>

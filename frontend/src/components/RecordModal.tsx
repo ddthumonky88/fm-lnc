@@ -10,8 +10,8 @@ export interface RecordModalProps {
   onSuccess?: () => void;
   type: RecordType | EntityType | string;
   initialData?: any;
-  defaultNationId?: number;
-  defaultCompId?: number;
+  defaultNationId?: string | number;
+  defaultCompId?: string | number;
 }
 
 /**

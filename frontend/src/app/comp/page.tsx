@@ -62,12 +62,8 @@ function CompetitionsExplorerContent() {
   const searchParams = useSearchParams();
   const { openRecordModal, setHeaderTitle, setHeaderId, refreshSignal } = useApp();
 
-  const initialConfed = searchParams.get('confedId')
-    ? parseInt(searchParams.get('confedId')!, 10)
-    : undefined;
-  const initialNation = searchParams.get('nationId')
-    ? parseInt(searchParams.get('nationId')!, 10)
-    : undefined;
+  const initialConfed = searchParams.get('confedId') || undefined;
+  const initialNation = searchParams.get('nationId') || undefined;
   const initialInt = searchParams.get('isInternational')
     ? searchParams.get('isInternational') === 'true'
     : undefined;
@@ -77,8 +73,8 @@ function CompetitionsExplorerContent() {
   const [nations, setNations] = useState<NationItem[]>([]);
 
   // Filters
-  const [selectedConfed, setSelectedConfed] = useState<number | undefined>(initialConfed);
-  const [selectedNation, setSelectedNation] = useState<number | undefined>(initialNation);
+  const [selectedConfed, setSelectedConfed] = useState<string | undefined>(initialConfed);
+  const [selectedNation, setSelectedNation] = useState<string | undefined>(initialNation);
   const [scopeFilter, setScopeFilter] = useState<'all' | 'intl' | 'domestic'>(
     initialInt === true ? 'intl' : initialInt === false ? 'domestic' : 'all',
   );
@@ -167,11 +163,11 @@ function CompetitionsExplorerContent() {
     setCurrentPage(1);
   }, [filterText, categoryFilter, selectedConfed, selectedNation, scopeFilter]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       await deleteRecord(RecordType.COMPETITION, id);
       message.success('Competition deleted');
-      setCompetitions((prev) => prev.filter((c) => c.id !== id));
+      setCompetitions((prev) => prev.filter((c) => String(c.id) !== String(id)));
     } catch (e: any) {
       message.error(e.message || 'Delete failed');
     }
@@ -185,8 +181,8 @@ function CompetitionsExplorerContent() {
         key: 'id',
         width: 90,
         align: 'left',
-        sorter: (a, b) => a.id - b.id,
-        render: (id: number) => (
+        sorter: (a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+        render: (id: string) => (
           <Tag color="blue" className="font-mono font-semibold m-0 text-xs">
             {id}
           </Tag>
@@ -257,6 +253,16 @@ function CompetitionsExplorerContent() {
               </span>
               {record.short_name && record.short_name !== text && (
                 <span className="text-xs text-slate-400 block">{record.short_name}</span>
+              )}
+              {record.parent_name && (
+                <span className="text-[11px] text-amber-600 block">
+                  Parent: {record.parent_name}
+                </span>
+              )}
+              {record.childrenCount !== undefined && record.childrenCount > 0 && (
+                <span className="text-[11px] text-blue-600 block">
+                  {record.childrenCount} Sub-Competitions
+                </span>
               )}
             </div>
           );

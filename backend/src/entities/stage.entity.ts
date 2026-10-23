@@ -3,8 +3,8 @@ import { BigIntTransformer } from './transformer';
 
 @Entity('stages')
 export class Stage {
-  @PrimaryColumn({ type: 'bigint', transformer: BigIntTransformer })
-  id: number;
+  @PrimaryColumn({ type: 'varchar', length: 64 })
+  id: string;
 
   @Column({ type: 'varchar', length: 255 })
   name: string;

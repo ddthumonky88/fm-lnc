@@ -4,14 +4,14 @@ import { BigIntTransformer } from './transformer';
 
 @Entity('cities')
 export class City {
-  @PrimaryColumn({ type: 'bigint', transformer: BigIntTransformer })
-  id: number;
+  @PrimaryColumn({ type: 'varchar', length: 64 })
+  id: string;
 
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'bigint', nullable: true, transformer: BigIntTransformer })
-  country_id: number;
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  country_id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   categories: string;

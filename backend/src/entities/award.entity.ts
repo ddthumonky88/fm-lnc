@@ -5,8 +5,8 @@ import { BigIntTransformer } from './transformer';
 
 @Entity('awards')
 export class Award {
-  @PrimaryColumn({ type: 'bigint', transformer: BigIntTransformer })
-  id: number;
+  @PrimaryColumn({ type: 'varchar', length: 64 })
+  id: string;
 
   @Column({ type: 'varchar', length: 255 })
   long_name: string;
@@ -14,11 +14,11 @@ export class Award {
   @Column({ type: 'varchar', length: 255 })
   short_name: string;
 
-  @Column({ type: 'bigint', nullable: true, transformer: BigIntTransformer })
-  nation_id: number;
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  nation_id: string;
 
-  @Column({ type: 'bigint', nullable: true, transformer: BigIntTransformer })
-  comp_id: number;
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  comp_id: string;
 
   @Column({ type: 'text', nullable: true })
   inactive_fields: string;

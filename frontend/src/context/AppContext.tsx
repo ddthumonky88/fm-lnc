@@ -18,8 +18,8 @@ export interface HeaderLogoInfo {
 interface AppContextType {
   headerTitle: string;
   setHeaderTitle: (title: string) => void;
-  headerId: number | undefined;
-  setHeaderId: (id: number | undefined) => void;
+  headerId: string | number | undefined;
+  setHeaderId: (id: string | number | undefined) => void;
   breadcrumbs: BreadcrumbStep[];
   setBreadcrumbs: (crumbs: BreadcrumbStep[]) => void;
   backHref: string | (() => void) | null;
@@ -29,8 +29,8 @@ interface AppContextType {
   openRecordModal: (
     type: RecordType,
     initialData?: any,
-    defaultNationId?: number,
-    defaultCompId?: number,
+    defaultNationId?: string | number,
+    defaultCompId?: string | number,
   ) => void;
   openSearchModal: () => void;
   refreshSignal: number;
@@ -59,8 +59,8 @@ export function AppContextProvider({
   children: ReactNode;
   headerTitle: string;
   setHeaderTitle: (title: string) => void;
-  headerId: number | undefined;
-  setHeaderId: (id: number | undefined) => void;
+  headerId: string | number | undefined;
+  setHeaderId: (id: string | number | undefined) => void;
   breadcrumbs?: BreadcrumbStep[];
   setBreadcrumbs?: (crumbs: BreadcrumbStep[]) => void;
   backHref?: string | (() => void) | null;
@@ -70,8 +70,8 @@ export function AppContextProvider({
   onOpenRecordModal: (
     type: RecordType,
     initialData?: any,
-    defaultNationId?: number,
-    defaultCompId?: number,
+    defaultNationId?: string | number,
+    defaultCompId?: string | number,
   ) => void;
   onOpenSearchModal: () => void;
   refreshSignal: number;

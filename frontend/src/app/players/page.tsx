@@ -45,11 +45,11 @@ export default function PlayersPage() {
     );
   }, [players, filterText]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       await deleteRecord(RecordType.PLAYER, id);
       message.success('Player/Staff deleted');
-      setPlayers((prev) => prev.filter((p) => p.id !== id));
+      setPlayers((prev) => prev.filter((p) => String(p.id) !== String(id)));
     } catch (e: any) {
       message.error(e.message || 'Delete failed');
     }
@@ -63,8 +63,8 @@ export default function PlayersPage() {
         key: 'id',
         width: 150,
         align: 'left',
-        sorter: (a, b) => Number(a.id) - Number(b.id),
-        render: (id: number) => (
+        sorter: (a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+        render: (id: string) => (
           <Tag color="blue" className="font-mono font-semibold m-0 text-xs">
             {id}
           </Tag>

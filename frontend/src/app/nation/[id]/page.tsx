@@ -41,7 +41,7 @@ export default function NationDetailPage() {
     refreshSignal,
   } = useApp();
 
-  const nationId = Number(params?.id);
+  const nationId = params?.id ? String(params.id) : '';
 
   const [nationHub, setNationHub] = useState<NationHubData | null>(null);
   const [activeTab, setActiveTab] = useState<'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS'>(
@@ -153,11 +153,11 @@ export default function NationDetailPage() {
     await loadTabRecords(key);
   };
 
-  const handleDelete = async (type: RecordType, id: number) => {
+  const handleDelete = async (type: RecordType, id: string) => {
     try {
       await deleteRecord(type, id);
       message.success('Record deleted');
-      setRecords((prev) => prev.filter((r) => r.id !== id));
+      setRecords((prev) => prev.filter((r) => String(r.id) !== String(id)));
       loadNationData();
     } catch (err: any) {
       message.error(err.message || 'Delete failed');

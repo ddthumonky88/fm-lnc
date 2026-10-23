@@ -78,7 +78,7 @@ import {
 
 interface NavStep {
   level: HierarchyLevelValue;
-  id?: number;
+  id?: string;
   title: string;
   metadata?: any;
 }
@@ -134,7 +134,7 @@ export default function LncSortitoutsiExplorer() {
 
   // Load records for active Nation tab
   const loadNationDataForTab = useCallback(
-    async (nationId: number, tabKey: NationTabKeyValue) => {
+    async (nationId: string, tabKey: NationTabKeyValue) => {
       setNationTabLoading(true);
       try {
         let data: any[] = [];
@@ -163,7 +163,7 @@ export default function LncSortitoutsiExplorer() {
     setActiveNationTab(tabKey);
     setTableFilter('');
     if (currentStep.id !== undefined) {
-      await loadNationDataForTab(currentStep.id, tabKey);
+      await loadNationDataForTab(String(currentStep.id), tabKey);
     }
   };
 
@@ -190,13 +190,13 @@ export default function LncSortitoutsiExplorer() {
         const data = await fetchContinents();
         setContinents(data);
       } else if (currentStep.level === 'NATIONS' && currentStep.id !== undefined) {
-        const data = await fetchNationsByContinent(currentStep.id);
+        const data = await fetchNationsByContinent(String(currentStep.id));
         setNations(data);
       } else if (currentStep.level === 'INT_COMPETITIONS' && currentStep.id !== undefined) {
-        const data = await fetchIntCompetitions(currentStep.id);
+        const data = await fetchIntCompetitions(String(currentStep.id));
         setIntComps(data);
       } else if (currentStep.level === 'NATION_HUB' && currentStep.id !== undefined) {
-        const hub = await fetchNationHub(currentStep.id);
+        const hub = await fetchNationHub(String(currentStep.id));
         setNationHub(hub);
 
         // Auto select tab that has count > 0
@@ -222,37 +222,37 @@ export default function LncSortitoutsiExplorer() {
 
         const hasAnyChildren = Object.values(hub.counts).some((c: any) => c > 0);
         if (hasAnyChildren) {
-          await loadNationDataForTab(currentStep.id, targetTab);
+          await loadNationDataForTab(String(currentStep.id), targetTab);
         } else {
           setDetailRecords([]);
         }
       } else if (currentStep.level === 'DOMESTIC_COMPS' && currentStep.id !== undefined) {
-        const data = await fetchDomesticCompetitions(currentStep.id);
+        const data = await fetchDomesticCompetitions(String(currentStep.id));
         setDetailRecords(data);
       } else if (currentStep.level === 'INDEPENDENT_CLUBS' && currentStep.id !== undefined) {
         const isExtinct = currentStep.metadata?.is_extinct;
-        const data = await fetchIndependentClubs(currentStep.id, isExtinct);
+        const data = await fetchIndependentClubs(String(currentStep.id), isExtinct);
         setDetailRecords(data);
       } else if (currentStep.level === 'CLUBS_IN_COMP' && currentStep.id !== undefined) {
         const [info, data] = await Promise.all([
-          fetchCompetitionInfo(currentStep.id).catch(() => null),
-          fetchClubsInComp(currentStep.id),
+          fetchCompetitionInfo(String(currentStep.id)).catch(() => null),
+          fetchClubsInComp(String(currentStep.id)),
         ]);
         if (info) setCompInfo(info);
         setDetailRecords(data);
       } else if (currentStep.level === 'STADIUMS' && currentStep.id !== undefined) {
-        const data = await fetchStadiums(currentStep.id);
+        const data = await fetchStadiums(String(currentStep.id));
         setDetailRecords(data);
       } else if (currentStep.level === 'CITIES' && currentStep.id !== undefined) {
-        const data = await fetchCities(currentStep.id);
+        const data = await fetchCities(String(currentStep.id));
         setDetailRecords(data);
       } else if (currentStep.level === 'INDEPENDENT_AWARDS' && currentStep.id !== undefined) {
-        const data = await fetchAwards(currentStep.id);
+        const data = await fetchAwards(String(currentStep.id));
         setDetailRecords(data);
       } else if (currentStep.level === 'COMP_AWARDS' && currentStep.id !== undefined) {
         const [info, data] = await Promise.all([
-          fetchCompetitionInfo(currentStep.id).catch(() => null),
-          fetchAwardsInComp(currentStep.id),
+          fetchCompetitionInfo(String(currentStep.id)).catch(() => null),
+          fetchAwardsInComp(String(currentStep.id)),
         ]);
         if (info) setCompInfo(info);
         setDetailRecords(data);
@@ -321,12 +321,12 @@ export default function LncSortitoutsiExplorer() {
   // Direct Delete via Popconfirm
   const handleDeleteDirect = async (record: any) => {
     try {
-      await deleteRecord(currentRecordType, record.id);
+      await deleteRecord(currentRecordType, String(record.id));
       message.success('Record deleted successfully!');
       if (currentStep.level === 'NATION_HUB' && currentStep.id !== undefined) {
-        const hub = await fetchNationHub(currentStep.id);
+        const hub = await fetchNationHub(String(currentStep.id));
         setNationHub(hub);
-        await loadNationDataForTab(currentStep.id, activeNationTab);
+        await loadNationDataForTab(String(currentStep.id), activeNationTab);
       } else {
         loadCurrentLevelData();
       }
@@ -357,8 +357,8 @@ export default function LncSortitoutsiExplorer() {
         key: 'id',
         width: 150,
         align: 'left',
-        sorter: (a, b) => Number(a.id) - Number(b.id),
-        render: (id: number) => (
+        sorter: (a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+        render: (id: string) => (
           <Tag color="blue" className="font-mono font-semibold m-0">
             {id}
           </Tag>

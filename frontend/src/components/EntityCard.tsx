@@ -400,8 +400,8 @@ export default function EntityCard({
               title={
                 data.is_virtual || data.id === '[EXTINCT]' || data.id === '[OTHER]'
                   ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
-                    ? 'Câu lạc bộ đã giải thể (Extinct Clubs)'
-                    : 'Câu lạc bộ độc lập / chưa xếp giải (Other Clubs)'
+                    ? 'Extinct Clubs'
+                    : 'Other Clubs (Unassigned)'
                   : undefined
               }
             >
@@ -466,7 +466,7 @@ export default function EntityCard({
             {renderChildButtons()}
 
             {/* Info button on EVERY card */}
-            <Tooltip title="View Details / Thông tin chi tiết">
+            <Tooltip title="View Details">
               <Button
                 type="text"
                 shape="circle"
@@ -483,7 +483,7 @@ export default function EntityCard({
             {(canEdit || canDelete) && (
               <div className="flex items-center gap-0.5 shrink-0">
                 {canEdit && (
-                  <Tooltip title="Edit / Chỉnh sửa">
+                  <Tooltip title="Edit">
                     <Button
                       type="text"
                       shape="circle"
@@ -646,6 +646,26 @@ export default function EntityCard({
                   </Tag>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Parent Competition info */}
+          {(type === 'competition' || type === EntityType.COMPETITION) && (data.parent_name || data.parent_id) && (
+            <div className="flex items-baseline gap-1.5 min-w-0">
+              <span className="w-14 text-gray-400 font-medium text-xs shrink-0 select-none">Parent:</span>
+              <span className={`font-semibold text-xs leading-5 truncate ${isInactive('parent_id') ? 'line-through text-red-600' : 'text-amber-700'}`}>
+                {data.parent_name || data.parent_long_name || `Comp ${data.parent_id}`}
+              </span>
+            </div>
+          )}
+
+          {/* Sub-competitions count */}
+          {(type === 'competition' || type === EntityType.COMPETITION) && data.childrenCount !== undefined && data.childrenCount > 0 && (
+            <div className="flex items-baseline gap-1.5 min-w-0">
+              <span className="w-14 text-gray-400 font-medium text-xs shrink-0 select-none">Subs:</span>
+              <span className="font-semibold text-xs leading-5 text-amber-600">
+                {data.childrenCount} Sub-Competitions
+              </span>
             </div>
           )}
 

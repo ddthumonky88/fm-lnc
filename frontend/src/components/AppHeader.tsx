@@ -48,7 +48,7 @@ interface AppHeaderProps {
   onRefresh: () => void;
   isRefreshing?: boolean;
   currentStepTitle?: string;
-  currentStepId?: number;
+  currentStepId?: string | number;
   breadcrumbs?: BreadcrumbStep[];
   backHref?: string | (() => void) | null;
   headerLogo?: HeaderLogoInfo | null;

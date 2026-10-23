@@ -41,11 +41,11 @@ export default function StagesPage() {
     );
   }, [stages, filterText]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       await deleteRecord(RecordType.STAGE, id);
       message.success('Stage deleted');
-      setStages((prev) => prev.filter((s) => s.id !== id));
+      setStages((prev) => prev.filter((s) => String(s.id) !== String(id)));
     } catch (e: any) {
       message.error(e.message || 'Delete failed');
     }
@@ -59,8 +59,8 @@ export default function StagesPage() {
         key: 'id',
         width: 150,
         align: 'left',
-        sorter: (a, b) => Number(a.id) - Number(b.id),
-        render: (id: number) => (
+        sorter: (a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+        render: (id: string) => (
           <Tag color="magenta" className="font-mono font-semibold m-0 text-xs">
             {id}
           </Tag>

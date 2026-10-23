@@ -83,7 +83,7 @@ export default function CityGroupView({
     if (uncategorizedItems.length > 0) {
       resultGroups.push({
         key: '__uncategorized__',
-        label: 'Uncategorized / Khác',
+        label: 'Uncategorized',
         isUncategorized: true,
         items: uncategorizedItems,
       });

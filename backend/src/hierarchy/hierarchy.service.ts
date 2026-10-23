@@ -33,18 +33,18 @@ export class HierarchyService {
     const results = await Promise.all(
       confeds.map(async (c) => {
         const totalNations = await this.nationRepo.count({
-          where: { confederation_id: c.id },
+          where: { confederation_id: String(c.id) },
         });
 
         // Count international competitions for this confederation
         const totalIntComps = await this.compRepo
           .createQueryBuilder('comp')
-          .where('comp.confed_id = :cid', { cid: c.id })
+          .where('comp.confed_id = :cid', { cid: String(c.id) })
           .andWhere('(comp.is_international = true OR comp.nation_id IS NULL)')
           .getCount();
 
         return {
-          id: c.id,
+          id: String(c.id),
           name: c.name,
           totalNations,
           totalIntComps,
@@ -55,7 +55,7 @@ export class HierarchyService {
     return results;
   }
 
-  async getNationsByContinent(confedId: number) {
+  async getNationsByContinent(confedId: string) {
     const raw = await this.nationRepo.query(
       `SELECT n.id, n.long_name, n.short_name, n.three_letter_name, n.confederation_id,
         (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id)::int as total_comps,
@@ -66,15 +66,15 @@ export class HierarchyService {
       FROM nations n
       WHERE n.confederation_id = $1
       ORDER BY n.long_name ASC;`,
-      [confedId],
+      [String(confedId)],
     );
 
     return raw.map((r: any) => ({
-      id: Number(r.id),
+      id: String(r.id),
       long_name: r.long_name,
       short_name: r.short_name,
       three_letter_name: r.three_letter_name,
-      confederation_id: Number(r.confederation_id),
+      confederation_id: r.confederation_id ? String(r.confederation_id) : null,
       totalComps: r.total_comps || 0,
       totalClubs: r.total_clubs || 0,
       totalStadiums: r.total_stadiums || 0,
@@ -89,44 +89,53 @@ export class HierarchyService {
     }));
   }
 
-  async getIntCompetitionsByContinent(confedId: number) {
+  async getIntCompetitionsByContinent(confedId: string) {
     const raw = await this.compRepo.query(
       `SELECT c.*,
         n.three_letter_name as nation_three_letter,
         n.long_name as nation_name,
+        p.long_name as parent_long_name,
+        p.short_name as parent_short_name,
+        (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
       FROM competitions c
       LEFT JOIN nations n ON n.id = c.nation_id
+      LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE c.confed_id = $1 AND (c.is_international = true OR c.nation_id IS NULL)
       ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
-      [confedId],
+      [String(confedId)],
     );
 
     return raw.map((r: any) => ({
-      id: Number(r.id),
+      id: String(r.id),
       long_name: r.long_name,
       short_name: r.short_name,
       three_letter_name: r.three_letter_name,
       fg_color: r.fg_color,
       bg_color: r.bg_color,
-      confed_id: r.confed_id ? Number(r.confed_id) : null,
-      nation_id: r.nation_id ? Number(r.nation_id) : null,
+      confed_id: r.confed_id ? String(r.confed_id) : null,
+      nation_id: r.nation_id ? String(r.nation_id) : null,
       nation_name: r.nation_name,
       nation_three_letter: r.nation_three_letter,
+      parent_id: r.parent_id ? String(r.parent_id) : null,
+      parent_name: r.parent_short_name || r.parent_long_name || null,
+      parent_long_name: r.parent_long_name || null,
+      parent_short_name: r.parent_short_name || null,
       categories: r.categories,
       is_international: r.is_international,
       note: r.note,
       inactive_fields: r.inactive_fields,
       clubsCount: r.clubs_count || 0,
       awardsCount: r.awards_count || 0,
+      childrenCount: r.children_count || 0,
       totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
     }));
   }
 
-  async getNationHub(nationId: number) {
+  async getNationHub(nationId: string) {
     const nation = await this.nationRepo.findOne({
-      where: { id: nationId },
+      where: { id: String(nationId) },
       relations: ['confederation'],
     });
 
@@ -140,12 +149,12 @@ export class HierarchyService {
       cities,
       awards,
     ] = await Promise.all([
-      this.compRepo.count({ where: { nation_id: nationId } }),
-      this.clubRepo.count({ where: { nation_id: nationId, comp_id: IsNull() } }),
-      this.clubRepo.count({ where: { nation_id: nationId } }),
-      this.stadiumRepo.count({ where: { nation_id: nationId } }),
-      this.cityRepo.count({ where: { country_id: nationId } }),
-      this.awardRepo.count({ where: { nation_id: nationId, comp_id: IsNull() } }),
+      this.compRepo.count({ where: { nation_id: String(nationId) } }),
+      this.clubRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
+      this.clubRepo.count({ where: { nation_id: String(nationId) } }),
+      this.stadiumRepo.count({ where: { nation_id: String(nationId) } }),
+      this.cityRepo.count({ where: { country_id: String(nationId) } }),
+      this.awardRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
     ]);
 
     return {
@@ -161,39 +170,49 @@ export class HierarchyService {
     };
   }
 
-  async getDomesticCompetitions(nationId: number) {
-    const nation = await this.nationRepo.findOne({ where: { id: nationId } });
+  async getDomesticCompetitions(nationId: string) {
+    const strNationId = String(nationId);
+    const nation = await this.nationRepo.findOne({ where: { id: strNationId } });
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
         n.three_letter_name as nation_three_letter,
         n.long_name as nation_name,
+        p.long_name as parent_long_name,
+        p.short_name as parent_short_name,
+        (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
       FROM competitions c
       LEFT JOIN nations n ON n.id = c.nation_id
+      LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE c.nation_id = $1
       ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
-      [nationId],
+      [strNationId],
     );
 
     const comps = raw.map((r: any) => ({
-      id: Number(r.id),
+      id: String(r.id),
       long_name: r.long_name,
       short_name: r.short_name,
       three_letter_name: r.three_letter_name,
       fg_color: r.fg_color,
       bg_color: r.bg_color,
-      confed_id: r.confed_id ? Number(r.confed_id) : null,
-      nation_id: r.nation_id ? Number(r.nation_id) : null,
+      confed_id: r.confed_id ? String(r.confed_id) : null,
+      nation_id: r.nation_id ? String(r.nation_id) : null,
       nation_name: r.nation_name || nation?.long_name,
       nation_three_letter: r.nation_three_letter || nation?.three_letter_name,
+      parent_id: r.parent_id ? String(r.parent_id) : null,
+      parent_name: r.parent_short_name || r.parent_long_name || null,
+      parent_long_name: r.parent_long_name || null,
+      parent_short_name: r.parent_short_name || null,
       categories: r.categories,
       is_international: r.is_international,
       note: r.note,
       inactive_fields: r.inactive_fields,
       clubsCount: r.clubs_count || 0,
       awardsCount: r.awards_count || 0,
+      childrenCount: r.children_count || 0,
       totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
     }));
 
@@ -203,7 +222,7 @@ export class HierarchyService {
         COUNT(*) FILTER (WHERE is_extinct = true)::int as extinct_count
       FROM clubs
       WHERE nation_id = $1;`,
-      [nationId],
+      [strNationId],
     );
 
     const otherClubsCount = countsRaw[0]?.other_count || 0;
@@ -215,13 +234,14 @@ export class HierarchyService {
       short_name: 'Other Clubs',
       three_letter_name: 'OTH',
       categories: 'Other',
-      nation_id: Number(nationId),
+      nation_id: strNationId,
       nation_name: nation?.long_name,
       nation_three_letter: nation?.three_letter_name,
       is_virtual: true,
       virtual_type: 'OTHER',
       clubsCount: otherClubsCount,
       awardsCount: 0,
+      childrenCount: 0,
       totalChildren: otherClubsCount,
     };
 
@@ -231,24 +251,25 @@ export class HierarchyService {
       short_name: 'Extinct Clubs',
       three_letter_name: 'EXT',
       categories: 'Other',
-      nation_id: Number(nationId),
+      nation_id: strNationId,
       nation_name: nation?.long_name,
       nation_three_letter: nation?.three_letter_name,
       is_virtual: true,
       virtual_type: 'EXTINCT',
       clubsCount: extinctClubsCount,
       awardsCount: 0,
+      childrenCount: 0,
       totalChildren: extinctClubsCount,
     };
 
     return [virtualOther, virtualExtinct, ...comps];
   }
 
-  async getIndependentClubs(nationId: number, extinct?: string) {
+  async getIndependentClubs(nationId: string, extinct?: string) {
     const qb = this.clubRepo
       .createQueryBuilder('club')
       .leftJoinAndSelect('club.nation', 'nation')
-      .where('club.nation_id = :nationId', { nationId });
+      .where('club.nation_id = :nationId', { nationId: String(nationId) });
 
     if (extinct === 'true') {
       qb.andWhere('club.is_extinct = true');
@@ -262,69 +283,120 @@ export class HierarchyService {
     return qb.orderBy('club.id', 'ASC').getMany();
   }
 
-  async getAllClubsInNation(nationId: number) {
+  async getAllClubsInNation(nationId: string) {
     return this.clubRepo.find({
-      where: { nation_id: nationId },
+      where: { nation_id: String(nationId) },
       relations: ['competition', 'nation'],
       order: { id: 'ASC' },
     });
   }
 
-  async getClubsInCompetition(compId: number) {
+  async getClubsInCompetition(compId: string) {
     return this.clubRepo.find({
-      where: { comp_id: compId },
+      where: { comp_id: String(compId) },
       relations: ['nation'],
       order: { id: 'ASC' },
     });
   }
 
-  async getStadiums(nationId: number) {
+  async getStadiums(nationId: string) {
     return this.stadiumRepo.find({
-      where: { nation_id: nationId },
+      where: { nation_id: String(nationId) },
       relations: ['nation'],
       order: { id: 'ASC' },
     });
   }
 
-  async getCities(nationId: number) {
+  async getCities(nationId: string) {
     return this.cityRepo.find({
-      where: { country_id: nationId },
+      where: { country_id: String(nationId) },
       relations: ['nation'],
       order: { id: 'ASC' },
     });
   }
 
-  async getAwardsByNation(nationId: number) {
+  async getAwardsByNation(nationId: string) {
     return this.awardRepo.find({
-      where: { nation_id: nationId, comp_id: IsNull() },
+      where: { nation_id: String(nationId), comp_id: IsNull() },
       relations: ['nation', 'competition'],
       order: { id: 'ASC' },
     });
   }
 
-  async getAwardsByCompetition(compId: number) {
+  async getAwardsByCompetition(compId: string) {
     return this.awardRepo.find({
-      where: { comp_id: compId },
+      where: { comp_id: String(compId) },
       relations: ['nation', 'competition'],
       order: { id: 'ASC' },
     });
   }
 
-  async getCompetitionInfo(compId: number) {
+  async getCompetitionInfo(compId: string) {
+    const strId = String(compId);
     const comp = await this.compRepo.findOne({
-      where: { id: compId },
-      relations: ['nation', 'confederation'],
+      where: { id: strId },
+      relations: ['nation', 'confederation', 'parent'],
     });
     if (!comp) return null;
-    const [clubsCount, awardsCount] = await Promise.all([
-      this.clubRepo.count({ where: { comp_id: compId } }),
-      this.awardRepo.count({ where: { comp_id: compId } }),
+    const [clubsCount, awardsCount, childrenCount] = await Promise.all([
+      this.clubRepo.count({ where: { comp_id: strId } }),
+      this.awardRepo.count({ where: { comp_id: strId } }),
+      this.compRepo.count({ where: { parent_id: strId } }),
     ]);
     return {
       ...comp,
+      parent_name: comp.parent?.short_name || comp.parent?.long_name || null,
+      parent_long_name: comp.parent?.long_name || null,
+      parent_short_name: comp.parent?.short_name || null,
       clubsCount,
       awardsCount,
+      childrenCount,
     };
+  }
+
+  async getSubCompetitions(compId: string) {
+    const strId = String(compId);
+    const raw = await this.compRepo.query(
+      `SELECT c.*,
+        n.three_letter_name as nation_three_letter,
+        n.long_name as nation_name,
+        p.long_name as parent_long_name,
+        p.short_name as parent_short_name,
+        (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
+        (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
+        (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
+      FROM competitions c
+      LEFT JOIN nations n ON n.id = c.nation_id
+      LEFT JOIN competitions p ON p.id = c.parent_id
+      WHERE c.parent_id = $1
+      ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
+      [strId],
+    );
+
+    return raw.map((r: any) => ({
+      id: String(r.id),
+      long_name: r.long_name,
+      short_name: r.short_name,
+      three_letter_name: r.three_letter_name,
+      fg_color: r.fg_color,
+      bg_color: r.bg_color,
+      confed_id: r.confed_id ? String(r.confed_id) : null,
+      nation_id: r.nation_id ? String(r.nation_id) : null,
+      nation_name: r.nation_name,
+      nation_three_letter: r.nation_three_letter,
+      parent_id: r.parent_id ? String(r.parent_id) : null,
+      parent_name: r.parent_short_name || r.parent_long_name || null,
+      parent_long_name: r.parent_long_name || null,
+      parent_short_name: r.parent_short_name || null,
+      categories: r.categories,
+      is_international: r.is_international,
+      note: r.note,
+      inactive_fields: r.inactive_fields,
+      clubsCount: r.clubs_count || 0,
+      awardsCount: r.awards_count || 0,
+      childrenCount: r.children_count || 0,
+      totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
+    }));
   }
 
   async getAllAwards() {
@@ -338,11 +410,9 @@ export class HierarchyService {
     const qb = this.personRepo.createQueryBuilder('p');
     if (query && query.trim()) {
       const term = query.trim();
-      const isId = /^\d+$/.test(term);
-      const idVal = isId ? parseInt(term, 10) : -1;
       qb.where(
-        'p.first_name ILIKE :q OR p.second_name ILIKE :q OR p.common_name ILIKE :q OR CONCAT(p.first_name, \' \', p.second_name) ILIKE :q OR p.id = :idVal',
-        { q: `%${term}%`, idVal },
+        'p.first_name ILIKE :q OR p.second_name ILIKE :q OR p.common_name ILIKE :q OR CONCAT(p.first_name, \' \', p.second_name) ILIKE :q OR p.id = :term',
+        { q: `%${term}%`, term },
       );
     }
     return qb.orderBy('p.id', 'ASC').getMany();
@@ -352,21 +422,19 @@ export class HierarchyService {
     const qb = this.stageRepo.createQueryBuilder('s');
     if (query && query.trim()) {
       const term = query.trim();
-      const isId = /^\d+$/.test(term);
-      const idVal = isId ? parseInt(term, 10) : -1;
-      qb.where('s.name ILIKE :q OR s.id = :idVal', {
+      qb.where('s.name ILIKE :q OR s.id = :term', {
         q: `%${term}%`,
-        idVal,
+        term,
       });
     }
     return qb.orderBy('s.id', 'ASC').getMany();
   }
 
-  async getAllNations(confedId?: number, q?: string) {
+  async getAllNations(confedId?: string, q?: string) {
     let whereClause = '1=1';
     const params: any[] = [];
     if (confedId) {
-      params.push(confedId);
+      params.push(String(confedId));
       whereClause += ` AND n.confederation_id = $${params.length}`;
     }
     if (q && q.trim()) {
@@ -389,11 +457,11 @@ export class HierarchyService {
     );
 
     return raw.map((r: any) => ({
-      id: Number(r.id),
+      id: String(r.id),
       long_name: r.long_name,
       short_name: r.short_name,
       three_letter_name: r.three_letter_name,
-      confederation_id: r.confederation_id ? Number(r.confederation_id) : null,
+      confederation_id: r.confederation_id ? String(r.confederation_id) : null,
       confederation_name: r.confederation_name,
       totalComps: r.total_comps || 0,
       totalClubs: r.total_clubs || 0,
@@ -409,15 +477,15 @@ export class HierarchyService {
     }));
   }
 
-  async getAllCompetitions(confedId?: number, nationId?: number, q?: string, isInternational?: boolean) {
+  async getAllCompetitions(confedId?: string, nationId?: string, q?: string, isInternational?: boolean) {
     let whereClause = '1=1';
     const params: any[] = [];
     if (confedId) {
-      params.push(confedId);
+      params.push(String(confedId));
       whereClause += ` AND c.confed_id = $${params.length}`;
     }
     if (nationId) {
-      params.push(nationId);
+      params.push(String(nationId));
       whereClause += ` AND c.nation_id = $${params.length}`;
     }
     if (isInternational !== undefined) {
@@ -437,34 +505,43 @@ export class HierarchyService {
         conf.name as confed_name,
         n.long_name as nation_name,
         n.three_letter_name as nation_three_letter,
+        p.long_name as parent_long_name,
+        p.short_name as parent_short_name,
+        (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
       FROM competitions c
       LEFT JOIN confederations conf ON c.confed_id = conf.id
       LEFT JOIN nations n ON c.nation_id = n.id
+      LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
       ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
       params,
     );
 
     return raw.map((r: any) => ({
-      id: Number(r.id),
+      id: String(r.id),
       long_name: r.long_name,
       short_name: r.short_name,
       three_letter_name: r.three_letter_name,
       fg_color: r.fg_color,
       bg_color: r.bg_color,
-      confed_id: r.confed_id ? Number(r.confed_id) : null,
+      confed_id: r.confed_id ? String(r.confed_id) : null,
       confed_name: r.confed_name,
-      nation_id: r.nation_id ? Number(r.nation_id) : null,
+      nation_id: r.nation_id ? String(r.nation_id) : null,
       nation_name: r.nation_name,
       nation_three_letter: r.nation_three_letter,
+      parent_id: r.parent_id ? String(r.parent_id) : null,
+      parent_name: r.parent_short_name || r.parent_long_name || null,
+      parent_long_name: r.parent_long_name || null,
+      parent_short_name: r.parent_short_name || null,
       categories: r.categories,
       is_international: r.is_international,
       note: r.note,
       inactive_fields: r.inactive_fields,
       clubsCount: r.clubs_count || 0,
       awardsCount: r.awards_count || 0,
+      childrenCount: r.children_count || 0,
       totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
     }));
   }

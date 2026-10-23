@@ -36,6 +36,9 @@ export class LncParserService {
     await queryRunner.startTransaction();
 
     try {
+      await queryRunner.query(`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS parent_id BIGINT`);
+      await queryRunner.query(`CREATE INDEX IF NOT EXISTS idx_competitions_parent_id ON competitions(parent_id)`);
+
       // 1. Confederations
       const confeds = [
         [1, 'Africa'],
@@ -266,6 +269,20 @@ export class LncParserService {
           continue;
         }
 
+        const parentMatch = cleanLine.match(/^"COMP_PARENT_ID"\s+(\d+)\s+(\d+)/);
+        if (parentMatch) {
+          const cid = parseInt(parentMatch[1], 10);
+          const pid = parseInt(parentMatch[2], 10);
+          if (!comps[cid]) {
+            comps[cid] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+          }
+          if (!comps[cid].inactive_fields) comps[cid].inactive_fields = new Set();
+          comps[cid].parent_id = pid;
+          if (isCommented) comps[cid].inactive_fields.add('parent_id');
+          else comps[cid].inactive_fields.delete('parent_id');
+          continue;
+        }
+
         const colMatch = cleanLine.match(/^"COMP_COLOUR_CHANGE"\s+(\d+)\s+([0-9\s]+)\s+""/);
         if (colMatch) {
           const cid = parseInt(colMatch[1], 10);
@@ -339,6 +356,7 @@ export class LncParserService {
         const bg = cdata.bg_color || null;
         const natId = cdata.nat_code ? codeToNationId[cdata.nat_code] || null : null;
         const isInter = natId === null;
+        const parentId = cdata.parent_id || null;
 
         compNameToId[lName.toLowerCase()] = id;
         compNameToId[sName.toLowerCase()] = id;
@@ -348,8 +366,8 @@ export class LncParserService {
           : null;
 
         await queryRunner.query(
-          `INSERT INTO competitions (id, long_name, short_name, three_letter_name, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          `INSERT INTO competitions (id, long_name, short_name, three_letter_name, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields, parent_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
            ON CONFLICT (id) DO UPDATE SET
              long_name = EXCLUDED.long_name,
              short_name = EXCLUDED.short_name,
@@ -360,8 +378,9 @@ export class LncParserService {
              nation_id = EXCLUDED.nation_id,
              categories = EXCLUDED.categories,
              is_international = EXCLUDED.is_international,
-             inactive_fields = EXCLUDED.inactive_fields`,
-          [id, lName, sName, code, fg, bg, cdata.confed_id, natId, cdata.cat, isInter, inactStr],
+             inactive_fields = EXCLUDED.inactive_fields,
+             parent_id = EXCLUDED.parent_id`,
+          [id, lName, sName, code, fg, bg, cdata.confed_id, natId, cdata.cat, isInter, inactStr, parentId],
         );
       }
 

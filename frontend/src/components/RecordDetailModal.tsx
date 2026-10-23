@@ -37,8 +37,8 @@ export interface RecordDetailModalProps {
   initialMode?: 'view' | 'edit' | 'create';
   onEdit?: (record?: any) => void;
   onSuccess?: () => void;
-  defaultNationId?: number;
-  defaultCompId?: number;
+  defaultNationId?: string | number;
+  defaultCompId?: string | number;
 }
 
 const parseColor = (rgbStr?: string | null) => {
@@ -98,8 +98,9 @@ export default function RecordDetailModal({
     is_international: false,
     is_extinct: false,
     note: '',
-    nation_id: defaultNationId || null,
-    comp_id: defaultCompId || null,
+    nation_id: defaultNationId ? String(defaultNationId) : null,
+    comp_id: defaultCompId ? String(defaultCompId) : null,
+    parent_id: '',
   });
 
   useEffect(() => {
@@ -110,7 +111,7 @@ export default function RecordDetailModal({
       setErrorMessage(null);
 
       setFormData({
-        id: activeData.id !== undefined ? String(activeData.id) : '',
+        id: activeData.id !== undefined && activeData.id !== null ? String(activeData.id) : '',
         long_name: activeData.long_name || '',
         short_name: activeData.short_name || '',
         three_letter_name: activeData.three_letter_name || activeData.code || '',
@@ -125,8 +126,9 @@ export default function RecordDetailModal({
         is_international: !!activeData.is_international,
         is_extinct: !!activeData.is_extinct,
         note: activeData.note || '',
-        nation_id: activeData.nation_id || defaultNationId || null,
-        comp_id: activeData.comp_id || defaultCompId || null,
+        nation_id: activeData.nation_id ? String(activeData.nation_id) : (defaultNationId ? String(defaultNationId) : null),
+        comp_id: activeData.comp_id ? String(activeData.comp_id) : (defaultCompId ? String(defaultCompId) : null),
+        parent_id: activeData.parent_id ? String(activeData.parent_id) : '',
       });
     }
   }, [isOpen, data, initialMode, isCreate, defaultNationId, defaultCompId]);
@@ -245,9 +247,9 @@ export default function RecordDetailModal({
       const payload: any = { ...formData };
 
       if (mode === 'create') {
-        payload.id = parseInt(formData.id, 10);
-        if (isNaN(payload.id)) {
-          throw new Error('FM ID must be a valid number');
+        payload.id = String(formData.id || '').trim();
+        if (!payload.id) {
+          throw new Error('FM ID is required');
         }
       }
 
@@ -265,6 +267,7 @@ export default function RecordDetailModal({
       if (isComp) {
         payload.fg_color = payload.fg_color?.trim() || null;
         payload.bg_color = payload.bg_color?.trim() || null;
+        payload.parent_id = formData.parent_id?.trim() ? String(formData.parent_id).trim() : null;
       }
 
       if (mode === 'create') {
@@ -274,7 +277,7 @@ export default function RecordDetailModal({
         onSuccess?.();
         onClose();
       } else {
-        await updateRecord(recType, currentData.id, payload);
+        await updateRecord(recType, String(currentData.id), payload);
         message.success('Record updated successfully!');
         const updated = { ...currentData, ...payload };
         setCurrentData(updated);
@@ -394,7 +397,7 @@ export default function RecordDetailModal({
               onClick={() => setMode('edit')}
               className="shrink-0 text-xs font-medium shadow-xs"
             >
-              <span className="hidden sm:inline">Chỉnh sửa</span>
+              <span className="hidden sm:inline">Edit</span>
             </Button>
           )}
 
@@ -405,7 +408,7 @@ export default function RecordDetailModal({
               onClick={() => setMode('view')}
               className="shrink-0 text-xs font-medium"
             >
-              <span className="hidden sm:inline">Chi tiết</span>
+              <span className="hidden sm:inline">Details</span>
             </Button>
           )}
         </div>
@@ -421,7 +424,7 @@ export default function RecordDetailModal({
                 onClick={() => setMode('edit')}
                 className="font-medium px-4 h-9 shadow-sm"
               >
-                Chỉnh sửa / Edit
+                Edit
               </Button>
             )}
             <Button
@@ -432,7 +435,7 @@ export default function RecordDetailModal({
               }}
               className="font-medium px-4 h-9"
             >
-              Đóng / Close
+              Close
             </Button>
           </div>
         ) : (
@@ -445,7 +448,7 @@ export default function RecordDetailModal({
               }}
               className="font-medium px-4 h-9"
             >
-              Hủy / Cancel
+              Cancel
             </Button>
             <Button
               key="save"
@@ -455,7 +458,7 @@ export default function RecordDetailModal({
               onClick={handleSave}
               className="bg-blue-600 hover:bg-blue-700 font-medium px-4 h-9 shadow-sm"
             >
-              {isCreate ? 'Tạo mới / Create' : 'Lưu thay đổi / Save'}
+              {isCreate ? 'Create' : 'Save Changes'}
             </Button>
           </div>
         )
@@ -688,6 +691,45 @@ export default function RecordDetailModal({
               </div>
             )}
 
+            {/* Parent Competition (for competitions) */}
+            {isComp && (currentData.parent_id || currentData.parent_name) && (
+              <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  Parent:
+                </span>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <TrophyOutlined className="text-amber-600 text-xs shrink-0" />
+                  <span
+                    className={`font-bold text-[13px] truncate ${
+                      isFieldInactive('parent_id') ? 'line-through text-red-600' : 'text-slate-800'
+                    }`}
+                  >
+                    {currentData.parent_name || currentData.parent_long_name || `Competition ${currentData.parent_id}`}
+                  </span>
+                  {isFieldInactive('parent_id') && (
+                    <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
+                      Inactive
+                    </span>
+                  )}
+                  <span className="text-xs text-slate-400 font-mono ml-auto shrink-0">
+                    ID: {currentData.parent_id}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-competitions count */}
+            {isComp && currentData.childrenCount !== undefined && currentData.childrenCount > 0 && (
+              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
+                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
+                  Sub-Comps:
+                </span>
+                <span className="font-bold text-[13px] text-amber-600">
+                  {currentData.childrenCount} Sub-Competitions
+                </span>
+              </div>
+            )}
+
             {/* Total Competitions for Nation */}
             {currentData.totalComps !== undefined && (
               <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
@@ -861,7 +903,7 @@ export default function RecordDetailModal({
                 FM Unique ID <span className="text-red-500">*</span>
               </label>
               <Input
-                type="number"
+                type="text"
                 disabled={mode === 'edit'}
                 value={formData.id}
                 onChange={(e) => setFormData({ ...formData, id: e.target.value })}
@@ -1043,6 +1085,24 @@ export default function RecordDetailModal({
               </div>
             )}
 
+            {/* Competition Parent ID */}
+            {isComp && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Parent Competition ID (COMP_PARENT_ID)
+                </label>
+                <Input
+                  value={formData.parent_id || ''}
+                  onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
+                  placeholder="e.g. 1301416 (Leave blank if none)"
+                  className="font-mono text-xs"
+                />
+                <span className="text-[11px] text-slate-400 mt-0.5 block">
+                  Assign this competition as a sub-stage or sub-competition of another parent competition.
+                </span>
+              </div>
+            )}
+
             {/* Checkboxes: International / Extinct */}
             <div className="flex items-center gap-4 flex-wrap pt-1">
               {isComp && (
@@ -1058,7 +1118,7 @@ export default function RecordDetailModal({
                   checked={formData.is_extinct}
                   onChange={(e) => setFormData({ ...formData, is_extinct: e.target.checked })}
                 >
-                  <span className="text-xs text-slate-700 font-medium">Extinct Club (Đã giải thể)</span>
+                  <span className="text-xs text-slate-700 font-medium">Extinct Club</span>
                 </Checkbox>
               )}
             </div>
@@ -1066,7 +1126,7 @@ export default function RecordDetailModal({
             {/* Note */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Note / Ghi chú
+                Note
               </label>
               <Input.TextArea
                 rows={2}
