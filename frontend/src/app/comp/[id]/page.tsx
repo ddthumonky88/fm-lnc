@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Breadcrumb, Tag, Badge, Input, Button, message, Spin, Tabs, Space } from 'antd';
+import { Breadcrumb, Tag, Badge, Input, Button, message, Spin, Tabs, Space, Tooltip } from 'antd';
 import {
   SafetyOutlined,
   StarOutlined,
@@ -10,6 +10,7 @@ import {
   PlusOutlined,
   ArrowLeftOutlined,
   TrophyOutlined,
+  CopyOutlined,
 } from '@ant-design/icons';
 import {
   fetchCompetitionInfo,
@@ -410,22 +411,41 @@ export default function CompetitionDetailPage() {
                 <TrophyOutlined className="text-2xl text-amber-500" />
               )}
               <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base sm:text-lg font-bold text-slate-800 m-0">
-                    {compTitle}
-                  </h2>
-                  <Tag
-                    color={
-                      isVirtual
-                        ? isVirtualExtinct
-                          ? 'volcano'
-                          : 'geekblue'
-                        : 'cyan'
-                    }
-                    className="m-0 font-bold text-xs"
-                  >
-                    {isVirtual ? (isVirtualExtinct ? '[EXTINCT]' : '[OTHER]') : `ID: ${compId}`}
-                  </Tag>
+                {/* Top: Tag ID (cho phép copy) + tags */}
+                <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                  <Tooltip title={isVirtual ? undefined : 'Click to copy ID'}>
+                    <Tag
+                      color={
+                        isVirtual
+                          ? isVirtualExtinct
+                            ? 'volcano'
+                            : 'geekblue'
+                          : 'cyan'
+                      }
+                      className={`m-0 font-mono font-bold text-xs inline-flex items-center gap-1.5 ${
+                        !isVirtual ? 'cursor-pointer hover:opacity-80' : ''
+                      }`}
+                      onClick={() => {
+                        if (!isVirtual) {
+                          navigator.clipboard.writeText(String(compId));
+                          message.success(`Copied ID: ${compId}`);
+                        }
+                      }}
+                    >
+                      {!isVirtual && <CopyOutlined className="text-[11px]" />}
+                      <span>{isVirtual ? (isVirtualExtinct ? '[EXTINCT]' : '[OTHER]') : `ID: ${compId}`}</span>
+                    </Tag>
+                  </Tooltip>
+                  {compInfo?.three_letter_name && (
+                    <Tag color="purple" className="m-0 font-mono font-bold text-xs">
+                      {compInfo.three_letter_name}
+                    </Tag>
+                  )}
+                  {compInfo?.categories && (
+                    <Tag color="blue" className="m-0 text-xs">
+                      {compInfo.categories}
+                    </Tag>
+                  )}
                   {compInfo?.parent_id && (
                     <Tag
                       color="orange"
@@ -440,26 +460,21 @@ export default function CompetitionDetailPage() {
                       {compInfo.childrenCount} Sub-Competitions
                     </Tag>
                   )}
-                  {compInfo?.three_letter_name && (
-                    <Tag color="purple" className="m-0 font-bold text-xs">
-                      {compInfo.three_letter_name}
-                    </Tag>
-                  )}
-                  {compInfo?.categories && (
-                    <Tag color="blue" className="m-0 text-xs">
-                      {compInfo.categories}
-                    </Tag>
-                  )}
                 </div>
+
+                {/* Bottom: Tên (thường là short name) */}
+                <h2 className="text-base sm:text-lg font-bold text-slate-800 m-0 leading-snug">
+                  {compTitle}
+                </h2>
                 {isVirtual ? (
                   <div className="text-xs text-slate-500 mt-0.5">
                     {isVirtualExtinct
                       ? 'List of extinct clubs in this nation'
                       : 'List of independent clubs (not assigned to a specific competition)'}
                   </div>
-                ) : compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (
+                ) : compInfo?.long_name && compInfo.long_name !== compTitle ? (
                   <div className="text-xs text-slate-500 mt-0.5">{compInfo.long_name}</div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

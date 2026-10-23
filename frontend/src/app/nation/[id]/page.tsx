@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Breadcrumb, Tabs, Tag, Badge, Input, Button, Space, message, Spin } from 'antd';
+import { Breadcrumb, Tabs, Tag, Badge, Input, Button, Space, message, Spin, Tooltip } from 'antd';
 import {
   TrophyOutlined,
   BankOutlined,
@@ -11,6 +11,7 @@ import {
   SearchOutlined,
   PlusOutlined,
   ArrowLeftOutlined,
+  CopyOutlined,
 } from '@ant-design/icons';
 import {
   fetchNationHub,
@@ -271,7 +272,8 @@ export default function NationDetailPage() {
   };
 
   const nation = nationHub?.nation;
-  const nationTitle = nation ? `[${nation.three_letter_name || ''}] ${nation.long_name}` : `Nation ${nationId}`;
+  const nationShortName = nation?.short_name || nation?.long_name || `Nation ${nationId}`;
+  const nationLongName = nation?.long_name;
 
   return (
     <div className="space-y-3">
@@ -282,14 +284,46 @@ export default function NationDetailPage() {
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-2xs">
           {/* Nation Info Banner */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 pb-3 border-b border-gray-100">
-            <div>
-              <h2 className="text-base font-bold text-gray-800 flex items-center gap-2 m-0">
-                <span>{nationTitle}</span>
-                <Tag color="blue" className="font-bold m-0 text-xs">
-                  ID: {nationId}
-                </Tag>
-              </h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <img
+                src={getNationLogoUrl(nationId, nation?.three_letter_name)}
+                alt={nationShortName}
+                className="w-9 h-6 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <div>
+                {/* Top: Tag ID (cho phép copy) + 3N */}
+                <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                  <Tooltip title="Click to copy ID">
+                    <Tag
+                      color="blue"
+                      onClick={() => {
+                        navigator.clipboard.writeText(String(nationId));
+                        message.success(`Copied ID: ${nationId}`);
+                      }}
+                      className="font-mono font-bold m-0 text-xs cursor-pointer hover:opacity-80 inline-flex items-center gap-1.5"
+                    >
+                      <CopyOutlined className="text-[11px]" />
+                      <span>ID: {nationId}</span>
+                    </Tag>
+                  </Tooltip>
+                  {nation?.three_letter_name && (
+                    <Tag color="purple" className="font-mono font-bold m-0 text-xs">
+                      {nation.three_letter_name}
+                    </Tag>
+                  )}
+                </div>
+                {/* Bottom: Tên (thường là short name) */}
+                <h2 className="text-base sm:text-lg font-bold text-gray-800 m-0 leading-snug">
+                  {nationShortName}
+                </h2>
+                {nationLongName && nationLongName !== nationShortName && (
+                  <div className="text-xs text-gray-500 mt-0.5">{nationLongName}</div>
+                )}
+              </div>
             </div>
           </div>
 

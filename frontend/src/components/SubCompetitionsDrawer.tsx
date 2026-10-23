@@ -9,10 +9,12 @@ import {
   Empty,
   Spin,
   message,
+  Tooltip,
 } from 'antd';
 import {
   PlusOutlined,
   ReloadOutlined,
+  CopyOutlined,
 } from '@ant-design/icons';
 import { fetchSubCompetitions } from '../services/api';
 import EntityCard from './EntityCard';
@@ -100,13 +102,25 @@ export default function SubCompetitionsDrawer({
     <>
       <Drawer
         title={
-          <div className="flex items-center gap-2 flex-wrap py-1 min-w-0">
+          <div className="flex flex-col py-0.5 min-w-0">
             {parentComp?.id && (
-              <Tag color="gold" className="m-0 font-mono font-bold text-xs">
-                ID: {parentComp.id}
-              </Tag>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Tooltip title="Click to copy ID">
+                  <Tag
+                    color="gold"
+                    className="m-0 font-mono font-bold text-xs cursor-pointer hover:opacity-80 inline-flex items-center gap-1.5"
+                    onClick={() => {
+                      navigator.clipboard.writeText(String(parentComp.id));
+                      message.success(`Copied ID: ${parentComp.id}`);
+                    }}
+                  >
+                    <CopyOutlined className="text-[11px]" />
+                    <span>ID: {parentComp.id}</span>
+                  </Tag>
+                </Tooltip>
+              </div>
             )}
-            <span className="font-bold text-sm text-gray-900 truncate">
+            <span className="font-bold text-sm text-gray-900 truncate leading-snug">
               {parentShortName}
             </span>
           </div>
