@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Badge, Empty, Select } from 'antd';
+import { Badge, Empty, Select, Switch, Tooltip } from 'antd';
 import {
   TrophyOutlined,
   SafetyOutlined,
@@ -9,8 +9,10 @@ import {
   GlobalOutlined,
   AppstoreOutlined,
   FilterOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons';
 import CardGrid from './CardGrid';
+import SubCompetitionsDrawer from './SubCompetitionsDrawer';
 
 export type CompetitionGroupKey = 'all' | 'league' | 'cup' | 'youth' | 'other';
 
@@ -54,6 +56,7 @@ interface CompetitionGroupViewProps {
   onDelete?: (record: any) => void;
   emptyText?: string;
   extraRight?: React.ReactNode;
+  defaultOnlyParents?: boolean;
 }
 
 export default function CompetitionGroupView({
@@ -64,8 +67,23 @@ export default function CompetitionGroupView({
   onDelete,
   emptyText = 'No competitions found',
   extraRight,
+  defaultOnlyParents = true,
 }: CompetitionGroupViewProps) {
   const [selectedGroup, setSelectedGroup] = useState<CompetitionGroupKey>('all');
+  const [onlyParents, setOnlyParents] = useState<boolean>(defaultOnlyParents);
+  const [drawerParent, setDrawerParent] = useState<any | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Filter only parents if onlyParents toggle is active
+  const visibleItems = useMemo(() => {
+    if (!onlyParents) return items;
+    return items.filter((item) => !item.parent_id);
+  }, [items, onlyParents]);
+
+  const handleViewChildren = (comp: any) => {
+    setDrawerParent(comp);
+    setIsDrawerOpen(true);
+  };
 
   const { leagueItems, cupItems, youthItems, otherItems } = useMemo(() => {
     const league: any[] = [];
@@ -73,7 +91,7 @@ export default function CompetitionGroupView({
     const youth: any[] = [];
     const other: any[] = [];
 
-    items.forEach((item) => {
+    visibleItems.forEach((item) => {
       const g = getCompetitionGroup(item.categories);
       if (g === 'league') league.push(item);
       else if (g === 'cup') cup.push(item);
@@ -92,7 +110,7 @@ export default function CompetitionGroupView({
       youthItems: youth,
       otherItems: other,
     };
-  }, [items]);
+  }, [visibleItems]);
 
   const groupConfigs = useMemo(
     () => [
@@ -139,7 +157,7 @@ export default function CompetitionGroupView({
               <span>All Categories</span>
             </span>
             <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-blue-50 text-blue-600 font-bold">
-              {items.length}
+              {visibleItems.length}
             </span>
           </div>
         ),
@@ -161,7 +179,7 @@ export default function CompetitionGroupView({
           ),
         })),
     ];
-  }, [items.length, groupConfigs]);
+  }, [visibleItems.length, groupConfigs]);
 
   if (loading) {
     return (
@@ -172,6 +190,8 @@ export default function CompetitionGroupView({
     );
   }
 
+  const hiddenChildrenCount = items.length - visibleItems.length;
+
   const renderToolbar = () => (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
       <div className="flex items-center gap-2.5 flex-wrap">
@@ -180,12 +200,37 @@ export default function CompetitionGroupView({
           value={selectedGroup}
           onChange={(val) => setSelectedGroup(val as CompetitionGroupKey)}
           options={selectOptions}
-          className="w-56 text-xs"
+          className="w-52 text-xs"
           suffixIcon={<FilterOutlined className="text-gray-400" />}
         />
+
+        {/* Parent Only Switch Toggle */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs shadow-2xs">
+          <Switch
+            size="small"
+            checked={onlyParents}
+            onChange={setOnlyParents}
+            className={onlyParents ? 'bg-blue-600' : 'bg-gray-300'}
+          />
+          <span
+            className="font-semibold text-gray-700 cursor-pointer select-none"
+            onClick={() => setOnlyParents(!onlyParents)}
+            title="Toggle between showing parent competitions only vs all sub-competitions"
+          >
+            Only Parents
+          </span>
+          {onlyParents && hiddenChildrenCount > 0 && (
+            <Tooltip title={`${hiddenChildrenCount} child competitions are organized inside parent drawers`}>
+              <span className="text-[10px] text-amber-700 font-bold bg-amber-100/80 px-1.5 py-0.2 rounded border border-amber-200/80 cursor-help">
+                {hiddenChildrenCount} in drawer
+              </span>
+            </Tooltip>
+          )}
+        </div>
+
         <span className="text-xs text-gray-300 font-medium hidden md:inline">|</span>
         <div className="text-xs text-gray-500 font-medium">
-          Total: <strong className="text-gray-800">{items.length}</strong> {items.length === 1 ? 'competition' : 'competitions'}
+          Total: <strong className="text-gray-800">{visibleItems.length}</strong> {visibleItems.length === 1 ? 'competition' : 'competitions'}
         </div>
       </div>
 
@@ -197,7 +242,7 @@ export default function CompetitionGroupView({
     </div>
   );
 
-  if (items.length === 0) {
+  if (visibleItems.length === 0) {
     return (
       <div className="space-y-4">
         {renderToolbar()}
@@ -243,6 +288,7 @@ export default function CompetitionGroupView({
                   onNavigate={onNavigate}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onViewChildren={handleViewChildren}
                   defaultPageSize={20}
                 />
               </div>
@@ -288,6 +334,7 @@ export default function CompetitionGroupView({
                   onNavigate={onNavigate}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onViewChildren={handleViewChildren}
                   defaultPageSize={20}
                 />
               </div>
@@ -295,6 +342,17 @@ export default function CompetitionGroupView({
           })()}
         </div>
       )}
+
+      {/* Sub-Competitions Drawer */}
+      <SubCompetitionsDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        parentComp={drawerParent}
+        allCompetitions={items}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onNavigate={onNavigate}
+      />
     </div>
   );
 }

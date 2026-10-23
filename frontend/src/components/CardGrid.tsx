@@ -12,6 +12,7 @@ interface CardGridProps {
   onNavigate?: (step: any) => void;
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
+  onViewChildren?: (record: any) => void;
   emptyText?: string;
   defaultPageSize?: number;
   columns?: number;
@@ -24,6 +25,7 @@ export default function CardGrid({
   onNavigate,
   onEdit,
   onDelete,
+  onViewChildren,
   emptyText = 'No records found',
   defaultPageSize = 20,
   columns,
@@ -76,6 +78,7 @@ export default function CardGrid({
             onNavigate={onNavigate}
             onEdit={onEdit}
             onDelete={onDelete}
+            onViewChildren={onViewChildren}
           />
         ))}
       </div>

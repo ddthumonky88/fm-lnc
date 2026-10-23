@@ -201,7 +201,7 @@ function ConfederationDetailContent() {
                         International Competitions
                       </span>
                       <Badge
-                        count={intComps.length}
+                        count={intComps.filter((c) => !c.parent_id).length}
                         overflowCount={99999}
                         style={{
                           backgroundColor: activeTab === 'INT_COMPETITIONS' ? '#1d70b8' : '#94a3b8',

@@ -17,6 +17,7 @@ import {
   FlagOutlined,
   EyeOutlined,
   InfoCircleOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
@@ -31,6 +32,7 @@ interface EntityCardProps {
   onNavigate?: (step: any) => void;
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
+  onViewChildren?: (record: any) => void;
 }
 
 const formatCode = (code?: string | null) => {
@@ -64,6 +66,7 @@ export default function EntityCard({
   onNavigate,
   onEdit,
   onDelete,
+  onViewChildren,
 }: EntityCardProps) {
   const router = useRouter();
   const [isInfoOpen, setIsInfoOpen] = useState(false);
@@ -324,7 +327,8 @@ export default function EntityCard({
     if (type === EntityType.COMPETITION || type === 'competition') {
       const hasClubs = data.is_virtual || (data.clubsCount || 0) > 0;
       const hasAwards = (data.awardsCount || 0) > 0;
-      if (!hasClubs && !hasAwards) return null;
+      const hasChildren = (data.childrenCount || 0) > 0;
+      if (!hasClubs && !hasAwards && !hasChildren) return null;
 
       const titleParts: string[] = [];
       if (data.is_virtual || (data.clubsCount || 0) > 0) {
@@ -335,22 +339,40 @@ export default function EntityCard({
       }
 
       return (
-        <Tooltip title={titleParts.join(' | ')}>
-          <Button
-            type="text"
-            shape="circle"
-            size="small"
-            icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onNavigate) {
-                handleNavigateAction();
-              } else if (data.id) {
-                router.push(`/comp/${data.id}`);
-              }
-            }}
-          />
-        </Tooltip>
+        <div className="flex items-center gap-0.5">
+          {hasChildren && (
+            <Tooltip title={`View Sub-Competitions (${data.childrenCount})`}>
+              <Button
+                type="text"
+                shape="circle"
+                size="small"
+                icon={<ApartmentOutlined style={{ color: '#d97706', fontSize: 13 }} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewChildren?.(data);
+                }}
+              />
+            </Tooltip>
+          )}
+          {(hasClubs || hasAwards) && (
+            <Tooltip title={titleParts.join(' | ')}>
+              <Button
+                type="text"
+                shape="circle"
+                size="small"
+                icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onNavigate) {
+                    handleNavigateAction();
+                  } else if (data.id) {
+                    router.push(`/comp/${data.id}`);
+                  }
+                }}
+              />
+            </Tooltip>
+          )}
+        </div>
       );
     }
 
@@ -661,11 +683,21 @@ export default function EntityCard({
 
           {/* Sub-competitions count */}
           {(type === 'competition' || type === EntityType.COMPETITION) && data.childrenCount !== undefined && data.childrenCount > 0 && (
-            <div className="flex items-baseline gap-1.5 min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0 mt-0.5">
               <span className="w-14 text-gray-400 font-medium text-xs shrink-0 select-none">Subs:</span>
-              <span className="font-semibold text-xs leading-5 text-amber-600">
-                {data.childrenCount} Sub-Competitions
-              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewChildren?.(data);
+                }}
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 hover:border-amber-300 text-xs font-semibold cursor-pointer transition-all shadow-2xs group"
+                title="Click to view Sub-Competitions in Drawer"
+              >
+                <ApartmentOutlined className="text-amber-600 group-hover:scale-110 transition-transform" />
+                <span>{data.childrenCount} Sub-Competitions</span>
+                <span className="text-[10px] text-amber-500 font-normal">→ Drawer</span>
+              </button>
             </div>
           )}
 

@@ -191,6 +191,10 @@ export default function NationDetailPage() {
 
   // Tab configurations (Awards hidden if count === 0)
   const tabItems = useMemo(() => {
+    const parentCompsCount = records.length > 0
+      ? records.filter((r) => !r.parent_id).length
+      : nationHub?.counts?.domesticComps || 0;
+
     const list = [
       {
         key: 'DOMESTIC_COMPS',
@@ -199,7 +203,7 @@ export default function NationDetailPage() {
             <TrophyOutlined className="text-amber-500" />
             <span className={activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}>Competitions</span>
             <Badge
-              count={nationHub?.counts?.domesticComps || 0}
+              count={parentCompsCount}
               overflowCount={99999}
               style={{ backgroundColor: activeTab === 'DOMESTIC_COMPS' ? '#1d70b8' : '#94a3b8' }}
             />
