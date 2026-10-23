@@ -162,7 +162,7 @@ export default function SubCompetitionsDrawer({
           </div>
         }
         placement="right"
-        width={typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : 720}
+        width={typeof window !== 'undefined' && window.innerWidth < 960 ? '100%' : 880}
         onClose={onClose}
         open={isOpen}
         destroyOnClose
@@ -250,7 +250,7 @@ export default function SubCompetitionsDrawer({
                 />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2">
                 {filteredChildren.map((child) => (
                   <EntityCard
                     key={child.id}
