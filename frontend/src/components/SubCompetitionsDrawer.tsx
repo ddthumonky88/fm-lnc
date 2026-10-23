@@ -8,14 +8,10 @@ import {
   Tag,
   Empty,
   Spin,
-  Tooltip,
-  Badge,
   message,
 } from 'antd';
 import {
-  ApartmentOutlined,
   PlusOutlined,
-  LinkOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
 import { fetchSubCompetitions } from '../services/api';
@@ -104,25 +100,15 @@ export default function SubCompetitionsDrawer({
     <>
       <Drawer
         title={
-          <div className="flex items-center gap-2.5 py-1 min-w-0">
-            <span className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
-              <ApartmentOutlined className="text-amber-600 text-base" />
+          <div className="flex items-center gap-2 flex-wrap py-1 min-w-0">
+            {parentComp?.id && (
+              <Tag color="gold" className="m-0 font-mono font-bold text-xs">
+                ID: {parentComp.id}
+              </Tag>
+            )}
+            <span className="font-bold text-sm text-gray-900 truncate">
+              {parentShortName}
             </span>
-            <div className="flex items-center gap-2 flex-wrap min-w-0">
-              {parentComp?.id && (
-                <Tag color="gold" className="m-0 font-mono font-bold text-xs">
-                  ID: {parentComp.id}
-                </Tag>
-              )}
-              <span className="font-bold text-sm text-gray-900 truncate">
-                {parentShortName}
-              </span>
-              <Badge
-                count={subComps.length}
-                overflowCount={999}
-                style={{ backgroundColor: '#d97706' }}
-              />
-            </div>
           </div>
         }
         extra={
@@ -137,22 +123,6 @@ export default function SubCompetitionsDrawer({
             >
               Add Child Comp
             </Button>
-            {parentComp?.id && (
-              <Tooltip title="Open Parent Competition Page">
-                <Button
-                  size="middle"
-                  type="default"
-                  icon={<LinkOutlined />}
-                  onClick={() => {
-                    onClose();
-                    router.push(`/comp/${parentComp.id}`);
-                  }}
-                  className="text-xs shrink-0"
-                >
-                  Parent Page
-                </Button>
-              </Tooltip>
-            )}
             <Button
               size="middle"
               type="text"

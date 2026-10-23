@@ -305,7 +305,7 @@ export default function EntityCard({
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
 
       return (
-        <Tooltip title={`View Nation / Competitions (${count || 0})`}>
+        <Tooltip title={`Details`}>
           <Button
             type="text"
             shape="circle"
@@ -489,7 +489,7 @@ export default function EntityCard({
             {renderChildButtons()}
 
             {/* Info button on EVERY card */}
-            <Tooltip title="View Details">
+            <Tooltip title="Info">
               <Button
                 type="text"
                 shape="circle"
