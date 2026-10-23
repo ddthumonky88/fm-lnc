@@ -134,8 +134,9 @@ export default function SubCompetitionsDrawer({
               onClick={() => setIsAddModalOpen(true)}
               style={{ backgroundColor: '#d97706', borderColor: '#d97706' }}
               className="text-xs font-semibold"
+              title="Add Child Comp"
             >
-              Add Child Comp
+              <span className="hidden sm:inline">Add Child Comp</span>
             </Button>
             <Button
               size="middle"
@@ -167,7 +168,7 @@ export default function SubCompetitionsDrawer({
                 <Empty description="No sub-competitions found for this parent" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2">
                 {subComps.map((child) => (
                   <EntityCard
                     key={child.id}

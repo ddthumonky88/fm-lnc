@@ -65,7 +65,7 @@ export default function CardGrid({
   const isFiveCols = type === 'stadium' || type === 'city' || type === 'nation' || columns === 5;
   const gridClasses = isFiveCols
     ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5'
-    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4';
+    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4';
 
   return (
     <div>

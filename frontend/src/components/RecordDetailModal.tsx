@@ -19,6 +19,7 @@ import {
   GlobalOutlined,
   AppstoreOutlined,
   BgColorsOutlined,
+  CloseOutlined,
 } from '@ant-design/icons';
 import { EntityType, RecordType } from '../types';
 import {
@@ -191,7 +192,7 @@ export default function RecordDetailModal({
     if (isStadium) return 'Stadium';
     if (isCity) return 'City';
     if (isAward) return 'Award';
-    if (isPlayer) return 'Person / Player';
+    if (isPlayer) return 'Person';
     if (isStage) return 'Stage';
     return String(type).toUpperCase();
   };
@@ -312,7 +313,7 @@ export default function RecordDetailModal({
       style={{ maxWidth: 600 }}
       destroyOnHidden
       centered
-      className="max-w-[calc(100vw-24px)] mx-auto"
+      className="mobile-modal-edge w-full max-w-full sm:max-w-[600px] mx-auto"
       title={
         <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 pr-6">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -424,33 +425,38 @@ export default function RecordDetailModal({
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={() => setMode('edit')}
-                className="font-medium px-4 h-9 shadow-sm"
+                className="font-medium px-3 sm:px-4 h-9 shadow-sm"
+                title="Edit"
               >
-                Edit
+                <span className="hidden sm:inline">Edit</span>
               </Button>
             )}
             <Button
               key="close"
+              icon={<CloseOutlined className="sm:hidden" />}
               onClick={(e) => {
                 e.stopPropagation();
                 onClose();
               }}
-              className="font-medium px-4 h-9"
+              className="font-medium px-3 sm:px-4 h-9"
+              title="Close"
             >
-              Close
+              <span className="hidden sm:inline">Close</span>
             </Button>
           </div>
         ) : (
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
             <Button
               key="cancel"
+              icon={<CloseOutlined className="sm:hidden" />}
               onClick={() => {
                 if (isCreate) onClose();
                 else setMode('view');
               }}
-              className="font-medium px-4 h-9"
+              className="font-medium px-3 sm:px-4 h-9"
+              title="Cancel"
             >
-              Cancel
+              <span className="hidden sm:inline">Cancel</span>
             </Button>
             <Button
               key="save"
@@ -458,9 +464,10 @@ export default function RecordDetailModal({
               icon={<SaveOutlined />}
               loading={isSaving}
               onClick={handleSave}
-              className="bg-blue-600 hover:bg-blue-700 font-medium px-4 h-9 shadow-sm"
+              className="bg-blue-600 hover:bg-blue-700 font-medium px-3 sm:px-4 h-9 shadow-sm"
+              title={isCreate ? 'Create' : 'Save Changes'}
             >
-              {isCreate ? 'Create' : 'Save Changes'}
+              <span className="hidden sm:inline">{isCreate ? 'Create' : 'Save Changes'}</span>
             </Button>
           </div>
         )

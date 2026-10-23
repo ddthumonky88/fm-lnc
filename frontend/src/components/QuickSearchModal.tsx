@@ -89,8 +89,8 @@ export default function QuickSearchModal({
     results.stages.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-2.5 pt-4 sm:p-4 sm:pt-16">
-      <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden border border-gray-200">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-0 sm:p-4 sm:pt-16">
+      <div className="bg-white rounded-none sm:rounded-lg shadow-2xl max-w-2xl w-full h-full sm:h-auto max-h-[96vh] sm:max-h-[88vh] flex flex-col overflow-hidden border-0 sm:border border-gray-200">
         <div className="p-3 sm:p-4 border-b border-gray-200 shrink-0 flex items-center gap-2 sm:gap-3">
           <input
             type="text"
@@ -315,11 +315,11 @@ export default function QuickSearchModal({
             </div>
           )}
 
-          {/* Players / People */}
+          {/* Persons */}
           {results.players.length > 0 && (
             <div>
               <div className="text-[11px] font-bold text-purple-600 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                <span>Players / Staff ({results.players.length})</span>
+                <span>Person ({results.players.length})</span>
               </div>
               <div className="divide-y divide-gray-100">
                 {results.players.map((p) => (
@@ -336,7 +336,7 @@ export default function QuickSearchModal({
                         {p.first_name} {p.second_name} {p.common_name ? `("${p.common_name}")` : ''}
                       </div>
                       <div className="text-[11px] text-gray-500">
-                        Player / Staff &bull; First: {p.first_name} | Last: {p.second_name}
+                        Person &bull; First: {p.first_name} | Last: {p.second_name}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">

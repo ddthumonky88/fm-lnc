@@ -663,39 +663,41 @@ export default function LncSortitoutsiExplorer() {
                 </div>
               </div>
 
-              {/* Mobile Vertical Cards (md:hidden) */}
-              <div className="md:hidden space-y-3">
+              {/* Mobile Vertical Cards (md:hidden) - 1 card per row */}
+              <div className="md:hidden grid grid-cols-1 gap-3">
                 {filteredContinents.map((c) => (
                   <div
                     key={c.id}
                     onClick={() => router.push(`/confederation/${c.id}`)}
-                    className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-3.5 shadow-2xs transition-all cursor-pointer flex flex-col gap-2.5"
+                    className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2.5 sm:p-3.5 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-2"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5 min-w-0">
+                    <div>
+                      <div className="flex items-center justify-between gap-1 mb-2">
+                        <Tag color="blue" className="font-mono font-bold text-[10px] sm:text-xs m-0 shrink-0">
+                          ID: {c.id}
+                        </Tag>
+                      </div>
+                      <div className="flex items-center gap-2 min-w-0">
                         <img
                           src={getConfederationLogoUrl(c.id)}
                           alt={c.name}
-                          className="w-8 h-8 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
+                          className="w-6 h-6 sm:w-8 sm:h-8 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                           }}
                         />
-                        <div className="font-bold text-sm text-slate-800 truncate">{c.name}</div>
+                        <div className="font-bold text-xs sm:text-sm text-slate-800 truncate">{c.name}</div>
                       </div>
-                      <Tag color="blue" className="font-mono font-bold text-xs m-0 shrink-0">
-                        ID: {c.id}
-                      </Tag>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-                      <div className="flex items-center gap-1.5 text-slate-600">
-                        <GlobalOutlined className="text-blue-500" />
-                        <span><strong>{c.totalNations || 0}</strong> countries</span>
+                    <div className="pt-2 border-t border-slate-100 text-[11px] space-y-1 text-slate-600">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <GlobalOutlined className="text-blue-500 text-xs shrink-0" />
+                        <span className="truncate"><strong>{c.totalNations || 0}</strong> nations</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-600">
-                        <TrophyOutlined className="text-amber-500" />
-                        <span><strong>{c.totalIntComps || 0}</strong> comps</span>
+                      <div className="flex items-center gap-1.5 truncate">
+                        <TrophyOutlined className="text-amber-500 text-xs shrink-0" />
+                        <span className="truncate"><strong>{c.totalIntComps || 0}</strong> comps</span>
                       </div>
                     </div>
                   </div>
@@ -811,8 +813,9 @@ export default function LncSortitoutsiExplorer() {
                       }}
                       style={{ backgroundColor: '#059669', borderColor: '#059669' }}
                       className="shrink-0"
+                      title="Add International Competition"
                     >
-                      Add International Competition
+                      <span className="hidden sm:inline">Add International Competition</span>
                     </Button>
                   </>
                 }
@@ -987,8 +990,9 @@ export default function LncSortitoutsiExplorer() {
                               setRecordModalType(currentRecordType);
                               setIsRecordModalOpen(true);
                             }}
+                            title={currentNationTabObj?.addLabel || 'Add Record'}
                           >
-                            {currentNationTabObj?.addLabel || 'Add Record'}
+                            <span className="hidden sm:inline">{currentNationTabObj?.addLabel || 'Add Record'}</span>
                           </Button>
                         </div>
                       </div>
@@ -1025,8 +1029,9 @@ export default function LncSortitoutsiExplorer() {
                                 setRecordModalType(currentRecordType);
                                 setIsRecordModalOpen(true);
                               }}
+                              title={currentNationTabObj?.addLabel || 'Add Competition'}
                             >
-                              {currentNationTabObj?.addLabel || 'Add Competition'}
+                              <span className="hidden sm:inline">{currentNationTabObj?.addLabel || 'Add Competition'}</span>
                             </Button>
                           </>
                         }

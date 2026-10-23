@@ -22,8 +22,8 @@ export default function DeleteConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden border border-gray-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-lg shadow-xl max-w-sm w-full overflow-hidden border-0 sm:border border-gray-200">
         <div className="bg-red-50 border-b border-red-200 px-5 py-3 flex items-center justify-between">
           <h3 className="font-bold text-sm text-red-800">{title}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none">

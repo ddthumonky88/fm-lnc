@@ -428,8 +428,9 @@ function CompetitionsExplorerContent() {
             icon={<PlusOutlined />}
             onClick={() => openRecordModal(RecordType.COMPETITION, null, selectedNation)}
             className="bg-blue-600"
+            title="Add Competition"
           >
-            Add Competition
+            <span className="hidden sm:inline">Add Competition</span>
           </Button>
         </div>
 
@@ -554,7 +555,7 @@ function CompetitionsExplorerContent() {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-3.5">
             {paginatedCompetitions.map((c) => {
               const bg = parseColor(c.bg_color);
               const fg = parseColor(c.fg_color);

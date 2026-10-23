@@ -137,8 +137,9 @@ export default function StagesPage() {
             size="small"
             onClick={() => openRecordModal(RecordType.STAGE)}
             className="bg-blue-600 hover:bg-blue-700 font-medium"
+            title="Add Stage"
           >
-            Add Stage
+            <span className="hidden sm:inline">Add Stage</span>
           </Button>
         </div>
       </div>
@@ -163,8 +164,8 @@ export default function StagesPage() {
           </div>
         </div>
 
-        {/* Mobile Vertical Cards (md:hidden) */}
-        <div className="md:hidden space-y-3">
+        {/* Mobile Vertical Cards (md:hidden) - 1 card per row */}
+        <div className="md:hidden grid grid-cols-1 gap-3">
           {filteredStages.length === 0 ? (
             <div className="py-12 text-center text-gray-400 text-xs italic">
               No tournament stages found
@@ -173,10 +174,10 @@ export default function StagesPage() {
             filteredStages.map((s) => (
               <div
                 key={s.id}
-                className="bg-white border border-gray-200 rounded-lg p-3.5 shadow-2xs flex flex-col gap-2.5"
+                className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between gap-2"
               >
-                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                  <Tag color="magenta" className="font-mono font-bold text-xs m-0">
+                <div className="flex items-center justify-between pb-1.5 border-b border-gray-100">
+                  <Tag color="magenta" className="font-mono font-bold text-[10px] sm:text-xs m-0">
                     ID: {s.id}
                   </Tag>
                   <div className="flex items-center gap-1">

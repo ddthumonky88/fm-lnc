@@ -279,38 +279,6 @@ export default function AppSidebar({
           </div>
         </div>
       )}
-
-      {/* Mobile Bottom Navigation Bar (World, Person, Stage) */}
-      <nav
-        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#0a1120]/95 backdrop-blur-md border-t border-[#19263e] px-2 py-1.5 flex items-center justify-around select-none shadow-2xl"
-        aria-label="Mobile Navigation"
-      >
-        {navItems.map((item) => {
-          const active = item.active;
-          return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={item.onClick}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer relative ${
-                active
-                  ? 'text-blue-400 font-semibold bg-blue-500/10'
-                  : 'text-slate-400 hover:text-slate-200 active:bg-slate-800/40'
-              }`}
-            >
-              <span className={`text-lg transition-transform ${active ? 'scale-110 text-blue-400' : ''}`}>
-                {item.icon}
-              </span>
-              <span className="text-[11px] tracking-tight mt-0.5">
-                {item.label}
-              </span>
-              {active && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-0.5" />
-              )}
-            </button>
-          );
-        })}
-      </nav>
     </>
   );
 }

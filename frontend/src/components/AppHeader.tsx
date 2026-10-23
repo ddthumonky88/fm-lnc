@@ -114,7 +114,7 @@ export default function AppHeader({
     {
       key: RecordType.PLAYER,
       icon: <UserOutlined className="text-sky-500" />,
-      label: 'Add Player / Staff',
+      label: 'Add Person',
       onClick: () => onQuickAdd(RecordType.PLAYER),
     },
     {
@@ -300,11 +300,11 @@ export default function AppHeader({
             type="primary"
             icon={<DownloadOutlined className="text-sm" />}
             loading={isSyncing || isRefreshing}
-            className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2.5 sm:px-3 h-8 sm:h-9 flex items-center gap-1.5 cursor-pointer"
+            className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2.5 sm:px-3 h-8 sm:h-9 flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+            title="Export & Sync Menu"
           >
             <span className="text-xs sm:text-sm font-semibold hidden sm:inline">Export / Sync</span>
-            <span className="text-xs font-semibold sm:hidden">Export</span>
-            <DownOutlined className="text-[10px] ml-0.5" />
+            <DownOutlined className="text-[9px] text-blue-200 ml-0.5" />
           </Button>
         </Dropdown>
       </div>
