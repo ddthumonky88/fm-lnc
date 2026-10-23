@@ -390,14 +390,14 @@ export default function EntityCard({
           }
           handleNavigateAction();
         }}
-        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
+        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg p-2.5 sm:p-3.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
           isNavigable ? 'cursor-pointer' : ''
         }`}
       >
       <div>
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between gap-1 pb-2.5 mb-2.5 border-b border-gray-100">
-          <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+        <div className="flex items-center justify-between gap-1 pb-2 sm:pb-2.5 mb-2 sm:mb-2.5 border-b border-gray-100">
+          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 flex-wrap">
             {/* Nation in Header: flag + nation_3letter (before ID) */}
             {nationInfo && (
               <Tooltip title={nationInfo.name || 'Nation'}>
@@ -517,20 +517,38 @@ export default function EntityCard({
             </>
           ) : type === 'city' || type === EntityType.CITY || type === 'stadium' || type === EntityType.STADIUM ? (
             <>
-              <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="w-12 text-gray-400 font-medium text-xs shrink-0 select-none">Name:</span>
+              <div className="flex items-start gap-1.5 min-w-0">
+                <span className="w-10 sm:w-12 text-gray-400 font-medium text-xs shrink-0 select-none pt-0.5">Name:</span>
                 <span
-                  className={`font-bold text-[13px] leading-5 truncate ${
+                  className={`font-bold text-[12.5px] sm:text-[13px] leading-[18px] line-clamp-2 break-words ${
                     isTitleInactive ? 'text-red-600' : 'text-gray-800'
                   }`}
+                  style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    wordBreak: 'break-word',
+                  }}
+                  title={title}
                 >
                   {title}
                 </span>
               </div>
               {data.categories && (
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-12 text-gray-400 font-medium text-xs shrink-0 select-none">Region:</span>
-                  <span className="font-bold text-[13px] leading-5 truncate text-gray-800">
+                <div className="flex items-start gap-1.5 min-w-0 mt-1">
+                  <span className="w-10 sm:w-12 text-gray-400 font-medium text-xs shrink-0 select-none pt-0.5">Region:</span>
+                  <span
+                    className="font-bold text-[12.5px] sm:text-[13px] leading-[18px] line-clamp-2 break-words text-gray-800"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      wordBreak: 'break-word',
+                    }}
+                    title={data.categories}
+                  >
                     {data.categories}
                   </span>
                 </div>

@@ -148,6 +148,26 @@ export default function LncSortitoutsiExplorer() {
           data = await fetchAwards(nationId);
         }
         setDetailRecords(data);
+        setNationHub((prev) => {
+          if (!prev) return prev;
+          const keyMap: Record<string, keyof typeof prev.counts> = {
+            [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
+            [NationTabKey.STADIUMS]: 'stadiums',
+            [NationTabKey.CITIES]: 'cities',
+            [NationTabKey.AWARDS]: 'awards',
+          };
+          const countKey = keyMap[tabKey];
+          if (countKey && prev.counts[countKey] !== data.length) {
+            return {
+              ...prev,
+              counts: {
+                ...prev.counts,
+                [countKey]: data.length,
+              },
+            };
+          }
+          return prev;
+        });
       } catch (err: any) {
         console.error(err);
         message.error(err.message || 'Failed to load tab data');
@@ -162,6 +182,7 @@ export default function LncSortitoutsiExplorer() {
   const handleSwitchNationTab = async (tabKey: NationTabKeyValue) => {
     setActiveNationTab(tabKey);
     setTableFilter('');
+    setDetailRecords([]);
     if (currentStep.id !== undefined) {
       await loadNationDataForTab(String(currentStep.id), tabKey);
     }

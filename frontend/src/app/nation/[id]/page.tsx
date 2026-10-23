@@ -70,6 +70,26 @@ export default function NationDetailPage() {
           data = await fetchAwards(nationId);
         }
         setRecords(data);
+        setNationHub((prev) => {
+          if (!prev) return prev;
+          const keyMap: Record<string, keyof typeof prev.counts> = {
+            DOMESTIC_COMPS: 'domesticComps',
+            STADIUMS: 'stadiums',
+            CITIES: 'cities',
+            AWARDS: 'awards',
+          };
+          const countKey = keyMap[tabKey];
+          if (countKey && prev.counts[countKey] !== data.length) {
+            return {
+              ...prev,
+              counts: {
+                ...prev.counts,
+                [countKey]: data.length,
+              },
+            };
+          }
+          return prev;
+        });
       } catch (err: any) {
         console.error(err);
         message.error(err.message || 'Failed to load tab data');
@@ -151,6 +171,7 @@ export default function NationDetailPage() {
   const handleSwitchTab = async (key: 'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS') => {
     setActiveTab(key);
     setTableFilter('');
+    setRecords([]);
     await loadTabRecords(key);
   };
 
@@ -159,6 +180,26 @@ export default function NationDetailPage() {
       await deleteRecord(type, id);
       message.success('Record deleted');
       setRecords((prev) => prev.filter((r) => String(r.id) !== String(id)));
+      setNationHub((prev) => {
+        if (!prev) return prev;
+        const keyMap: Record<string, keyof typeof prev.counts> = {
+          DOMESTIC_COMPS: 'domesticComps',
+          STADIUMS: 'stadiums',
+          CITIES: 'cities',
+          AWARDS: 'awards',
+        };
+        const countKey = keyMap[activeTab];
+        if (countKey && prev.counts[countKey] > 0) {
+          return {
+            ...prev,
+            counts: {
+              ...prev.counts,
+              [countKey]: prev.counts[countKey] - 1,
+            },
+          };
+        }
+        return prev;
+      });
       loadNationData();
     } catch (err: any) {
       message.error(err.message || 'Delete failed');
@@ -192,10 +233,6 @@ export default function NationDetailPage() {
 
   // Tab configurations (Awards hidden if count === 0)
   const tabItems = useMemo(() => {
-    const parentCompsCount = records.length > 0
-      ? records.filter((r) => !r.parent_id).length
-      : nationHub?.counts?.domesticComps || 0;
-
     const list = [
       {
         key: 'DOMESTIC_COMPS',
@@ -204,7 +241,7 @@ export default function NationDetailPage() {
             <TrophyOutlined className="text-amber-500" />
             <span className={activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}>Competitions</span>
             <Badge
-              count={parentCompsCount}
+              count={nationHub?.counts?.domesticComps || 0}
               overflowCount={99999}
               style={{ backgroundColor: activeTab === 'DOMESTIC_COMPS' ? '#1d70b8' : '#94a3b8' }}
             />

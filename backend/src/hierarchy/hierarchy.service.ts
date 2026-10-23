@@ -149,7 +149,11 @@ export class HierarchyService {
       cities,
       awards,
     ] = await Promise.all([
-      this.compRepo.count({ where: { nation_id: String(nationId), parent_id: IsNull() } }),
+      this.compRepo
+        .createQueryBuilder('c')
+        .where('c.nation_id = :nid', { nid: String(nationId) })
+        .andWhere('(c.parent_id IS NULL OR c.parent_id = :emptyStr)', { emptyStr: '' })
+        .getCount(),
       this.clubRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
       this.clubRepo.count({ where: { nation_id: String(nationId) } }),
       this.stadiumRepo.count({ where: { nation_id: String(nationId) } }),
@@ -624,7 +628,11 @@ export class HierarchyService {
       awards,
       totalAwards,
     ] = await Promise.all([
-      this.compRepo.count({ where: { nation_id: strId, parent_id: IsNull() } }),
+      this.compRepo
+        .createQueryBuilder('c')
+        .where('c.nation_id = :nid', { nid: strId })
+        .andWhere('(c.parent_id IS NULL OR c.parent_id = :emptyStr)', { emptyStr: '' })
+        .getCount(),
       this.compRepo.count({ where: { nation_id: strId } }),
       this.clubRepo
         .createQueryBuilder('c')
