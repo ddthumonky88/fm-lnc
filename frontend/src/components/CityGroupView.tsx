@@ -201,40 +201,16 @@ export default function CityGroupView({
           />
         </div>
       ) : (
-        /* Render All Groups */
-        <div className="space-y-8">
-          {groups.map((g) => (
-            <div key={g.key} className="space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-                <div className="flex items-center gap-2">
-                  <span className="p-1 rounded-md bg-indigo-50 text-indigo-600">
-                    {g.isUncategorized ? <CompassOutlined /> : <EnvironmentOutlined />}
-                  </span>
-                  <h3 className="font-bold text-sm text-gray-800 tracking-wide">
-                    {g.label}
-                  </h3>
-                  <Badge
-                    count={g.items.length}
-                    overflowCount={99999}
-                    style={{ backgroundColor: '#4f46e5' }}
-                  />
-                </div>
-                <span className="text-xs text-gray-400">
-                  {g.items.length} {g.items.length === 1 ? 'city' : 'cities'}
-                </span>
-              </div>
-
-              <CardGrid
-                items={g.items}
-                type="city"
-                onNavigate={onNavigate}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                defaultPageSize={20}
-              />
-            </div>
-          ))}
-        </div>
+        /* All Regions: do not group, render single unified grid */
+        <CardGrid
+          items={items}
+          type="city"
+          onNavigate={onNavigate}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyText={emptyText}
+          defaultPageSize={20}
+        />
       )}
     </div>
   );
