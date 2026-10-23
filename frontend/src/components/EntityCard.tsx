@@ -517,10 +517,10 @@ export default function EntityCard({
             </>
           ) : type === 'city' || type === EntityType.CITY || type === 'stadium' || type === EntityType.STADIUM ? (
             <>
-              <div className="flex items-start gap-1.5 min-w-0">
-                <span className="w-10 sm:w-12 text-gray-400 font-medium text-xs shrink-0 select-none pt-0.5">Name:</span>
+              <div className="min-w-0">
+                <span className="text-gray-400 font-medium text-[11px] block select-none mb-0.5">Name:</span>
                 <span
-                  className={`font-bold text-[12.5px] sm:text-[13px] leading-[18px] line-clamp-2 break-words ${
+                  className={`font-bold text-[13px] leading-[18px] min-h-[36px] line-clamp-2 break-words block ${
                     isTitleInactive ? 'text-red-600' : 'text-gray-800'
                   }`}
                   style={{
@@ -536,10 +536,10 @@ export default function EntityCard({
                 </span>
               </div>
               {data.categories && (
-                <div className="flex items-start gap-1.5 min-w-0 mt-1">
-                  <span className="w-10 sm:w-12 text-gray-400 font-medium text-xs shrink-0 select-none pt-0.5">Region:</span>
+                <div className="min-w-0 mt-1.5">
+                  <span className="text-gray-400 font-medium text-[11px] block select-none mb-0.5">Region:</span>
                   <span
-                    className="font-bold text-[12.5px] sm:text-[13px] leading-[18px] line-clamp-2 break-words text-gray-800"
+                    className="font-bold text-[12.5px] sm:text-[13px] leading-[18px] line-clamp-2 break-words block text-gray-800"
                     style={{
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
