@@ -12,6 +12,7 @@ export interface RecordModalProps {
   initialData?: any;
   defaultNationId?: string | number;
   defaultCompId?: string | number;
+  defaultParentId?: string | number;
 }
 
 /**
@@ -27,6 +28,7 @@ export default function RecordModal({
   initialData,
   defaultNationId,
   defaultCompId,
+  defaultParentId,
 }: RecordModalProps) {
   return (
     <RecordDetailModal
@@ -38,6 +40,7 @@ export default function RecordModal({
       initialMode={initialData ? 'edit' : 'create'}
       defaultNationId={defaultNationId}
       defaultCompId={defaultCompId}
+      defaultParentId={defaultParentId}
     />
   );
 }

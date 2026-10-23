@@ -309,8 +309,8 @@ export default function SubCompetitionsDrawer({
             confed_id: parentComp?.confed_id ? String(parentComp.confed_id) : undefined,
             categories: parentComp?.categories || undefined,
           }}
-          parentId={parentComp?.id ? String(parentComp.id) : undefined}
-          nationId={parentComp?.nation_id ? String(parentComp.nation_id) : undefined}
+          defaultNationId={parentComp?.nation_id ? String(parentComp.nation_id) : undefined}
+          defaultParentId={parentComp?.id ? String(parentComp.id) : undefined}
         />
       )}
     </>

@@ -39,6 +39,7 @@ export interface RecordDetailModalProps {
   onSuccess?: () => void;
   defaultNationId?: string | number;
   defaultCompId?: string | number;
+  defaultParentId?: string | number;
 }
 
 const parseColor = (rgbStr?: string | null) => {
@@ -69,6 +70,7 @@ export default function RecordDetailModal({
   onSuccess,
   defaultNationId,
   defaultCompId,
+  defaultParentId,
 }: RecordDetailModalProps) {
   const { triggerRefresh } = useApp();
 
@@ -100,7 +102,7 @@ export default function RecordDetailModal({
     note: '',
     nation_id: defaultNationId ? String(defaultNationId) : null,
     comp_id: defaultCompId ? String(defaultCompId) : null,
-    parent_id: '',
+    parent_id: defaultParentId ? String(defaultParentId) : '',
   });
 
   useEffect(() => {
@@ -128,10 +130,10 @@ export default function RecordDetailModal({
         note: activeData.note || '',
         nation_id: activeData.nation_id ? String(activeData.nation_id) : (defaultNationId ? String(defaultNationId) : null),
         comp_id: activeData.comp_id ? String(activeData.comp_id) : (defaultCompId ? String(defaultCompId) : null),
-        parent_id: activeData.parent_id ? String(activeData.parent_id) : '',
+        parent_id: activeData.parent_id ? String(activeData.parent_id) : (defaultParentId ? String(defaultParentId) : ''),
       });
     }
-  }, [isOpen, data, initialMode, isCreate, defaultNationId, defaultCompId]);
+  }, [isOpen, data, initialMode, isCreate, defaultNationId, defaultCompId, defaultParentId]);
 
   if (!isOpen) return null;
 
