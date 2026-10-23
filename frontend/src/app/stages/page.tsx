@@ -163,8 +163,62 @@ export default function StagesPage() {
           </div>
         </div>
 
-        {/* Stages Ant Design Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
+        {/* Mobile Vertical Cards (md:hidden) */}
+        <div className="md:hidden space-y-3">
+          {filteredStages.length === 0 ? (
+            <div className="py-12 text-center text-gray-400 text-xs italic">
+              No tournament stages found
+            </div>
+          ) : (
+            filteredStages.map((s) => (
+              <div
+                key={s.id}
+                className="bg-white border border-gray-200 rounded-lg p-3.5 shadow-2xs flex flex-col gap-2.5"
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                  <Tag color="magenta" className="font-mono font-bold text-xs m-0">
+                    ID: {s.id}
+                  </Tag>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="text"
+                      shape="circle"
+                      size="small"
+                      icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
+                      onClick={() => openRecordModal(RecordType.STAGE, s)}
+                    />
+                    <Popconfirm
+                      title="Delete Record"
+                      description={`Delete stage "${s.name}"?`}
+                      onConfirm={() => handleDelete(String(s.id))}
+                      okText="Delete"
+                      cancelText="Cancel"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                        type="text"
+                        shape="circle"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined style={{ fontSize: 13 }} />}
+                      />
+                    </Popconfirm>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <span className="w-7 h-7 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-xs text-rose-600 shrink-0">
+                    <FlagOutlined />
+                  </span>
+                  <span className="font-semibold text-slate-800 text-sm">{s.name}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Stages Ant Design Table (hidden md:block) */}
+        <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
           <Table<StageItem>
             rowKey="id"
             columns={columns}

@@ -174,8 +174,72 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Players Ant Design Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
+        {/* Mobile Vertical Cards (md:hidden) */}
+        <div className="md:hidden space-y-3">
+          {filteredPlayers.length === 0 ? (
+            <div className="py-12 text-center text-gray-400 text-xs italic">
+              No players or staff found
+            </div>
+          ) : (
+            filteredPlayers.map((p) => (
+              <div
+                key={p.id}
+                className="bg-white border border-gray-200 rounded-lg p-3.5 shadow-2xs flex flex-col gap-2.5"
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                  <Tag color="blue" className="font-mono font-bold text-xs m-0">
+                    ID: {p.id}
+                  </Tag>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="text"
+                      shape="circle"
+                      size="small"
+                      icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
+                      onClick={() => openRecordModal(RecordType.PLAYER, p)}
+                    />
+                    <Popconfirm
+                      title="Delete Record"
+                      description={`Delete ${p.first_name} ${p.second_name}?`}
+                      onConfirm={() => handleDelete(String(p.id))}
+                      okText="Delete"
+                      cancelText="Cancel"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                        type="text"
+                        shape="circle"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined style={{ fontSize: 13 }} />}
+                      />
+                    </Popconfirm>
+                  </div>
+                </div>
+
+                <div className="text-xs space-y-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="w-8 text-gray-400 font-medium select-none shrink-0">FN:</span>
+                    <span className="font-bold text-[13px] text-gray-800">{p.first_name || '-'}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="w-8 text-gray-400 font-medium select-none shrink-0">SN:</span>
+                    <span className="font-bold text-[13px] text-gray-800">{p.second_name || '-'}</span>
+                  </div>
+                  {p.common_name && (
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="w-8 text-gray-400 font-medium select-none shrink-0">CN:</span>
+                      <span className="font-bold text-[13px] text-gray-700 italic">{p.common_name}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Players Ant Design Table (hidden md:block) */}
+        <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
           <Table<PlayerItem>
             rowKey="id"
             columns={columns}
