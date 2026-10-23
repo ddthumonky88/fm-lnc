@@ -98,44 +98,30 @@ export default function SubCompetitionsDrawer({
     }
   };
 
-  const parentTitle = parentComp?.short_name || parentComp?.long_name || `Competition ${parentComp?.id}`;
+  const parentShortName = parentComp?.short_name || parentComp?.long_name || `Competition ${parentComp?.id}`;
 
   return (
     <>
       <Drawer
         title={
-          <div className="flex items-center gap-3 py-1">
-            <span className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
-              <ApartmentOutlined className="text-amber-600 text-lg" />
+          <div className="flex items-center gap-2.5 py-1 min-w-0">
+            <span className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
+              <ApartmentOutlined className="text-amber-600 text-base" />
             </span>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-sm text-gray-900 truncate">
-                  {parentTitle}
-                </span>
-                <Badge
-                  count={subComps.length}
-                  overflowCount={999}
-                  style={{ backgroundColor: '#d97706' }}
-                />
-              </div>
-              <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                {parentComp?.id && (
-                  <Tag color="gold" className="m-0 font-mono font-bold text-[11px] leading-4">
-                    ID: {parentComp.id}
-                  </Tag>
-                )}
-                {parentComp?.three_letter_name && (
-                  <Tag color="blue" className="m-0 font-bold text-[11px] leading-4">
-                    {parentComp.three_letter_name}
-                  </Tag>
-                )}
-                {parentComp?.categories && (
-                  <Tag color="cyan" className="m-0 text-[11px] leading-4">
-                    {parentComp.categories}
-                  </Tag>
-                )}
-              </div>
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              {parentComp?.id && (
+                <Tag color="gold" className="m-0 font-mono font-bold text-xs">
+                  ID: {parentComp.id}
+                </Tag>
+              )}
+              <span className="font-bold text-sm text-gray-900 truncate">
+                {parentShortName}
+              </span>
+              <Badge
+                count={subComps.length}
+                overflowCount={999}
+                style={{ backgroundColor: '#d97706' }}
+              />
             </div>
           </div>
         }
