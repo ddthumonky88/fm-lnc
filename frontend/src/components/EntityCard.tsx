@@ -327,7 +327,8 @@ export default function EntityCard({
     if (type === EntityType.COMPETITION || type === 'competition') {
       const hasClubs = data.is_virtual || (data.clubsCount || 0) > 0;
       const hasAwards = (data.awardsCount || 0) > 0;
-      const hasChildren = (data.childrenCount || 0) > 0;
+      const childrenCnt = data.childrenCount ?? data.children_count ?? 0;
+      const hasChildren = childrenCnt > 0;
       if (!hasClubs && !hasAwards && !hasChildren) return null;
 
       const titleParts: string[] = [];
@@ -341,7 +342,7 @@ export default function EntityCard({
       return (
         <div className="flex items-center gap-0.5">
           {hasChildren && (
-            <Tooltip title={`View Sub-Competitions (${data.childrenCount})`}>
+            <Tooltip title={`Sub-Competitions (${childrenCnt})`}>
               <Button
                 type="text"
                 shape="circle"
@@ -671,35 +672,7 @@ export default function EntityCard({
             </div>
           )}
 
-          {/* Parent Competition info */}
-          {(type === 'competition' || type === EntityType.COMPETITION) && (data.parent_name || data.parent_id) && (
-            <div className="flex items-baseline gap-1.5 min-w-0">
-              <span className="w-14 text-gray-400 font-medium text-xs shrink-0 select-none">Parent:</span>
-              <span className={`font-semibold text-xs leading-5 truncate ${isInactive('parent_id') ? 'line-through text-red-600' : 'text-amber-700'}`}>
-                {data.parent_name || data.parent_long_name || `Comp ${data.parent_id}`}
-              </span>
-            </div>
-          )}
 
-          {/* Sub-competitions count */}
-          {(type === 'competition' || type === EntityType.COMPETITION) && data.childrenCount !== undefined && data.childrenCount > 0 && (
-            <div className="flex items-center gap-1.5 min-w-0 mt-0.5">
-              <span className="w-14 text-gray-400 font-medium text-xs shrink-0 select-none">Subs:</span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onViewChildren?.(data);
-                }}
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 hover:border-amber-300 text-xs font-semibold cursor-pointer transition-all shadow-2xs group"
-                title="Click to view Sub-Competitions in Drawer"
-              >
-                <ApartmentOutlined className="text-amber-600 group-hover:scale-110 transition-transform" />
-                <span>{data.childrenCount} Sub-Competitions</span>
-                <span className="text-[10px] text-amber-500 font-normal">→ Drawer</span>
-              </button>
-            </div>
-          )}
 
           {/* Note */}
           {data.note && (
