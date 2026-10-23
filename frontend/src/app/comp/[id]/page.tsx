@@ -380,7 +380,7 @@ export default function CompetitionDetailPage() {
     <div className="space-y-3">
       {loading ? (
         <div className="py-20 text-center">
-          <Spin size="large" tip="Loading competition details..." />
+          <Spin size="large" description="Loading competition details..." />
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-2xs">

@@ -148,10 +148,10 @@ export default function SubCompetitionsDrawer({
           </div>
         }
         placement="right"
-        width={typeof window !== 'undefined' && window.innerWidth < 960 ? '100%' : 880}
+        size={typeof window !== 'undefined' && window.innerWidth < 960 ? '100%' : 880}
         onClose={onClose}
         open={isOpen}
-        destroyOnClose
+        destroyOnHidden
         className="sub-competitions-drawer font-sans"
       >
         <div className="flex flex-col h-full gap-3 font-sans">

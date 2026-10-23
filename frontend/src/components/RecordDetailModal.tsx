@@ -310,7 +310,7 @@ export default function RecordDetailModal({
       )}
       width="100%"
       style={{ maxWidth: 600 }}
-      destroyOnClose
+      destroyOnHidden
       centered
       className="max-w-[calc(100vw-24px)] mx-auto"
       title={
