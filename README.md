@@ -115,19 +115,29 @@ Mở trình duyệt: `http://localhost:3000`
 
 ## 📡 API Endpoints
 
+> 📖 **Xem tài liệu API chi tiết đầy đủ tham số và payload tại:** [API_DOCUMENTATION.md](file:///d:/Games/FM24_2026/FootballManager24/data/database/db/2430/lnc/all/tool/API_DOCUMENTATION.md)  
+> 🌐 **Swagger UI tương tác trực tiếp:** `http://localhost:3001/docs`
+
 | Method | Endpoint | Mô tả |
 |--------|----------|-------|
 | `GET` | `/health` | Health check |
-| `GET` | `/hierarchy/confederations` | Lấy danh sách Confederations |
-| `GET` | `/hierarchy/nations` | Lấy danh sách Nations |
-| `GET` | `/hierarchy/competitions` | Lấy danh sách Competitions |
-| `GET` | `/hierarchy/clubs` | Lấy danh sách Clubs |
-| `GET` | `/hierarchy/nation/:id` | Chi tiết một Nation |
-| `GET` | `/hierarchy/comp/:id` | Chi tiết một Competition |
-| `GET` | `/search?q=...` | Tìm kiếm toàn văn |
-| `GET` | `/lnc/export` | Export toàn bộ dữ liệu ra file `.lnc` |
-| `POST` | `/lnc/import` | Import file `.lnc` (local only) |
-| `GET` | `/logos/:type/:id` | Lấy logo (local only) |
+| `GET` | `/api/hierarchy/continents` | Lấy danh sách Confederations |
+| `GET` | `/api/hierarchy/continents/:id/nations` | Lấy Nations theo Confederation |
+| `GET` | `/api/hierarchy/continents/:id/international-competitions` | Lấy giải đấu quốc tế theo Confederation |
+| `GET` | `/api/hierarchy/nations` | Lấy tất cả Nations (hỗ trợ filter/search) |
+| `GET` | `/api/hierarchy/nations/:id/hub` | Thông tin tổng quan và bộ đếm con của Nation |
+| `GET` | `/api/hierarchy/nations/:id/competitions` | Danh sách giải đấu quốc nội của Nation |
+| `GET` | `/api/hierarchy/competitions` | Danh sách giải đấu (lọc theo nation, confed, isInternational) |
+| `GET` | `/api/records/:type/:id` | Xem chi tiết bản ghi (club, competition, stadium, ...) |
+| `POST` | `/api/records/:type` | Tạo mới bản ghi |
+| `PUT` | `/api/records/:type/:id` | Cập nhật thông tin bản ghi |
+| `DELETE` | `/api/records/:type/:id` | Xóa bản ghi |
+| `GET` | `/api/search?q=...` | Tìm kiếm toàn văn đa thực thể |
+| `GET` | `/api/lnc/export` | Export toàn bộ dữ liệu ra file `.lnc` |
+| `POST` | `/api/lnc/import` | Import file `.lnc` vào PostgreSQL |
+| `GET` | `/api/lnc/status` | Thống kê số lượng bản ghi DB |
+| `GET` | `/api/logos/confederation/:id` | Lấy logo Confederation (PNG) |
+| `GET` | `/api/logos/nation/:id` | Lấy logo/cờ Nation (PNG) |
 
 ---
 
