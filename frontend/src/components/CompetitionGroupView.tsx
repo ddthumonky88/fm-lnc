@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Badge, Empty, Select, Switch, Tooltip } from 'antd';
+import { Badge, Empty, Select, Tooltip } from 'antd';
 import {
   TrophyOutlined,
   SafetyOutlined,
@@ -56,7 +56,6 @@ interface CompetitionGroupViewProps {
   onDelete?: (record: any) => void;
   emptyText?: string;
   extraRight?: React.ReactNode;
-  defaultOnlyParents?: boolean;
 }
 
 export default function CompetitionGroupView({
@@ -67,18 +66,15 @@ export default function CompetitionGroupView({
   onDelete,
   emptyText = 'No competitions found',
   extraRight,
-  defaultOnlyParents = true,
 }: CompetitionGroupViewProps) {
   const [selectedGroup, setSelectedGroup] = useState<CompetitionGroupKey>('all');
-  const [onlyParents, setOnlyParents] = useState<boolean>(defaultOnlyParents);
   const [drawerParent, setDrawerParent] = useState<any | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Filter only parents if onlyParents toggle is active
+  // Visible items: parent/top-level competitions (sub-competitions are organized inside parent drawer)
   const visibleItems = useMemo(() => {
-    if (!onlyParents) return items;
     return items.filter((item) => !item.parent_id);
-  }, [items, onlyParents]);
+  }, [items]);
 
   const handleViewChildren = (comp: any) => {
     setDrawerParent(comp);
@@ -190,8 +186,6 @@ export default function CompetitionGroupView({
     );
   }
 
-  const hiddenChildrenCount = items.length - visibleItems.length;
-
   const renderToolbar = () => (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
       <div className="flex items-center gap-2.5 flex-wrap">
@@ -203,30 +197,6 @@ export default function CompetitionGroupView({
           className="w-52 text-xs"
           suffixIcon={<FilterOutlined className="text-gray-400" />}
         />
-
-        {/* Parent Only Switch Toggle */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs shadow-2xs">
-          <Switch
-            size="small"
-            checked={onlyParents}
-            onChange={setOnlyParents}
-            className={onlyParents ? 'bg-blue-600' : 'bg-gray-300'}
-          />
-          <span
-            className="font-semibold text-gray-700 cursor-pointer select-none"
-            onClick={() => setOnlyParents(!onlyParents)}
-            title="Toggle between showing parent competitions only vs all sub-competitions"
-          >
-            Only Parents
-          </span>
-          {onlyParents && hiddenChildrenCount > 0 && (
-            <Tooltip title={`${hiddenChildrenCount} child competitions are organized inside parent drawers`}>
-              <span className="text-[10px] text-amber-700 font-bold bg-amber-100/80 px-1.5 py-0.2 rounded border border-amber-200/80 cursor-help">
-                {hiddenChildrenCount} in drawer
-              </span>
-            </Tooltip>
-          )}
-        </div>
 
         <span className="text-xs text-gray-300 font-medium hidden md:inline">|</span>
         <div className="text-xs text-gray-500 font-medium">
