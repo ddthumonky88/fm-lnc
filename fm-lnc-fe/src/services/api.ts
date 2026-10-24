@@ -47,6 +47,29 @@ export function setCustomApiBase(url: string | null) {
   }
 }
 
+export interface PaginationQuery {
+  page?: number;
+  size?: number;
+  sort?: string | string[];
+  keyword?: string;
+  q?: string;
+}
+
+export interface PaginatedResponse<T> {
+  content: T[];
+  items: T[];
+  totalElements: number;
+  total: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  page: number;
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
 export interface ConfederationItem {
   id: string;
   name: string;
@@ -209,8 +232,32 @@ async function cachedFetch<T>(url: string, forceRefresh = false, ttl = CACHE_TTL
   return promise;
 }
 
-async function cachedPost<T>(url: string, body: any = {}, forceRefresh = false, ttl = CACHE_TTL_MS): Promise<T> {
-  const cacheKey = `POST::${url}::${JSON.stringify(body || {})}`;
+async function cachedPost<T>(
+  url: string,
+  filterAndPage: any = {},
+  forceRefresh = false,
+  ttl = CACHE_TTL_MS,
+): Promise<T> {
+  const { page, size, sort, ...payload } = filterAndPage || {};
+
+  const queryParams = new URLSearchParams();
+  if (page !== undefined && page !== null && page !== '') {
+    queryParams.set('page', String(page));
+  }
+  if (size !== undefined && size !== null && size !== '') {
+    queryParams.set('size', String(size));
+  }
+  if (sort !== undefined && sort !== null && sort !== '') {
+    if (Array.isArray(sort)) {
+      sort.forEach((s) => queryParams.append('sort', String(s)));
+    } else {
+      queryParams.set('sort', String(sort));
+    }
+  }
+
+  const queryString = queryParams.toString();
+  const finalUrl = queryString ? `${url}?${queryString}` : url;
+  const cacheKey = `POST::${finalUrl}::${JSON.stringify(payload || {})}`;
   const now = Date.now();
   if (!forceRefresh) {
     const cached = apiCache.get(cacheKey);
@@ -225,16 +272,21 @@ async function cachedPost<T>(url: string, body: any = {}, forceRefresh = false, 
 
   const promise = (async () => {
     try {
-      const res = await fetch(url, {
+      const res = await fetch(finalUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body || {}),
+        body: JSON.stringify(payload || {}),
       });
       if (!res.ok) {
         throw new Error(`Request failed with status ${res.status}`);
       }
       const data = await res.json();
       apiCache.set(cacheKey, { data, timestamp: Date.now() });
+      if (data && typeof data === 'object' && Array.isArray(data.content)) {
+        const arr = data.content as any;
+        Object.assign(arr, data);
+        return arr as T;
+      }
       return data as T;
     } finally {
       inFlightRequests.delete(cacheKey);
