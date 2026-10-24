@@ -130,13 +130,17 @@ export default function AppSidebar({
             }}
             className="flex items-center gap-3 cursor-pointer group overflow-hidden"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0 group-hover:scale-105 transition-transform">
-              <DatabaseOutlined className="text-lg" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md shadow-black/20 shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
+              <img
+                src="/fm/icons/icon-192.png"
+                alt="FM24 LNC"
+                className="w-full h-full object-contain rounded-xl"
+              />
             </div>
             {!isCollapsed && (
               <div className="min-w-0 transition-opacity duration-200">
                 <div className="font-bold text-sm text-white tracking-wide flex items-center gap-1.5">
-                  <span>FM .LNC</span>
+                  <span>FM24 LNC</span>
                   <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded">
                     24.3
                   </span>

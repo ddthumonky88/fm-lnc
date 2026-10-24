@@ -7,14 +7,11 @@ import {
   Input,
   Button,
   Tag,
-  Alert,
-  Space,
   Tooltip,
   message,
   Card,
   Spin,
   Typography,
-  Divider,
 } from 'antd';
 import {
   SettingOutlined,
@@ -31,7 +28,9 @@ import {
   BankOutlined,
   CompassOutlined,
   SaveOutlined,
-  InfoCircleOutlined,
+  DesktopOutlined,
+  CloudUploadOutlined,
+  CloudServerOutlined,
 } from '@ant-design/icons';
 import {
   fetchAppConfig,
@@ -39,11 +38,16 @@ import {
   testDirectoryPath,
   syncLncFromConfig,
   reloadLogosFromConfig,
+  syncLocalLncToProd,
+  getApiBase,
+  getLocalApiBase,
   type AppPathsConfig,
   type ConfigStatusResponse,
 } from '../services/api';
 
 const { Text } = Typography;
+
+const DEFAULT_LOCAL_LNC_DIR = 'D:\\Games\\FM24_2026\\FootballManager24\\data\\database\\db\\2430\\lnc\\all';
 
 interface SettingsModalProps {
   open: boolean;
@@ -59,6 +63,7 @@ export default function SettingsModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [syncingToProd, setSyncingToProd] = useState(false);
   const [reloadingLogos, setReloadingLogos] = useState(false);
 
   const [formData, setFormData] = useState<AppPathsConfig>({
@@ -78,7 +83,7 @@ export default function SettingsModal({
       setFormData(data.config);
       setStatusData(data.status);
     } catch (err: any) {
-      message.error(err.message || 'Không thể tải cấu hình thư mục');
+      message.error(err.message || 'Không thể kết nối tới backend local để tải cấu hình');
     } finally {
       setLoading(false);
     }
@@ -106,13 +111,13 @@ export default function SettingsModal({
   };
 
   const handleSyncLnc = async () => {
-    if (!confirm('Bạn có chắc chắn muốn đồng bộ lại database từ thư mục file .LNC này?')) {
+    if (!confirm('Bạn có chắc chắn muốn đồng bộ lại database từ thư mục file .LNC local này?')) {
       return;
     }
     setSyncing(true);
     const hide = message.loading('Đang phân tích và nhập dữ liệu từ file .LNC...', 0);
     try {
-      await handleSave(); // Lưu trước khi sync
+      await handleSave();
       await syncLncFromConfig();
       hide();
       message.success('Đồng bộ database thành công!');
@@ -126,12 +131,32 @@ export default function SettingsModal({
     }
   };
 
+  const handleSyncToProd = async () => {
+    if (!confirm('Bạn có chắc muốn đẩy toàn bộ nội dung từ các file .LNC local lên Cloud Database (Render)?')) {
+      return;
+    }
+    setSyncingToProd(true);
+    const hide = message.loading('Đang đọc file .LNC local và gửi lên Cloud Database...', 0);
+    try {
+      await handleSave();
+      const res = await syncLocalLncToProd();
+      hide();
+      message.success(res.message || 'Đã đồng bộ lên Cloud Database Production thành công!');
+      if (onRefreshData) onRefreshData();
+    } catch (err: any) {
+      hide();
+      message.error(err.message || 'Đồng bộ lên Cloud thất bại');
+    } finally {
+      setSyncingToProd(false);
+    }
+  };
+
   const handleReloadLogos = async () => {
     setReloadingLogos(true);
     try {
-      await handleSave(); // Lưu trước khi reload
-      const res = await reloadLogosFromConfig();
-      message.success('Đã quét và làm mới bộ nhớ ảnh thành công!');
+      await handleSave();
+      await reloadLogosFromConfig();
+      message.success('Đã quét và nạp lại ảnh từ thư mục local thành công!');
       await loadCurrentConfig();
     } catch (err: any) {
       message.error(err.message || 'Không thể tải lại ảnh');
@@ -150,7 +175,7 @@ export default function SettingsModal({
       const res = await testDirectoryPath(p);
       if (res.exists) {
         if (res.isDirectory) {
-          message.success(`Thư mục hợp lệ! Phát hiện ${res.fileCount} mục bên trong.`);
+          message.success(`Thư mục hợp lệ trên máy! Phát hiện ${res.fileCount} mục bên trong.`);
         } else {
           message.info(`Đường dẫn là một file (kích thước: ${(res.size / 1024).toFixed(1)} KB)`);
         }
@@ -173,14 +198,15 @@ export default function SettingsModal({
   return (
     <Modal
       title={
-        <div className="flex items-center gap-2 text-slate-800 font-bold text-base">
-          <SettingOutlined className="text-blue-600 text-lg" />
-          <span>Cấu hình Thư mục Dữ liệu & Ảnh</span>
+        <div className="flex items-center gap-2 text-slate-800 font-semibold text-base">
+          <SettingOutlined className="text-blue-600" />
+          <span>Cấu hình thư mục Local</span>
         </div>
       }
       open={open}
       onCancel={onClose}
-      width={760}
+      width={560}
+      centered
       footer={[
         <Button key="close" onClick={onClose}>
           Đóng
@@ -196,50 +222,59 @@ export default function SettingsModal({
           Lưu cấu hình
         </Button>,
       ]}
-      destroyOnClose
+      destroyOnHidden
     >
       {loading ? (
         <div className="py-12 flex flex-col items-center justify-center gap-3">
           <Spin size="large" />
-          <span className="text-sm text-slate-500">Đang tải cấu hình...</span>
+          <span className="text-sm text-slate-500">Đang tải cấu hình từ backend local...</span>
         </div>
       ) : (
-        <div className="mt-2">
+        <div className="mt-1">
           <Tabs
             defaultActiveKey="lnc"
             items={[
               {
                 key: 'lnc',
                 label: (
-                  <span className="flex items-center gap-1.5 font-medium">
+                  <span className="flex items-center gap-1.5 font-medium text-xs">
                     <FileTextOutlined className="text-blue-500" />
-                    <span>File .LNC đầu vào</span>
+                    <span>File .LNC</span>
                   </span>
                 ),
                 children: (
-                  <div className="space-y-4 py-1">
+                  <div className="space-y-3 py-1">
+                    {/* Local LNC Path */}
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                          Thư mục chứa các file .LNC:
-                        </label>
-                        {lncStatus?.exists ? (
-                          <Tag color="success" icon={<CheckCircleOutlined />}>
-                            Thư mục tồn tại
-                          </Tag>
-                        ) : (
-                          <Tag color="error" icon={<CloseCircleOutlined />}>
-                            Thư mục không tồn tại
-                          </Tag>
-                        )}
+                      <div className="flex items-center justify-between mb-1 text-xs">
+                        <span className="font-semibold text-slate-700">Đường dẫn thư mục .LNC:</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, lncDir: DEFAULT_LOCAL_LNC_DIR })}
+                            className="text-[11px] text-blue-600 hover:underline cursor-pointer bg-transparent border-0 p-0"
+                          >
+                            Mặc định
+                          </button>
+                          {lncStatus?.exists ? (
+                            <span className="text-emerald-600 text-[11px] font-medium flex items-center gap-0.5">
+                              <CheckCircleOutlined /> Hợp lệ
+                            </span>
+                          ) : (
+                            <span className="text-rose-500 text-[11px] font-medium flex items-center gap-0.5">
+                              <CloseCircleOutlined /> Không tìm thấy
+                            </span>
+                          )}
+                        </div>
                       </div>
+
                       <div className="flex items-center gap-2">
                         <Input
                           value={formData.lncDir}
                           onChange={(e) => setFormData({ ...formData, lncDir: e.target.value })}
-                          placeholder="Ví dụ: D:\Games\FM24_2026\FootballManager24\data\database\db\2430\lnc\all"
+                          placeholder="D:\Games\FM24_2026\FootballManager24\data\database\db\2430\lnc\all"
                           prefix={<FolderOpenOutlined className="text-slate-400" />}
-                          className="flex-1 text-xs sm:text-sm font-mono"
+                          className="flex-1 font-mono text-xs"
                           allowClear
                         />
                         <Button
@@ -249,107 +284,84 @@ export default function SettingsModal({
                           Kiểm tra
                         </Button>
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-1">
-                        Thư mục chứa 3 file .LNC chuẩn của bản sửa tên FM24.
-                      </p>
                     </div>
 
-                    {/* Status Alert */}
-                    {lncStatus && (
-                      <div>
-                        {lncStatus.allFilesFound ? (
-                          <Alert
-                            type="success"
-                            showIcon
-                            icon={<CheckCircleOutlined className="text-emerald-500" />}
-                            message="Tất cả 3 file .LNC đã sẵn sàng"
-                            description="Đã tìm thấy đầy đủ 3 file cần thiết. Bạn có thể bấm 'Đồng bộ Database' để nạp toàn bộ dữ liệu."
-                            className="bg-emerald-50 border-emerald-200"
-                          />
+                    {/* Server Status Checklist */}
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs pb-1 border-b border-slate-200/60 font-medium">
+                        <span className="text-slate-600">3 file .LNC trong thư mục:</span>
+                        {lncStatus?.allFilesFound ? (
+                          <span className="text-emerald-600 flex items-center gap-1 font-semibold">
+                            <CheckCircleOutlined /> Đầy đủ
+                          </span>
                         ) : (
-                          <Alert
-                            type="warning"
-                            showIcon
-                            icon={<ExclamationCircleOutlined className="text-amber-500" />}
-                            message="Chưa đủ 3 file .LNC"
-                            description="Vui lòng kiểm tra lại đường dẫn thư mục hoặc sao chép đủ 3 file .LNC bên dưới."
-                            className="bg-amber-50 border-amber-200"
-                          />
+                          <span className="text-amber-600 flex items-center gap-1">
+                            <ExclamationCircleOutlined /> Chưa đủ
+                          </span>
                         )}
-                      </div>
-                    )}
-
-                    {/* File Checklist */}
-                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-                      <div className="text-xs font-bold text-slate-600 mb-2">
-                        Danh sách file cần thiết:
                       </div>
 
                       {[
                         {
                           key: 'cityNation',
                           label: 'FM24 - City & Nation.lnc',
-                          desc: 'Quốc gia, Thành phố, Châu lục (CAF, AFC, UEFA...)',
                           file: lncStatus?.files?.cityNation,
                         },
                         {
                           key: 'clubStadium',
                           label: 'FM24 - Club & Stadium.lnc',
-                          desc: 'Câu lạc bộ và Sân vận động',
                           file: lncStatus?.files?.clubStadium,
                         },
                         {
                           key: 'compOther',
                           label: 'FM24 - Competition & Other.lnc',
-                          desc: 'Giải đấu, Giải thưởng, Cầu thủ, Giai đoạn',
                           file: lncStatus?.files?.compOther,
                         },
                       ].map((item) => (
                         <div
                           key={item.key}
-                          className="flex items-center justify-between p-2.5 bg-white rounded border border-slate-200/80 shadow-2xs"
+                          className="flex items-center justify-between text-xs py-0.5"
                         >
-                          <div className="flex items-center gap-2.5">
+                          <span className="flex items-center gap-1.5 text-slate-700 font-mono text-[11.5px] truncate">
                             {item.file?.exists ? (
-                              <CheckCircleOutlined className="text-emerald-500 text-base" />
+                              <CheckCircleOutlined className="text-emerald-500 text-xs shrink-0" />
                             ) : (
-                              <CloseCircleOutlined className="text-rose-400 text-base" />
+                              <CloseCircleOutlined className="text-rose-400 text-xs shrink-0" />
                             )}
-                            <div>
-                              <div className="text-xs font-semibold text-slate-800 font-mono">
-                                {item.label}
-                              </div>
-                              <div className="text-[11px] text-slate-400">{item.desc}</div>
-                            </div>
-                          </div>
+                            <span className="truncate">{item.label}</span>
+                          </span>
 
-                          <div className="text-right">
+                          <span className="text-slate-400 font-mono text-[11px] shrink-0 ml-2">
                             {item.file?.exists ? (
-                              <Tag color="green" className="font-mono text-[11px]">
-                                {formatFileSize(item.file?.size)}
-                              </Tag>
+                              formatFileSize(item.file?.size)
                             ) : (
-                              <Tag color="red" className="text-[11px]">
-                                Thiếu file
-                              </Tag>
+                              <span className="text-rose-500">Thiếu</span>
                             )}
-                          </div>
+                          </span>
                         </div>
                       ))}
                     </div>
 
-                    {/* Quick Sync Button */}
-                    <div className="pt-2 flex justify-end">
+                    {/* Sync Actions */}
+                    <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
                       <Button
-                        type="primary"
                         icon={<SyncOutlined spin={syncing} />}
                         loading={syncing}
                         onClick={handleSyncLnc}
-                        disabled={!lncStatus?.allFilesFound}
-                        style={{ backgroundColor: '#059669', borderColor: '#059669' }}
-                        className="font-medium shadow-xs"
+                        disabled={!lncStatus?.allFilesFound || syncingToProd}
+                        className="text-xs text-emerald-700 border-emerald-300 hover:border-emerald-500"
                       >
-                        Đồng bộ Database từ thư mục này
+                        Đồng bộ DB Local
+                      </Button>
+                      <Button
+                        type="primary"
+                        icon={<CloudUploadOutlined spin={syncingToProd} />}
+                        loading={syncingToProd}
+                        onClick={handleSyncToProd}
+                        disabled={!lncStatus?.allFilesFound || syncing}
+                        className="text-xs bg-blue-600 hover:bg-blue-700"
+                      >
+                        Đẩy lên Cloud Prod
                       </Button>
                     </div>
                   </div>
@@ -358,145 +370,81 @@ export default function SettingsModal({
               {
                 key: 'logos',
                 label: (
-                  <span className="flex items-center gap-1.5 font-medium">
+                  <span className="flex items-center gap-1.5 font-medium text-xs">
                     <PictureOutlined className="text-purple-500" />
-                    <span>Thư mục Ảnh & Logo</span>
+                    <span>Ảnh & Logo</span>
                   </span>
                 ),
                 children: (
-                  <div className="space-y-4 py-1">
-                    <div className="bg-blue-50/60 p-2.5 rounded-lg border border-blue-100 flex items-start gap-2 text-xs text-blue-700">
-                      <InfoCircleOutlined className="text-blue-500 mt-0.5 shrink-0" />
-                      <div>
-                        Hệ thống tự động đọc file ảnh theo mã ID (ví dụ: <code className="bg-blue-100/60 px-1 py-0.5 rounded font-mono">765.png</code>), mã 3 chữ cái, hoặc cấu hình từ file <code className="bg-blue-100/60 px-1 py-0.5 rounded font-mono">config.xml</code> của Football Manager.
+                  <div className="space-y-2.5 py-1">
+                    {[
+                      {
+                        key: 'confedLogoDir' as const,
+                        label: 'Logo Châu lục',
+                        icon: <GlobalOutlined className="text-blue-500" />,
+                        status: statusData?.confedLogo,
+                        placeholder: 'D:\\...\\graphics\\logo\\Confederations\\normal',
+                      },
+                      {
+                        key: 'nationLogoDir' as const,
+                        label: 'Logo Quốc gia',
+                        icon: <CompassOutlined className="text-emerald-500" />,
+                        status: statusData?.nationLogo,
+                        placeholder: 'D:\\...\\graphics\\logo\\Nations\\normal',
+                      },
+                      {
+                        key: 'compLogoDir' as const,
+                        label: 'Logo Giải đấu (tùy chọn)',
+                        icon: <TrophyOutlined className="text-amber-500" />,
+                        status: statusData?.compLogo,
+                        placeholder: 'D:\\...\\graphics\\logo\\Competitions',
+                      },
+                      {
+                        key: 'clubLogoDir' as const,
+                        label: 'Logo CLB (tùy chọn)',
+                        icon: <BankOutlined className="text-purple-500" />,
+                        status: statusData?.clubLogo,
+                        placeholder: 'D:\\...\\graphics\\logo\\Club',
+                      },
+                    ].map((field) => (
+                      <div key={field.key} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="flex items-center gap-1.5 font-medium text-slate-700">
+                            {field.icon}
+                            <span>{field.label}:</span>
+                          </span>
+                          {field.status?.exists ? (
+                            <span className="text-emerald-600 text-[11px] font-mono">
+                              {field.status.fileCount} file
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-[11px]">Chưa tìm thấy</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={formData[field.key]}
+                            onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                            placeholder={field.placeholder}
+                            className="flex-1 font-mono text-xs"
+                            allowClear
+                          />
+                          <Button onClick={() => handleTestPath(field.key)} size="small" className="text-xs shrink-0">
+                            Kiểm tra
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    ))}
 
-                    {/* 1. Confederation Logos */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <GlobalOutlined className="text-blue-500" />
-                          <span>Logo Châu lục (Confederations):</span>
-                        </label>
-                        {statusData?.confedLogo?.exists ? (
-                          <Tag color="success">
-                            {statusData.confedLogo.fileCount} file
-                          </Tag>
-                        ) : (
-                          <Tag color="default">Chưa tìm thấy</Tag>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={formData.confedLogoDir}
-                          onChange={(e) => setFormData({ ...formData, confedLogoDir: e.target.value })}
-                          placeholder="Ví dụ: ...\graphics\logo\Confederations\normal"
-                          className="flex-1 text-xs font-mono"
-                          allowClear
-                        />
-                        <Button onClick={() => handleTestPath('confedLogoDir')} className="shrink-0 text-xs">
-                          Kiểm tra
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* 2. Nation Logos */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <CompassOutlined className="text-emerald-500" />
-                          <span>Logo Quốc gia (Nations):</span>
-                        </label>
-                        {statusData?.nationLogo?.exists ? (
-                          <Tag color="success">
-                            {statusData.nationLogo.fileCount} file
-                          </Tag>
-                        ) : (
-                          <Tag color="default">Chưa tìm thấy</Tag>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={formData.nationLogoDir}
-                          onChange={(e) => setFormData({ ...formData, nationLogoDir: e.target.value })}
-                          placeholder="Ví dụ: ...\graphics\logo\Nations\normal"
-                          className="flex-1 text-xs font-mono"
-                          allowClear
-                        />
-                        <Button onClick={() => handleTestPath('nationLogoDir')} className="shrink-0 text-xs">
-                          Kiểm tra
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* 3. Competition Logos */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <TrophyOutlined className="text-amber-500" />
-                          <span>Logo Giải đấu (Competitions):</span>
-                        </label>
-                        {statusData?.compLogo?.exists ? (
-                          <Tag color="success">
-                            {statusData.compLogo.fileCount} mục
-                          </Tag>
-                        ) : (
-                          <Tag color="default">Tùy chọn</Tag>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={formData.compLogoDir}
-                          onChange={(e) => setFormData({ ...formData, compLogoDir: e.target.value })}
-                          placeholder="Ví dụ: ...\graphics\logo\Competitions"
-                          className="flex-1 text-xs font-mono"
-                          allowClear
-                        />
-                        <Button onClick={() => handleTestPath('compLogoDir')} className="shrink-0 text-xs">
-                          Kiểm tra
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* 4. Club Logos */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <BankOutlined className="text-purple-500" />
-                          <span>Logo Câu lạc bộ (Clubs):</span>
-                        </label>
-                        {statusData?.clubLogo?.exists ? (
-                          <Tag color="success">
-                            {statusData.clubLogo.fileCount} mục
-                          </Tag>
-                        ) : (
-                          <Tag color="default">Tùy chọn</Tag>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={formData.clubLogoDir}
-                          onChange={(e) => setFormData({ ...formData, clubLogoDir: e.target.value })}
-                          placeholder="Ví dụ: ...\graphics\logo\Club"
-                          className="flex-1 text-xs font-mono"
-                          allowClear
-                        />
-                        <Button onClick={() => handleTestPath('clubLogoDir')} className="shrink-0 text-xs">
-                          Kiểm tra
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Reload Logos Cache button */}
-                    <div className="pt-2 flex justify-end">
+                    <div className="pt-2 flex justify-end border-t border-slate-100">
                       <Button
+                        type="primary"
                         icon={<ReloadOutlined spin={reloadingLogos} />}
                         loading={reloadingLogos}
                         onClick={handleReloadLogos}
-                        className="font-medium"
+                        className="bg-blue-600 hover:bg-blue-700 text-xs"
                       >
-                        Quét & Tải lại bộ nhớ ảnh
+                        Quét & Nạp lại Logo
                       </Button>
                     </div>
                   </div>

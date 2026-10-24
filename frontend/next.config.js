@@ -33,6 +33,30 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/favicon.ico',
+        destination: '/fm/favicon.ico',
+        basePath: false,
+        permanent: false,
+      },
+      {
+        source: '/favicon.png',
+        destination: '/fm/favicon.png',
+        basePath: false,
+        permanent: false,
+      },
+      {
+        source: '/apple-touch-icon.png',
+        destination: '/fm/apple-touch-icon.png',
+        basePath: false,
+        permanent: false,
+      },
+      {
+        source: '/logo.png',
+        destination: '/fm/logo.png',
+        basePath: false,
+        permanent: false,
+      },
     ];
   },
   async rewrites() {

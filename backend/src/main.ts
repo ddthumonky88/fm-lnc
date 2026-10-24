@@ -18,6 +18,10 @@ async function bootstrap() {
     logger.error('Failed to run startup migrations:', err);
   }
 
+  // Increase payload limit for .lnc uploads
+  app.use(require('express').json({ limit: '50mb' }));
+  app.use(require('express').urlencoded({ limit: '50mb', extended: true }));
+
   // Enable CORS for frontend (origin: true phản chiếu origin gọi tới, tương thích cả localhost và IP LAN)
   app.enableCors({
     origin: true,
@@ -71,7 +75,7 @@ async function bootstrap() {
     }
   }
 
-  logger.log(`FM .LNC Backend is running at:`);
+  logger.log(`FM24 LNC Backend is running at:`);
   logger.log(`  - Local:   http://localhost:${port}`);
   logger.log(`  - Swagger: http://localhost:${port}/docs`);
 

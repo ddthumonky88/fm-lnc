@@ -21,6 +21,7 @@ import {
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
+import { NationIcon, CompIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 
@@ -175,44 +176,67 @@ function ConfederationDetailContent() {
                 setActiveTab(key as any);
               }}
               type="line"
-              items={[
-                {
-                  key: 'NATIONS',
-                  label: (
-                    <Space size={4} title="Countries">
-                      <GlobalOutlined />
-                      <span className={`hidden sm:inline ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}>
-                        Countries
-                      </span>
-                      <Badge
-                        count={nations.length}
-                        overflowCount={99999}
-                        style={{
-                          backgroundColor: activeTab === 'NATIONS' ? '#1d70b8' : '#94a3b8',
-                        }}
-                      />
-                    </Space>
-                  ),
-                },
-                {
-                  key: 'INT_COMPETITIONS',
-                  label: (
-                    <Space size={4} title="International Competitions">
-                      <TrophyOutlined />
-                      <span className={`hidden sm:inline ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}>
-                        International Competitions
-                      </span>
-                      <Badge
-                        count={intComps.filter((c) => !c.parent_id).length}
-                        overflowCount={99999}
-                        style={{
-                          backgroundColor: activeTab === 'INT_COMPETITIONS' ? '#1d70b8' : '#94a3b8',
-                        }}
-                      />
-                    </Space>
-                  ),
-                },
-              ]}
+              items={(() => {
+                const list: any[] = [];
+                const nationsCount = nations.length;
+                const compsCount = intComps.filter((c) => !c.parent_id).length;
+
+                if (nationsCount > 0) {
+                  list.push({
+                    key: 'NATIONS',
+                    label: (
+                      <Space size={4} title="Countries">
+                        <NationIcon size={18} className="text-cyan-600" />
+                        <span className={`hidden sm:inline ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}>
+                          Countries
+                        </span>
+                        <Badge
+                          count={nationsCount}
+                          overflowCount={99999}
+                          style={{
+                            backgroundColor: activeTab === 'NATIONS' ? '#1d70b8' : '#94a3b8',
+                          }}
+                        />
+                      </Space>
+                    ),
+                  });
+                }
+
+                if (compsCount > 0) {
+                  list.push({
+                    key: 'INT_COMPETITIONS',
+                    label: (
+                      <Space size={4} title="International Competitions">
+                        <CompIcon size={18} className="text-amber-500" />
+                        <span className={`hidden sm:inline ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}>
+                          International Competitions
+                        </span>
+                        <Badge
+                          count={compsCount}
+                          overflowCount={99999}
+                          style={{
+                            backgroundColor: activeTab === 'INT_COMPETITIONS' ? '#1d70b8' : '#94a3b8',
+                          }}
+                        />
+                      </Space>
+                    ),
+                  });
+                }
+
+                if (list.length === 0) {
+                  list.push({
+                    key: 'NATIONS',
+                    label: (
+                      <Space size={4} title="Countries">
+                        <NationIcon size={18} className="text-cyan-600" />
+                        <span className="hidden sm:inline font-semibold">Countries</span>
+                      </Space>
+                    ),
+                  });
+                }
+
+                return list;
+              })()}
               className="mb-4"
             />
 

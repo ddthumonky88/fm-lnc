@@ -1,15 +1,50 @@
 import { RecordType } from '../types';
 
 export function getApiBase(): string {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('custom_api_base');
+    if (custom) return custom;
+  }
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
+  return 'https://fm-lnc-backend.onrender.com/api';
+}
+
+export function getLocalApiBase(): string {
   if (typeof window !== 'undefined') {
-    // Tự động sử dụng hostname hiện tại (dùng 127.0.0.1 thay cho localhost để tránh lỗi IPv6 ERR_CONNECTION_REFUSED trên Windows)
+    const customLocal = localStorage.getItem('custom_local_api_base');
+    if (customLocal) return customLocal;
+  }
+  if (process.env.NEXT_PUBLIC_LOCAL_API_URL) {
+    return process.env.NEXT_PUBLIC_LOCAL_API_URL;
+  }
+  if (typeof window !== 'undefined') {
     const host = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
     return `http://${host}:3001/api`;
   }
   return 'http://127.0.0.1:3001/api';
+}
+
+export function setCustomLocalApiBase(url: string | null) {
+  if (typeof window !== 'undefined') {
+    if (url) {
+      localStorage.setItem('custom_local_api_base', url);
+    } else {
+      localStorage.removeItem('custom_local_api_base');
+    }
+  }
+}
+
+export function setCustomApiBase(url: string | null) {
+  if (typeof window !== 'undefined') {
+    if (url) {
+      localStorage.setItem('custom_api_base', url);
+    } else {
+      localStorage.removeItem('custom_api_base');
+    }
+    clearApiCache();
+  }
 }
 
 export interface ConfederationItem {
@@ -353,20 +388,20 @@ export function getExportUrl(): string {
 }
 
 export function getConfederationLogoUrl(id: string): string {
-  return `${getApiBase()}/logos/confederation/${id}`;
+  return `${getLocalApiBase()}/logos/confederation/${id}`;
 }
 
 export function getNationLogoUrl(id: string, code?: string): string {
   const query = code ? `?code=${encodeURIComponent(code)}` : '';
-  return `${getApiBase()}/logos/nation/${id}${query}`;
+  return `${getLocalApiBase()}/logos/nation/${id}${query}`;
 }
 
 export function getCompetitionLogoUrl(id: string | number): string {
-  return `${getApiBase()}/logos/competition/${id}`;
+  return `${getLocalApiBase()}/logos/competition/${id}`;
 }
 
 export function getClubLogoUrl(id: string | number): string {
-  return `${getApiBase()}/logos/club/${id}`;
+  return `${getLocalApiBase()}/logos/club/${id}`;
 }
 
 export interface AppPathsConfig {
@@ -404,46 +439,71 @@ export interface ConfigStatusResponse {
 }
 
 export async function fetchAppConfig(): Promise<ConfigStatusResponse> {
-  const res = await fetch(`${getApiBase()}/config`, {
+  const res = await fetch(`${getLocalApiBase()}/config`, {
     cache: 'no-store',
   });
-  if (!res.ok) throw new Error('Failed to fetch config');
+  if (!res.ok) throw new Error('Không thể tải cấu hình thư mục local từ backend localhost:3001');
   return res.json();
 }
 
 export async function updateAppConfig(config: Partial<AppPathsConfig>): Promise<ConfigStatusResponse> {
-  const res = await fetch(`${getApiBase()}/config`, {
+  const res = await fetch(`${getLocalApiBase()}/config`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(config),
   });
-  if (!res.ok) throw new Error('Failed to update config');
+  if (!res.ok) throw new Error('Không thể cập nhật cấu hình local');
   return res.json();
 }
 
 export async function testDirectoryPath(targetPath: string) {
-  const res = await fetch(`${getApiBase()}/config/test`, {
+  const res = await fetch(`${getLocalApiBase()}/config/test`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: targetPath }),
   });
-  if (!res.ok) throw new Error('Failed to test path');
+  if (!res.ok) throw new Error('Kiểm tra thư mục local thất bại');
   return res.json();
 }
 
 export async function syncLncFromConfig() {
   clearApiCache();
-  const res = await fetch(`${getApiBase()}/config/sync`, {
+  const res = await fetch(`${getLocalApiBase()}/config/sync`, {
     method: 'POST',
   });
-  if (!res.ok) throw new Error('Sync failed');
+  if (!res.ok) throw new Error('Đồng bộ LNC local thất bại');
   return res.json();
 }
 
 export async function reloadLogosFromConfig() {
-  const res = await fetch(`${getApiBase()}/config/reload-logos`, {
+  const res = await fetch(`${getLocalApiBase()}/config/reload-logos`, {
     method: 'POST',
   });
-  if (!res.ok) throw new Error('Reload logos failed');
+  if (!res.ok) throw new Error('Quét lại logo local thất bại');
   return res.json();
 }
+
+export async function uploadLncFiles(files: { name: string; content: string }[]) {
+  clearApiCache();
+  const res = await fetch(`${getApiBase()}/lnc/upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Upload failed' }));
+    throw new Error(err.message || 'Upload failed');
+  }
+  return res.json();
+}
+
+export async function syncLocalLncToProd(): Promise<{ success: boolean; message: string }> {
+  clearApiCache();
+  const exportRes = await fetch(`${getLocalApiBase()}/lnc/export`);
+  if (!exportRes.ok) {
+    throw new Error('Không thể đọc dữ liệu LNC từ backend local');
+  }
+  const lncContent = await exportRes.text();
+  return uploadLncFiles([{ name: 'FM24_Merged_Names.lnc', content: lncContent }]);
+}
+

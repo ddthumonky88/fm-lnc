@@ -161,10 +161,22 @@ export class HierarchyService {
       this.awardRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
     ]);
 
+    const countsRaw = await this.clubRepo.query(
+      `SELECT
+        COUNT(*) FILTER (WHERE comp_id IS NULL AND (is_extinct = false OR is_extinct IS NULL))::int as other_count,
+        COUNT(*) FILTER (WHERE is_extinct = true)::int as extinct_count
+      FROM clubs
+      WHERE nation_id = $1;`,
+      [String(nationId)],
+    );
+    const otherClubsCount = countsRaw[0]?.other_count || 0;
+    const extinctClubsCount = countsRaw[0]?.extinct_count || 0;
+    const extraComps = (otherClubsCount > 0 ? 1 : 0) + (extinctClubsCount > 0 ? 1 : 0);
+
     return {
       nation,
       counts: {
-        domesticComps: domesticComps + 2,
+        domesticComps: domesticComps + extraComps,
         independentClubs,
         allClubs,
         stadiums,
@@ -266,7 +278,15 @@ export class HierarchyService {
       totalChildren: extinctClubsCount,
     };
 
-    return [virtualOther, virtualExtinct, ...comps];
+    const virtualItems: any[] = [];
+    if (otherClubsCount > 0) {
+      virtualItems.push(virtualOther);
+    }
+    if (extinctClubsCount > 0) {
+      virtualItems.push(virtualExtinct);
+    }
+
+    return [...virtualItems, ...comps];
   }
 
   async getIndependentClubs(nationId: string, extinct?: string) {

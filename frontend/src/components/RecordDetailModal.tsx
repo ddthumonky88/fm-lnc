@@ -22,6 +22,7 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import { EntityType, RecordType } from '../types';
+import { CompIcon, ClubIcon, NationIcon, StadiumIcon, CityIcon, AwardIcon } from './EntityIcons';
 import {
   getConfederationLogoUrl,
   getNationLogoUrl,
@@ -210,15 +211,15 @@ export default function RecordDetailModal({
   };
 
   const getTypeIcon = () => {
-    if (isVirtual) return <SafetyOutlined className="text-orange-500" />;
-    if (isComp) return <TrophyOutlined className="text-amber-500" />;
-    if (isClub) return <SafetyOutlined className="text-blue-500" />;
-    if (isNation) return <FlagOutlined className="text-cyan-600" />;
-    if (isConfed) return <GlobalOutlined className="text-indigo-500" />;
-    if (isStadium) return <BankOutlined className="text-emerald-500" />;
-    if (isCity) return <EnvironmentOutlined className="text-indigo-500" />;
-    if (isAward) return <StarOutlined className="text-yellow-500" />;
-    if (isPlayer) return <UserOutlined className="text-purple-500" />;
+    if (isVirtual) return <ClubIcon size={18} className="text-orange-500" />;
+    if (isComp) return <CompIcon size={18} className="text-amber-500" />;
+    if (isClub) return <ClubIcon size={18} className="text-blue-500" />;
+    if (isNation) return <NationIcon size={18} className="text-cyan-600" />;
+    if (isConfed) return <GlobalOutlined className="text-indigo-500 text-lg" />;
+    if (isStadium) return <StadiumIcon size={18} className="text-emerald-500" />;
+    if (isCity) return <CityIcon size={18} className="text-indigo-500" />;
+    if (isAward) return <AwardIcon size={18} className="text-yellow-500" />;
+    if (isPlayer) return <UserOutlined className="text-purple-500 text-base" />;
     return <AppstoreOutlined className="text-gray-500" />;
   };
 

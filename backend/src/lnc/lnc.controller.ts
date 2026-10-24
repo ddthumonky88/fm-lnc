@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Res, Body, Query, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Res, Body, Query, HttpStatus, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { Response } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
 import { LncService } from './lnc.service';
 import { LncParserService } from './lnc-parser.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -55,6 +57,55 @@ export class LncController {
     return {
       success: true,
       message: 'Successfully imported .lnc files into database',
+      stats: await this.getStatus(),
+    };
+  }
+
+  @ApiOperation({ summary: 'Tải trực tiếp các file .lnc từ máy lên và nạp vào database' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              content: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Post('upload')
+  async uploadLncFiles(@Body('files') files: { name: string; content: string }[]) {
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      throw new BadRequestException('Không tìm thấy file nào để tải lên');
+    }
+
+    const targetDir = this.lncParserService.getBaseDir();
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const writtenFiles: string[] = [];
+    for (const f of files) {
+      if (!f.name || !f.content) continue;
+      const safeName = path.basename(f.name);
+      const filePath = path.resolve(targetDir, safeName);
+      fs.writeFileSync(filePath, f.content, 'utf8');
+      writtenFiles.push(safeName);
+    }
+
+    // Auto-seed
+    await this.lncParserService.parseAndSeed(targetDir);
+
+    return {
+      success: true,
+      message: `Đã nạp thành công ${writtenFiles.length} file .LNC vào database!`,
+      uploadedFiles: writtenFiles,
       stats: await this.getStatus(),
     };
   }

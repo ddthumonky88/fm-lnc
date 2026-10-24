@@ -64,6 +64,7 @@ import QuickSearchModal from '../components/QuickSearchModal';
 import CardGrid from '../components/CardGrid';
 import CompetitionGroupView, { sortCompetitionsByCategory } from '../components/CompetitionGroupView';
 import CityGroupView from '../components/CityGroupView';
+import { CompIcon, StadiumIcon, CityIcon, AwardIcon } from '../components/EntityIcons';
 import { useApp } from '../context/AppContext';
 import {
   HierarchyLevel,
@@ -559,7 +560,7 @@ export default function LncSortitoutsiExplorer() {
         key: NationTabKey.DOMESTIC_COMPS,
         label: 'Competitions',
         count: nationHub?.counts?.domesticComps || 0,
-        icon: <TrophyOutlined className="text-amber-500" />,
+        icon: <CompIcon size={18} className="text-amber-500" />,
         addLabel: 'Add Competition',
         type: RecordType.COMPETITION,
       },
@@ -567,7 +568,7 @@ export default function LncSortitoutsiExplorer() {
         key: NationTabKey.STADIUMS,
         label: 'Stadiums',
         count: nationHub?.counts?.stadiums || 0,
-        icon: <BankOutlined className="text-emerald-500" />,
+        icon: <StadiumIcon size={18} className="text-emerald-500" />,
         addLabel: 'Add Stadium',
         type: RecordType.STADIUM,
       },
@@ -575,7 +576,7 @@ export default function LncSortitoutsiExplorer() {
         key: NationTabKey.CITIES,
         label: 'Cities',
         count: nationHub?.counts?.cities || 0,
-        icon: <EnvironmentOutlined className="text-indigo-500" />,
+        icon: <CityIcon size={18} className="text-indigo-500" />,
         addLabel: 'Add City',
         type: RecordType.CITY,
       },
@@ -583,18 +584,20 @@ export default function LncSortitoutsiExplorer() {
         key: NationTabKey.AWARDS,
         label: 'Awards',
         count: nationHub?.counts?.awards || 0,
-        icon: <StarOutlined className="text-yellow-500" />,
+        icon: <AwardIcon size={18} className="text-yellow-500" />,
         addLabel: 'Add Award',
         type: RecordType.AWARD,
       },
     ];
   }, [nationHub]);
 
-  // Only keep Competitions tab always accessible; other tabs (Awards, Stadiums, Cities) are only visible if count > 0
+  // Hide any tab that has 0 records; fallback to Competitions tab if all are 0
   const visibleNationTabs = useMemo(() => {
-    return nationTabsConfig.filter(
-      (t) => t.count > 0 || t.key === NationTabKey.DOMESTIC_COMPS,
-    );
+    const list = nationTabsConfig.filter((t) => t.count > 0);
+    if (list.length === 0) {
+      return nationTabsConfig.slice(0, 1);
+    }
+    return list;
   }, [nationTabsConfig]);
 
   // Ensure activeNationTab is in visibleNationTabs
@@ -684,39 +687,39 @@ export default function LncSortitoutsiExplorer() {
                 </div>
               </div>
 
-              {/* Mobile Vertical Cards (md:hidden) - 1 card per row */}
-              <div className="md:hidden grid grid-cols-1 gap-3">
+              {/* Mobile Cards (md:hidden) - 2 cards per row */}
+              <div className="md:hidden grid grid-cols-2 gap-2 sm:gap-3">
                 {filteredContinents.map((c) => (
                   <div
                     key={c.id}
                     onClick={() => router.push(`/confederation/${c.id}`)}
-                    className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2.5 sm:p-3.5 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-2"
+                    className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2 sm:p-3 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-1.5"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-1 mb-2">
-                        <Tag color="blue" className="font-mono font-bold text-[10px] sm:text-xs m-0 shrink-0">
-                          ID: {c.id}
+                      <div className="flex items-center justify-between gap-1 mb-1.5">
+                        <Tag color="blue" className="font-mono font-bold text-[10px] m-0 shrink-0 px-1 py-0">
+                          {c.id}
                         </Tag>
                       </div>
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         <img
                           src={getConfederationLogoUrl(c.id)}
                           alt={c.name}
-                          className="w-6 h-6 sm:w-8 sm:h-8 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
+                          className="w-6 h-6 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                           }}
                         />
-                        <div className="font-bold text-xs sm:text-sm text-slate-800 truncate">{c.name}</div>
+                        <div className="font-bold text-xs text-slate-800 line-clamp-1" title={c.name}>{c.name}</div>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 text-[11px] space-y-1 text-slate-600">
-                      <div className="flex items-center gap-1.5 truncate">
+                    <div className="pt-1.5 border-t border-slate-100 text-[11px] space-y-0.5 text-slate-600">
+                      <div className="flex items-center gap-1 truncate">
                         <GlobalOutlined className="text-blue-500 text-xs shrink-0" />
                         <span className="truncate"><strong>{c.totalNations || 0}</strong> nations</span>
                       </div>
-                      <div className="flex items-center gap-1.5 truncate">
+                      <div className="flex items-center gap-1 truncate">
                         <TrophyOutlined className="text-amber-500 text-xs shrink-0" />
                         <span className="truncate"><strong>{c.totalIntComps || 0}</strong> comps</span>
                       </div>

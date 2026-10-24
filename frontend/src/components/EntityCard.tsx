@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag, Button, Space, Tooltip, Popconfirm, Badge } from 'antd';
+import { Tag, Button, Space, Tooltip, Popconfirm, Badge, message } from 'antd';
 import {
   TrophyOutlined,
   SafetyOutlined,
@@ -18,11 +18,14 @@ import {
   EyeOutlined,
   InfoCircleOutlined,
   ApartmentOutlined,
+  CopyOutlined,
+  CheckOutlined,
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
 import { getConfederationLogoUrl, getNationLogoUrl } from '../services/api';
 import RecordDetailModal from './RecordDetailModal';
+import { CompIcon, ClubIcon, NationIcon, StadiumIcon, CityIcon, AwardIcon } from './EntityIcons';
 
 export { EntityType };
 
@@ -71,6 +74,45 @@ export default function EntityCard({
   const router = useRouter();
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
+  const [idCopied, setIdCopied] = useState(false);
+
+  const isRedKeyword = (val?: any): boolean => {
+    if (!val || typeof val !== 'string') return false;
+    const upper = val.trim().toUpperCase();
+    return (
+      upper === '[OTHER]' ||
+      upper === '[EXTINCT]' ||
+      upper === '[REMOVE]' ||
+      upper === 'OTHER' ||
+      upper === 'EXTINCT' ||
+      upper === 'REMOVE' ||
+      upper.startsWith('[OTHER]') ||
+      upper.startsWith('[EXTINCT]') ||
+      upper.startsWith('[REMOVE]')
+    );
+  };
+
+  const isSpecialCard = Boolean(
+    data.is_virtual ||
+    data.id === '[EXTINCT]' ||
+    data.id === '[OTHER]' ||
+    data.id === '[REMOVE]' ||
+    data.virtual_type === 'EXTINCT' ||
+    data.virtual_type === 'OTHER' ||
+    data.virtual_type === 'REMOVE' ||
+    (typeof data.id === 'string' && data.id.startsWith('['))
+  );
+
+  const handleCopyId = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isSpecialCard) return;
+    if (data.id !== undefined && data.id !== null) {
+      navigator.clipboard.writeText(String(data.id));
+      setIdCopied(true);
+      message.success(`Copied ID: ${data.id}`);
+      setTimeout(() => setIdCopied(false), 2000);
+    }
+  };
 
   // Determine Type Icon and badge styling
   const getIcon = () => {
@@ -112,40 +154,44 @@ export default function EntityCard({
         );
       case EntityType.NATION:
       case 'nation':
-        return null;
+        return (
+          <span className="w-7 h-7 rounded-full bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
+            <NationIcon size={16} />
+          </span>
+        );
       case EntityType.COMPETITION:
       case 'competition':
         return (
-          <span className="w-6 h-6 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-xs text-amber-600">
-            <TrophyOutlined />
+          <span className="w-7 h-7 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+            <CompIcon size={16} />
           </span>
         );
       case EntityType.CLUB:
       case 'club':
         return (
-          <span className="w-6 h-6 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-xs text-blue-600">
-            <SafetyOutlined />
+          <span className="w-7 h-7 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+            <ClubIcon size={16} />
           </span>
         );
       case EntityType.STADIUM:
       case 'stadium':
         return (
-          <span className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-xs text-emerald-600">
-            <BankOutlined />
+          <span className="w-7 h-7 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+            <StadiumIcon size={16} />
           </span>
         );
       case EntityType.CITY:
       case 'city':
         return (
-          <span className="w-6 h-6 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-xs text-indigo-600">
-            <EnvironmentOutlined />
+          <span className="w-7 h-7 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+            <CityIcon size={16} />
           </span>
         );
       case EntityType.AWARD:
       case 'award':
         return (
-          <span className="w-6 h-6 rounded-full bg-yellow-50 border border-yellow-200 flex items-center justify-center text-xs text-yellow-600">
-            <StarOutlined />
+          <span className="w-7 h-7 rounded-full bg-yellow-50 border border-yellow-200 flex items-center justify-center text-yellow-600">
+            <AwardIcon size={16} />
           </span>
         );
       case EntityType.PLAYER:
@@ -399,330 +445,429 @@ export default function EntityCard({
         }`}
       >
       <div>
-        {/* Top Header Bar */}
-        <div className="flex items-center justify-between gap-1 pb-1.5 mb-1.5 border-b border-gray-100">
-          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 flex-wrap">
-            {/* Nation in Header: flag + nation_3letter (before ID) */}
-            {nationInfo && (
-              <Tooltip title={nationInfo.name || 'Nation'}>
-                <div className="flex items-center gap-1 shrink-0 px-1.5 py-0 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-xs text-slate-600 transition-colors">
-                  <img
-                    src={getNationLogoUrl(nationInfo.id, nationInfo.code)}
-                    alt={nationInfo.name || 'Nation'}
-                    className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0 inline-block"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
+        {/* Top Header Bar: [flag / thẻ tên], 2 thẻ màu */}
+        {(nationInfo || bgInfo || fgInfo || data.is_extinct) && (
+          <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-gray-100 min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+              {/* [flag / thẻ tên] */}
+              {nationInfo && (
+                <Tooltip title={nationInfo.name ? `${nationInfo.name} • Chi tiết` : 'Chi tiết'} trigger="hover" destroyTooltipOnHide>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      (e.currentTarget as HTMLElement)?.blur();
+                      setModalMode('view');
+                      setIsInfoOpen(true);
                     }}
-                  />
-                  {nationInfo.code && (
-                    <span className="text-[11px] font-semibold text-slate-600">
-                      {nationInfo.code}
-                    </span>
+                    className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded text-xs text-slate-600 hover:text-sky-700 transition-all cursor-pointer"
+                    aria-label="View info"
+                  >
+                    <img
+                      src={getNationLogoUrl(nationInfo.id, nationInfo.code)}
+                      alt={nationInfo.name || 'Nation'}
+                      className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0 inline-block"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    {nationInfo.code && (
+                      <span className="text-[10.5px] font-semibold text-inherit leading-none">
+                        {nationInfo.code}
+                      </span>
+                    )}
+                  </button>
+                </Tooltip>
+              )}
+
+              {/* 2 thẻ màu */}
+              {(bgInfo || fgInfo) && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1 shrink-0"
+                >
+                  {bgInfo && (
+                    <Tooltip
+                      title={
+                        <div className="text-center font-mono text-xs py-0.5">
+                          <div className="font-bold text-sky-300">Background Color</div>
+                          <div>{bgInfo.hex}</div>
+                          <div>{bgInfo.rgb}</div>
+                        </div>
+                      }
+                    >
+                      <span
+                        className="inline-block w-3.5 h-3.5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
+                        style={{
+                          backgroundColor: bgInfo.css,
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                  {fgInfo && (
+                    <Tooltip
+                      title={
+                        <div className="text-center font-mono text-xs py-0.5">
+                          <div className="font-bold text-sky-300">Foreground Color</div>
+                          <div>{fgInfo.hex}</div>
+                          <div>{fgInfo.rgb}</div>
+                        </div>
+                      }
+                    >
+                      <span
+                        className="inline-block w-3.5 h-3.5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
+                        style={{
+                          backgroundColor: fgInfo.css,
+                        }}
+                      />
+                    </Tooltip>
                   )}
                 </div>
-              </Tooltip>
-            )}
+              )}
+            </div>
 
-            <Tooltip
-              title={
-                data.is_virtual || data.id === '[EXTINCT]' || data.id === '[OTHER]'
-                  ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
-                    ? 'Extinct Clubs'
-                    : 'Other Clubs (Unassigned)'
-                  : undefined
-              }
-            >
-              <Tag
-                color={
-                  data.is_virtual || data.id === '[EXTINCT]' || data.id === '[OTHER]'
-                    ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
-                      ? 'volcano'
-                      : 'geekblue'
-                    : 'blue'
-                }
-                className="font-bold text-[11px] sm:text-xs m-0 shrink-0 leading-tight px-1.5 py-0"
-              >
-                {data.id}
+            {data.is_extinct && (
+              <Tag color="red" className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight ml-auto">
+                Extinct
               </Tag>
-            </Tooltip>
-            {(bgInfo || fgInfo) && (
-              <div className="flex items-center gap-1.5 shrink-0">
-                {bgInfo && (
-                  <Tooltip
-                    title={
-                      <div className="text-center font-mono text-xs py-0.5">
-                        <div className="font-bold text-sky-300">Background Color</div>
-                        <div>{bgInfo.hex}</div>
-                        <div>{bgInfo.rgb}</div>
-                      </div>
-                    }
-                  >
-                    <span
-                      className="inline-block w-4 h-4 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
-                      style={{
-                        backgroundColor: bgInfo.css,
-                      }}
-                    />
-                  </Tooltip>
-                )}
-
-                {fgInfo && (
-                  <Tooltip
-                    title={
-                      <div className="text-center font-mono text-xs py-0.5">
-                        <div className="font-bold text-sky-300">Foreground Color</div>
-                        <div>{fgInfo.hex}</div>
-                        <div>{fgInfo.rgb}</div>
-                      </div>
-                    }
-                  >
-                    <span
-                      className="inline-block w-4 h-4 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
-                      style={{
-                        backgroundColor: fgInfo.css,
-                      }}
-                    />
-                  </Tooltip>
-                )}
-              </div>
             )}
           </div>
-          {data.is_extinct && (
-            <Tag color="red" className="m-0 text-[10px] font-semibold shrink-0">
-              Extinct
-            </Tag>
-          )}
-        </div>
+        )}
 
-        {/* Fields List formatted as [label]: {value} */}
-        <div className="space-y-1 mb-1 text-xs">
-          {type === 'player' || type === EntityType.PLAYER ? (
-            <>
-              <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">FN:</span>
-                <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-800">
-                  {data.first_name || '-'}
+        {/* Fields List formatted as [label]: on line 1, [value] on line 2 on mobile; inline on desktop */}
+        {(() => {
+          const isPlayer = type === 'player' || type === EntityType.PLAYER;
+          const isCityOrStadium =
+            type === 'city' || type === EntityType.CITY || type === 'stadium' || type === EntityType.STADIUM;
+
+          const hasId = data.id !== undefined && data.id !== null && data.id !== '';
+
+          {/* Reusable ID field row for middle/top of card body */}
+          const renderIdRow = (customLabelWidth?: string) => {
+            if (!hasId) {
+              return null;
+            }
+            const lblWidth = customLabelWidth || 'sm:w-8';
+            return (
+              <div className="sm:flex sm:items-center sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                <span className={`text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline ${lblWidth} sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none`}>
+                  ID:
                 </span>
-              </div>
-              <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">SN:</span>
-                <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-800">
-                  {data.second_name || '-'}
-                </span>
-              </div>
-              {data.common_name && (
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">CN:</span>
-                  <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-700 italic">
-                    {data.common_name}
-                  </span>
+                <div className="flex sm:inline-flex items-center gap-1.5 min-w-0">
+                  {/* Nút info cạnh ID text - KHÔNG hiển thị cho card [OTHER], [EXTINCT], [REMOVE] */}
+                  {!isSpecialCard && (
+                    <Tooltip title="Chi tiết" trigger="hover" destroyTooltipOnHide>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          (e.currentTarget as HTMLElement)?.blur();
+                          setModalMode('view');
+                          setIsInfoOpen(true);
+                        }}
+                        className="w-4 h-4 rounded-full flex items-center justify-center text-sky-500 hover:text-sky-600 hover:bg-sky-50 transition-colors cursor-pointer shrink-0"
+                        aria-label="Chi tiết"
+                      >
+                        <InfoCircleOutlined className="text-[11.5px]" />
+                      </button>
+                    </Tooltip>
+                  )}
+
+                  {/* ID text: Với [OTHER], [EXTINCT], [REMOVE] thì KHÔNG copy, chỉ hiển thị text thường màu đỏ */}
+                  {isSpecialCard ? (
+                    <span
+                      className={`font-mono font-bold text-xs sm:text-[13px] shrink-0 select-none ${
+                        isRedKeyword(data.id) || isRedKeyword(data.virtual_type)
+                          ? 'text-red-600'
+                          : 'text-gray-700'
+                      }`}
+                    >
+                      {data.id}
+                    </span>
+                  ) : (
+                    <Tooltip title={idCopied ? 'Đã sao chép!' : 'Nhấn để copy ID'} trigger="hover" destroyTooltipOnHide>
+                      <span
+                        onClick={handleCopyId}
+                        className={`font-mono font-bold text-xs sm:text-[13px] hover:text-blue-600 cursor-pointer select-all transition-colors inline-flex items-center gap-1 group/id shrink-0 ${
+                          isRedKeyword(data.id) ? 'text-red-600' : 'text-gray-800'
+                        }`}
+                        title={
+                          data.is_virtual || data.id === '[EXTINCT]' || data.id === '[OTHER]' || data.id === '[REMOVE]'
+                            ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
+                              ? 'Extinct Clubs'
+                              : data.id === '[REMOVE]' || data.virtual_type === 'REMOVE'
+                              ? 'Removed Records'
+                              : 'Other Clubs (Unassigned)'
+                            : undefined
+                        }
+                      >
+                        <span>{data.id}</span>
+                        {idCopied ? (
+                          <CheckOutlined className="text-emerald-500 text-[10px]" />
+                        ) : (
+                          <CopyOutlined className="text-gray-400 group-hover/id:text-blue-500 opacity-0 group-hover/id:opacity-100 transition-opacity text-[10px]" />
+                        )}
+                      </span>
+                    </Tooltip>
+                  )}
                 </div>
-              )}
-            </>
-          ) : type === 'city' || type === EntityType.CITY || type === 'stadium' || type === EntityType.STADIUM ? (
-            <>
-              <div className="flex items-start gap-1.5 min-w-0">
-                <span className="w-10 sm:w-12 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none pt-0.5">Name:</span>
-                <span
-                  className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words ${
-                    isTitleInactive ? 'text-red-600' : 'text-gray-800'
-                  }`}
-                  style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    wordBreak: 'break-word',
-                  }}
-                  title={title}
-                >
-                  {title}
-                </span>
               </div>
-              {data.categories && (
-                <div className="flex items-start gap-1.5 min-w-0 mt-1">
-                  <span className="w-10 sm:w-12 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none pt-0.5">Region:</span>
+            );
+          };
+
+          return (
+            /* Fields List formatted as [label]: \n [value] on mobile; [label]: [value] inline on desktop */
+            <div className="space-y-1.5 sm:space-y-1 mb-1 text-xs">
+              {isPlayer ? (
+                <>
+                  {/* Trường ID ở dòng đầu tiên của nội dung */}
+                  {renderIdRow()}
+
+                  <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                    <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                      FN:
+                    </span>
+                    <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline text-gray-800">
+                      {data.first_name || '-'}
+                    </span>
+                  </div>
+                  <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                    <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                      SN:
+                    </span>
+                    <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline text-gray-800">
+                      {data.second_name || '-'}
+                    </span>
+                  </div>
+                  {data.common_name && (
+                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                        CN:
+                      </span>
+                      <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-700 italic block sm:inline">
+                        {data.common_name}
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : isCityOrStadium ? (
+                <>
+                  {/* Trường ID ở dòng đầu tiên của nội dung */}
+                  {renderIdRow('sm:w-10 sm:w-12')}
+
+                  <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                    <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none">
+                      Name:
+                    </span>
+                    <span
+                      className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words block sm:inline ${
+                        isTitleInactive || isRedKeyword(title) ? 'text-red-600' : 'text-gray-800'
+                      }`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={title}
+                    >
+                      {title}
+                    </span>
+                  </div>
+                  {data.categories && (
+                    <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1.5 sm:mt-1">
+                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none">
+                        Region:
+                      </span>
+                      <span
+                        className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words block sm:inline ${
+                          isRedKeyword(data.categories) ? 'text-red-600' : 'text-gray-800'
+                        }`}
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          wordBreak: 'break-word',
+                        }}
+                        title={data.categories}
+                      >
+                        {data.categories}
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Trường ID ở dòng đầu tiên của nội dung (nằm trên LN) */}
+                  {renderIdRow()}
+
+                  {/* LN */}
+                  <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                    <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                      LN:
+                    </span>
+                    <span
+                      className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
+                        isTitleInactive || isRedKeyword(data.long_name || title) ? 'text-red-600' : 'text-gray-800'
+                      }`}
+                    >
+                      {data.is_virtual ? '-' : (data.long_name || title)}
+                    </span>
+                  </div>
+
+                  {/* SN */}
+                  {(hasThreeLetter || data.short_name || data.is_virtual) && (
+                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                        SN:
+                      </span>
+                      <span
+                        className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
+                          isInactive('short_name') || isRedKeyword(data.short_name || title) ? 'text-red-600' : 'text-gray-800'
+                        }`}
+                      >
+                        {data.is_virtual ? '-' : (data.short_name || title)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* 6N */}
+                  {(type === 'club' || type === EntityType.CLUB || data.six_letter_name) && (
+                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                        6N:
+                      </span>
+                      <span
+                        className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
+                          isInactive('six_letter_name') ? 'text-red-600' : 'text-gray-800'
+                        }`}
+                      >
+                        {code6 || '-'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* 3N */}
+                  {(hasThreeLetter || data.three_letter_name || data.is_virtual) && (
+                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                        3N:
+                      </span>
+                      <span
+                        className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
+                          isInactive('three_letter_name') ? 'text-red-600' : 'text-gray-800'
+                        }`}
+                      >
+                        {data.is_virtual ? '-' : (code3 || '-')}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Stage Type */}
+                  {(type === 'stage' || type === EntityType.STAGE) && (
+                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                        Type:
+                      </span>
+                      <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline text-gray-800">
+                        Tournament Stage
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Category for other types (text format) */}
+              {type !== 'city' && data.categories && (
+                <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                  <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-14 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                    Category:
+                  </span>
                   <span
-                    className="font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words text-gray-800"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      wordBreak: 'break-word',
-                    }}
+                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
+                      isRedKeyword(data.categories) ? 'text-red-600' : 'text-gray-800'
+                    }`}
                     title={data.categories}
                   >
                     {data.categories}
                   </span>
                 </div>
               )}
-            </>
-          ) : (
-            <>
-              {/* LN */}
-              <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">LN:</span>
-                <span
-                  className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
-                    isTitleInactive ? 'text-red-600' : 'text-gray-800'
-                  }`}
-                >
-                  {data.is_virtual ? '-' : (data.long_name || title)}
-                </span>
-              </div>
 
-              {/* SN */}
-              {(hasThreeLetter || data.short_name || data.is_virtual) && (
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">SN:</span>
-                  <span
-                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
-                      isInactive('short_name') ? 'text-red-600' : 'text-gray-800'
-                    }`}
-                  >
-                    {data.is_virtual ? '-' : (data.short_name || title)}
+              {/* Note */}
+              {data.note && (
+                <div className="sm:flex sm:items-baseline sm:gap-1.5 text-[11px] sm:text-xs text-gray-500 min-w-0 mt-1 sm:mt-0">
+                  <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                    Note:
+                  </span>
+                  <span className="truncate text-gray-600 block sm:inline" title={data.note}>
+                    {data.note}
                   </span>
                 </div>
               )}
-
-              {/* 6N */}
-              {(type === 'club' || type === EntityType.CLUB || data.six_letter_name) && (
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">6N:</span>
-                  <span
-                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
-                      isInactive('six_letter_name') ? 'text-red-600' : 'text-gray-800'
-                    }`}
-                  >
-                    {code6 || '-'}
-                  </span>
-                </div>
-              )}
-
-              {/* 3N */}
-              {(hasThreeLetter || data.three_letter_name || data.is_virtual) && (
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">3N:</span>
-                  <span
-                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate ${
-                      isInactive('three_letter_name') ? 'text-red-600' : 'text-gray-800'
-                    }`}
-                  >
-                    {data.is_virtual ? '-' : (code3 || '-')}
-                  </span>
-                </div>
-              )}
-
-              {/* Stage Type */}
-              {(type === 'stage' || type === EntityType.STAGE) && (
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">Type:</span>
-                  <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-800">Tournament Stage</span>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Category for other types */}
-          {type !== 'city' && data.categories && (
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="w-14 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">Category:</span>
-              <div className="flex items-center gap-1 flex-wrap">
-                {data.categories.split(',').map((cat: string, idx: number) => (
-                  <Tag color="cyan" key={idx} className="m-0 text-[10.5px] sm:text-xs font-normal">
-                    {cat.trim()}
-                  </Tag>
-                ))}
-              </div>
             </div>
-          )}
-
-          {/* Note */}
-          {data.note && (
-            <div className="flex items-baseline gap-1.5 text-[11px] sm:text-xs text-gray-500 min-w-0">
-              <span className="w-8 text-gray-400 font-medium text-[11px] sm:text-xs shrink-0 select-none">Note:</span>
-              <span className="truncate text-gray-600" title={data.note}>{data.note}</span>
-            </div>
-          )}
-        </div>
+          );
+        })()}
       </div>
 
-      {/* Card Footer: Action Buttons (Eye, Info, Edit, Delete) */}
-      <div className="pt-1 mt-auto border-t border-gray-100 flex items-center justify-end gap-0.5">
-        {renderChildButtons()}
+      {/* Card Footer: Action Buttons (Eye, Edit, Delete) */}
+      {(Boolean(renderChildButtons()) || canEdit || canDelete) && (
+        <div className="pt-1 mt-auto border-t border-gray-100 flex items-center justify-end gap-0.5">
+          {renderChildButtons()}
 
-        {/* Info button on EVERY card */}
-        <Tooltip
-          title="Info"
-          trigger="hover"
-          destroyTooltipOnHide
-          open={isInfoOpen ? false : undefined}
-        >
-          <Button
-            type="text"
-            shape="circle"
-            size="small"
-            icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              (e.currentTarget as HTMLElement)?.blur();
-              setModalMode('view');
-              setIsInfoOpen(true);
-            }}
-          />
-        </Tooltip>
-
-        {(canEdit || canDelete) && (
-          <div className="flex items-center gap-0.5 shrink-0">
-            {canEdit && (
-              <Tooltip
-                title="Edit"
-                trigger="hover"
-                destroyTooltipOnHide
-                open={isInfoOpen ? false : undefined}
-              >
-                <Button
-                  type="text"
-                  shape="circle"
-                  size="small"
-                  icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    (e.currentTarget as HTMLElement)?.blur();
-                    setModalMode('edit');
-                    setIsInfoOpen(true);
-                  }}
-                />
-              </Tooltip>
-            )}
-            {canDelete && (
-              <Popconfirm
-                title="Delete Record"
-                description={`Are you sure you want to delete "${title}"?`}
-                onConfirm={() => onDelete(data)}
-                okText="Delete"
-                cancelText="Cancel"
-                okButtonProps={{ danger: true }}
-              >
-                <Tooltip title="Delete" trigger="hover" destroyTooltipOnHide>
+          {(canEdit || canDelete) && (
+            <div className="flex items-center gap-0.5 shrink-0">
+              {canEdit && (
+                <Tooltip
+                  title="Edit"
+                  trigger="hover"
+                  destroyTooltipOnHide
+                  open={isInfoOpen ? false : undefined}
+                >
                   <Button
                     type="text"
                     shape="circle"
                     size="small"
-                    danger
-                    icon={<DeleteOutlined style={{ fontSize: 13 }} />}
+                    icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
                     onClick={(e) => {
                       e.stopPropagation();
                       (e.currentTarget as HTMLElement)?.blur();
+                      setModalMode('edit');
+                      setIsInfoOpen(true);
                     }}
                   />
                 </Tooltip>
-              </Popconfirm>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+              {canDelete && (
+                <Popconfirm
+                  title="Delete Record"
+                  description={`Are you sure you want to delete "${title}"?`}
+                  onConfirm={() => onDelete(data)}
+                  okText="Delete"
+                  cancelText="Cancel"
+                  okButtonProps={{ danger: true }}
+                >
+                  <Tooltip title="Delete" trigger="hover" destroyTooltipOnHide>
+                    <Button
+                      type="text"
+                      shape="circle"
+                      size="small"
+                      danger
+                      icon={<DeleteOutlined style={{ fontSize: 13 }} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        (e.currentTarget as HTMLElement)?.blur();
+                      }}
+                    />
+                  </Tooltip>
+                </Popconfirm>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
 
     {/* Unified Record Detail + Edit Modal */}

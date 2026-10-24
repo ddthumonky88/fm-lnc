@@ -13,39 +13,97 @@ import {
 } from '@ant-design/icons';
 import CardGrid from './CardGrid';
 import SubCompetitionsDrawer from './SubCompetitionsDrawer';
+import { CompIcon, AwardIcon } from './EntityIcons';
 
 export type CompetitionGroupKey = 'all' | 'league' | 'cup' | 'youth' | 'other';
+export type CompetitionCategory = 'league' | 'cup' | 'youth' | 'other';
 
-export function getCompetitionGroup(category?: string | null): 'league' | 'cup' | 'youth' | 'other' {
-  if (!category) return 'other';
-  const cat = category.trim().toLowerCase();
+export function getCompetitionGroup(target?: any): CompetitionCategory {
+  if (!target) return 'other';
+  const item = typeof target === 'object' ? target : { categories: target };
+  const id = String(item?.id || '');
+  if (id === '[OTHER]' || id === '[EXTINCT]' || item?.is_virtual) {
+    return 'other';
+  }
+  const cat = String(item?.categories || item?.category || '').trim().toLowerCase();
+  if (!cat) return 'other';
   if (cat.includes('youth')) return 'youth';
-  if (cat.startsWith('league') || cat.includes('league') || cat.includes('lower leagues')) return 'league';
   if (cat.includes('cup')) return 'cup';
+  if (cat.includes('league') || cat.includes('division') || cat.includes('tier') || cat.includes('lower leagues')) {
+    return 'league';
+  }
   return 'other';
 }
 
+const GROUP_PRIORITY: Record<CompetitionCategory, number> = {
+  league: 1,
+  cup: 2,
+  youth: 3,
+  other: 4,
+};
+
+function getLeagueTier(categoryStr: string): number {
+  const match = categoryStr.match(/league\s*\(\s*(\d+)\s*\)/i) || categoryStr.match(/\((\d+)\)/);
+  if (match) {
+    return parseInt(match[1], 10);
+  }
+  return 9999;
+}
+
+function getOtherWeight(item: any): number {
+  const id = String(item?.id || '');
+  if (id === '[EXTINCT]' || item?.virtual_type === 'EXTINCT') return 3;
+  if (id === '[OTHER]' || item?.virtual_type === 'OTHER' || item?.is_virtual) return 2;
+  return 1;
+}
+
 export function sortCompetitionsByCategory(a: any, b: any): number {
-  const aVirtual = !!a.is_virtual || a.id === '[OTHER]' || a.id === '[EXTINCT]';
-  const bVirtual = !!b.is_virtual || b.id === '[OTHER]' || b.id === '[EXTINCT]';
-  if (aVirtual && !bVirtual) return -1;
-  if (!aVirtual && bVirtual) return 1;
-  if (aVirtual && bVirtual) {
-    return String(a.long_name || a.name || '').localeCompare(String(b.long_name || b.name || ''));
+  const groupA = getCompetitionGroup(a);
+  const groupB = getCompetitionGroup(b);
+
+  // 1. Overall Category group priority: league (1) > cup (2) > youth (3) > other (4)
+  if (groupA !== groupB) {
+    return GROUP_PRIORITY[groupA] - GROUP_PRIORITY[groupB];
   }
 
-  const catA = (a.categories || '').trim();
-  const catB = (b.categories || '').trim();
+  // 2. Within 'league': league (1) > league (2) > ...
+  if (groupA === 'league') {
+    const catA = String(a.categories || '').trim();
+    const catB = String(b.categories || '').trim();
+    const tierA = getLeagueTier(catA);
+    const tierB = getLeagueTier(catB);
+    if (tierA !== tierB) {
+      return tierA - tierB;
+    }
+    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
+    if (catComp !== 0) return catComp;
+  }
 
-  if (!catA && catB) return 1;
-  if (catA && !catB) return -1;
+  // 3. Within 'other': ... > [OTHER] > [EXTINCT]
+  if (groupA === 'other') {
+    const weightA = getOtherWeight(a);
+    const weightB = getOtherWeight(b);
+    if (weightA !== weightB) {
+      return weightA - weightB;
+    }
+    const catA = String(a.categories || '').trim();
+    const catB = String(b.categories || '').trim();
+    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
+    if (catComp !== 0) return catComp;
+  }
 
-  const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
-  if (catComp !== 0) return catComp;
+  // 4. Within 'cup' or 'youth'
+  if (groupA === 'cup' || groupA === 'youth') {
+    const catA = String(a.categories || '').trim();
+    const catB = String(b.categories || '').trim();
+    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
+    if (catComp !== 0) return catComp;
+  }
 
+  // Fallback: alphabetical by name
   const nameA = a.long_name || a.short_name || a.name || '';
   const nameB = b.long_name || b.short_name || b.name || '';
-  return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+  return String(nameA).localeCompare(String(nameB), undefined, { numeric: true, sensitivity: 'base' });
 }
 
 interface CompetitionGroupViewProps {
@@ -72,14 +130,27 @@ export default function CompetitionGroupView({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Visible items: parent/top-level competitions (sub-competitions are organized inside parent drawer)
+  // Hide independent clubs containers ([OTHER], [EXTINCT]) if they have 0 clubs
   const visibleItems = useMemo(() => {
-    return items.filter((item) => !item.parent_id);
+    return items.filter((item) => {
+      if (item.parent_id) return false;
+      const isOther = item.id === '[OTHER]' || item.virtual_type === 'OTHER';
+      const isExtinct = item.id === '[EXTINCT]' || item.virtual_type === 'EXTINCT';
+      if ((isOther || isExtinct) && (item.clubsCount || item.totalChildren || 0) === 0) {
+        return false;
+      }
+      return true;
+    });
   }, [items]);
 
   const handleViewChildren = (comp: any) => {
     setDrawerParent(comp);
     setIsDrawerOpen(true);
   };
+
+  const sortedAllItems = useMemo(() => {
+    return [...visibleItems].sort(sortCompetitionsByCategory);
+  }, [visibleItems]);
 
   const { leagueItems, cupItems, youthItems, otherItems } = useMemo(() => {
     const league: any[] = [];
@@ -88,7 +159,7 @@ export default function CompetitionGroupView({
     const other: any[] = [];
 
     visibleItems.forEach((item) => {
-      const g = getCompetitionGroup(item.categories);
+      const g = getCompetitionGroup(item);
       if (g === 'league') league.push(item);
       else if (g === 'cup') cup.push(item);
       else if (g === 'youth') youth.push(item);
@@ -113,14 +184,14 @@ export default function CompetitionGroupView({
       {
         key: 'league' as const,
         label: 'League',
-        icon: <TrophyOutlined className="text-amber-500 text-sm" />,
+        icon: <CompIcon size={16} className="text-amber-500" />,
         color: '#1677ff',
         items: leagueItems,
       },
       {
         key: 'cup' as const,
         label: 'Cup',
-        icon: <SafetyOutlined className="text-emerald-500 text-sm" />,
+        icon: <AwardIcon size={16} className="text-emerald-500" />,
         color: '#52c41a',
         items: cupItems,
       },
@@ -189,7 +260,6 @@ export default function CompetitionGroupView({
   const renderToolbar = () => (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
       <div className="flex items-center gap-2.5 flex-wrap">
-        <span className="text-xs font-semibold text-gray-600 shrink-0">Category:</span>
         <Select
           value={selectedGroup}
           onChange={(val) => setSelectedGroup(val as CompetitionGroupKey)}
@@ -197,11 +267,6 @@ export default function CompetitionGroupView({
           className="w-52 text-xs"
           suffixIcon={<FilterOutlined className="text-gray-400" />}
         />
-
-        <span className="text-xs text-gray-300 font-medium hidden md:inline">|</span>
-        <div className="text-xs text-gray-500 font-medium">
-          Total: <strong className="text-gray-800">{visibleItems.length}</strong> {visibleItems.length === 1 ? 'competition' : 'competitions'}
-        </div>
       </div>
 
       {extraRight && (
@@ -230,41 +295,16 @@ export default function CompetitionGroupView({
 
       {/* Render Sections */}
       {selectedGroup === 'all' ? (
-        <div className="space-y-8">
-          {groupConfigs.map((g) => {
-            if (g.items.length === 0) return null;
-            return (
-              <div key={g.key} className="space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-                  <div className="flex items-center gap-2">
-                    {g.icon}
-                    <h3 className="font-bold text-sm text-gray-800 tracking-wide uppercase">
-                      {g.label}
-                    </h3>
-                    <Badge
-                      count={g.items.length}
-                      overflowCount={99999}
-                      color={g.color}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-400">
-                    {g.items.length} {g.items.length === 1 ? 'competition' : 'competitions'}
-                  </span>
-                </div>
-
-                <CardGrid
-                  items={g.items}
-                  type="competition"
-                  onNavigate={onNavigate}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onViewChildren={handleViewChildren}
-                  defaultPageSize={20}
-                />
-              </div>
-            );
-          })}
-        </div>
+        <CardGrid
+          items={sortedAllItems}
+          type="competition"
+          onNavigate={onNavigate}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onViewChildren={handleViewChildren}
+          emptyText={emptyText}
+          defaultPageSize={20}
+        />
       ) : (
         <div>
           {(() => {

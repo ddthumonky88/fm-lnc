@@ -33,6 +33,7 @@ import {
 } from '@ant-design/icons';
 
 import { RecordType } from '../types';
+import { CompIcon, ClubIcon, StadiumIcon, CityIcon, AwardIcon } from './EntityIcons';
 import { BreadcrumbStep, HeaderLogoInfo } from '../context/AppContext';
 
 export { RecordType };
@@ -100,13 +101,13 @@ export default function AppHeader({
   const quickAddItems: MenuProps['items'] = [
     {
       key: RecordType.CLUB,
-      icon: <BankOutlined className="text-blue-500" />,
+      icon: <ClubIcon size={16} className="text-blue-500" />,
       label: 'Add Club',
       onClick: () => onQuickAdd(RecordType.CLUB),
     },
     {
       key: RecordType.COMPETITION,
-      icon: <TrophyOutlined className="text-emerald-500" />,
+      icon: <CompIcon size={16} className="text-emerald-500" />,
       label: 'Add Competition',
       onClick: () => onQuickAdd(RecordType.COMPETITION),
     },
@@ -115,19 +116,19 @@ export default function AppHeader({
     },
     {
       key: RecordType.CITY,
-      icon: <CompassOutlined className="text-purple-500" />,
+      icon: <CityIcon size={16} className="text-purple-500" />,
       label: 'Add City',
       onClick: () => onQuickAdd(RecordType.CITY),
     },
     {
       key: RecordType.STADIUM,
-      icon: <EnvironmentOutlined className="text-amber-500" />,
+      icon: <StadiumIcon size={16} className="text-amber-500" />,
       label: 'Add Stadium',
       onClick: () => onQuickAdd(RecordType.STADIUM),
     },
     {
       key: RecordType.AWARD,
-      icon: <StarOutlined className="text-yellow-500" />,
+      icon: <AwardIcon size={16} className="text-yellow-500" />,
       label: 'Add Award',
       onClick: () => onQuickAdd(RecordType.AWARD),
     },

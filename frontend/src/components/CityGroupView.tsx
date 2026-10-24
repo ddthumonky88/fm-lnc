@@ -9,6 +9,7 @@ import {
   FilterOutlined,
 } from '@ant-design/icons';
 import CardGrid from './CardGrid';
+import { CityIcon } from './EntityIcons';
 
 interface CityGroupViewProps {
   items: any[];
@@ -183,7 +184,6 @@ export default function CityGroupView({
       {/* Category / Region Filter Toolbar with Select */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
         <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="text-xs font-semibold text-gray-600 shrink-0">Region:</span>
           <Select
             showSearch
             value={selectedCategory}
@@ -201,10 +201,6 @@ export default function CityGroupView({
             className="w-56 text-xs"
             suffixIcon={<FilterOutlined className="text-gray-400" />}
           />
-          <span className="text-xs text-gray-300 font-medium hidden md:inline">|</span>
-          <div className="text-xs text-gray-500 font-medium whitespace-nowrap">
-            {groups.length} regions &bull; {items.length} cities
-          </div>
         </div>
 
         {extraRight && (
@@ -219,10 +215,18 @@ export default function CityGroupView({
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-2.5 border-b border-gray-200">
             <div className="flex items-center gap-2">
-              <span className="p-1 rounded-md bg-indigo-50 text-indigo-600">
-                <EnvironmentOutlined />
+              <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <CityIcon size={18} />
               </span>
-              <h3 className="font-bold text-sm text-gray-800 tracking-wide">
+              <h3
+                className={`font-bold text-sm tracking-wide ${
+                  activeGroup.label.toUpperCase().includes('REMOVE') ||
+                  activeGroup.label.toUpperCase().includes('OTHER') ||
+                  activeGroup.label.toUpperCase().includes('EXTINCT')
+                    ? 'text-red-600'
+                    : 'text-gray-800'
+                }`}
+              >
                 {activeGroup.label}
               </h3>
               <Badge

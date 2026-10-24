@@ -26,6 +26,7 @@ import {
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
 import CityGroupView from '../../../components/CityGroupView';
+import { CompIcon, StadiumIcon, CityIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 
@@ -231,62 +232,74 @@ export default function NationDetailPage() {
     });
   }, [records, tableFilter, nationHub]);
 
-  // Tab configurations (Awards hidden if count === 0)
+  // Tab configurations: Hide any tab that has 0 records
   const tabItems = useMemo(() => {
-    const list = [
-      {
+    const list: any[] = [];
+    const compCount = nationHub?.counts?.domesticComps ?? 0;
+    const stadiumCount = nationHub?.counts?.stadiums ?? 0;
+    const cityCount = nationHub?.counts?.cities ?? 0;
+    const awardCount = nationHub?.counts?.awards ?? 0;
+
+    if (compCount > 0) {
+      list.push({
         key: 'DOMESTIC_COMPS',
         label: (
           <Space size={4} title="Competitions">
-            <TrophyOutlined className="text-amber-500" />
+            <CompIcon size={18} className="text-amber-500" />
             <span className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}>Competitions</span>
             <Badge
-              count={nationHub?.counts?.domesticComps || 0}
+              count={compCount}
               overflowCount={99999}
               style={{ backgroundColor: activeTab === 'DOMESTIC_COMPS' ? '#1d70b8' : '#94a3b8' }}
             />
           </Space>
         ),
-      },
-      {
+      });
+    }
+
+    if (stadiumCount > 0) {
+      list.push({
         key: 'STADIUMS',
         label: (
           <Space size={4} title="Stadiums">
-            <BankOutlined className="text-emerald-500" />
+            <StadiumIcon size={18} className="text-emerald-500" />
             <span className={`hidden sm:inline ${activeTab === 'STADIUMS' ? 'font-bold' : ''}`}>Stadiums</span>
             <Badge
-              count={nationHub?.counts?.stadiums || 0}
+              count={stadiumCount}
               overflowCount={99999}
               style={{ backgroundColor: activeTab === 'STADIUMS' ? '#1d70b8' : '#94a3b8' }}
             />
           </Space>
         ),
-      },
-      {
+      });
+    }
+
+    if (cityCount > 0) {
+      list.push({
         key: 'CITIES',
         label: (
           <Space size={4} title="Cities">
-            <EnvironmentOutlined className="text-indigo-500" />
+            <CityIcon size={18} className="text-indigo-500" />
             <span className={`hidden sm:inline ${activeTab === 'CITIES' ? 'font-bold' : ''}`}>Cities</span>
             <Badge
-              count={nationHub?.counts?.cities || 0}
+              count={cityCount}
               overflowCount={99999}
               style={{ backgroundColor: activeTab === 'CITIES' ? '#1d70b8' : '#94a3b8' }}
             />
           </Space>
         ),
-      },
-    ];
+      });
+    }
 
-    if ((nationHub?.counts?.awards || 0) > 0) {
+    if (awardCount > 0) {
       list.push({
         key: 'AWARDS',
         label: (
           <Space size={4} title="Awards">
-            <StarOutlined className="text-yellow-500" />
+            <AwardIcon size={18} className="text-yellow-500" />
             <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>Awards</span>
             <Badge
-              count={nationHub?.counts?.awards || 0}
+              count={awardCount}
               overflowCount={99999}
               style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
             />
@@ -295,8 +308,30 @@ export default function NationDetailPage() {
       });
     }
 
+    // Fallback: If nation has 0 for everything, keep Competitions tab so user can add records
+    if (list.length === 0) {
+      list.push({
+        key: 'DOMESTIC_COMPS',
+        label: (
+          <Space size={4} title="Competitions">
+            <CompIcon size={18} className="text-amber-500" />
+            <span className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}>Competitions</span>
+          </Space>
+        ),
+      });
+    }
+
     return list;
   }, [nationHub, activeTab]);
+
+  // Keep activeTab synchronized with available tabs
+  useEffect(() => {
+    if (tabItems.length > 0 && !tabItems.some((t) => t.key === activeTab)) {
+      const nextTab = tabItems[0].key as 'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS';
+      setActiveTab(nextTab);
+      loadTabRecords(nextTab);
+    }
+  }, [tabItems, activeTab, loadTabRecords]);
 
   const handleNavigate = (step: any) => {
     if (step.level === 'INDEPENDENT_CLUBS') {
@@ -408,11 +443,8 @@ export default function NationDetailPage() {
           {/* Tab 2: Stadiums */}
           {activeTab === 'STADIUMS' && (
             <div>
-              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
-                <div className="text-xs text-gray-500">
-                  Total: <strong className="text-gray-800">{filteredRecords.length}</strong> stadiums
-                </div>
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <div className="flex justify-end items-center gap-2.5 sm:gap-3 mb-4">
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
                   <Input
                     prefix={<SearchOutlined className="text-gray-400" />}
                     placeholder="Filter stadiums..."
@@ -479,11 +511,8 @@ export default function NationDetailPage() {
           {/* Tab 4: Awards */}
           {activeTab === 'AWARDS' && (
             <div>
-              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
-                <div className="text-xs text-gray-500">
-                  Total: <strong className="text-gray-800">{filteredRecords.length}</strong> national awards
-                </div>
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <div className="flex justify-end items-center gap-2.5 sm:gap-3 mb-4">
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
                   <Input
                     prefix={<SearchOutlined className="text-gray-400" />}
                     placeholder="Filter awards..."

@@ -13,8 +13,17 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'FM .LNC Manager & Explorer',
-  description: 'Football Manager (.LNC) Database Management & Explorer',
+  title: 'FM24 LNC',
+  description: 'FM24 LNC - Football Manager Database Management & Explorer',
+  icons: {
+    icon: [
+      { url: '/fm/favicon.ico', sizes: 'any' },
+      { url: '/fm/favicon.png', type: 'image/png', sizes: '32x32' },
+      { url: '/fm/icons/icon-192.png', type: 'image/png', sizes: '192x192' },
+    ],
+    shortcut: '/fm/favicon.ico',
+    apple: '/fm/icons/apple-touch-icon.png',
+  },
 };
 
 export const viewport = {

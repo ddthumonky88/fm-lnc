@@ -27,6 +27,7 @@ import {
   AwardItem,
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
+import { CompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 
@@ -320,7 +321,7 @@ export default function CompetitionDetailPage() {
         key: 'CLUBS',
         label: (
           <Space size={4} title="Clubs">
-            <SafetyOutlined className="text-blue-500" />
+            <ClubIcon size={18} className="text-blue-500" />
             <span className={`hidden sm:inline ${activeTab === 'CLUBS' ? 'font-bold' : ''}`}>Clubs</span>
             <Badge
               count={clubs.length}
@@ -333,28 +334,29 @@ export default function CompetitionDetailPage() {
     ];
 
     if (!isVirtual) {
-      list.push({
-        key: 'AWARDS',
-        label: (
-          <Space size={4} title="Awards">
-            <StarOutlined className="text-yellow-500" />
-            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>Awards</span>
-            <Badge
-              count={awards.length}
-              overflowCount={99999}
-              showZero
-              style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
-            />
-          </Space>
-        ),
-      });
+      if (awards.length > 0) {
+        list.push({
+          key: 'AWARDS',
+          label: (
+            <Space size={4} title="Awards">
+              <AwardIcon size={18} className="text-yellow-500" />
+              <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>Awards</span>
+              <Badge
+                count={awards.length}
+                overflowCount={99999}
+                style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
+              />
+            </Space>
+          ),
+        });
+      }
 
       if (subComps.length > 0 || (compInfo?.childrenCount && compInfo.childrenCount > 0)) {
         list.push({
           key: 'SUB_COMPS',
           label: (
             <Space size={4} title="Sub-Competitions">
-              <TrophyOutlined className="text-amber-500" />
+              <CompIcon size={18} className="text-amber-500" />
               <span className={`hidden sm:inline ${activeTab === 'SUB_COMPS' ? 'font-bold' : ''}`}>Sub-Competitions</span>
               <Badge
                 count={subComps.length}
