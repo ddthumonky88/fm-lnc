@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Res, Body, Query, HttpStatus, BadRequestException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -38,6 +38,13 @@ export class LncController {
 
   @ApiOperation({ summary: 'Xuất dữ liệu toàn bộ ra file định dạng .LNC' })
   @ApiQuery({ name: 'download', required: false, description: 'Nếu là true thì download file attachment' })
+  @ApiOkResponse({
+    description: 'Nội dung file .LNC (plain text UTF-8)',
+    schema: {
+      type: 'string',
+      example: '"NATION_LONG_NAME_CHANGE" 560 "Việt Nam" 8\n"COMP_LONG_NAME_CHANGE" 11 "English Premier Division" ""',
+    },
+  })
   @Get('export')
   async exportLnc(@Res() res: Response, @Query('download') download?: string) {
     const content = await this.lncService.exportLnc();
@@ -51,6 +58,32 @@ export class LncController {
 
   @ApiOperation({ summary: 'Import dữ liệu từ file .lnc trên server' })
   @ApiBody({ schema: { type: 'object', properties: { dir: { type: 'string', description: 'Đường dẫn thư mục lnc (tùy chọn)' } } } })
+  @ApiOkResponse({
+    description: 'Kết quả import các file .lnc vào cơ sở dữ liệu',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Successfully imported .lnc files into database' },
+        stats: { type: 'object' },
+      },
+      example: {
+        success: true,
+        message: 'Successfully imported .lnc files into database',
+        stats: {
+          confederations: 7,
+          nations: 250,
+          cities: 13408,
+          competitions: 2731,
+          clubs: 6604,
+          stadiums: 3762,
+          awards: 1180,
+          people: 8900,
+          stages: 12,
+        },
+      },
+    },
+  })
   @Post('import')
   async importLnc(@Body('dir') dir?: string) {
     await this.lncParserService.parseAndSeed(dir);
@@ -76,6 +109,18 @@ export class LncController {
             },
           },
         },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Kết quả upload và parse file .lnc',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Đã nạp thành công 3 file .LNC vào database!' },
+        uploadedFiles: { type: 'array', items: { type: 'string' }, example: ['test.lnc'] },
+        stats: { type: 'object' },
       },
     },
   })
@@ -111,6 +156,23 @@ export class LncController {
   }
 
   @ApiOperation({ summary: 'Thống kê số lượng bản ghi trong database' })
+  @ApiOkResponse({
+    description: 'Số lượng bản ghi hiện có trong từng bảng dữ liệu của PostgreSQL',
+    schema: {
+      type: 'object',
+      example: {
+        confederations: 7,
+        nations: 250,
+        cities: 13408,
+        competitions: 2731,
+        clubs: 6604,
+        stadiums: 3762,
+        awards: 1180,
+        people: 8900,
+        stages: 12,
+      },
+    },
+  })
   @Get('status')
   async getStatus() {
     const [

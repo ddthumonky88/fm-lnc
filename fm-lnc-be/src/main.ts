@@ -42,6 +42,8 @@ async function bootstrap() {
       '- **Logos**: Serve logo từ filesystem FM'
     )
     .setVersion('1.0')
+    .addServer('https://fm-lnc-backend.onrender.com', 'Production Server (Render)')
+    .addServer('http://localhost:3001', 'Local Development Server')
     .addTag('Hierarchy', 'Truy vấn cấu trúc phân cấp dữ liệu')
     .addTag('Records', 'CRUD cho các entity (Nation, Club, Competition...)')
     .addTag('Search', 'Tìm kiếm toàn văn')

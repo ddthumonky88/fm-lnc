@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query, Res, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { LogosService } from './logos.service';
 
@@ -10,6 +10,10 @@ export class LogosController {
 
   @ApiOperation({ summary: 'Lấy logo Confederation' })
   @ApiParam({ name: 'id', description: 'Confederation ID' })
+  @ApiOkResponse({
+    description: 'File ảnh logo Confederation định dạng PNG',
+    schema: { type: 'string', format: 'binary' },
+  })
   @Get('confederation/:id')
   getConfederationLogo(@Param('id') id: string, @Res() res: Response) {
     const filePath = this.logosService.getConfederationLogoPath(id);
@@ -25,6 +29,10 @@ export class LogosController {
   @ApiOperation({ summary: 'Lấy logo Nation' })
   @ApiParam({ name: 'id', description: 'Nation ID' })
   @ApiQuery({ name: 'code', required: false, description: 'Mã 3 chữ cái của quốc gia (nếu có)' })
+  @ApiOkResponse({
+    description: 'File ảnh cờ / logo Nation định dạng PNG',
+    schema: { type: 'string', format: 'binary' },
+  })
   @Get('nation/:id')
   getNationLogo(
     @Param('id') id: string,
@@ -43,6 +51,10 @@ export class LogosController {
 
   @ApiOperation({ summary: 'Lấy logo Competition' })
   @ApiParam({ name: 'id', description: 'Competition ID' })
+  @ApiOkResponse({
+    description: 'File ảnh logo Competition định dạng PNG',
+    schema: { type: 'string', format: 'binary' },
+  })
   @Get('competition/:id')
   getCompetitionLogo(@Param('id') id: string, @Res() res: Response) {
     const filePath = this.logosService.getCompetitionLogoPath(id);
@@ -57,6 +69,10 @@ export class LogosController {
 
   @ApiOperation({ summary: 'Lấy logo Club' })
   @ApiParam({ name: 'id', description: 'Club ID' })
+  @ApiOkResponse({
+    description: 'File ảnh logo Club định dạng PNG',
+    schema: { type: 'string', format: 'binary' },
+  })
   @Get('club/:id')
   getClubLogo(@Param('id') id: string, @Res() res: Response) {
     const filePath = this.logosService.getClubLogoPath(id);
@@ -69,3 +85,4 @@ export class LogosController {
     return res.sendFile(filePath);
   }
 }
+
