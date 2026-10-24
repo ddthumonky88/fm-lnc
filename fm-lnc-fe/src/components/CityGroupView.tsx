@@ -153,65 +153,65 @@ export default function CityGroupView({
     );
   }
 
+  // Calculate effective selected category so it safely falls back to 'all' if filtered out
+  const effectiveCategory =
+    selectedCategory === 'all'
+      ? 'all'
+      : categoryList.some((c) => c.value === selectedCategory)
+      ? selectedCategory
+      : 'all';
+
+  const renderToolbar = () => (
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <Select
+          showSearch
+          value={effectiveCategory}
+          onChange={(val) => setSelectedCategory(val || 'all')}
+          options={[
+            {
+              value: 'all',
+              label: `All Regions (${items.length})`,
+            },
+            ...categoryList,
+          ]}
+          filterOption={(input, option) =>
+            (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+          }
+          className="w-56 text-xs"
+          suffixIcon={<FilterOutlined className="text-gray-400" />}
+        />
+      </div>
+
+      {extraRight && (
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          {extraRight}
+        </div>
+      )}
+    </div>
+  );
+
   if (items.length === 0) {
     return (
-      <div className="py-12 bg-white rounded-lg border border-gray-100 shadow-sm">
-        <Empty description={emptyText} />
+      <div className="space-y-4">
+        {renderToolbar()}
+        <div className="py-12 bg-white rounded-lg border border-gray-100 shadow-sm">
+          <Empty description={emptyText} />
+        </div>
       </div>
-    );
-  }
-
-  // If there's only 1 group or none, render standard grid
-  if (groups.length <= 1) {
-    return (
-      <CardGrid
-        items={sortedAllItems}
-        type="city"
-        onNavigate={onNavigate}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        emptyText={emptyText}
-        defaultPageSize={20}
-      />
     );
   }
 
   const activeGroup =
-    selectedCategory !== 'all' ? groups.find((g) => g.key === selectedCategory) : null;
+    effectiveCategory !== 'all' ? groups.find((g) => g.key === effectiveCategory) : null;
 
   return (
     <div className="space-y-4">
       {/* Category / Region Filter Toolbar with Select */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Select
-            showSearch
-            value={selectedCategory}
-            onChange={(val) => setSelectedCategory(val || 'all')}
-            options={[
-              {
-                value: 'all',
-                label: `All Regions (${items.length})`,
-              },
-              ...categoryList,
-            ]}
-            filterOption={(input, option) =>
-              (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
-            }
-            className="w-56 text-xs"
-            suffixIcon={<FilterOutlined className="text-gray-400" />}
-          />
-        </div>
-
-        {extraRight && (
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-            {extraRight}
-          </div>
-        )}
-      </div>
+      {renderToolbar()}
 
       {/* Render Single Region Selected */}
-      {selectedCategory !== 'all' && activeGroup ? (
+      {effectiveCategory !== 'all' && activeGroup ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-2.5 border-b border-gray-200">
             <div className="flex items-center gap-2">
@@ -246,6 +246,7 @@ export default function CityGroupView({
             onNavigate={onNavigate}
             onEdit={onEdit}
             onDelete={onDelete}
+            emptyText={emptyText}
             defaultPageSize={20}
           />
         </div>

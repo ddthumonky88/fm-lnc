@@ -21,9 +21,10 @@ import {
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
-import { NationIcon, CompIcon } from '../../../components/EntityIcons';
+import { NationIcon, IntCompIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
+import { matchRecordSearch } from '../../../utils/search';
 
 function ConfederationDetailContent() {
   const params = useParams();
@@ -112,16 +113,8 @@ function ConfederationDetailContent() {
 
   // Client-side filter for nations
   const filteredNations = useMemo(() => {
-    const q = tableFilter.trim().toLowerCase();
     return nations
-      .filter(
-        (n) =>
-          !q ||
-          n.long_name.toLowerCase().includes(q) ||
-          (n.short_name && n.short_name.toLowerCase().includes(q)) ||
-          (n.three_letter_name && n.three_letter_name.toLowerCase().includes(q)) ||
-          String(n.id).includes(q),
-      )
+      .filter((n) => matchRecordSearch(n, tableFilter))
       .sort((a, b) =>
         (a.long_name || a.short_name || '').localeCompare(
           b.long_name || b.short_name || '',
@@ -133,16 +126,7 @@ function ConfederationDetailContent() {
 
   // Client-side filter for international competitions
   const filteredIntComps = useMemo(() => {
-    const q = tableFilter.trim().toLowerCase();
-    return intComps.filter(
-      (c) =>
-        !q ||
-        c.long_name.toLowerCase().includes(q) ||
-        (c.short_name && c.short_name.toLowerCase().includes(q)) ||
-        (c.three_letter_name && c.three_letter_name.toLowerCase().includes(q)) ||
-        String(c.id).includes(q) ||
-        (c.categories && c.categories.toLowerCase().includes(q)),
-    );
+    return intComps.filter((c) => matchRecordSearch(c, tableFilter));
   }, [intComps, tableFilter]);
 
   const handleNavigate = (step: any) => {
@@ -207,7 +191,7 @@ function ConfederationDetailContent() {
                     key: 'INT_COMPETITIONS',
                     label: (
                       <Space size={4} title="International Competitions">
-                        <CompIcon size={18} className="text-amber-500" />
+                        <IntCompIcon size={18} className="text-purple-600" />
                         <span className={`hidden sm:inline ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}>
                           International Competitions
                         </span>

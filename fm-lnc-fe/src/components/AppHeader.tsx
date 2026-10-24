@@ -101,7 +101,7 @@ export default function AppHeader({
     },
     {
       key: RecordType.COMPETITION,
-      icon: <CompIcon size={16} className="text-emerald-500" />,
+      icon: <CompIcon size={16} className="text-amber-500" />,
       label: 'Add Competition',
       onClick: () => onQuickAdd(RecordType.COMPETITION),
     },
@@ -110,13 +110,13 @@ export default function AppHeader({
     },
     {
       key: RecordType.CITY,
-      icon: <CityIcon size={16} className="text-purple-500" />,
+      icon: <CityIcon size={16} className="text-sky-500" />,
       label: 'Add City',
       onClick: () => onQuickAdd(RecordType.CITY),
     },
     {
       key: RecordType.STADIUM,
-      icon: <StadiumIcon size={16} className="text-amber-500" />,
+      icon: <StadiumIcon size={16} className="text-emerald-500" />,
       label: 'Add Stadium',
       onClick: () => onQuickAdd(RecordType.STADIUM),
     },

@@ -43,6 +43,7 @@ import {
 } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { RecordType } from '../../types';
+import { DomesticCompIcon, ClubIcon, AwardIcon } from '../../components/EntityIcons';
 import { formatCategoryCode, getCategoryTagColor } from '../../components/EntityCard';
 
 const parseColor = (rgbStr?: string | null) => {
@@ -331,7 +332,7 @@ function CompetitionsExplorerContent() {
         render: (val: number) =>
           val > 0 ? (
             <span className="font-semibold text-blue-600 flex items-center justify-center gap-1">
-              <SafetyOutlined className="text-blue-500" />
+              <ClubIcon size={14} className="text-blue-500" />
               {val}
             </span>
           ) : (
@@ -348,7 +349,7 @@ function CompetitionsExplorerContent() {
         render: (val: number) =>
           val > 0 ? (
             <span className="font-semibold text-amber-600 flex items-center justify-center gap-1">
-              <StarOutlined className="text-amber-500" />
+              <AwardIcon size={14} className="text-yellow-500" />
               {val}
             </span>
           ) : (
@@ -403,7 +404,7 @@ function CompetitionsExplorerContent() {
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-sm shadow-amber-500/30">
-              <TrophyOutlined className="text-xl" />
+              <DomesticCompIcon size={22} className="text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -619,12 +620,12 @@ function CompetitionsExplorerContent() {
                     {/* Stats pills */}
                     <div className="flex items-center gap-2 text-xs text-slate-600 mb-2">
                       <span className="flex items-center gap-1 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[11px]">
-                        <SafetyOutlined />
+                        <ClubIcon size={12} className="text-blue-600" />
                         <span>{c.clubsCount || 0} Clubs</span>
                       </span>
                       {(c.awardsCount || 0) > 0 && (
                         <span className="flex items-center gap-1 bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded text-[11px]">
-                          <StarOutlined />
+                          <AwardIcon size={12} className="text-yellow-600" />
                           <span>{c.awardsCount}</span>
                         </span>
                       )}

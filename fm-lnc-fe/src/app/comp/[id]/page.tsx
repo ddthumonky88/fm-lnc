@@ -31,6 +31,7 @@ import { CompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { formatCategoryCode, getCategoryTagColor } from '../../../components/EntityCard';
+import { matchRecordSearch } from '../../../utils/search';
 
 export default function CompetitionDetailPage() {
   const router = useRouter();
@@ -283,37 +284,17 @@ export default function CompetitionDetailPage() {
   // Client search filter
   const filteredClubs = useMemo(() => {
     if (!tableFilter.trim()) return clubs;
-    const q = tableFilter.toLowerCase();
-    return clubs.filter(
-      (c) =>
-        c.long_name.toLowerCase().includes(q) ||
-        (c.short_name && c.short_name.toLowerCase().includes(q)) ||
-        (c.three_letter_name && c.three_letter_name.toLowerCase().includes(q)) ||
-        String(c.id).includes(q),
-    );
+    return clubs.filter((c) => matchRecordSearch(c, tableFilter));
   }, [clubs, tableFilter]);
 
   const filteredAwards = useMemo(() => {
     if (!tableFilter.trim()) return awards;
-    const q = tableFilter.toLowerCase();
-    return awards.filter(
-      (a) =>
-        a.long_name.toLowerCase().includes(q) ||
-        (a.short_name && a.short_name.toLowerCase().includes(q)) ||
-        String(a.id).includes(q),
-    );
+    return awards.filter((a) => matchRecordSearch(a, tableFilter));
   }, [awards, tableFilter]);
 
   const filteredSubComps = useMemo(() => {
     if (!tableFilter.trim()) return subComps;
-    const q = tableFilter.toLowerCase();
-    return subComps.filter(
-      (c) =>
-        c.long_name.toLowerCase().includes(q) ||
-        (c.short_name && c.short_name.toLowerCase().includes(q)) ||
-        (c.three_letter_name && c.three_letter_name.toLowerCase().includes(q)) ||
-        String(c.id).includes(q),
-    );
+    return subComps.filter((c) => matchRecordSearch(c, tableFilter));
   }, [subComps, tableFilter]);
 
   const tabItems = useMemo(() => {
@@ -409,9 +390,9 @@ export default function CompetitionDetailPage() {
                   }}
                 />
               ) : isVirtual ? (
-                <SafetyOutlined className={`text-2xl ${isVirtualExtinct ? 'text-red-500' : 'text-blue-500'}`} />
+                <ClubIcon size={24} className={isVirtualExtinct ? 'text-red-500' : 'text-blue-500'} />
               ) : (
-                <TrophyOutlined className="text-2xl text-amber-500" />
+                <CompIcon size={24} className="text-amber-500" />
               )}
               <div>
                 {/* Top: Tag ID (cho phép copy) + tags */}

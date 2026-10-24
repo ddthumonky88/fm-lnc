@@ -209,56 +209,158 @@ async function cachedFetch<T>(url: string, forceRefresh = false, ttl = CACHE_TTL
   return promise;
 }
 
-export async function fetchContinents(forceRefresh = false): Promise<ConfederationItem[]> {
-  return cachedFetch<ConfederationItem[]>(`${getApiBase()}/hierarchy/continents`, forceRefresh);
+async function cachedPost<T>(url: string, body: any = {}, forceRefresh = false, ttl = CACHE_TTL_MS): Promise<T> {
+  const cacheKey = `POST::${url}::${JSON.stringify(body || {})}`;
+  const now = Date.now();
+  if (!forceRefresh) {
+    const cached = apiCache.get(cacheKey);
+    if (cached && now - cached.timestamp < ttl) {
+      return cached.data as T;
+    }
+  }
+
+  if (!forceRefresh && inFlightRequests.has(cacheKey)) {
+    return inFlightRequests.get(cacheKey) as Promise<T>;
+  }
+
+  const promise = (async () => {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {}),
+      });
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
+      const data = await res.json();
+      apiCache.set(cacheKey, { data, timestamp: Date.now() });
+      return data as T;
+    } finally {
+      inFlightRequests.delete(cacheKey);
+    }
+  })();
+
+  inFlightRequests.set(cacheKey, promise);
+  return promise;
 }
 
-export async function fetchAllNations(confedId?: string, query?: string, forceRefresh = false): Promise<NationItem[]> {
-  const params = new URLSearchParams();
-  if (confedId) params.append('confedId', String(confedId));
-  if (query) params.append('q', query);
-  const qStr = params.toString() ? `?${params.toString()}` : '';
-  return cachedFetch<NationItem[]>(`${getApiBase()}/hierarchy/nations${qStr}`, forceRefresh);
+export async function fetchContinents(
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<ConfederationItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<ConfederationItem[]>(`${getApiBase()}/hierarchy/continents`, filter, forceRefresh);
+}
+
+export async function fetchAllNations(
+  optionsOrConfedId?: string | { confedId?: string; q?: string },
+  query?: string,
+  forceRefresh = false
+): Promise<NationItem[]> {
+  const filter =
+    typeof optionsOrConfedId === 'object' && optionsOrConfedId !== null
+      ? optionsOrConfedId
+      : { confedId: optionsOrConfedId, q: query };
+  return cachedPost<NationItem[]>(`${getApiBase()}/hierarchy/nations`, filter, forceRefresh);
 }
 
 export async function fetchAllCompetitions(options?: {
   confedId?: string;
   nationId?: string;
   query?: string;
+  q?: string;
   isInternational?: boolean;
 }, forceRefresh = false): Promise<CompetitionItem[]> {
-  const params = new URLSearchParams();
-  if (options?.confedId) params.append('confedId', String(options.confedId));
-  if (options?.nationId) params.append('nationId', String(options.nationId));
-  if (options?.query) params.append('q', options.query);
-  if (options?.isInternational !== undefined) params.append('isInternational', String(options.isInternational));
-  const qStr = params.toString() ? `?${params.toString()}` : '';
-  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions${qStr}`, forceRefresh);
+  const body = options ? { ...options, q: options.q || options.query } : {};
+  return cachedPost<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions`, body, forceRefresh);
 }
 
-export async function fetchNationsByContinent(confedId: string, forceRefresh = false): Promise<NationItem[]> {
-  return cachedFetch<NationItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/nations`, forceRefresh);
+export async function fetchNationsByContinent(
+  confedId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<NationItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<NationItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/nations`, filter, forceRefresh);
 }
 
-export async function fetchIntCompetitions(confedId: string, forceRefresh = false): Promise<CompetitionItem[]> {
-  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`, forceRefresh);
+export async function fetchIntCompetitions(
+  confedId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<CompetitionItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<CompetitionItem[]>(`${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`, filter, forceRefresh);
 }
 
 export async function fetchNationHub(nationId: string, forceRefresh = false): Promise<NationHubData> {
   return cachedFetch<NationHubData>(`${getApiBase()}/hierarchy/nations/${nationId}/hub`, forceRefresh);
 }
 
-export async function fetchDomesticCompetitions(nationId: string, forceRefresh = false): Promise<CompetitionItem[]> {
-  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/competitions`, forceRefresh);
+export async function fetchDomesticCompetitions(
+  nationId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<CompetitionItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<CompetitionItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/competitions`, filter, forceRefresh);
 }
 
-export async function fetchIndependentClubs(nationId: string, isExtinct?: boolean, forceRefresh = false): Promise<ClubItem[]> {
-  const query = isExtinct !== undefined ? `?extinct=${isExtinct}` : '';
-  return cachedFetch<ClubItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs${query}`, forceRefresh);
+export async function fetchIndependentClubs(
+  nationId: string,
+  filterOrExtinct?: any,
+  forceRefresh = false
+): Promise<ClubItem[]> {
+  const filter =
+    typeof filterOrExtinct === 'object' && filterOrExtinct !== null
+      ? filterOrExtinct
+      : { extinct: filterOrExtinct };
+  return cachedPost<ClubItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs`, filter, forceRefresh);
 }
 
-export async function fetchClubsInComp(compId: string, forceRefresh = false): Promise<ClubItem[]> {
-  return cachedFetch<ClubItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/clubs`, forceRefresh);
+export async function fetchClubsInComp(
+  compId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<ClubItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<ClubItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/clubs`, filter, forceRefresh);
 }
 
 export async function fetchCompetitionInfo(compId: string, forceRefresh = false): Promise<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }> {
@@ -293,42 +395,129 @@ export async function fetchEntityInfo(type: string, id: string, forceRefresh = f
   return cachedFetch<any>(`${getApiBase()}/records/${type}/${id}/info`, forceRefresh);
 }
 
-export async function fetchSubCompetitions(compId: string, forceRefresh = false): Promise<CompetitionItem[]> {
-  return cachedFetch<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/sub-competitions`, forceRefresh);
+export async function fetchSubCompetitions(
+  compId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<CompetitionItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<CompetitionItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/sub-competitions`, filter, forceRefresh);
 }
 
-export async function fetchStadiums(nationId: string, forceRefresh = false): Promise<StadiumItem[]> {
-  return cachedFetch<StadiumItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/stadiums`, forceRefresh);
+export async function fetchStadiums(
+  nationId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<StadiumItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<StadiumItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/stadiums`, filter, forceRefresh);
 }
 
-export async function fetchCities(nationId: string, forceRefresh = false): Promise<CityItem[]> {
-  return cachedFetch<CityItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/cities`, forceRefresh);
+export async function fetchCities(
+  nationId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<CityItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<CityItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/cities`, filter, forceRefresh);
 }
 
-export async function fetchAwards(nationId: string, forceRefresh = false): Promise<AwardItem[]> {
-  return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/awards`, forceRefresh);
+export async function fetchAwards(
+  nationId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<AwardItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<AwardItem[]>(`${getApiBase()}/hierarchy/nations/${nationId}/awards`, filter, forceRefresh);
 }
 
-export async function fetchAwardsInComp(compId: string, forceRefresh = false): Promise<AwardItem[]> {
-  return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/awards`, forceRefresh);
+export async function fetchAwardsInComp(
+  compId: string,
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<AwardItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<AwardItem[]>(`${getApiBase()}/hierarchy/competitions/${compId}/awards`, filter, forceRefresh);
 }
 
-export async function fetchAllAwards(forceRefresh = false): Promise<AwardItem[]> {
-  return cachedFetch<AwardItem[]>(`${getApiBase()}/hierarchy/awards`, forceRefresh);
+export async function fetchAllAwards(
+  filterOrForceRefresh?: any,
+  maybeForceRefresh = false
+): Promise<AwardItem[]> {
+  const filter =
+    typeof filterOrForceRefresh === 'object' && filterOrForceRefresh !== null
+      ? filterOrForceRefresh
+      : {};
+  const forceRefresh =
+    typeof filterOrForceRefresh === 'boolean'
+      ? filterOrForceRefresh
+      : maybeForceRefresh;
+  return cachedPost<AwardItem[]>(`${getApiBase()}/hierarchy/awards`, filter, forceRefresh);
 }
 
-export async function fetchPlayers(query?: string, forceRefresh = false): Promise<PlayerItem[]> {
-  const qStr = query ? `?q=${encodeURIComponent(query)}` : '';
-  return cachedFetch<PlayerItem[]>(`${getApiBase()}/hierarchy/players${qStr}`, forceRefresh);
+export async function fetchPlayers(
+  queryOrFilter?: any,
+  forceRefresh = false
+): Promise<PlayerItem[]> {
+  const filter =
+    typeof queryOrFilter === 'object' && queryOrFilter !== null
+      ? queryOrFilter
+      : { q: queryOrFilter };
+  return cachedPost<PlayerItem[]>(`${getApiBase()}/hierarchy/players`, filter, forceRefresh);
 }
 
-export async function fetchStages(query?: string, forceRefresh = false): Promise<StageItem[]> {
-  const qStr = query ? `?q=${encodeURIComponent(query)}` : '';
-  return cachedFetch<StageItem[]>(`${getApiBase()}/hierarchy/stages${qStr}`, forceRefresh);
+export async function fetchStages(
+  queryOrFilter?: any,
+  forceRefresh = false
+): Promise<StageItem[]> {
+  const filter =
+    typeof queryOrFilter === 'object' && queryOrFilter !== null
+      ? queryOrFilter
+      : { q: queryOrFilter };
+  return cachedPost<StageItem[]>(`${getApiBase()}/hierarchy/stages`, filter, forceRefresh);
 }
 
-export async function quickSearch(query: string) {
-  const res = await fetch(`${getApiBase()}/search?q=${encodeURIComponent(query)}`);
+export async function quickSearch(query: string, limit = 20) {
+  const res = await fetch(`${getApiBase()}/search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: query, limit }),
+  });
   if (!res.ok) throw new Error('Search failed');
   return res.json();
 }

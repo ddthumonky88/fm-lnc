@@ -65,7 +65,7 @@ import CardGrid from '../components/CardGrid';
 import CompetitionGroupView, { sortCompetitionsByCategory } from '../components/CompetitionGroupView';
 import { formatCategoryCode, getCategoryTagColor } from '../components/EntityCard';
 import CityGroupView from '../components/CityGroupView';
-import { CompIcon, StadiumIcon, CityIcon, AwardIcon } from '../components/EntityIcons';
+import { NationIcon, IntCompIcon, DomesticCompIcon, CompIcon, StadiumIcon, CityIcon, AwardIcon } from '../components/EntityIcons';
 import { useApp } from '../context/AppContext';
 import {
   HierarchyLevel,
@@ -77,6 +77,7 @@ import {
   EntityType,
   EntityTypeValue,
 } from '../types';
+import { matchRecordSearch } from '../utils/search';
 
 interface NavStep {
   level: HierarchyLevelValue;
@@ -360,14 +361,8 @@ export default function LncSortitoutsiExplorer() {
 
   // Filtered view data with ID ascending sorting
   const filteredContinents = useMemo(() => {
-    const q = tableFilter.trim().toLowerCase();
     return continents
-      .filter(
-        (c) =>
-          !q ||
-          c.name.toLowerCase().includes(q) ||
-          String(c.id).includes(q),
-      )
+      .filter((c) => matchRecordSearch(c, tableFilter))
       .sort((a, b) => Number(a.id) - Number(b.id));
   }, [continents, tableFilter]);
 
@@ -459,9 +454,9 @@ export default function LncSortitoutsiExplorer() {
                   type="text"
                   size="small"
                   onClick={() => router.push(`/confederation/${record.id}?tab=int`)}
-                  className="h-7 px-2.5 inline-flex items-center gap-1.5 rounded-md hover:bg-emerald-50 text-emerald-700 font-medium border border-emerald-100"
+                  className="h-7 px-2.5 inline-flex items-center gap-1.5 rounded-md hover:bg-purple-50 text-purple-700 font-medium border border-purple-100"
                 >
-                  <TrophyOutlined className="text-emerald-600 text-sm" />
+                  <IntCompIcon size={14} className="text-purple-600" />
                   <span>{count} competitions</span>
                 </Button>
               </Tooltip>
@@ -475,16 +470,8 @@ export default function LncSortitoutsiExplorer() {
   );
 
   const filteredNations = useMemo(() => {
-    const q = tableFilter.trim().toLowerCase();
     return nations
-      .filter(
-        (n) =>
-          !q ||
-          n.long_name.toLowerCase().includes(q) ||
-          n.short_name.toLowerCase().includes(q) ||
-          n.three_letter_name.toLowerCase().includes(q) ||
-          String(n.id).includes(q),
-      )
+      .filter((n) => matchRecordSearch(n, tableFilter))
       .sort((a, b) =>
         (a.long_name || a.short_name || '').localeCompare(
           b.long_name || b.short_name || '',
@@ -495,47 +482,15 @@ export default function LncSortitoutsiExplorer() {
   }, [nations, tableFilter]);
 
   const filteredIntComps = useMemo(() => {
-    const q = tableFilter.trim().toLowerCase();
     return intComps
-      .filter(
-        (c) =>
-          !q ||
-          c.long_name.toLowerCase().includes(q) ||
-          c.short_name.toLowerCase().includes(q) ||
-          (c.three_letter_name && c.three_letter_name.toLowerCase().includes(q)) ||
-          String(c.id).includes(q),
-      )
+      .filter((c) => matchRecordSearch(c, tableFilter))
       .sort(sortCompetitionsByCategory);
   }, [intComps, tableFilter]);
 
   const filteredDetailRecords = useMemo(() => {
     let list = detailRecords;
     if (tableFilter.trim()) {
-      const q = tableFilter.toLowerCase();
-      list = list.filter((item) => {
-        const name = item.name || item.long_name || '';
-        const sname = item.short_name || '';
-        const fname = item.first_name || '';
-        const lname = item.second_name || '';
-        const cname = item.common_name || '';
-        const fullName = `${fname} ${lname}`.trim();
-        const code3 = item.three_letter_name || '';
-        const code6 = item.six_letter_name || '';
-        const note = item.note || item.categories || '';
-        const idStr = String(item.id);
-        return (
-          name.toLowerCase().includes(q) ||
-          sname.toLowerCase().includes(q) ||
-          fname.toLowerCase().includes(q) ||
-          lname.toLowerCase().includes(q) ||
-          cname.toLowerCase().includes(q) ||
-          fullName.toLowerCase().includes(q) ||
-          code3.toLowerCase().includes(q) ||
-          code6.toLowerCase().includes(q) ||
-          note.toLowerCase().includes(q) ||
-          idStr.includes(q)
-        );
-      });
+      list = list.filter((item) => matchRecordSearch(item, tableFilter));
     }
 
     if (
@@ -561,7 +516,7 @@ export default function LncSortitoutsiExplorer() {
         key: NationTabKey.DOMESTIC_COMPS,
         label: 'Competitions',
         count: nationHub?.counts?.domesticComps || 0,
-        icon: <CompIcon size={18} className="text-amber-500" />,
+        icon: <DomesticCompIcon size={18} className="text-amber-500" />,
         addLabel: 'Add Competition',
         type: RecordType.COMPETITION,
       },
@@ -577,7 +532,7 @@ export default function LncSortitoutsiExplorer() {
         key: NationTabKey.CITIES,
         label: 'Cities',
         count: nationHub?.counts?.cities || 0,
-        icon: <CityIcon size={18} className="text-indigo-500" />,
+        icon: <CityIcon size={18} className="text-sky-500" />,
         addLabel: 'Add City',
         type: RecordType.CITY,
       },
@@ -717,11 +672,11 @@ export default function LncSortitoutsiExplorer() {
 
                     <div className="pt-1.5 border-t border-slate-100 text-[11px] space-y-0.5 text-slate-600">
                       <div className="flex items-center gap-1 truncate">
-                        <GlobalOutlined className="text-blue-500 text-xs shrink-0" />
+                        <NationIcon size={12} className="text-cyan-600 shrink-0" />
                         <span className="truncate"><strong>{c.totalNations || 0}</strong> nations</span>
                       </div>
                       <div className="flex items-center gap-1 truncate">
-                        <TrophyOutlined className="text-amber-500 text-xs shrink-0" />
+                        <IntCompIcon size={12} className="text-purple-600 shrink-0" />
                         <span className="truncate"><strong>{c.totalIntComps || 0}</strong> comps</span>
                       </div>
                     </div>
@@ -777,7 +732,7 @@ export default function LncSortitoutsiExplorer() {
                         key: 'NATIONS',
                         label: (
                           <Space size={4} title="Countries">
-                            <GlobalOutlined />
+                            <NationIcon size={16} className="text-cyan-600" />
                             <span className="hidden sm:inline">Countries</span>
                             <Badge
                               count={currentConfed.totalNations}
@@ -791,12 +746,12 @@ export default function LncSortitoutsiExplorer() {
                         key: 'INT_COMPETITIONS',
                         label: (
                           <Space size={4} title="International Competitions">
-                            <TrophyOutlined />
+                            <IntCompIcon size={16} className="text-purple-600" />
                             <span className="hidden sm:inline font-semibold">International Competitions</span>
                             <Badge
                               count={currentConfed.totalIntComps}
                               overflowCount={99999}
-                              style={{ backgroundColor: '#10b981' }}
+                              style={{ backgroundColor: '#9333ea' }}
                             />
                           </Space>
                         ),
@@ -874,7 +829,7 @@ export default function LncSortitoutsiExplorer() {
                         key: 'NATIONS',
                         label: (
                           <Space size={4} title="Countries">
-                            <GlobalOutlined />
+                            <NationIcon size={16} className="text-cyan-600" />
                             <span className="hidden sm:inline font-semibold">Countries</span>
                             <Badge
                               count={currentConfed.totalNations}
@@ -888,7 +843,7 @@ export default function LncSortitoutsiExplorer() {
                         key: 'INT_COMPETITIONS',
                         label: (
                           <Space size={4} title="International Competitions">
-                            <TrophyOutlined />
+                            <IntCompIcon size={16} className="text-purple-600" />
                             <span className="hidden sm:inline">International Competitions</span>
                             <Badge
                               count={currentConfed.totalIntComps}
@@ -1152,8 +1107,10 @@ export default function LncSortitoutsiExplorer() {
                               e.currentTarget.style.display = 'none';
                             }}
                           />
+                        ) : (!compInfo?.nation_id || compInfo?.is_international) ? (
+                          <IntCompIcon size={24} className="text-purple-600 shrink-0" />
                         ) : (
-                          <TrophyOutlined className="text-2xl text-amber-500" />
+                          <DomesticCompIcon size={24} className="text-amber-500 shrink-0" />
                         )}
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">

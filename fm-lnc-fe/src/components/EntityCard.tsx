@@ -25,7 +25,16 @@ import {
 import { EntityType } from '../types';
 import { getConfederationLogoUrl, getNationLogoUrl } from '../services/api';
 import RecordDetailModal from './RecordDetailModal';
-import { CompIcon, ClubIcon, NationIcon, StadiumIcon, CityIcon, AwardIcon } from './EntityIcons';
+import {
+  NationIcon,
+  IntCompIcon,
+  DomesticCompIcon,
+  CompIcon,
+  ClubIcon,
+  StadiumIcon,
+  CityIcon,
+  AwardIcon,
+} from './EntityIcons';
 
 export { EntityType };
 
@@ -231,17 +240,26 @@ export default function EntityCard({
       case EntityType.NATION:
       case 'nation':
         return (
-          <span className="w-7 h-7 rounded-full bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
+          <span className="w-7 h-7 rounded-full bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-600">
             <NationIcon size={16} />
           </span>
         );
       case EntityType.COMPETITION:
-      case 'competition':
+      case 'competition': {
+        const isInter = Boolean(data.is_international || !data.nation_id);
+        if (isInter) {
+          return (
+            <span className="w-7 h-7 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600">
+              <IntCompIcon size={16} />
+            </span>
+          );
+        }
         return (
           <span className="w-7 h-7 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
-            <CompIcon size={16} />
+            <DomesticCompIcon size={16} />
           </span>
         );
+      }
       case EntityType.CLUB:
       case 'club':
         return (
@@ -259,7 +277,7 @@ export default function EntityCard({
       case EntityType.CITY:
       case 'city':
         return (
-          <span className="w-7 h-7 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+          <span className="w-7 h-7 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
             <CityIcon size={16} />
           </span>
         );
@@ -745,16 +763,18 @@ export default function EntityCard({
                   {renderIdRow('sm:w-10 sm:w-12')}
 
                   <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                    <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none">
+                    <span className={`text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
+                      isInactive('name') || isInactive('long_name') ? 'text-red-600 font-normal' : 'text-gray-400 font-medium'
+                    }`}>
                       Name:
                     </span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words block sm:inline ${
-                        isTitleInactive || isRedKeyword(title) ? 'text-red-600' : 'text-gray-800'
+                      className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-3 break-words block sm:inline ${
+                        isInactive('name') || isInactive('long_name') || isTitleInactive || isRedKeyword(title) ? 'text-red-600' : 'text-gray-800'
                       }`}
                       style={{
                         display: '-webkit-box',
-                        WebkitLineClamp: 2,
+                        WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
                         wordBreak: 'break-word',
@@ -766,12 +786,14 @@ export default function EntityCard({
                   </div>
                   {data.categories && (
                     <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1.5 sm:mt-1">
-                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none">
+                      <span className={`text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
+                        isInactive('categories') ? 'text-red-600 font-normal' : 'text-gray-400 font-medium'
+                      }`}>
                         Region:
                       </span>
                       <span
                         className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words block sm:inline ${
-                          isRedKeyword(data.categories) ? 'text-red-600' : 'text-gray-800'
+                          isInactive('categories') || isRedKeyword(data.categories) ? 'text-red-600' : 'text-gray-800'
                         }`}
                         style={{
                           display: '-webkit-box',
@@ -793,14 +815,24 @@ export default function EntityCard({
                   {renderIdRow()}
 
                   {/* LN */}
-                  <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                    <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                  <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                    <span className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
+                      isInactive('long_name') || isInactive('name') ? 'text-red-600 font-normal' : 'text-gray-400 font-medium'
+                    }`}>
                       LN:
                     </span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
-                        isTitleInactive || isRedKeyword(data.long_name || title) ? 'text-red-600' : 'text-gray-800'
+                      className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-3 break-words block sm:inline ${
+                        isInactive('long_name') || isInactive('name') || isTitleInactive || isRedKeyword(data.long_name || title) ? 'text-red-600' : 'text-gray-800'
                       }`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={data.is_virtual ? '-' : (data.long_name || title)}
                     >
                       {data.is_virtual ? '-' : (data.long_name || title)}
                     </span>
@@ -808,14 +840,24 @@ export default function EntityCard({
 
                   {/* SN */}
                   {(hasThreeLetter || data.short_name || data.is_virtual) && (
-                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                    <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
+                      <span className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
+                        isInactive('short_name') ? 'text-red-600 font-normal' : 'text-gray-400 font-medium'
+                      }`}>
                         SN:
                       </span>
                       <span
-                        className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
+                        className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-3 break-words block sm:inline ${
                           isInactive('short_name') || isRedKeyword(data.short_name || title) ? 'text-red-600' : 'text-gray-800'
                         }`}
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          wordBreak: 'break-word',
+                        }}
+                        title={data.is_virtual ? '-' : (data.short_name || title)}
                       >
                         {data.is_virtual ? '-' : (data.short_name || title)}
                       </span>
@@ -825,7 +867,9 @@ export default function EntityCard({
                   {/* 6N */}
                   {(type === 'club' || type === EntityType.CLUB || data.six_letter_name) && (
                     <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                      <span className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none ${
+                        isInactive('six_letter_name') ? 'text-red-600 font-normal' : 'text-gray-400 font-medium'
+                      }`}>
                         6N:
                       </span>
                       <span
@@ -841,7 +885,9 @@ export default function EntityCard({
                   {/* 3N */}
                   {(hasThreeLetter || data.three_letter_name || data.is_virtual) && (
                     <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
+                      <span className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none ${
+                        isInactive('three_letter_name') ? 'text-red-600 font-normal' : 'text-gray-400 font-medium'
+                      }`}>
                         3N:
                       </span>
                       <span

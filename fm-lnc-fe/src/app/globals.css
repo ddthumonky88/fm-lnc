@@ -47,13 +47,13 @@ body {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 16px !important;
+    padding: 8px !important;
   }
 
   .ant-modal,
   .ant-modal-centered .ant-modal {
-    max-width: calc(100vw - 32px) !important;
-    width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 16px) !important;
+    width: calc(100vw - 16px) !important;
     margin: auto !important;
     padding: 0 !important;
     top: auto !important;
@@ -67,8 +67,8 @@ body {
     border-radius: 16px !important;
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 88vh !important;
-    padding: 16px 14px 12px 14px !important;
+    max-height: 90vh !important;
+    padding: 16px 14px 14px 14px !important;
     margin: 0 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -94,9 +94,30 @@ body {
   }
 }
 
-/* Custom thanh scroll thanh mảnh, không bám sát vào form */
+/* Fixed desktop width for RecordDetailModal */
+@media (min-width: 641px) {
+  .record-detail-modal.ant-modal,
+  .record-detail-modal .ant-modal-content {
+    width: 520px !important;
+    max-width: 520px !important;
+  }
+}
+
+/* Custom thanh scroll thanh mảnh: linh hoạt khi có scroll và không có scroll */
 .modal-scroll-container {
-  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  transition: padding 0.15s ease;
+}
+
+.modal-scroll-container.no-scroll {
+  overflow-y: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+.modal-scroll-container.has-scroll {
+  overflow-y: auto !important;
+  scrollbar-gutter: auto !important;
 }
 
 .modal-scroll-container::-webkit-scrollbar {
@@ -105,7 +126,7 @@ body {
 
 .modal-scroll-container::-webkit-scrollbar-track {
   background: transparent;
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
 .modal-scroll-container::-webkit-scrollbar-thumb {

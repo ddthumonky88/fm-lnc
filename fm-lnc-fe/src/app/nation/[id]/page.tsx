@@ -26,9 +26,10 @@ import {
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
 import CityGroupView from '../../../components/CityGroupView';
-import { CompIcon, StadiumIcon, CityIcon, AwardIcon } from '../../../components/EntityIcons';
+import { DomesticCompIcon, StadiumIcon, CityIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
+import { matchRecordSearch } from '../../../utils/search';
 
 export default function NationDetailPage() {
   const params = useParams();
@@ -222,14 +223,7 @@ export default function NationDetailPage() {
         }));
 
     if (!tableFilter.trim()) return enriched;
-    const q = tableFilter.toLowerCase();
-    return enriched.filter((r) => {
-      const name = (r.long_name || r.name || r.short_name || '').toLowerCase();
-      const code = (r.three_letter_name || '').toLowerCase();
-      const idStr = String(r.id);
-      const cat = (r.categories || '').toLowerCase();
-      return name.includes(q) || code.includes(q) || idStr.includes(q) || cat.includes(q);
-    });
+    return enriched.filter((r) => matchRecordSearch(r, tableFilter));
   }, [records, tableFilter, nationHub]);
 
   // Tab configurations: Hide any tab that has 0 records
@@ -245,7 +239,7 @@ export default function NationDetailPage() {
         key: 'DOMESTIC_COMPS',
         label: (
           <Space size={4} title="Competitions">
-            <CompIcon size={18} className="text-amber-500" />
+            <DomesticCompIcon size={18} className="text-amber-500" />
             <span className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}>Competitions</span>
             <Badge
               count={compCount}
@@ -279,7 +273,7 @@ export default function NationDetailPage() {
         key: 'CITIES',
         label: (
           <Space size={4} title="Cities">
-            <CityIcon size={18} className="text-indigo-500" />
+            <CityIcon size={18} className="text-sky-500" />
             <span className={`hidden sm:inline ${activeTab === 'CITIES' ? 'font-bold' : ''}`}>Cities</span>
             <Badge
               count={cityCount}
@@ -314,7 +308,7 @@ export default function NationDetailPage() {
         key: 'DOMESTIC_COMPS',
         label: (
           <Space size={4} title="Competitions">
-            <CompIcon size={18} className="text-amber-500" />
+            <DomesticCompIcon size={18} className="text-amber-500" />
             <span className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}>Competitions</span>
           </Space>
         ),

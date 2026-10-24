@@ -36,6 +36,7 @@ import {
   NationItem,
   ConfederationItem,
 } from '../../services/api';
+import { DomesticCompIcon, ClubIcon, StadiumIcon, CityIcon } from '../../components/EntityIcons';
 import { useApp } from '../../context/AppContext';
 
 function NationExplorerContent() {
@@ -212,10 +213,10 @@ function NationExplorerContent() {
               type="text"
               size="small"
               onClick={() => router.push(`/comp?nationId=${record.id}`)}
-              className="h-6 px-1.5 font-semibold text-sky-700 hover:bg-sky-50"
+              className="h-6 px-1.5 font-semibold text-sky-700 hover:bg-sky-50 inline-flex items-center gap-1"
             >
-              <TrophyOutlined className="text-amber-500 mr-1" />
-              {val}
+              <DomesticCompIcon size={13} className="text-amber-500" />
+              <span>{val}</span>
             </Button>
           ) : (
             <span className="text-gray-300">0</span>
@@ -434,25 +435,25 @@ function NationExplorerContent() {
                   <div className="grid grid-cols-2 gap-1.5 text-[11px] text-slate-600 mb-3 bg-slate-50/80 p-2 rounded border border-slate-100">
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500 flex items-center gap-1">
-                        <TrophyOutlined className="text-amber-500 text-[10px]" /> Comps:
+                        <DomesticCompIcon size={12} className="text-amber-500" /> Comps:
                       </span>
                       <strong className="text-slate-700">{n.totalComps || 0}</strong>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500 flex items-center gap-1">
-                        <SafetyOutlined className="text-blue-500 text-[10px]" /> Clubs:
+                        <ClubIcon size={12} className="text-blue-500" /> Clubs:
                       </span>
                       <strong className="text-slate-700">{n.totalClubs || 0}</strong>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500 flex items-center gap-1">
-                        <BankOutlined className="text-emerald-500 text-[10px]" /> Stad:
+                        <StadiumIcon size={12} className="text-emerald-500" /> Stad:
                       </span>
                       <strong className="text-slate-700">{n.totalStadiums || 0}</strong>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500 flex items-center gap-1">
-                        <EnvironmentOutlined className="text-indigo-500 text-[10px]" /> Cities:
+                        <CityIcon size={12} className="text-sky-500" /> Cities:
                       </span>
                       <strong className="text-slate-700">{n.totalCities || 0}</strong>
                     </div>
@@ -474,7 +475,7 @@ function NationExplorerContent() {
                   {(n.totalComps || 0) > 0 && (
                     <Button
                       size="small"
-                      icon={<TrophyOutlined />}
+                      icon={<DomesticCompIcon size={13} className="text-amber-500" />}
                       onClick={() => router.push(`/comp?nationId=${n.id}`)}
                       className="text-[11px] h-7 px-2"
                       title="View Competitions"

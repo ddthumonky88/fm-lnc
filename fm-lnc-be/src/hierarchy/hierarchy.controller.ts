@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Query, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Param, Query, Body, NotFoundException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { HierarchyService } from './hierarchy.service';
 
 @ApiTags('Hierarchy')
@@ -23,9 +23,10 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('continents')
   @Get('continents')
-  getContinents() {
-    return this.hierarchyService.getContinents();
+  getContinents(@Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getContinents({ ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy Nations theo Confederation ID' })
@@ -51,9 +52,10 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('continents/:id/nations')
   @Get('continents/:id/nations')
-  getNations(@Param('id') id: string) {
-    return this.hierarchyService.getNationsByContinent(id);
+  getNations(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getNationsByContinent(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy International Competitions theo Confederation ID' })
@@ -74,9 +76,10 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('continents/:id/international-competitions')
   @Get('continents/:id/international-competitions')
-  getIntCompetitions(@Param('id') id: string) {
-    return this.hierarchyService.getIntCompetitionsByContinent(id);
+  getIntCompetitions(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getIntCompetitionsByContinent(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy hub đầy đủ của một Nation (clubs, competitions, cities...)' })
@@ -134,9 +137,10 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('nations/:id/competitions')
   @Get('nations/:id/competitions')
-  getDomesticCompetitions(@Param('id') id: string) {
-    return this.hierarchyService.getDomesticCompetitions(id);
+  getDomesticCompetitions(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getDomesticCompetitions(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy danh sách CLB độc lập của một Nation' })
@@ -158,12 +162,15 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('nations/:id/independent-clubs')
   @Get('nations/:id/independent-clubs')
   getIndependentClubs(
     @Param('id') id: string,
-    @Query('extinct') extinct?: string,
+    @Body() body?: any,
+    @Query() query?: any,
   ) {
-    return this.hierarchyService.getIndependentClubs(id, extinct);
+    const filter = { ...query, ...body };
+    return this.hierarchyService.getIndependentClubs(id, filter);
   }
 
   @ApiOperation({ summary: 'Lấy tất cả CLB trong một Nation' })
@@ -183,9 +190,10 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('nations/:id/all-clubs')
   @Get('nations/:id/all-clubs')
-  getAllClubs(@Param('id') id: string) {
-    return this.hierarchyService.getAllClubsInNation(id);
+  getAllClubs(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getAllClubsInNation(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy danh sách sân vận động của một Nation' })
@@ -197,9 +205,10 @@ export class HierarchyController {
       example: [{ id: '789', name: 'Anfield', nation_id: '11' }],
     },
   })
+  @Post('nations/:id/stadiums')
   @Get('nations/:id/stadiums')
-  getStadiums(@Param('id') id: string) {
-    return this.hierarchyService.getStadiums(id);
+  getStadiums(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getStadiums(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy danh sách thành phố của một Nation' })
@@ -211,9 +220,10 @@ export class HierarchyController {
       example: [{ id: '123', name: 'London', country_id: '11', categories: 'Capital' }],
     },
   })
+  @Post('nations/:id/cities')
   @Get('nations/:id/cities')
-  getCities(@Param('id') id: string) {
-    return this.hierarchyService.getCities(id);
+  getCities(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getCities(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy danh sách giải thưởng độc lập cấp Nation' })
@@ -225,9 +235,10 @@ export class HierarchyController {
       example: [{ id: '456', long_name: 'National Player of the Year', short_name: 'Player of Year', nation_id: '11' }],
     },
   })
+  @Post('nations/:id/awards')
   @Get('nations/:id/awards')
-  getAwards(@Param('id') id: string) {
-    return this.hierarchyService.getAwardsByNation(id);
+  getAwards(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getAwardsByNation(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy danh sách CLB trong một giải đấu' })
@@ -239,9 +250,10 @@ export class HierarchyController {
       example: [{ id: '676', long_name: 'Liverpool Football Club', short_name: 'Liverpool', comp_id: '11' }],
     },
   })
+  @Post('competitions/:id/clubs')
   @Get('competitions/:id/clubs')
-  getClubsInComp(@Param('id') id: string) {
-    return this.hierarchyService.getClubsInCompetition(id);
+  getClubsInComp(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getClubsInCompetition(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy danh sách giải thưởng trong một giải đấu' })
@@ -253,9 +265,10 @@ export class HierarchyController {
       example: [{ id: '456', long_name: 'Premier League Golden Boot', short_name: 'Golden Boot', comp_id: '11' }],
     },
   })
+  @Post('competitions/:id/awards')
   @Get('competitions/:id/awards')
-  getAwardsInComp(@Param('id') id: string) {
-    return this.hierarchyService.getAwardsByCompetition(id);
+  getAwardsInComp(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getAwardsByCompetition(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy thông tin chi tiết một Confederation (Châu lục)' })
@@ -476,9 +489,10 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('competitions/:id/sub-competitions')
   @Get('competitions/:id/sub-competitions')
-  getSubCompetitions(@Param('id') id: string) {
-    return this.hierarchyService.getSubCompetitions(id);
+  getSubCompetitions(@Param('id') id: string, @Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getSubCompetitions(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy danh sách Players/Persons' })
@@ -492,9 +506,11 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('players')
   @Get('players')
-  getPlayers(@Query('q') q?: string) {
-    return this.hierarchyService.getPlayers(q);
+  getPlayers(@Body() body?: any, @Query() query?: any) {
+    const filter = { ...query, ...body };
+    return this.hierarchyService.getPlayers(filter?.q);
   }
 
   @ApiOperation({ summary: 'Lấy danh sách Stages' })
@@ -506,9 +522,11 @@ export class HierarchyController {
       example: [{ id: '1', name: 'Vòng bảng' }],
     },
   })
+  @Post('stages')
   @Get('stages')
-  getStages(@Query('q') q?: string) {
-    return this.hierarchyService.getStages(q);
+  getStages(@Body() body?: any, @Query() query?: any) {
+    const filter = { ...query, ...body };
+    return this.hierarchyService.getStages(filter?.q);
   }
 
   @ApiOperation({ summary: 'Lấy tất cả Awards' })
@@ -519,9 +537,10 @@ export class HierarchyController {
       example: [{ id: '456', long_name: "Ballon d'Or", short_name: "Ballon d'Or" }],
     },
   })
+  @Post('awards')
   @Get('awards')
-  getAllAwards() {
-    return this.hierarchyService.getAllAwards();
+  getAllAwards(@Body() body?: any, @Query() query?: any) {
+    return this.hierarchyService.getAllAwards({ ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy tất cả Nations, có thể filter theo Confederation hoặc tìm kiếm' })
@@ -543,12 +562,11 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('nations')
   @Get('nations')
-  getAllNations(
-    @Query('confedId') confedId?: string,
-    @Query('q') q?: string,
-  ) {
-    return this.hierarchyService.getAllNations(confedId, q);
+  getAllNations(@Body() body?: any, @Query() query?: any) {
+    const filter = { ...query, ...body };
+    return this.hierarchyService.getAllNations(filter.confedId, filter.q);
   }
 
   @ApiOperation({ summary: 'Lấy tất cả Competitions, có thể filter nhiều chiều' })
@@ -571,14 +589,14 @@ export class HierarchyController {
       ],
     },
   })
+  @Post('competitions')
   @Get('competitions')
-  getAllCompetitions(
-    @Query('confedId') confedId?: string,
-    @Query('nationId') nationId?: string,
-    @Query('q') q?: string,
-    @Query('isInternational') isInternational?: string,
-  ) {
-    const isInt = isInternational !== undefined ? isInternational === 'true' : undefined;
-    return this.hierarchyService.getAllCompetitions(confedId, nationId, q, isInt);
+  getAllCompetitions(@Body() body?: any, @Query() query?: any) {
+    const filter = { ...query, ...body };
+    const isInt =
+      filter.isInternational !== undefined
+        ? filter.isInternational === 'true' || filter.isInternational === true
+        : undefined;
+    return this.hierarchyService.getAllCompetitions(filter.confedId, filter.nationId, filter.q, isInt);
   }
 }

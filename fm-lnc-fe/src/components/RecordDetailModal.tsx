@@ -1,18 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Modal, Tag, Button, Tooltip, Input, Checkbox, message, Space, Divider } from 'antd';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Modal, Tag, Button, Tooltip, Input, Checkbox, message, Divider } from 'antd';
 import {
   CopyOutlined,
   CheckOutlined,
   EditOutlined,
   SaveOutlined,
-  ArrowLeftOutlined,
   TrophyOutlined,
-  SafetyOutlined,
-  BankOutlined,
   EnvironmentOutlined,
-  StarOutlined,
   UserOutlined,
   FlagOutlined,
   InfoCircleOutlined,
@@ -20,9 +16,19 @@ import {
   AppstoreOutlined,
   BgColorsOutlined,
   CloseOutlined,
+  LockOutlined,
 } from '@ant-design/icons';
 import { EntityType, RecordType } from '../types';
-import { CompIcon, ClubIcon, NationIcon, StadiumIcon, CityIcon, AwardIcon } from './EntityIcons';
+import {
+  NationIcon,
+  IntCompIcon,
+  DomesticCompIcon,
+  CompIcon,
+  ClubIcon,
+  StadiumIcon,
+  CityIcon,
+  AwardIcon,
+} from './EntityIcons';
 import {
   getConfederationLogoUrl,
   getNationLogoUrl,
@@ -60,6 +66,35 @@ const parseColor = (rgbStr?: string | null) => {
     };
   }
   return null;
+};
+
+const CONFED_NAME_MAP: Record<string, { id: string; name: string }> = {
+  CAF: { id: '1', name: 'Africa' },
+  AFRICA: { id: '1', name: 'Africa' },
+  AFC: { id: '2', name: 'Asia' },
+  ASIA: { id: '2', name: 'Asia' },
+  UEFA: { id: '3', name: 'Europe' },
+  EUROPE: { id: '3', name: 'Europe' },
+  CONCACAF: { id: '4', name: 'North America' },
+  'NORTH AMERICA': { id: '4', name: 'North America' },
+  OFC: { id: '5', name: 'Oceania' },
+  OCEANIA: { id: '5', name: 'Oceania' },
+  CONMEBOL: { id: '6', name: 'South America' },
+  'SOUTH AMERICA': { id: '6', name: 'South America' },
+  WORLD: { id: '7', name: 'World' },
+  INTERNATIONAL: { id: '7', name: 'World' },
+  FIFA: { id: '7', name: 'World' },
+  GLOBAL: { id: '7', name: 'World' },
+};
+
+const CONFED_ID_MAP: Record<string, string> = {
+  '1': 'Africa',
+  '2': 'Asia',
+  '3': 'Europe',
+  '4': 'North America',
+  '5': 'Oceania',
+  '6': 'South America',
+  '7': 'World',
 };
 
 export default function RecordDetailModal({
@@ -106,6 +141,46 @@ export default function RecordDetailModal({
     comp_id: defaultCompId ? String(defaultCompId) : null,
     parent_id: defaultParentId ? String(defaultParentId) : '',
   });
+
+  // Dynamic Scroll Detection (khi có scroll và khi không có scroll)
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [hasScroll, setHasScroll] = useState(false);
+  const [isScrolledTop, setIsScrolledTop] = useState(true);
+  const [isScrolledBottom, setIsScrolledBottom] = useState(true);
+
+  const checkScrollState = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const canScroll = el.scrollHeight > el.clientHeight + 2;
+    setHasScroll(canScroll);
+    setIsScrolledTop(el.scrollTop <= 2);
+    setIsScrolledBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 2);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      checkScrollState();
+      const rAF = requestAnimationFrame(checkScrollState);
+      const timer = setTimeout(checkScrollState, 120);
+      return () => {
+        cancelAnimationFrame(rAF);
+        clearTimeout(timer);
+      };
+    }
+  }, [isOpen, mode, currentData, formData, checkScrollState]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !isOpen) return;
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => {
+        checkScrollState();
+      });
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+  }, [isOpen, checkScrollState]);
 
   useEffect(() => {
     if (isOpen) {
@@ -160,7 +235,36 @@ export default function RecordDetailModal({
     .map((s: string) => s.trim().toLowerCase())
     .filter(Boolean);
 
-  const isFieldInactive = (field: string) => inactiveList.includes(field.toLowerCase());
+  const isFieldInactive = (field: string | string[]) => {
+    const fields = Array.isArray(field) ? field : [field];
+    return fields.some((f) => {
+      const lower = f.toLowerCase();
+      return inactiveList.includes(lower) || inactiveList.some((item: string) => item.toLowerCase() === lower);
+    });
+  };
+
+  const getLabelClass = (field?: string | string[], extraClass: string = '') => {
+    const inactive = field ? isFieldInactive(field) : false;
+    return `${
+      inactive
+        ? 'text-red-600 font-normal'
+        : 'text-slate-400 font-semibold'
+    } text-xs shrink-0 select-none ${extraClass}`;
+  };
+
+  const getValueClass = (field?: string | string[], defaultClass: string = 'text-slate-800') => {
+    const inactive = field ? isFieldInactive(field) : false;
+    return inactive ? 'text-red-600' : defaultClass;
+  };
+
+  const getFormLabelClass = (field?: string | string[], extraClass: string = '') => {
+    const inactive = field ? isFieldInactive(field) : false;
+    return `block text-xs mb-1 ${
+      inactive
+        ? 'text-red-600 font-normal'
+        : 'font-semibold text-slate-700'
+    } ${extraClass}`;
+  };
 
   // Determine Type Flags
   const isPlayer = type === 'player' || type === EntityType.PLAYER || type === RecordType.PLAYER;
@@ -174,6 +278,27 @@ export default function RecordDetailModal({
   const isAward = type === 'award' || type === EntityType.AWARD || type === RecordType.AWARD;
   const isVirtual = Boolean(currentData.is_virtual || currentData.id === '[EXTINCT]' || currentData.id === '[OTHER]');
 
+  // International Competition & Confederation resolving
+  const isInternationalComp =
+    isComp &&
+    Boolean(
+      currentData.is_international ||
+      (!currentData.nation_id && (currentData.confed_id || currentData.confederation || currentData.categories))
+    );
+
+  const rawConfedId = currentData.confed_id || currentData.confederation_id || currentData.confederation?.id;
+  const rawCat = currentData.categories ? String(currentData.categories).split(',')[0].trim().toUpperCase() : '';
+  const catConfed = rawCat ? CONFED_NAME_MAP[rawCat] : null;
+
+  const confedId = rawConfedId ? String(rawConfedId) : (catConfed?.id || null);
+  const confedName =
+    currentData.confed_name ||
+    currentData.confederation?.name ||
+    (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
+    catConfed?.name ||
+    rawCat ||
+    'International';
+
   const canEdit = !isVirtual && !isConfed;
 
   const title = isPlayer
@@ -182,12 +307,13 @@ export default function RecordDetailModal({
     ? currentData.virtual_type === 'EXTINCT' || currentData.id === '[EXTINCT]'
       ? 'Extinct Clubs'
       : 'Other Clubs'
-    : currentData.long_name || currentData.name || 'Unnamed';
+    : currentData.short_name || currentData.long_name || currentData.name || 'Unnamed';
 
   const getTypeLabel = () => {
+    if (isInternationalComp) return 'International Competition';
     if (isVirtual) return 'Virtual Group';
     if (isClub) return 'Club';
-    if (isComp) return 'Competition';
+    if (isComp) return 'Domestic Competition';
     if (isNation) return 'Nation';
     if (isConfed) return 'Confederation';
     if (isStadium) return 'Stadium';
@@ -199,6 +325,7 @@ export default function RecordDetailModal({
   };
 
   const getTypeColor = () => {
+    if (isInternationalComp) return 'purple';
     if (isVirtual) return currentData.virtual_type === 'EXTINCT' || currentData.id === '[EXTINCT]' ? 'volcano' : 'geekblue';
     if (isComp) return 'gold';
     if (isClub) return 'blue';
@@ -210,17 +337,31 @@ export default function RecordDetailModal({
     return 'default';
   };
 
-  const getTypeIcon = () => {
-    if (isVirtual) return <ClubIcon size={18} className="text-orange-500" />;
-    if (isComp) return <CompIcon size={18} className="text-amber-500" />;
-    if (isClub) return <ClubIcon size={18} className="text-blue-500" />;
-    if (isNation) return <NationIcon size={18} className="text-cyan-600" />;
-    if (isConfed) return <GlobalOutlined className="text-indigo-500 text-lg" />;
-    if (isStadium) return <StadiumIcon size={18} className="text-emerald-500" />;
-    if (isCity) return <CityIcon size={18} className="text-indigo-500" />;
-    if (isAward) return <AwardIcon size={18} className="text-yellow-500" />;
-    if (isPlayer) return <UserOutlined className="text-purple-500 text-base" />;
-    return <AppstoreOutlined className="text-gray-500" />;
+  const getTypeBadgeStyles = () => {
+    if (isInternationalComp) return 'bg-purple-50/90 border-purple-300 text-purple-600';
+    if (isComp) return 'bg-amber-50/90 border-amber-300 text-amber-600';
+    if (isClub) return 'bg-blue-50/90 border-blue-300 text-blue-600';
+    if (isNation) return 'bg-cyan-50/90 border-cyan-300 text-cyan-600';
+    if (isPlayer) return 'bg-purple-50/90 border-purple-300 text-purple-600';
+    if (isStadium) return 'bg-emerald-50/90 border-emerald-300 text-emerald-600';
+    if (isCity) return 'bg-sky-50/90 border-sky-300 text-sky-600';
+    if (isAward) return 'bg-yellow-50/90 border-yellow-400 text-yellow-600';
+    if (isVirtual) return 'bg-orange-50/90 border-orange-300 text-orange-600';
+    return 'bg-slate-50/90 border-slate-300 text-slate-600';
+  };
+
+  const getTypeIcon = (size = 18) => {
+    if (isInternationalComp) return <IntCompIcon size={size} className="text-purple-600 shrink-0" />;
+    if (isVirtual) return <ClubIcon size={size} className="text-orange-500 shrink-0" />;
+    if (isComp) return <DomesticCompIcon size={size} className="text-amber-500 shrink-0" />;
+    if (isClub) return <ClubIcon size={size} className="text-blue-500 shrink-0" />;
+    if (isNation) return <NationIcon size={size} className="text-cyan-600 shrink-0" />;
+    if (isConfed) return <IntCompIcon size={size} className="text-indigo-500 shrink-0" />;
+    if (isStadium) return <StadiumIcon size={size} className="text-emerald-500 shrink-0" />;
+    if (isCity) return <CityIcon size={size} className="text-sky-500 shrink-0" />;
+    if (isAward) return <AwardIcon size={size} className="text-yellow-500 shrink-0" />;
+    if (isPlayer) return <UserOutlined style={{ fontSize: size }} className="text-purple-500 shrink-0" />;
+    return <AppstoreOutlined style={{ fontSize: size }} className="text-gray-500 shrink-0" />;
   };
 
   // Nation resolving: If it's a nation, currentData.id is the nation id
@@ -305,87 +446,125 @@ export default function RecordDetailModal({
         e?.stopPropagation?.();
         onClose();
       }}
-      modalRender={(modal) => (
-        <div onClick={(e) => e.stopPropagation()}>
-          {modal}
-        </div>
-      )}
-      width="100%"
-      style={{ maxWidth: 560 }}
+      width={520}
+      style={{ width: '520px', maxWidth: 'calc(100vw - 24px)' }}
       destroyOnHidden
       centered
-      className="w-full max-w-[calc(100vw-32px)] sm:max-w-[560px] mx-auto"
+      className="record-detail-modal"
       title={
-        <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 pr-6 min-w-0">
-          {mode === 'create' ? (
-            <span className="font-bold text-sm sm:text-base text-slate-900">
-              Add New {getTypeLabel()}
-            </span>
-          ) : (
-            <>
-              {currentData.id !== undefined && currentData.id !== null && (
-                <Tag
-                  color="blue"
-                  className="font-mono font-bold text-xs sm:text-[13px] m-0 shrink-0 cursor-pointer hover:opacity-80"
-                  onClick={handleCopyId}
-                  title="Click to copy ID"
-                >
-                  {copied ? 'Copied!' : currentData.id}
-                </Tag>
+        <div
+          className={`flex items-center gap-2.5 sm:gap-3 pb-2.5 pr-7 min-w-0 transition-all duration-200 border-b ${
+            hasScroll && !isScrolledTop
+              ? 'border-slate-200/90 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.06)]'
+              : 'border-slate-100'
+          }`}
+        >
+          {/* Thẻ icon có viền rõ ràng */}
+          <Tooltip title={getTypeLabel()} placement="bottom">
+            <div
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 cursor-default p-0 shadow-2xs border ${getTypeBadgeStyles()}`}
+            >
+              {getTypeIcon(18)}
+            </div>
+          </Tooltip>
+
+          {/* 2 dòng: (id, text name) */}
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            {/* Dòng 1: id */}
+            <div className="flex items-center gap-2">
+              {mode !== 'create' && currentData.id !== undefined && currentData.id !== null && (
+                <Tooltip title="Click to copy ID" placement="bottom">
+                  <button
+                    type="button"
+                    onClick={handleCopyId}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 border border-sky-200 font-mono text-xs font-bold transition-all cursor-pointer shadow-2xs select-none"
+                  >
+                    <span>ID: {currentData.id}</span>
+                    {copied ? (
+                      <CheckOutlined className="text-emerald-600 text-xs" />
+                    ) : (
+                      <CopyOutlined className="text-sky-500 text-xs" />
+                    )}
+                  </button>
+                </Tooltip>
               )}
-              <span className="font-bold text-sm sm:text-base text-slate-900 truncate">
-                {title}
-                {currentData.short_name && currentData.short_name !== title && (
-                  <span className="text-slate-500 font-semibold ml-1">
-                    ({currentData.short_name})
-                  </span>
-                )}
-              </span>
-            </>
-          )}
+            </div>
+
+            {/* Dòng 2: text name (in hoa) */}
+            <div className="mt-1 min-w-0">
+              {mode === 'create' ? (
+                <span className="font-bold text-xs sm:text-sm text-slate-900 uppercase truncate block">
+                  Add New {getTypeLabel()}
+                </span>
+              ) : (
+                <div
+                  className="font-bold text-xs sm:text-[13px] text-slate-900 uppercase tracking-wide line-clamp-2 break-words block leading-snug"
+                  style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    wordBreak: 'break-word',
+                  }}
+                  title={title}
+                >
+                  <span>{title}</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       }
       footer={
         mode === 'view' ? (
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <div
+            className={`flex items-center justify-end gap-2 pt-2.5 transition-all duration-200 border-t ${
+              hasScroll && !isScrolledBottom
+                ? 'border-slate-200/90 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.06)]'
+                : 'border-slate-100'
+            }`}
+          >
+            <Button
+              key="close"
+              icon={<CloseOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className="font-medium px-4 h-9 rounded-lg border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center gap-1.5"
+            >
+              <span>Close</span>
+            </Button>
             {canEdit && (
               <Button
                 key="edit"
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={() => setMode('edit')}
-                className="font-medium px-3 sm:px-4 h-9 shadow-sm"
-                title="Edit"
+                className="font-medium px-4 h-9 rounded-lg bg-blue-600 hover:bg-blue-700 shadow-sm flex items-center justify-center gap-1.5"
               >
                 <span>Edit</span>
               </Button>
             )}
-            <Button
-              key="close"
-              icon={<CloseOutlined className="sm:hidden" />}
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="font-medium px-3 sm:px-4 h-9"
-              title="Close"
-            >
-              <span className="hidden sm:inline">Close</span>
-            </Button>
           </div>
         ) : (
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <div
+            className={`flex items-center justify-end gap-2 pt-2.5 transition-all duration-200 border-t ${
+              hasScroll && !isScrolledBottom
+                ? 'border-slate-200/90 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.06)]'
+                : 'border-slate-100'
+            }`}
+          >
             <Button
               key="cancel"
-              icon={<CloseOutlined className="sm:hidden" />}
+              icon={<CloseOutlined />}
               onClick={() => {
                 if (isCreate) onClose();
                 else setMode('view');
               }}
-              className="font-medium px-3 sm:px-4 h-9"
-              title="Cancel"
+              className="font-medium px-4 h-9 rounded-lg border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center gap-1.5"
             >
-              <span className="hidden sm:inline">Cancel</span>
+              <span>Cancel</span>
             </Button>
             <Button
               key="save"
@@ -393,405 +572,381 @@ export default function RecordDetailModal({
               icon={<SaveOutlined />}
               loading={isSaving}
               onClick={handleSave}
-              className="bg-blue-600 hover:bg-blue-700 font-medium px-3 sm:px-4 h-9 shadow-sm"
-              title={isCreate ? 'Create' : 'Save Changes'}
+              className="font-medium px-4 h-9 rounded-lg bg-blue-600 hover:bg-blue-700 shadow-sm flex items-center justify-center gap-1.5"
             >
-              <span className="hidden sm:inline">{isCreate ? 'Create' : 'Save Changes'}</span>
+              <span>{isCreate ? 'Create' : 'Save Changes'}</span>
             </Button>
           </div>
         )
       }
     >
-      <div className="py-2.5 max-h-[70vh] overflow-y-auto pl-0.5 pr-3.5 sm:pr-4 modal-scroll-container">
+      <div
+        ref={scrollRef}
+        onScroll={checkScrollState}
+        className={`py-2 max-h-[calc(88vh-130px)] sm:max-h-[68vh] transition-all duration-150 modal-scroll-container ${
+          hasScroll
+            ? 'has-scroll pl-0.5 sm:pl-1 pr-2 sm:pr-2.5'
+            : 'no-scroll px-0.5 sm:px-1'
+        }`}
+      >
         {errorMessage && (
-          <div className="bg-red-50 text-red-600 border border-red-200 rounded p-2.5 text-xs mb-3">
-            {errorMessage}
+          <div className="bg-red-50 text-red-600 border border-red-200 rounded-lg p-2.5 text-xs mb-3 flex items-center gap-2">
+            <InfoCircleOutlined className="text-red-500 shrink-0" />
+            <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* 1. VIEW MODE: [label]: [Value] */}
+        {/* 1. VIEW MODE: Sleek semantic cards */}
         {mode === 'view' ? (
-          <div className="bg-slate-50/70 border border-slate-200/90 rounded-xl p-3 sm:p-3.5 space-y-2">
-            {/* ID */}
-            <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                ID:
-              </span>
-              <div className="flex items-center gap-1.5 font-mono font-bold text-sm text-blue-600 min-w-0">
-                <span>{currentData.id}</span>
-                <Tooltip title="Copy ID">
-                  <Button
-                    type="text"
-                    size="small"
-                    shape="circle"
-                    icon={copied ? <CheckOutlined className="text-emerald-600 text-xs" /> : <CopyOutlined className="text-slate-400 text-xs" />}
-                    onClick={handleCopyId}
-                    className="hover:bg-slate-200"
-                  />
-                </Tooltip>
-              </div>
-            </div>
-
-            {/* Type */}
-            <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-              <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                Type:
-              </span>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Tag color={getTypeColor()} className="m-0 font-semibold text-xs">
-                  {getTypeLabel()}
-                </Tag>
-              </div>
-            </div>
-
-            {/* Names block: [label]: [Value] */}
-            {isPlayer ? (
-              <>
-                <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                  <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                    FN:
-                  </span>
-                  <span className="font-bold text-[13px] text-slate-800 break-words flex-1">
-                    {currentData.first_name || '-'}
-                  </span>
-                </div>
-
-                <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                  <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                    SN:
-                  </span>
-                  <span className="font-bold text-[13px] text-slate-800 break-words flex-1">
-                    {currentData.second_name || '-'}
-                  </span>
-                </div>
-
-                {currentData.common_name && (
-                  <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                    <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                      CN:
+          <div className="space-y-3">
+            {/* Primary Details Card */}
+            <div className="bg-sky-50/70 border border-sky-200/80 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
+              {/* Names Block */}
+              {/* Names Block */}
+              {isPlayer ? (
+                <>
+                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass('first_name', 'pt-0.5')}>
+                      FN:
                     </span>
-                    <span className="font-bold text-[13px] text-purple-700 italic break-words flex-1">
-                      {currentData.common_name}
+                    <span className={`font-bold text-xs sm:text-[13px] ${getValueClass('first_name')} line-clamp-3 break-words text-left`}>
+                      {currentData.first_name || '-'}
                     </span>
                   </div>
-                )}
-              </>
-            ) : isCity || isStadium ? (
-              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Name:
-                </span>
-                <span className="font-bold text-[13px] text-slate-800 break-words flex-1">
-                  {currentData.name || currentData.long_name || '-'}
-                </span>
-              </div>
-            ) : (
-              <>
-                {/* LN */}
-                <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                  <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                    LN:
+
+                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass('second_name', 'pt-0.5')}>
+                      SN:
+                    </span>
+                    <span className={`font-bold text-xs sm:text-[13px] ${getValueClass('second_name')} line-clamp-3 break-words text-left`}>
+                      {currentData.second_name || '-'}
+                    </span>
+                  </div>
+
+                  {currentData.common_name && (
+                    <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                      <span className={getLabelClass('common_name', 'pt-0.5')}>
+                        CN:
+                      </span>
+                      <span className={`font-bold text-xs sm:text-[13px] ${getValueClass('common_name', 'text-purple-700')} italic line-clamp-3 break-words text-left`}>
+                        {currentData.common_name}
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : isCity || isStadium || isStage ? (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['name', 'long_name'], 'pt-0.5')}>
+                    Name:
                   </span>
-                  <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                  <span
+                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name', 'long_name'])} line-clamp-3 break-words text-left`}
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      wordBreak: 'break-word',
+                    }}
+                    title={currentData.name || currentData.long_name || '-'}
+                  >
+                    {currentData.name || currentData.long_name || '-'}
+                  </span>
+                </div>
+              ) : (
+                <>
+                  {/* LN */}
+                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['long_name', 'name'], 'pt-0.5')}>
+                      LN:
+                    </span>
                     <span
-                      className={`font-bold text-[13px] break-words ${
-                        isFieldInactive('long_name') ? 'line-through text-red-600' : 'text-slate-900'
-                      }`}
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['long_name', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={currentData.is_virtual ? '-' : (currentData.long_name || currentData.name || title)}
                     >
                       {currentData.is_virtual ? '-' : (currentData.long_name || currentData.name || title)}
                     </span>
-                    {isFieldInactive('long_name') && (
-                      <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                        Inactive
-                      </span>
-                    )}
                   </div>
-                </div>
 
-                {/* SN */}
-                <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                  <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                    SN:
-                  </span>
-                  <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                  {/* SN */}
+                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass('short_name', 'pt-0.5')}>
+                      SN:
+                    </span>
                     <span
-                      className={`font-bold text-[13px] break-words ${
-                        isFieldInactive('short_name') ? 'line-through text-red-600' : 'text-slate-800'
-                      }`}
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass('short_name')} line-clamp-3 break-words text-left`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={currentData.is_virtual ? '-' : (currentData.short_name || '-')}
                     >
                       {currentData.is_virtual ? '-' : (currentData.short_name || '-')}
                     </span>
-                    {isFieldInactive('short_name') && (
-                      <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                        Inactive
-                      </span>
-                    )}
                   </div>
-                </div>
 
-                {/* 3N */}
-                <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                  <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                    3N:
-                  </span>
-                  <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
-                    <span
-                      className={`font-mono font-bold text-[13px] ${
-                        isFieldInactive('three_letter_name')
-                          ? 'line-through text-red-600'
-                          : 'text-slate-800'
-                      }`}
-                    >
+                  {/* 3N */}
+                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['three_letter_name', 'three_letter'], 'pt-0.5')}>
+                      3N:
+                    </span>
+                    <span className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['three_letter_name', 'three_letter'])} break-words text-left`}>
                       {currentData.is_virtual ? '-' : (currentData.three_letter_name || nationCode || '-')}
                     </span>
-                    {isFieldInactive('three_letter_name') && (
-                      <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                        Inactive
-                      </span>
-                    )}
                   </div>
-                </div>
 
-                {/* 6N */}
-                {(type === 'club' ||
-                  type === EntityType.CLUB ||
-                  currentData.six_letter_name !== undefined) && (
-                  <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                    <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                      6N:
-                    </span>
-                    <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
-                      <span
-                        className={`font-mono font-bold text-[13px] ${
-                          isFieldInactive('six_letter_name')
-                            ? 'line-through text-red-600'
-                            : 'text-slate-800'
-                        }`}
-                      >
+                  {/* 6N */}
+                  {(type === 'club' ||
+                    type === EntityType.CLUB ||
+                    currentData.six_letter_name !== undefined) && (
+                    <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                      <span className={getLabelClass(['six_letter_name', 'six_letter'], 'pt-0.5')}>
+                        6N:
+                      </span>
+                      <span className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['six_letter_name', 'six_letter'])} break-words text-left`}>
                         {currentData.six_letter_name || '-'}
                       </span>
-                      {isFieldInactive('six_letter_name') && (
-                        <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 shrink-0">
-                          Inactive
-                        </span>
-                      )}
                     </div>
+                  )}
+                </>
+              )}
+
+              {/* Confederation (for International Competition) */}
+              {isInternationalComp && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                  <span className={getLabelClass(['confed_id', 'confederation_id'], 'pt-0.5')}>
+                    Confed:
+                  </span>
+                  <span className={`font-bold text-xs sm:text-[13px] ${getValueClass(['confed_id', 'confederation_id'])} break-words text-left`}>
+                    {confedName}
+                  </span>
+                </div>
+              )}
+
+              {/* Associated Nation */}
+              {!isNation && !isInternationalComp && nationId && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
+                    Nation:
+                  </span>
+                  <div className="flex items-center gap-1.5 min-w-0 text-left">
+                    <img
+                      src={getNationLogoUrl(nationId, nationCode)}
+                      alt={nationName || 'Nation'}
+                      className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <span className={`font-bold text-xs sm:text-[13px] ${getValueClass(['nation_id', 'country_id', 'nation'])} truncate`}>
+                      {nationName}
+                    </span>
                   </div>
-                )}
-              </>
-            )}
+                </div>
+              )}
 
-            {/* Associated Nation */}
-            {!isNation && nationId && (
-              <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Nation:
-                </span>
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="font-bold text-[13px] text-slate-800 truncate">
-                    {nationName}
+              {/* Region (City) */}
+              {isCity && currentData.categories && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['categories', 'category', 'region'], 'pt-0.5')}>
+                    Region:
+                  </span>
+                  <div className={`flex items-center gap-1 font-semibold text-xs ${getValueClass(['categories', 'category', 'region'], 'text-sky-700')}`}>
+                    <EnvironmentOutlined className={isFieldInactive(['categories', 'category', 'region']) ? 'text-red-500' : 'text-sky-500'} />
+                    <span>{currentData.categories}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Assigned Competition / League */}
+              {currentData.comp_id && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['comp_id', 'competition_id'], 'pt-0.5')}>
+                    League:
+                  </span>
+                  <div className="flex items-center gap-1.5 min-w-0 text-left">
+                    <DomesticCompIcon size={12} className="text-amber-500 shrink-0" />
+                    <span className={`font-bold text-xs sm:text-[13px] ${getValueClass(['comp_id', 'competition_id'])} line-clamp-3 break-words`}>
+                      {currentData.competition?.long_name || currentData.comp_name || `Competition ${currentData.comp_id}`}
+                    </span>
+                    <span className="text-xs text-slate-400 font-mono shrink-0">
+                      ({currentData.comp_id})
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Parent Competition (for Competitions) */}
+              {isComp && (currentData.parent_id || isFieldInactive(['parent_id', 'parent'])) && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['parent_id', 'parent'], 'pt-0.5')}>
+                    Parent Comp:
+                  </span>
+                  <span className={`font-bold text-xs sm:text-[13px] ${getValueClass(['parent_id', 'parent'])} line-clamp-3 break-words text-left`}>
+                    {currentData.parent_long_name || currentData.parent_name || currentData.parent?.long_name || (currentData.parent_id ? `ID: ${currentData.parent_id}` : '-')}
                   </span>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Assigned Competition */}
-            {currentData.comp_id && (
-              <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  League:
-                </span>
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <TrophyOutlined className="text-amber-500 text-xs shrink-0" />
-                  <span className="font-bold text-[13px] text-slate-800 truncate">
-                    {currentData.competition?.long_name || currentData.comp_name || `Competition ${currentData.comp_id}`}
+              {/* Sub-competitions count */}
+              {isComp && currentData.childrenCount !== undefined && currentData.childrenCount > 0 && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['sub_competitions', 'children'], 'pt-0.5')}>
+                    Sub-Comps:
                   </span>
-                  <span className="text-xs text-slate-400 font-mono ml-auto shrink-0">
-                    ID: {currentData.comp_id}
+                  <span className="font-bold text-xs sm:text-[13px] text-amber-600 text-left">
+                    {currentData.childrenCount}
                   </span>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Sub-competitions count */}
-            {isComp && currentData.childrenCount !== undefined && currentData.childrenCount > 0 && (
-              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Sub-Comps:
-                </span>
-                <span className="font-bold text-[13px] text-amber-600">
-                  {currentData.childrenCount} Sub-Competitions
-                </span>
-              </div>
-            )}
-
-            {/* Total Competitions for Nation */}
-            {currentData.totalComps !== undefined && (
-              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Comps:
-                </span>
-                <span className="font-bold text-[13px] text-amber-700">
-                  {currentData.totalComps} Competitions
-                </span>
-              </div>
-            )}
-
-            {/* Clubs Count */}
-            {currentData.clubsCount !== undefined && (
-              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Clubs:
-                </span>
-                <span className="font-bold text-[13px] text-blue-700">
-                  {currentData.clubsCount} Clubs
-                </span>
-              </div>
-            )}
-
-            {/* Awards Count */}
-            {currentData.awardsCount !== undefined && (
-              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Awards:
-                </span>
-                <span className="font-bold text-[13px] text-amber-700">
-                  {currentData.awardsCount} Awards
-                </span>
-              </div>
-            )}
-
-            {/* Total Nations */}
-            {currentData.totalNations !== undefined && (
-              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Nations:
-                </span>
-                <span className="font-bold text-[13px] text-cyan-700">
-                  {currentData.totalNations} Member Nations
-                </span>
-              </div>
-            )}
-
-            {/* Colors */}
-            {(bgInfo || fgInfo) && (
-              <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60 flex-wrap">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Colors:
-                </span>
-                <div className="flex items-center gap-2 flex-wrap flex-1">
-                  <span
-                    className="px-2 py-0.5 rounded text-xs font-bold border border-black/15 shadow-2xs"
-                    style={{
-                      backgroundColor: bgInfo ? bgInfo.css : '#ffffff',
-                      color: fgInfo ? fgInfo.css : '#000000',
-                    }}
-                  >
-                    Sample
+              {/* Total Competitions for Nation */}
+              {currentData.totalComps !== undefined && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass('competitions', 'pt-0.5')}>
+                    Competitions:
                   </span>
+                  <span className="font-bold text-xs sm:text-[13px] text-amber-700 text-left">
+                    {currentData.totalComps}
+                  </span>
+                </div>
+              )}
 
-                  {bgInfo && (
-                    <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded">
+              {/* Clubs Count - Hidden for International Competitions */}
+              {!isInternationalComp && currentData.clubsCount !== undefined && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>
+                    Clubs:
+                  </span>
+                  <span className="font-bold text-xs sm:text-[13px] text-blue-700 text-left">
+                    {currentData.clubsCount}
+                  </span>
+                </div>
+              )}
+
+              {/* Awards Count */}
+              {currentData.awardsCount !== undefined && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass('awards', 'pt-0.5')}>
+                    Awards:
+                  </span>
+                  <span className="font-bold text-xs sm:text-[13px] text-amber-700 text-left">
+                    {currentData.awardsCount}
+                  </span>
+                </div>
+              )}
+
+              {/* Total Nations */}
+              {currentData.totalNations !== undefined && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass('nations', 'pt-0.5')}>
+                    Nations:
+                  </span>
+                  <span className="font-bold text-xs sm:text-[13px] text-cyan-700 text-left">
+                    {currentData.totalNations}
+                  </span>
+                </div>
+              )}
+
+              {/* Categories (Non-City) */}
+              {!isCity && currentData.categories && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                  <span className={getLabelClass(['categories', 'category'], 'pt-0.5')}>
+                    Category:
+                  </span>
+                  <div className="flex items-center gap-1 flex-wrap text-left">
+                    {String(currentData.categories)
+                      .split(',')
+                      .map((cat: string, idx: number) => (
+                        <Tag color="cyan" key={idx} className="m-0 text-xs font-medium">
+                          {cat.trim()}
+                        </Tag>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* BG Color Row */}
+              {bgInfo && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                  <span className={getLabelClass(['bg_color', 'background_color'], 'pt-0.5')} title="Background Color">
+                    BG:
+                  </span>
+                  <div className="flex items-center gap-2 min-w-0 text-left">
+                    <Tooltip title={`Hex: ${bgInfo.hex}`}>
                       <span
-                        className="w-3.5 h-3.5 rounded border border-black/20 shrink-0"
+                        className="inline-block w-4 h-4 rounded border border-black/20 shadow-2xs shrink-0 cursor-pointer"
                         style={{ backgroundColor: bgInfo.css }}
                       />
-                      <span className="text-slate-400">BG:</span>
-                      <span className="font-mono font-bold text-slate-800">{bgInfo.hex}</span>
-                      <span className="text-slate-400 font-mono text-[11px]">({currentData.bg_color})</span>
+                    </Tooltip>
+                    <span className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['bg_color', 'background_color'])}`}>
+                      {currentData.bg_color}
                     </span>
-                  )}
+                  </div>
+                </div>
+              )}
 
-                  {fgInfo && (
-                    <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded">
+              {/* FG Color Row */}
+              {fgInfo && (
+                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                  <span className={getLabelClass(['fg_color', 'foreground_color'], 'pt-0.5')} title="Foreground Color">
+                    FG:
+                  </span>
+                  <div className="flex items-center gap-2 min-w-0 text-left">
+                    <Tooltip title={`Hex: ${fgInfo.hex}`}>
                       <span
-                        className="w-3.5 h-3.5 rounded border border-black/20 shrink-0"
+                        className="inline-block w-4 h-4 rounded border border-black/20 shadow-2xs shrink-0 cursor-pointer"
                         style={{ backgroundColor: fgInfo.css }}
                       />
-                      <span className="text-slate-400">FG:</span>
-                      <span className="font-mono font-bold text-slate-800">{fgInfo.hex}</span>
-                      <span className="text-slate-400 font-mono text-[11px]">({currentData.fg_color})</span>
+                    </Tooltip>
+                    <span className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['fg_color', 'foreground_color'])}`}>
+                      {currentData.fg_color}
                     </span>
-                  )}
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* Scope & Status Badges */}
+            {(currentData.is_extinct || isVirtual) && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {currentData.is_extinct && (
+                  <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
+                    Extinct Club
+                  </Tag>
+                )}
+                {isVirtual && (
+                  <Tag color="orange" className="m-0 text-xs font-medium py-0.5 px-2">
+                    {currentData.virtual_type === 'EXTINCT' ? 'Extinct Clubs Container' : 'Independent Clubs Container'}
+                  </Tag>
+                )}
               </div>
             )}
 
-            {/* Scope / Status */}
-            {(currentData.is_international !== undefined || currentData.is_extinct !== undefined || isVirtual) && (
-              <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Status:
-                </span>
-                <div className="flex items-center gap-1.5 flex-wrap flex-1">
-                  {currentData.is_international && (
-                    <Tag color="purple" className="m-0 text-xs font-medium">
-                      International Competition
-                    </Tag>
-                  )}
-                  {currentData.is_extinct && (
-                    <Tag color="red" className="m-0 text-xs font-medium">
-                      Extinct Club
-                    </Tag>
-                  )}
-                  {isVirtual && (
-                    <Tag color="orange" className="m-0 text-xs font-medium">
-                      {currentData.virtual_type === 'EXTINCT' ? 'Extinct Clubs Container' : 'Independent Clubs Container'}
-                    </Tag>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Categories */}
-            {currentData.categories && (
-              <div className="flex items-center gap-2 min-w-0 pb-1.5 border-b border-slate-200/60">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  {isCity ? 'Region:' : 'Category:'}
-                </span>
-                <div className="flex items-center gap-1 flex-wrap flex-1">
-                  {String(currentData.categories)
-                    .split(',')
-                    .map((cat: string, idx: number) => (
-                      <Tag color="cyan" key={idx} className="m-0 text-xs font-medium">
-                        {cat.trim()}
-                      </Tag>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {/* Note */}
+            {/* Notes Card */}
             {currentData.note && (
-              <div className="flex items-baseline gap-2 min-w-0 pb-1.5 border-b border-slate-200/60 last:border-b-0">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Note:
-                </span>
-                <span className="text-xs text-slate-700 italic flex-1 break-words">
-                  {currentData.note}
-                </span>
-              </div>
-            )}
-
-            {/* Inactive Fields */}
-            {inactiveList.length > 0 && (
-              <div className="flex items-center gap-2 min-w-0 last:border-b-0">
-                <span className="w-20 text-slate-400 font-semibold text-xs shrink-0 select-none">
-                  Inactive:
-                </span>
-                <div className="flex items-center gap-1 flex-wrap flex-1">
-                  {inactiveList.map((f: string, i: number) => (
-                    <Tag color="error" key={i} className="m-0 text-xs">
-                      {f}
-                    </Tag>
-                  ))}
+              <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-3 flex items-start gap-2.5 text-xs text-slate-700">
+                <InfoCircleOutlined className="text-sky-500 mt-0.5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <span className="font-bold text-slate-800 block mb-0.5">Note:</span>
+                  <p className="italic text-slate-600 break-words m-0">{currentData.note}</p>
                 </div>
               </div>
             )}
           </div>
         ) : (
           /* 2. EDIT / CREATE MODE: INLINE FORM */
-          <form onSubmit={handleSave} className="space-y-3.5 pr-1">
+          <form onSubmit={handleSave} className="space-y-3.5 pr-0.5">
             {/* FM Unique ID */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -803,7 +958,8 @@ export default function RecordDetailModal({
                 value={formData.id}
                 onChange={(e) => setFormData({ ...formData, id: e.target.value })}
                 placeholder="e.g. 102422"
-                className="font-mono"
+                className="font-mono rounded-lg"
+                prefix={mode === 'edit' ? <LockOutlined className="text-slate-400" /> : undefined}
                 required
               />
             </div>
@@ -813,49 +969,53 @@ export default function RecordDetailModal({
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className={getFormLabelClass('first_name')}>
                       First Name (FN) <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={formData.first_name}
                       onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                       placeholder="e.g. Cristiano"
+                      className="rounded-lg"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className={getFormLabelClass('second_name')}>
                       Second Name (SN) <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={formData.second_name}
                       onChange={(e) => setFormData({ ...formData, second_name: e.target.value })}
                       placeholder="e.g. Ronaldo"
+                      className="rounded-lg"
                       required
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className={getFormLabelClass('common_name')}>
                     Common Name (CN / Nickname)
                   </label>
                   <Input
                     value={formData.common_name}
                     onChange={(e) => setFormData({ ...formData, common_name: e.target.value })}
                     placeholder="e.g. Ronaldo / Kaka"
+                    className="rounded-lg"
                   />
                 </div>
               </div>
             ) : isCity || isStadium || isStage ? (
               /* Name for Stadium, City, Stage */
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className={getFormLabelClass(['name', 'long_name'])}>
                   Name <span className="text-red-500">*</span>
                 </label>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value, long_name: e.target.value })}
                   placeholder="e.g. Wembley Stadium / London"
+                  className="rounded-lg"
                   required
                 />
               </div>
@@ -863,30 +1023,32 @@ export default function RecordDetailModal({
               /* Club / Competition / Award / Nation Fields */
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className={getFormLabelClass(['long_name', 'name'])}>
                     Long Name (LN) <span className="text-red-500">*</span>
                   </label>
                   <Input
                     value={formData.long_name}
                     onChange={(e) => setFormData({ ...formData, long_name: e.target.value })}
                     placeholder="e.g. Manchester United"
+                    className="rounded-lg"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className={getFormLabelClass('short_name')}>
                       Short Name (SN)
                     </label>
                     <Input
                       value={formData.short_name}
                       onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
                       placeholder="e.g. Man Utd"
+                      className="rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className={getFormLabelClass(['three_letter_name', 'three_letter'])}>
                       3-Letter Code (3N)
                     </label>
                     <Input
@@ -894,14 +1056,14 @@ export default function RecordDetailModal({
                       onChange={(e) => setFormData({ ...formData, three_letter_name: e.target.value.toUpperCase() })}
                       placeholder="e.g. MUN"
                       maxLength={3}
-                      className="font-mono uppercase"
+                      className="font-mono uppercase rounded-lg"
                     />
                   </div>
                 </div>
 
                 {(isClub || type === 'club' || type === EntityType.CLUB) && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className={getFormLabelClass(['six_letter_name', 'six_letter'])}>
                       6-Letter Code (6N)
                     </label>
                     <Input
@@ -909,7 +1071,7 @@ export default function RecordDetailModal({
                       onChange={(e) => setFormData({ ...formData, six_letter_name: e.target.value })}
                       placeholder="e.g. MANUTD"
                       maxLength={6}
-                      className="font-mono"
+                      className="font-mono rounded-lg"
                     />
                   </div>
                 )}
@@ -918,32 +1080,32 @@ export default function RecordDetailModal({
 
             {/* Competition Colors with interactive live preview */}
             {isComp && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-3">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-3.5 space-y-3">
                 <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                   <BgColorsOutlined className="text-amber-500" /> Competition Colors (RGB Format: R G B)
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    <label className={getFormLabelClass(['bg_color', 'background_color'])}>
                       Background Color (BG)
                     </label>
                     <Input
                       value={formData.bg_color}
                       onChange={(e) => setFormData({ ...formData, bg_color: e.target.value })}
                       placeholder="e.g. 0 51 102"
-                      className="font-mono text-xs"
+                      className="font-mono text-xs rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    <label className={getFormLabelClass(['fg_color', 'foreground_color'])}>
                       Foreground Color (FG)
                     </label>
                     <Input
                       value={formData.fg_color}
                       onChange={(e) => setFormData({ ...formData, fg_color: e.target.value })}
                       placeholder="e.g. 255 255 255"
-                      className="font-mono text-xs"
+                      className="font-mono text-xs rounded-lg"
                     />
                   </div>
                 </div>
@@ -969,13 +1131,14 @@ export default function RecordDetailModal({
             {/* Competition Categories */}
             {isComp && (
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className={getFormLabelClass(['categories', 'category'])}>
                   Categories (comma-separated)
                 </label>
                 <Input
                   value={formData.categories}
                   onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
                   placeholder="e.g. NATIONAL_TEAM,CONTINENTAL"
+                  className="rounded-lg"
                 />
               </div>
             )}
@@ -983,14 +1146,14 @@ export default function RecordDetailModal({
             {/* Competition Parent ID */}
             {isComp && (
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className={getFormLabelClass(['parent_id', 'parent'])}>
                   Parent Competition ID (COMP_PARENT_ID)
                 </label>
                 <Input
                   value={formData.parent_id || ''}
                   onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
                   placeholder="e.g. 1301416 (Leave blank if none)"
-                  className="font-mono text-xs"
+                  className="font-mono text-xs rounded-lg"
                 />
                 <span className="text-[11px] text-slate-400 mt-0.5 block">
                   Assign this competition as a sub-stage or sub-competition of another parent competition.
@@ -1028,7 +1191,7 @@ export default function RecordDetailModal({
                 value={formData.note}
                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                 placeholder="Optional notes or details..."
-                className="text-xs"
+                className="text-xs rounded-lg"
               />
             </div>
           </form>

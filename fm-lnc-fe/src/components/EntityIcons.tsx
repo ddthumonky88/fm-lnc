@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Trophy, Shield, Flag, MapPin, Award } from 'lucide-react';
+import { Trophy, Shield, Flag, Award, Globe, Building2 } from 'lucide-react';
 
 export interface EntityIconProps {
   size?: number | string;
@@ -10,7 +10,51 @@ export interface EntityIconProps {
 }
 
 /**
- * 1. StadiumIcon: An oval arena / football stadium with bowl & pitch
+ * 1. NationIcon: Country flag
+ */
+export function NationIcon({ size = 18, className = '', style }: EntityIconProps) {
+  return (
+    <Flag
+      size={size}
+      className={`inline-block shrink-0 ${className}`}
+      style={{ verticalAlign: 'middle', ...style }}
+    />
+  );
+}
+
+/**
+ * 2. IntCompIcon: Globe for International Competitions
+ */
+export function IntCompIcon({ size = 18, className = '', style }: EntityIconProps) {
+  return (
+    <Globe
+      size={size}
+      className={`inline-block shrink-0 ${className}`}
+      style={{ verticalAlign: 'middle', ...style }}
+    />
+  );
+}
+
+/**
+ * 3. DomesticCompIcon: Trophy cup for Domestic Competitions
+ */
+export function DomesticCompIcon({ size = 18, className = '', style }: EntityIconProps) {
+  return (
+    <Trophy
+      size={size}
+      className={`inline-block shrink-0 ${className}`}
+      style={{ verticalAlign: 'middle', ...style }}
+    />
+  );
+}
+
+/**
+ * CompIcon: General competition trophy (backward compatibility)
+ */
+export const CompIcon = DomesticCompIcon;
+
+/**
+ * 4. StadiumIcon: An oval arena / football stadium with bowl & pitch
  */
 export function StadiumIcon({ size = 18, className = '', style }: EntityIconProps) {
   return (
@@ -34,11 +78,11 @@ export function StadiumIcon({ size = 18, className = '', style }: EntityIconProp
 }
 
 /**
- * 2. CompIcon: Trophy cup for competitions
+ * 5. CityIcon: Urban buildings / skyline for City
  */
-export function CompIcon({ size = 18, className = '', style }: EntityIconProps) {
+export function CityIcon({ size = 18, className = '', style }: EntityIconProps) {
   return (
-    <Trophy
+    <Building2
       size={size}
       className={`inline-block shrink-0 ${className}`}
       style={{ verticalAlign: 'middle', ...style }}
@@ -47,7 +91,7 @@ export function CompIcon({ size = 18, className = '', style }: EntityIconProps) 
 }
 
 /**
- * 3. ClubIcon: Football club shield emblem
+ * 6. ClubIcon: Football club shield emblem
  */
 export function ClubIcon({ size = 18, className = '', style }: EntityIconProps) {
   return (
@@ -60,33 +104,7 @@ export function ClubIcon({ size = 18, className = '', style }: EntityIconProps) 
 }
 
 /**
- * 4. NationIcon: Country flag
- */
-export function NationIcon({ size = 18, className = '', style }: EntityIconProps) {
-  return (
-    <Flag
-      size={size}
-      className={`inline-block shrink-0 ${className}`}
-      style={{ verticalAlign: 'middle', ...style }}
-    />
-  );
-}
-
-/**
- * 5. CityIcon: Location map pin
- */
-export function CityIcon({ size = 18, className = '', style }: EntityIconProps) {
-  return (
-    <MapPin
-      size={size}
-      className={`inline-block shrink-0 ${className}`}
-      style={{ verticalAlign: 'middle', ...style }}
-    />
-  );
-}
-
-/**
- * 6. AwardIcon: Rosette ribbon medal for national & competition awards
+ * 7. AwardIcon: Rosette ribbon medal for national & competition awards
  */
 export function AwardIcon({ size = 18, className = '', style }: EntityIconProps) {
   return (
