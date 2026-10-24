@@ -1,10 +1,9 @@
 import { Controller, Get, Post, Param, Query, Body, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { HierarchyService } from './hierarchy.service';
 import {
   PageableQueryDto,
   SearchFilterDto,
-  PaginationQueryDto,
   NationListFilterDto,
   CompetitionListFilterDto,
   IndependentClubFilterDto,
@@ -23,13 +22,13 @@ export class HierarchyController {
     schema: {
       type: 'array',
       example: [
-        { id: '1', name: 'Africa', totalNations: 57, totalIntComps: 23 },
-        { id: '2', name: 'Asia', totalNations: 47, totalIntComps: 38 },
-        { id: '3', name: 'Europe', totalNations: 56, totalIntComps: 31 },
-        { id: '4', name: 'North America', totalNations: 43, totalIntComps: 20 },
-        { id: '5', name: 'Oceania', totalNations: 15, totalIntComps: 9 },
-        { id: '6', name: 'South America', totalNations: 10, totalIntComps: 12 },
-        { id: '7', name: 'World', totalNations: 22, totalIntComps: 31 },
+        { id: '1', name: 'Africa', stats: { nations: 57, intComps: 23 } },
+        { id: '2', name: 'Asia', stats: { nations: 47, intComps: 38 } },
+        { id: '3', name: 'Europe', stats: { nations: 56, intComps: 31 } },
+        { id: '4', name: 'North America', stats: { nations: 43, intComps: 20 } },
+        { id: '5', name: 'Oceania', stats: { nations: 15, intComps: 9 } },
+        { id: '6', name: 'South America', stats: { nations: 10, intComps: 12 } },
+        { id: '7', name: 'World', stats: { nations: 22, intComps: 31 } },
       ],
     },
   })
@@ -53,12 +52,14 @@ export class HierarchyController {
           short_name: 'England',
           three_letter_name: 'ENG',
           confederation_id: '1',
-          totalComps: 14,
-          totalClubs: 450,
-          totalStadiums: 65,
-          totalCities: 110,
-          totalAwards: 25,
-          totalChildren: 664,
+          stats: {
+            comps: 14,
+            clubs: 450,
+            stadiums: 65,
+            cities: 110,
+            awards: 25,
+            children: 664,
+          },
         },
       ],
     },
@@ -359,13 +360,15 @@ export class HierarchyController {
       example: {
         id: '1',
         name: 'Europe (UEFA)',
-        totalNations: 55,
-        totalIntComps: 12,
-        totalComps: 420,
-        totalClubs: 6500,
-        totalStadiums: 980,
-        totalCities: 620,
-        totalAwards: 180,
+        stats: {
+          nations: 55,
+          intComps: 12,
+          comps: 420,
+          clubs: 6500,
+          stadiums: 980,
+          cities: 620,
+          awards: 180,
+        },
       },
     },
   })

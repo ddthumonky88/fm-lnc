@@ -20,6 +20,15 @@ import {
   IndependentClubFilterDto,
   CityFilterDto,
 } from './dto/pagination.dto';
+import {
+  mapNation,
+  mapCompetition,
+  mapClub,
+  mapCity,
+  mapStadium,
+  mapAward,
+  mapNationRef,
+} from '../common/entity-mapper';
 
 @Injectable()
 export class HierarchyService {
@@ -48,7 +57,7 @@ export class HierarchyService {
     const results = await Promise.all(
       confeds.map(async (c) => {
         const totalNations = await this.nationRepo.count({
-          where: { confederation_id: String(c.id) },
+          where: { confed_id: String(c.id) },
         });
 
         // Count international competitions for this confederation
@@ -61,8 +70,10 @@ export class HierarchyService {
         return {
           id: String(c.id),
           name: c.name,
-          totalNations,
-          totalIntComps,
+          stats: {
+            nations: totalNations,
+            intComps: totalIntComps,
+          },
         };
       }),
     );
@@ -71,45 +82,43 @@ export class HierarchyService {
   }
 
   async getNationsByContinent(confedId: string, filter?: PaginationQueryDto) {
-    let whereClause = 'n.confederation_id = $1';
+    let whereClause = 'n.confed_id = $1';
     const params: any[] = [String(confedId)];
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(n.long_name) LIKE $${params.length} OR LOWER(COALESCE(n.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(n.three_letter_name, '')) LIKE $${params.length} OR CAST(n.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(n.name_lg) LIKE $${params.length} OR LOWER(COALESCE(n.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(n.name_3l, '')) LIKE $${params.length} OR CAST(n.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.nationRepo.query(
-      `SELECT n.id, n.long_name, n.short_name, n.three_letter_name, n.confederation_id,
+      `SELECT n.id, n.name_lg, n.name_sh, n.name_3l, n.confed_id, conf.name as confed_name,
         (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id AND (c.parent_id IS NULL OR c.parent_id = ''))::int as total_comps,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.nation_id = n.id)::int as total_clubs,
         (SELECT COUNT(*) FROM stadiums s WHERE s.nation_id = n.id)::int as total_stadiums,
-        (SELECT COUNT(*) FROM cities ci WHERE ci.country_id = n.id)::int as total_cities,
+        (SELECT COUNT(*) FROM cities ci WHERE ci.nation_id = n.id)::int as total_cities,
         (SELECT COUNT(*) FROM awards a WHERE a.nation_id = n.id AND a.comp_id IS NULL)::int as total_awards
       FROM nations n
+      LEFT JOIN confederations conf ON conf.id = n.confed_id
       WHERE ${whereClause}
-      ORDER BY n.long_name ASC;`,
+      ORDER BY n.name_lg ASC;`,
       params,
     );
 
-    const items = raw.map((r: any) => ({
-      id: String(r.id),
-      long_name: r.long_name,
-      short_name: r.short_name,
-      three_letter_name: r.three_letter_name,
-      confederation_id: r.confederation_id ? String(r.confederation_id) : null,
-      totalComps: r.total_comps || 0,
-      totalClubs: r.total_clubs || 0,
-      totalStadiums: r.total_stadiums || 0,
-      totalCities: r.total_cities || 0,
-      totalAwards: r.total_awards || 0,
-      totalChildren:
-        (r.total_comps || 0) +
-        (r.total_clubs || 0) +
-        (r.total_stadiums || 0) +
-        (r.total_cities || 0) +
-        (r.total_awards || 0),
-    }));
+    const items = raw.map((r: any) =>
+      mapNation(r, {
+        comps: r.total_comps || 0,
+        clubs: r.total_clubs || 0,
+        stadiums: r.total_stadiums || 0,
+        cities: r.total_cities || 0,
+        awards: r.total_awards || 0,
+        children:
+          (r.total_comps || 0) +
+          (r.total_clubs || 0) +
+          (r.total_stadiums || 0) +
+          (r.total_cities || 0) +
+          (r.total_awards || 0),
+      }),
+    );
 
     return paginateAndSort(items, filter);
   }
@@ -120,50 +129,35 @@ export class HierarchyService {
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
-        n.three_letter_name as nation_three_letter,
-        n.long_name as nation_name,
-        p.long_name as parent_long_name,
-        p.short_name as parent_short_name,
+        conf.name as confed_name,
+        n.name_3l as nation_three_letter,
+        n.name_lg as nation_long_name,
+        n.name_sh as nation_short_name,
+        p.name_lg as parent_long_name,
+        p.name_sh as parent_short_name,
+        p.name_3l as parent_three_letter,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
       FROM competitions c
+      LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
+      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
-    const items = raw.map((r: any) => ({
-      id: String(r.id),
-      long_name: r.long_name,
-      short_name: r.short_name,
-      three_letter_name: r.three_letter_name,
-      fg_color: r.fg_color,
-      bg_color: r.bg_color,
-      confed_id: r.confed_id ? String(r.confed_id) : null,
-      nation_id: r.nation_id ? String(r.nation_id) : null,
-      nation_name: r.nation_name,
-      nation_three_letter: r.nation_three_letter,
-      parent_id: r.parent_id ? String(r.parent_id) : null,
-      parent_name: r.parent_short_name || r.parent_long_name || null,
-      parent_long_name: r.parent_long_name || null,
-      parent_short_name: r.parent_short_name || null,
-      categories: r.categories,
-      is_international: r.is_international,
-      note: r.note,
-      inactive_fields: r.inactive_fields,
-      clubsCount: r.clubs_count || 0,
-      awardsCount: r.awards_count || 0,
-      childrenCount: r.children_count || 0,
-      totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
-    }));
+    const items = raw.map((r: any) =>
+      mapCompetition(r, {
+        children: (r.clubs_count || 0) + (r.awards_count || 0),
+      }),
+    );
 
     return paginateAndSort(items, filter);
   }
@@ -192,7 +186,7 @@ export class HierarchyService {
       this.clubRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
       this.clubRepo.count({ where: { nation_id: String(nationId) } }),
       this.stadiumRepo.count({ where: { nation_id: String(nationId) } }),
-      this.cityRepo.count({ where: { country_id: String(nationId) } }),
+      this.cityRepo.count({ where: { nation_id: String(nationId) } }),
       this.awardRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
     ]);
 
@@ -209,7 +203,15 @@ export class HierarchyService {
     const extraComps = (otherClubsCount > 0 ? 1 : 0) + (extinctClubsCount > 0 ? 1 : 0);
 
     return {
-      nation,
+      nation: mapNation(nation),
+      stats: {
+        domesticComps: domesticComps + extraComps,
+        independentClubs,
+        allClubs,
+        stadiums,
+        cities,
+        awards,
+      },
       counts: {
         domesticComps: domesticComps + extraComps,
         independentClubs,
@@ -223,57 +225,51 @@ export class HierarchyService {
 
   async getDomesticCompetitions(nationId: string, filter?: PaginationQueryDto) {
     const strNationId = String(nationId);
-    const nation = await this.nationRepo.findOne({ where: { id: strNationId } });
+    const nation = await this.nationRepo.findOne({
+      where: { id: strNationId },
+      relations: ['confederation'],
+    });
 
     let whereClause = `c.nation_id = $1 AND (c.parent_id IS NULL OR c.parent_id = '')`;
     const params: any[] = [strNationId];
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
-        n.three_letter_name as nation_three_letter,
-        n.long_name as nation_name,
-        p.long_name as parent_long_name,
-        p.short_name as parent_short_name,
+        conf.name as confed_name,
+        n.name_3l as nation_three_letter,
+        n.name_lg as nation_long_name,
+        n.name_sh as nation_short_name,
+        p.name_lg as parent_long_name,
+        p.name_sh as parent_short_name,
+        p.name_3l as parent_three_letter,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
       FROM competitions c
+      LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
+      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
-    const comps = raw.map((r: any) => ({
-      id: String(r.id),
-      long_name: r.long_name,
-      short_name: r.short_name,
-      three_letter_name: r.three_letter_name,
-      fg_color: r.fg_color,
-      bg_color: r.bg_color,
-      confed_id: r.confed_id ? String(r.confed_id) : null,
-      nation_id: r.nation_id ? String(r.nation_id) : null,
-      nation_name: r.nation_name || nation?.long_name,
-      nation_three_letter: r.nation_three_letter || nation?.three_letter_name,
-      parent_id: r.parent_id ? String(r.parent_id) : null,
-      parent_name: r.parent_short_name || r.parent_long_name || null,
-      parent_long_name: r.parent_long_name || null,
-      parent_short_name: r.parent_short_name || null,
-      categories: r.categories,
-      is_international: r.is_international,
-      note: r.note,
-      inactive_fields: r.inactive_fields,
-      clubsCount: r.clubs_count || 0,
-      awardsCount: r.awards_count || 0,
-      childrenCount: r.children_count || 0,
-      totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
-    }));
+    const comps = raw.map((r: any) =>
+      mapCompetition(
+        {
+          ...r,
+          nation: r.nation_id ? r.nation : nation,
+        },
+        {
+          children: (r.clubs_count || 0) + (r.awards_count || 0),
+        },
+      ),
+    );
 
     const countsRaw = await this.clubRepo.query(
       `SELECT
@@ -287,38 +283,49 @@ export class HierarchyService {
     const otherClubsCount = countsRaw[0]?.other_count || 0;
     const extinctClubsCount = countsRaw[0]?.extinct_count || 0;
 
+    const nationRef = mapNationRef(nation) || {
+      id: strNationId,
+      name_lg: null,
+      name_sh: null,
+      name_3l: null,
+    };
+
     const virtualOther = {
       id: '[OTHER]',
-      long_name: '[OTHER] Other Clubs',
-      short_name: 'Other Clubs',
-      three_letter_name: 'OTH',
+      name_lg: '[OTHER] Other Clubs',
+      name_sh: 'Other Clubs',
+      name_3l: 'OTH',
       categories: 'Other',
-      nation_id: strNationId,
-      nation_name: nation?.long_name,
-      nation_three_letter: nation?.three_letter_name,
+      nation: nationRef,
+      confed: null,
+      parent: null,
       is_virtual: true,
       virtual_type: 'OTHER',
       clubsCount: otherClubsCount,
       awardsCount: 0,
       childrenCount: 0,
-      totalChildren: otherClubsCount,
+      stats: {
+        children: otherClubsCount,
+      },
     };
 
     const virtualExtinct = {
       id: '[EXTINCT]',
-      long_name: '[EXTINCT] Extinct Clubs',
-      short_name: 'Extinct Clubs',
-      three_letter_name: 'EXT',
+      name_lg: '[EXTINCT] Extinct Clubs',
+      name_sh: 'Extinct Clubs',
+      name_3l: 'EXT',
       categories: 'Other',
-      nation_id: strNationId,
-      nation_name: nation?.long_name,
-      nation_three_letter: nation?.three_letter_name,
+      nation: nationRef,
+      confed: null,
+      parent: null,
       is_virtual: true,
       virtual_type: 'EXTINCT',
       clubsCount: extinctClubsCount,
       awardsCount: 0,
       childrenCount: 0,
-      totalChildren: extinctClubsCount,
+      stats: {
+        children: extinctClubsCount,
+      },
     };
 
     const virtualItems: any[] = [];
@@ -328,10 +335,10 @@ export class HierarchyService {
       return name.toLowerCase().includes(qTerm) || cat.toLowerCase().includes(qTerm);
     };
 
-    if (otherClubsCount > 0 && matchVirtual(virtualOther.long_name, virtualOther.categories)) {
+    if (otherClubsCount > 0 && matchVirtual(virtualOther.name_lg, virtualOther.categories)) {
       virtualItems.push(virtualOther);
     }
-    if (extinctClubsCount > 0 && matchVirtual(virtualExtinct.long_name, virtualExtinct.categories)) {
+    if (extinctClubsCount > 0 && matchVirtual(virtualExtinct.name_lg, virtualExtinct.categories)) {
       virtualItems.push(virtualExtinct);
     }
 
@@ -363,13 +370,13 @@ export class HierarchyService {
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(club.long_name) LIKE :term OR LOWER(COALESCE(club.short_name, \'\')) LIKE :term OR LOWER(COALESCE(club.three_letter_name, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
+        '(LOWER(club.name_lg) LIKE :term OR LOWER(COALESCE(club.name_sh, \'\')) LIKE :term OR LOWER(COALESCE(club.name_3l, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
         { term },
       );
     }
 
     const items = await qb.orderBy('club.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapClub), filter);
   }
 
   async getAllClubsInNation(nationId: string, filter?: PaginationQueryDto) {
@@ -383,13 +390,13 @@ export class HierarchyService {
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(club.long_name) LIKE :term OR LOWER(COALESCE(club.short_name, \'\')) LIKE :term OR LOWER(COALESCE(club.three_letter_name, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
+        '(LOWER(club.name_lg) LIKE :term OR LOWER(COALESCE(club.name_sh, \'\')) LIKE :term OR LOWER(COALESCE(club.name_3l, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
         { term },
       );
     }
 
     const items = await qb.orderBy('club.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapClub), filter);
   }
 
   async getClubsInCompetition(compId: string, filter?: PaginationQueryDto) {
@@ -402,13 +409,13 @@ export class HierarchyService {
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(club.long_name) LIKE :term OR LOWER(COALESCE(club.short_name, \'\')) LIKE :term OR LOWER(COALESCE(club.three_letter_name, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
+        '(LOWER(club.name_lg) LIKE :term OR LOWER(COALESCE(club.name_sh, \'\')) LIKE :term OR LOWER(COALESCE(club.name_3l, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
         { term },
       );
     }
 
     const items = await qb.orderBy('club.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapClub), filter);
   }
 
   async getStadiums(nationId: string, filter?: PaginationQueryDto) {
@@ -427,20 +434,20 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('stadium.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapStadium), filter);
   }
 
   async getCities(nationId: string, filter?: CityFilterDto) {
     const qb = this.cityRepo
       .createQueryBuilder('city')
       .leftJoinAndSelect('city.nation', 'nation')
-      .where('city.country_id = :nationId', { nationId: String(nationId) });
+      .where('city.nation_id = :nationId', { nationId: String(nationId) });
 
     if (filter?.category && filter.category !== 'all') {
       if (filter.category === '__uncategorized__') {
-        qb.andWhere('(city.categories IS NULL OR TRIM(city.categories) = \'\')');
+        qb.andWhere('(city.region IS NULL OR TRIM(city.region) = \'\')');
       } else {
-        qb.andWhere('city.categories = :cat', { cat: filter.category });
+        qb.andWhere('city.region = :cat', { cat: filter.category });
       }
     }
 
@@ -448,13 +455,13 @@ export class HierarchyService {
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(city.name) LIKE :term OR LOWER(COALESCE(city.categories, \'\')) LIKE :term OR CAST(city.id AS TEXT) LIKE :term)',
+        '(LOWER(city.name) LIKE :term OR LOWER(COALESCE(city.region, \'\')) LIKE :term OR CAST(city.id AS TEXT) LIKE :term)',
         { term },
       );
     }
 
     const items = await qb.orderBy('city.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapCity), filter);
   }
 
   async getAwardsByNation(nationId: string, filter?: PaginationQueryDto) {
@@ -468,13 +475,13 @@ export class HierarchyService {
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(award.long_name) LIKE :term OR LOWER(COALESCE(award.short_name, \'\')) LIKE :term OR CAST(award.id AS TEXT) LIKE :term)',
+        '(LOWER(award.name_lg) LIKE :term OR LOWER(COALESCE(award.name_sh, \'\')) LIKE :term OR CAST(award.id AS TEXT) LIKE :term)',
         { term },
       );
     }
 
     const items = await qb.orderBy('award.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapAward), filter);
   }
 
   async getAwardsByCompetition(compId: string, filter?: PaginationQueryDto) {
@@ -488,13 +495,13 @@ export class HierarchyService {
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(award.long_name) LIKE :term OR LOWER(COALESCE(award.short_name, \'\')) LIKE :term OR CAST(award.id AS TEXT) LIKE :term)',
+        '(LOWER(award.name_lg) LIKE :term OR LOWER(COALESCE(award.name_sh, \'\')) LIKE :term OR CAST(award.id AS TEXT) LIKE :term)',
         { term },
       );
     }
 
     const items = await qb.orderBy('award.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapAward), filter);
   }
 
   async getCompetitionInfo(compId: string) {
@@ -511,15 +518,17 @@ export class HierarchyService {
       this.awardRepo.count({ where: { comp_id: strId } }),
       this.compRepo.count({ where: { parent_id: strId } }),
     ]);
-    return {
-      ...comp,
-      parent_name: comp.parent?.short_name || comp.parent?.long_name || null,
-      parent_long_name: comp.parent?.long_name || null,
-      parent_short_name: comp.parent?.short_name || null,
-      clubsCount,
-      awardsCount,
-      childrenCount,
-    };
+    return mapCompetition(
+      {
+        ...comp,
+        clubsCount,
+        awardsCount,
+        childrenCount,
+      },
+      {
+        children: clubsCount + awardsCount,
+      },
+    );
   }
 
   async getSubCompetitions(compId: string, filter?: PaginationQueryDto) {
@@ -529,50 +538,35 @@ export class HierarchyService {
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
-        n.three_letter_name as nation_three_letter,
-        n.long_name as nation_name,
-        p.long_name as parent_long_name,
-        p.short_name as parent_short_name,
+        conf.name as confed_name,
+        n.name_3l as nation_three_letter,
+        n.name_lg as nation_long_name,
+        n.name_sh as nation_short_name,
+        p.name_lg as parent_long_name,
+        p.name_sh as parent_short_name,
+        p.name_3l as parent_three_letter,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
       FROM competitions c
+      LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
+      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
-    const items = raw.map((r: any) => ({
-      id: String(r.id),
-      long_name: r.long_name,
-      short_name: r.short_name,
-      three_letter_name: r.three_letter_name,
-      fg_color: r.fg_color,
-      bg_color: r.bg_color,
-      confed_id: r.confed_id ? String(r.confed_id) : null,
-      nation_id: r.nation_id ? String(r.nation_id) : null,
-      nation_name: r.nation_name,
-      nation_three_letter: r.nation_three_letter,
-      parent_id: r.parent_id ? String(r.parent_id) : null,
-      parent_name: r.parent_short_name || r.parent_long_name || null,
-      parent_long_name: r.parent_long_name || null,
-      parent_short_name: r.parent_short_name || null,
-      categories: r.categories,
-      is_international: r.is_international,
-      note: r.note,
-      inactive_fields: r.inactive_fields,
-      clubsCount: r.clubs_count || 0,
-      awardsCount: r.awards_count || 0,
-      childrenCount: r.children_count || 0,
-      totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
-    }));
+    const items = raw.map((r: any) =>
+      mapCompetition(r, {
+        children: (r.clubs_count || 0) + (r.awards_count || 0),
+      }),
+    );
 
     return paginateAndSort(items, filter);
   }
@@ -587,13 +581,13 @@ export class HierarchyService {
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.where(
-        '(LOWER(award.long_name) LIKE :term OR LOWER(COALESCE(award.short_name, \'\')) LIKE :term OR CAST(award.id AS TEXT) LIKE :term)',
+        '(LOWER(award.name_lg) LIKE :term OR LOWER(COALESCE(award.name_sh, \'\')) LIKE :term OR CAST(award.id AS TEXT) LIKE :term)',
         { term },
       );
     }
 
     const items = await qb.orderBy('award.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items.map(mapAward), filter);
   }
 
   async getPlayers(queryOrFilter?: any) {
@@ -642,47 +636,49 @@ export class HierarchyService {
     const params: any[] = [];
     if (filter.confedId) {
       params.push(String(filter.confedId));
-      whereClause += ` AND n.confederation_id = $${params.length}`;
+      whereClause += ` AND n.confed_id = $${params.length}`;
     }
     const searchKey = (filter.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(n.long_name) LIKE $${params.length} OR LOWER(COALESCE(n.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(n.three_letter_name, '')) LIKE $${params.length} OR CAST(n.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(n.name_lg) LIKE $${params.length} OR LOWER(COALESCE(n.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(n.name_3l, '')) LIKE $${params.length} OR CAST(n.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.nationRepo.query(
-      `SELECT n.id, n.long_name, n.short_name, n.three_letter_name, n.confederation_id, conf.name as confederation_name,
+      `SELECT n.id, n.name_lg, n.name_sh, n.name_3l, n.confed_id, conf.name as confederation_name,
         (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id)::int as total_comps,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.nation_id = n.id)::int as total_clubs,
         (SELECT COUNT(*) FROM stadiums s WHERE s.nation_id = n.id)::int as total_stadiums,
-        (SELECT COUNT(*) FROM cities ci WHERE ci.country_id = n.id)::int as total_cities,
+        (SELECT COUNT(*) FROM cities ci WHERE ci.nation_id = n.id)::int as total_cities,
         (SELECT COUNT(*) FROM awards a WHERE a.nation_id = n.id AND a.comp_id IS NULL)::int as total_awards
       FROM nations n
-      LEFT JOIN confederations conf ON n.confederation_id = conf.id
+      LEFT JOIN confederations conf ON n.confed_id = conf.id
       WHERE ${whereClause}
-      ORDER BY n.long_name ASC;`,
+      ORDER BY n.name_lg ASC;`,
       params,
     );
 
-    const items = raw.map((r: any) => ({
-      id: String(r.id),
-      long_name: r.long_name,
-      short_name: r.short_name,
-      three_letter_name: r.three_letter_name,
-      confederation_id: r.confederation_id ? String(r.confederation_id) : null,
-      confederation_name: r.confederation_name,
-      totalComps: r.total_comps || 0,
-      totalClubs: r.total_clubs || 0,
-      totalStadiums: r.total_stadiums || 0,
-      totalCities: r.total_cities || 0,
-      totalAwards: r.total_awards || 0,
-      totalChildren:
-        (r.total_comps || 0) +
-        (r.total_clubs || 0) +
-        (r.total_stadiums || 0) +
-        (r.total_cities || 0) +
-        (r.total_awards || 0),
-    }));
+    const items = raw.map((r: any) =>
+      mapNation(
+        {
+          ...r,
+          confed_name: r.confederation_name,
+        },
+        {
+          comps: r.total_comps || 0,
+          clubs: r.total_clubs || 0,
+          stadiums: r.total_stadiums || 0,
+          cities: r.total_cities || 0,
+          awards: r.total_awards || 0,
+          children:
+            (r.total_comps || 0) +
+            (r.total_clubs || 0) +
+            (r.total_stadiums || 0) +
+            (r.total_cities || 0) +
+            (r.total_awards || 0),
+        },
+      ),
+    );
 
     return paginateAndSort(items, filter);
   }
@@ -723,16 +719,18 @@ export class HierarchyService {
     const searchKey = (filter.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
         conf.name as confed_name,
-        n.long_name as nation_name,
-        n.three_letter_name as nation_three_letter,
-        p.long_name as parent_long_name,
-        p.short_name as parent_short_name,
+        n.name_lg as nation_long_name,
+        n.name_sh as nation_short_name,
+        n.name_3l as nation_three_letter,
+        p.name_lg as parent_long_name,
+        p.name_sh as parent_short_name,
+        p.name_3l as parent_three_letter,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
         (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
@@ -741,35 +739,15 @@ export class HierarchyService {
       LEFT JOIN nations n ON c.nation_id = n.id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.long_name ASC;`,
+      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
-    const items = raw.map((r: any) => ({
-      id: String(r.id),
-      long_name: r.long_name,
-      short_name: r.short_name,
-      three_letter_name: r.three_letter_name,
-      fg_color: r.fg_color,
-      bg_color: r.bg_color,
-      confed_id: r.confed_id ? String(r.confed_id) : null,
-      confed_name: r.confed_name,
-      nation_id: r.nation_id ? String(r.nation_id) : null,
-      nation_name: r.nation_name,
-      nation_three_letter: r.nation_three_letter,
-      parent_id: r.parent_id ? String(r.parent_id) : null,
-      parent_name: r.parent_short_name || r.parent_long_name || null,
-      parent_long_name: r.parent_long_name || null,
-      parent_short_name: r.parent_short_name || null,
-      categories: r.categories,
-      is_international: r.is_international,
-      note: r.note,
-      inactive_fields: r.inactive_fields,
-      clubsCount: r.clubs_count || 0,
-      awardsCount: r.awards_count || 0,
-      childrenCount: r.children_count || 0,
-      totalChildren: (r.clubs_count || 0) + (r.awards_count || 0),
-    }));
+    const items = raw.map((r: any) =>
+      mapCompetition(r, {
+        children: (r.clubs_count || 0) + (r.awards_count || 0),
+      }),
+    );
 
     return paginateAndSort(items, filter);
   }
@@ -783,7 +761,7 @@ export class HierarchyService {
 
     const [totalNations, totalIntComps, totalComps, totalClubs, totalStadiums, totalCities, totalAwards] =
       await Promise.all([
-        this.nationRepo.count({ where: { confederation_id: strId } }),
+        this.nationRepo.count({ where: { confed_id: strId } }),
         this.compRepo
           .createQueryBuilder('comp')
           .where('comp.confed_id = :cid', { cid: strId })
@@ -793,39 +771,41 @@ export class HierarchyService {
         this.compRepo
           .createQueryBuilder('comp')
           .leftJoin('comp.nation', 'nation')
-          .where('comp.confed_id = :cid OR nation.confederation_id = :cid', { cid: strId })
+          .where('comp.confed_id = :cid OR nation.confed_id = :cid', { cid: strId })
           .getCount(),
         this.clubRepo
           .createQueryBuilder('club')
           .innerJoin('club.nation', 'nation')
-          .where('nation.confederation_id = :cid', { cid: strId })
+          .where('nation.confed_id = :cid', { cid: strId })
           .getCount(),
         this.stadiumRepo
           .createQueryBuilder('stadium')
           .innerJoin('stadium.nation', 'nation')
-          .where('nation.confederation_id = :cid', { cid: strId })
+          .where('nation.confed_id = :cid', { cid: strId })
           .getCount(),
         this.cityRepo
           .createQueryBuilder('city')
           .innerJoin('city.nation', 'nation')
-          .where('nation.confederation_id = :cid', { cid: strId })
+          .where('nation.confed_id = :cid', { cid: strId })
           .getCount(),
         this.awardRepo
           .createQueryBuilder('award')
           .innerJoin('award.nation', 'nation')
-          .where('nation.confederation_id = :cid', { cid: strId })
+          .where('nation.confed_id = :cid', { cid: strId })
           .getCount(),
       ]);
 
     return {
       ...confed,
-      totalNations,
-      totalIntComps,
-      totalComps,
-      totalClubs,
-      totalStadiums,
-      totalCities,
-      totalAwards,
+      stats: {
+        nations: totalNations,
+        intComps: totalIntComps,
+        comps: totalComps,
+        clubs: totalClubs,
+        stadiums: totalStadiums,
+        cities: totalCities,
+        awards: totalAwards,
+      },
     };
   }
 
@@ -865,27 +845,23 @@ export class HierarchyService {
       this.clubRepo.count({ where: { nation_id: strId, is_extinct: true } }),
       this.clubRepo.count({ where: { nation_id: strId } }),
       this.stadiumRepo.count({ where: { nation_id: strId } }),
-      this.cityRepo.count({ where: { country_id: strId } }),
+      this.cityRepo.count({ where: { nation_id: strId } }),
       this.awardRepo.count({ where: { nation_id: strId, comp_id: IsNull() } }),
       this.awardRepo.count({ where: { nation_id: strId } }),
     ]);
 
-    return {
-      ...nation,
-      confederation_name: nation.confederation?.name || null,
-      counts: {
-        domesticComps: domesticComps + 2, // +2 cho [OTHER] và [EXTINCT]
-        parentComps: domesticComps,
-        totalComps,
-        independentClubs,
-        extinctClubs,
-        allClubs,
-        stadiums,
-        cities,
-        awards,
-        totalAwards,
-      },
-    };
+    return mapNation(nation, {
+      domesticComps: domesticComps + 2, // +2 cho [OTHER] và [EXTINCT]
+      parentComps: domesticComps,
+      comps: totalComps,
+      independentClubs,
+      extinctClubs,
+      clubs: allClubs,
+      stadiums,
+      cities,
+      awards,
+      totalAwards,
+    });
   }
 
   async getClubInfo(clubId: string) {
@@ -898,14 +874,7 @@ export class HierarchyService {
       throw new NotFoundException(`Club with ID ${clubId} not found`);
     }
 
-    return {
-      ...club,
-      competition_name: club.competition?.short_name || club.competition?.long_name || null,
-      parent_competition_name:
-        club.competition?.parent?.short_name || club.competition?.parent?.long_name || null,
-      nation_name: club.nation?.long_name || null,
-      nation_three_letter: club.nation?.three_letter_name || null,
-    };
+    return mapClub(club);
   }
 
   async getCityInfo(cityId: string) {
@@ -918,11 +887,7 @@ export class HierarchyService {
       throw new NotFoundException(`City with ID ${cityId} not found`);
     }
 
-    return {
-      ...city,
-      nation_name: city.nation?.long_name || null,
-      nation_three_letter: city.nation?.three_letter_name || null,
-    };
+    return mapCity(city);
   }
 
   async getAwardInfo(awardId: string) {
@@ -935,12 +900,7 @@ export class HierarchyService {
       throw new NotFoundException(`Award with ID ${awardId} not found`);
     }
 
-    return {
-      ...award,
-      nation_name: award.nation?.long_name || null,
-      nation_three_letter: award.nation?.three_letter_name || null,
-      competition_name: award.competition?.short_name || award.competition?.long_name || null,
-    };
+    return mapAward(award);
   }
 
   async getStadiumInfo(stadiumId: string) {
@@ -953,11 +913,7 @@ export class HierarchyService {
       throw new NotFoundException(`Stadium with ID ${stadiumId} not found`);
     }
 
-    return {
-      ...stadium,
-      nation_name: stadium.nation?.long_name || null,
-      nation_three_letter: stadium.nation?.three_letter_name || null,
-    };
+    return mapStadium(stadium);
   }
 
   async getEntityInfo(type: string, id: string) {

@@ -100,12 +100,12 @@ export class LncParserService {
 
       // 1. Confederations
       const confeds = [
-        [1, 'Africa'],
-        [2, 'Asia'],
-        [3, 'Europe'],
-        [4, 'North America'],
-        [5, 'Oceania'],
-        [6, 'South America'],
+        [1, 'CAF'],
+        [2, 'AFC'],
+        [3, 'UEFA'],
+        [4, 'CONCACAF'],
+        [5, 'OFC'],
+        [6, 'CONMEBOL'],
         [7, 'World'],
       ];
       for (const [id, name] of confeds) {
@@ -225,13 +225,13 @@ export class LncParserService {
           : null;
 
         await queryRunner.query(
-          `INSERT INTO nations (id, long_name, short_name, three_letter_name, confederation_id, inactive_fields)
+          `INSERT INTO nations (id, name_lg, name_sh, name_3l, confed_id, inactive_fields)
            VALUES ($1, $2, $3, $4, $5, $6)
            ON CONFLICT (id) DO UPDATE SET
-             long_name = EXCLUDED.long_name,
-             short_name = EXCLUDED.short_name,
-             three_letter_name = EXCLUDED.three_letter_name,
-             confederation_id = EXCLUDED.confederation_id,
+             name_lg = EXCLUDED.name_lg,
+             name_sh = EXCLUDED.name_sh,
+             name_3l = EXCLUDED.name_3l,
+             confed_id = EXCLUDED.confed_id,
              inactive_fields = EXCLUDED.inactive_fields`,
           [id, lName, sName, code, cid, inactStr],
         );
@@ -251,12 +251,12 @@ export class LncParserService {
           : null;
 
         await queryRunner.query(
-          `INSERT INTO cities (id, name, country_id, categories, inactive_fields)
+          `INSERT INTO cities (id, name, nation_id, region, inactive_fields)
            VALUES ($1, $2, $3, $4, $5)
            ON CONFLICT (id) DO UPDATE SET
              name = EXCLUDED.name,
-             country_id = EXCLUDED.country_id,
-             categories = EXCLUDED.categories,
+             nation_id = EXCLUDED.nation_id,
+             region = EXCLUDED.region,
              inactive_fields = EXCLUDED.inactive_fields`,
           [id, cdata.name, natId, cdata.cat, inactStr],
         );
@@ -425,12 +425,12 @@ export class LncParserService {
           : null;
 
         await queryRunner.query(
-          `INSERT INTO competitions (id, long_name, short_name, three_letter_name, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields, parent_id)
+          `INSERT INTO competitions (id, name_lg, name_sh, name_3l, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields, parent_id)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
            ON CONFLICT (id) DO UPDATE SET
-             long_name = EXCLUDED.long_name,
-             short_name = EXCLUDED.short_name,
-             three_letter_name = EXCLUDED.three_letter_name,
+             name_lg = EXCLUDED.name_lg,
+             name_sh = EXCLUDED.name_sh,
+             name_3l = EXCLUDED.name_3l,
              fg_color = EXCLUDED.fg_color,
              bg_color = EXCLUDED.bg_color,
              confed_id = EXCLUDED.confed_id,
@@ -460,11 +460,11 @@ export class LncParserService {
           : null;
 
         await queryRunner.query(
-          `INSERT INTO awards (id, long_name, short_name, nation_id, comp_id, inactive_fields)
+          `INSERT INTO awards (id, name_lg, name_sh, nation_id, comp_id, inactive_fields)
            VALUES ($1, $2, $3, $4, $5, $6)
            ON CONFLICT (id) DO UPDATE SET
-             long_name = EXCLUDED.long_name,
-             short_name = EXCLUDED.short_name,
+             name_lg = EXCLUDED.name_lg,
+             name_sh = EXCLUDED.name_sh,
              nation_id = EXCLUDED.nation_id,
              comp_id = EXCLUDED.comp_id,
              inactive_fields = EXCLUDED.inactive_fields`,
@@ -580,13 +580,13 @@ export class LncParserService {
           Boolean(lName?.toLowerCase().includes('extinct'));
 
         await queryRunner.query(
-          `INSERT INTO clubs (id, long_name, short_name, six_letter_name, three_letter_name, nation_id, comp_id, note, inactive_fields, is_extinct)
+          `INSERT INTO clubs (id, name_lg, name_sh, name_6l, name_3l, nation_id, comp_id, note, inactive_fields, is_extinct)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
            ON CONFLICT (id) DO UPDATE SET
-             long_name = EXCLUDED.long_name,
-             short_name = EXCLUDED.short_name,
-             six_letter_name = EXCLUDED.six_letter_name,
-             three_letter_name = EXCLUDED.three_letter_name,
+             name_lg = EXCLUDED.name_lg,
+             name_sh = EXCLUDED.name_sh,
+             name_6l = EXCLUDED.name_6l,
+             name_3l = EXCLUDED.name_3l,
              nation_id = EXCLUDED.nation_id,
              comp_id = EXCLUDED.comp_id,
              note = EXCLUDED.note,
@@ -602,14 +602,13 @@ export class LncParserService {
         const inactStr = sdata.inactive ? 'name' : null;
 
         await queryRunner.query(
-          `INSERT INTO stadiums (id, name, nation_id, note, inactive_fields)
-           VALUES ($1, $2, $3, $4, $5)
+          `INSERT INTO stadiums (id, name, nation_id, inactive_fields)
+           VALUES ($1, $2, $3, $4)
            ON CONFLICT (id) DO UPDATE SET
              name = EXCLUDED.name,
              nation_id = EXCLUDED.nation_id,
-             note = EXCLUDED.note,
              inactive_fields = EXCLUDED.inactive_fields`,
-          [id, sdata.name, natId, sdata.note || null, inactStr],
+          [id, sdata.name, natId, inactStr],
         );
       }
 

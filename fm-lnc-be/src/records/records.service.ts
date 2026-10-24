@@ -12,7 +12,50 @@ import {
   Stage,
 } from '../entities';
 
+function normalizeInputData(data: any): any {
+  if (!data || typeof data !== 'object') return data;
+  const d = { ...data };
+  if (d.long_name !== undefined && d.name_lg === undefined) d.name_lg = d.long_name;
+  if (d.name_lg !== undefined && d.long_name === undefined) d.long_name = d.name_lg;
+
+  if (d.short_name !== undefined && d.name_sh === undefined) d.name_sh = d.short_name;
+  if (d.name_sh !== undefined && d.short_name === undefined) d.short_name = d.name_sh;
+
+  if (d.six_letter_name !== undefined && d.name_6l === undefined) d.name_6l = d.six_letter_name;
+  if (d.name_6l !== undefined && d.six_letter_name === undefined) d.six_letter_name = d.name_6l;
+
+  if (d.three_letter_name !== undefined && d.name_3l === undefined) d.name_3l = d.three_letter_name;
+  if (d.name_3l !== undefined && d.three_letter_name === undefined) d.three_letter_name = d.name_3l;
+
+  if (d.categories !== undefined && d.region === undefined) d.region = d.categories;
+  if (d.region !== undefined && d.categories === undefined) d.categories = d.region;
+
+  if (d.confederation_id !== undefined && d.confed_id === undefined) d.confed_id = d.confederation_id;
+  if (d.country_id !== undefined && d.nation_id === undefined) d.nation_id = d.country_id;
+
+  if (d.nation && typeof d.nation === 'object' && d.nation.id) {
+    d.nation_id = d.nation.id;
+  }
+  if (d.confed && typeof d.confed === 'object' && d.confed.id) {
+    d.confed_id = d.confed.id;
+  }
+  if (d.comp && typeof d.comp === 'object' && d.comp.id) {
+    d.comp_id = d.comp.id;
+  }
+  if (d.parent && typeof d.parent === 'object' && d.parent.id) {
+    d.parent_id = d.parent.id;
+  }
+
+  if (d.nation_id !== undefined) d.nation_id = d.nation_id ? String(d.nation_id) : null;
+  if (d.confed_id !== undefined) d.confed_id = d.confed_id ? String(d.confed_id) : null;
+  if (d.comp_id !== undefined) d.comp_id = d.comp_id ? String(d.comp_id) : null;
+  if (d.parent_id !== undefined) d.parent_id = d.parent_id ? String(d.parent_id) : null;
+
+  return d;
+}
+
 export enum RecordType {
+  NATION = 'nation',
   COMPETITION = 'competition',
   CLUB = 'club',
   STADIUM = 'stadium',
@@ -38,6 +81,9 @@ export class RecordsService {
 
   private getRepository(type: RecordType | string): Repository<any> {
     switch (type) {
+      case RecordType.NATION:
+      case 'nation':
+        return this.nationRepo;
       case RecordType.COMPETITION:
       case 'competition':
         return this.compRepo;
@@ -77,16 +123,14 @@ export class RecordsService {
 
   async createRecord(type: RecordType, data: any) {
     const repo = this.getRepository(type);
+    data = normalizeInputData(data);
     if (!data.id) {
       throw new BadRequestException('FM ID is required');
     }
     data.id = String(data.id);
-    if (data.nation_id !== undefined) data.nation_id = data.nation_id ? String(data.nation_id) : null;
-    if (data.confed_id !== undefined) data.confed_id = data.confed_id ? String(data.confed_id) : null;
-    if (data.confederation_id !== undefined) data.confederation_id = data.confederation_id ? String(data.confederation_id) : null;
-    if (data.country_id !== undefined) data.country_id = data.country_id ? String(data.country_id) : null;
-    if (data.comp_id !== undefined) data.comp_id = data.comp_id ? String(data.comp_id) : null;
-    if (data.parent_id !== undefined) data.parent_id = data.parent_id ? String(data.parent_id) : null;
+    if (type === RecordType.STADIUM) {
+      delete data.note;
+    }
 
     const existing = await repo.findOne({ where: { id: data.id } });
     if (existing) {
@@ -97,17 +141,15 @@ export class RecordsService {
 
   async updateRecord(type: RecordType, id: string, data: any) {
     const repo = this.getRepository(type);
+    data = normalizeInputData(data);
     const strId = String(id);
     const existing = await repo.findOne({ where: { id: strId } });
     if (!existing) {
       throw new NotFoundException(`${type} with ID ${id} not found`);
     }
-    if (data.nation_id !== undefined) data.nation_id = data.nation_id ? String(data.nation_id) : null;
-    if (data.confed_id !== undefined) data.confed_id = data.confed_id ? String(data.confed_id) : null;
-    if (data.confederation_id !== undefined) data.confederation_id = data.confederation_id ? String(data.confederation_id) : null;
-    if (data.country_id !== undefined) data.country_id = data.country_id ? String(data.country_id) : null;
-    if (data.comp_id !== undefined) data.comp_id = data.comp_id ? String(data.comp_id) : null;
-    if (data.parent_id !== undefined) data.parent_id = data.parent_id ? String(data.parent_id) : null;
+    if (type === RecordType.STADIUM) {
+      delete data.note;
+    }
 
     const updated = repo.merge(existing, data);
     return repo.save(updated);

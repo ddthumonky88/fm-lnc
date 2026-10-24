@@ -43,26 +43,26 @@ def seed():
 
     CREATE TABLE nations (
         id VARCHAR(64) PRIMARY KEY,
-        long_name VARCHAR(255) NOT NULL,
-        short_name VARCHAR(255) NOT NULL,
-        three_letter_name VARCHAR(50) NOT NULL,
-        confederation_id VARCHAR(64),
+        name_lg VARCHAR(255) NOT NULL,
+        name_sh VARCHAR(255) NOT NULL,
+        name_3l VARCHAR(50) NOT NULL,
+        confed_id VARCHAR(64),
         inactive_fields TEXT
     );
 
     CREATE TABLE cities (
         id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        country_id VARCHAR(64),
-        categories VARCHAR(255),
+        nation_id VARCHAR(64),
+        region VARCHAR(255),
         inactive_fields TEXT
     );
 
     CREATE TABLE competitions (
         id VARCHAR(64) PRIMARY KEY,
-        long_name VARCHAR(255) NOT NULL,
-        short_name VARCHAR(255) NOT NULL,
-        three_letter_name VARCHAR(50),
+        name_lg VARCHAR(255) NOT NULL,
+        name_sh VARCHAR(255) NOT NULL,
+        name_3l VARCHAR(50),
         fg_color VARCHAR(100),
         bg_color VARCHAR(100),
         confed_id VARCHAR(64),
@@ -76,10 +76,10 @@ def seed():
 
     CREATE TABLE clubs (
         id VARCHAR(64) PRIMARY KEY,
-        long_name VARCHAR(255) NOT NULL,
-        short_name VARCHAR(255) NOT NULL,
-        six_letter_name VARCHAR(50),
-        three_letter_name VARCHAR(50),
+        name_lg VARCHAR(255) NOT NULL,
+        name_sh VARCHAR(255) NOT NULL,
+        name_6l VARCHAR(50),
+        name_3l VARCHAR(50),
         nation_id VARCHAR(64),
         comp_id VARCHAR(64),
         note TEXT,
@@ -91,14 +91,13 @@ def seed():
         id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         nation_id VARCHAR(64),
-        note TEXT,
         inactive_fields TEXT
     );
 
     CREATE TABLE awards (
         id VARCHAR(64) PRIMARY KEY,
-        long_name VARCHAR(255) NOT NULL,
-        short_name VARCHAR(255) NOT NULL,
+        name_lg VARCHAR(255) NOT NULL,
+        name_sh VARCHAR(255) NOT NULL,
         nation_id VARCHAR(64),
         comp_id VARCHAR(64),
         inactive_fields TEXT
@@ -119,12 +118,12 @@ def seed():
 
     # 1. Confederations
     confeds = [
-        (1, 'Africa'),
-        (2, 'Asia'),
-        (3, 'Europe'),
-        (4, 'North America'),
-        (5, 'Oceania'),
-        (6, 'South America'),
+        (1, 'CAF'),
+        (2, 'AFC'),
+        (3, 'UEFA'),
+        (4, 'CONCACAF'),
+        (5, 'OFC'),
+        (6, 'CONMEBOL'),
         (7, 'World')
     ]
     execute_batch(cur, "INSERT INTO confederations (id, name) VALUES (%s, %s);", confeds)
@@ -240,7 +239,7 @@ def seed():
         name_to_nation_id[sname.upper()] = nid
 
     execute_batch(cur, """
-        INSERT INTO nations (id, long_name, short_name, three_letter_name, confederation_id, inactive_fields)
+        INSERT INTO nations (id, name_lg, name_sh, name_3l, confed_id, inactive_fields)
         VALUES (%s, %s, %s, %s, %s, %s);
     """, nations_batch, page_size=1000)
     conn.commit()
@@ -258,7 +257,7 @@ def seed():
         cities_batch.append((cid, cname, nat_id, cdata['category'], inact_str))
 
     execute_batch(cur, """
-        INSERT INTO cities (id, name, country_id, categories, inactive_fields)
+        INSERT INTO cities (id, name, nation_id, region, inactive_fields)
         VALUES (%s, %s, %s, %s, %s);
     """, cities_batch, page_size=1000)
     conn.commit()
@@ -447,7 +446,7 @@ def seed():
         comp_name_to_id[sname.lower()] = cid
 
     execute_batch(cur, """
-        INSERT INTO competitions (id, long_name, short_name, three_letter_name, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields, parent_id)
+        INSERT INTO competitions (id, name_lg, name_sh, name_3l, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields, parent_id)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """, comps_batch, page_size=1000)
     conn.commit()
@@ -465,7 +464,7 @@ def seed():
         awards_batch.append((aid, lname, sname, nat_id, comp_id, inact_str))
 
     execute_batch(cur, """
-        INSERT INTO awards (id, long_name, short_name, nation_id, comp_id, inactive_fields)
+        INSERT INTO awards (id, name_lg, name_sh, nation_id, comp_id, inactive_fields)
         VALUES (%s, %s, %s, %s, %s, %s);
     """, awards_batch, page_size=1000)
     conn.commit()
@@ -622,7 +621,7 @@ def seed():
         clubs_batch.append((cid, lname, sname, code6, code3, nat_id, comp_id, cdata.get('note'), inact_str, is_extinct))
 
     execute_batch(cur, """
-        INSERT INTO clubs (id, long_name, short_name, six_letter_name, three_letter_name, nation_id, comp_id, note, inactive_fields, is_extinct)
+        INSERT INTO clubs (id, name_lg, name_sh, name_6l, name_3l, nation_id, comp_id, note, inactive_fields, is_extinct)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """, clubs_batch, page_size=2000)
     conn.commit()
@@ -632,11 +631,11 @@ def seed():
         nat_id = code_to_nation_id.get(sdata.get('nation_code'))
         inact_set = sdata.get('inactive_fields')
         inact_str = ','.join(sorted(inact_set)) if inact_set else None
-        stadiums_batch.append((sid, sdata['name'], nat_id, sdata.get('note'), inact_str))
+        stadiums_batch.append((sid, sdata['name'], nat_id, inact_str))
 
     execute_batch(cur, """
-        INSERT INTO stadiums (id, name, nation_id, note, inactive_fields)
-        VALUES (%s, %s, %s, %s, %s);
+        INSERT INTO stadiums (id, name, nation_id, inactive_fields)
+        VALUES (%s, %s, %s, %s);
     """, stadiums_batch, page_size=2000)
     conn.commit()
 

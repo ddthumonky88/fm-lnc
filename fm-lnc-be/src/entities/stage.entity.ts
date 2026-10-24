@@ -1,5 +1,4 @@
 import { Entity, PrimaryColumn, Column } from 'typeorm';
-import { BigIntTransformer } from './transformer';
 
 @Entity('stages')
 export class Stage {

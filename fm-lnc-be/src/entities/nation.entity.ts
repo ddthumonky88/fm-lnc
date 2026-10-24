@@ -5,7 +5,6 @@ import { Competition } from './competition.entity';
 import { Club } from './club.entity';
 import { Stadium } from './stadium.entity';
 import { Award } from './award.entity';
-import { BigIntTransformer } from './transformer';
 
 @Entity('nations')
 export class Nation {
@@ -13,22 +12,22 @@ export class Nation {
   id: string;
 
   @Column({ type: 'varchar', length: 255 })
-  long_name: string;
+  name_lg: string;
 
   @Column({ type: 'varchar', length: 255 })
-  short_name: string;
+  name_sh: string;
 
   @Column({ type: 'varchar', length: 50 })
-  three_letter_name: string;
+  name_3l: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
-  confederation_id: string;
+  confed_id: string;
 
   @Column({ type: 'text', nullable: true })
   inactive_fields: string;
 
   @ManyToOne(() => Confederation, (confed) => confed.nations, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'confederation_id' })
+  @JoinColumn({ name: 'confed_id' })
   confederation: Confederation;
 
   @OneToMany(() => City, (city) => city.nation)

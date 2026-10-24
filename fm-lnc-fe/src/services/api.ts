@@ -115,9 +115,71 @@ function isApiEnvelope(body: unknown): body is ApiEnvelope {
   );
 }
 
+function normalizeEntityFields(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  if (Array.isArray(item)) {
+    item.forEach(normalizeEntityFields);
+    return item;
+  }
+  if (item.content && Array.isArray(item.content)) {
+    item.content.forEach(normalizeEntityFields);
+  }
+
+  // Stats normalization
+  if (item.stats && typeof item.stats === 'object') {
+    const s = item.stats;
+    if (s.nations !== undefined && item.totalNations === undefined) item.totalNations = s.nations;
+    if (s.intComps !== undefined && item.totalIntComps === undefined) item.totalIntComps = s.intComps;
+    if (s.comps !== undefined && item.totalComps === undefined) item.totalComps = s.comps;
+    if (s.clubs !== undefined && item.totalClubs === undefined) item.totalClubs = s.clubs;
+    if (s.stadiums !== undefined && item.totalStadiums === undefined) item.totalStadiums = s.stadiums;
+    if (s.cities !== undefined && item.totalCities === undefined) item.totalCities = s.cities;
+    if (s.awards !== undefined && item.totalAwards === undefined) item.totalAwards = s.awards;
+    if (s.children !== undefined && item.totalChildren === undefined) item.totalChildren = s.children;
+  }
+
+  // Name fields aliases
+  if (item.name_lg !== undefined && item.long_name === undefined) item.long_name = item.name_lg;
+  if (item.long_name !== undefined && item.name_lg === undefined) item.name_lg = item.long_name;
+  if (item.name_sh !== undefined && item.short_name === undefined) item.short_name = item.name_sh;
+  if (item.short_name !== undefined && item.name_sh === undefined) item.name_sh = item.short_name;
+  if (item.name_3l !== undefined && item.three_letter_name === undefined) item.three_letter_name = item.name_3l;
+  if (item.three_letter_name !== undefined && item.name_3l === undefined) item.name_3l = item.three_letter_name;
+  if (item.name_6l !== undefined && item.six_letter_name === undefined) item.six_letter_name = item.name_6l;
+  if (item.six_letter_name !== undefined && item.name_6l === undefined) item.name_6l = item.six_letter_name;
+
+  // City region / categories
+  if (item.region !== undefined && item.categories === undefined) item.categories = item.region;
+  if (item.categories !== undefined && item.region === undefined) item.region = item.categories;
+
+  // Confed / nation ID aliases
+  if (item.confed_id !== undefined && item.confederation_id === undefined) item.confederation_id = item.confed_id;
+  if (item.confederation_id !== undefined && item.confed_id === undefined) item.confed_id = item.confederation_id;
+  if (item.nation_id !== undefined && item.country_id === undefined) item.country_id = item.nation_id;
+  if (item.country_id !== undefined && item.nation_id === undefined) item.nation_id = item.country_id;
+
+  // Nested relations
+  if (item.confed && !item.confederation) item.confederation = item.confed;
+  if (item.confederation && !item.confed) item.confed = item.confederation;
+  if (item.confed) {
+    if (item.confed_name === undefined) item.confed_name = item.confed.name;
+    if (item.confederation_name === undefined) item.confederation_name = item.confed.name;
+  }
+  if (item.comp && !item.competition) item.competition = item.comp;
+  if (item.competition && !item.comp) item.comp = item.competition;
+
+  if (item.nation) normalizeEntityFields(item.nation);
+  if (item.competition) normalizeEntityFields(item.competition);
+  if (item.comp) normalizeEntityFields(item.comp);
+  if (item.parent) normalizeEntityFields(item.parent);
+
+  return item;
+}
+
 /** Bóc `data` ra khỏi envelope (nếu body không phải envelope thì trả nguyên body). */
 export function unwrapApiResponse<T>(body: unknown): T {
-  return (isApiEnvelope(body) ? body.data : body) as T;
+  const data = isApiEnvelope(body) ? body.data : body;
+  return normalizeEntityFields(data) as T;
 }
 
 /**
@@ -144,20 +206,38 @@ async function parseApiResponse<T = any>(res: Response, fallbackError: string): 
   return unwrapApiResponse<T>(body);
 }
 
+export interface EntityStats {
+  nations?: number;
+  intComps?: number;
+  comps?: number;
+  clubs?: number;
+  stadiums?: number;
+  cities?: number;
+  awards?: number;
+  children?: number;
+}
+
 export interface ConfederationItem {
   id: string;
   name: string;
-  totalNations: number;
-  totalIntComps: number;
+  totalNations?: number;
+  totalIntComps?: number;
+  stats?: EntityStats;
 }
 
 export interface NationItem {
   id: string;
+  name_lg?: string;
   long_name: string;
+  name_sh?: string;
   short_name: string;
+  name_3l?: string;
   three_letter_name: string;
+  confed_id?: string;
   confederation_id: string;
+  confed_name?: string;
   confederation_name?: string;
+  confed?: ConfederationItem;
   confederation?: ConfederationItem;
   totalChildren?: number;
   totalComps?: number;
@@ -165,12 +245,16 @@ export interface NationItem {
   totalStadiums?: number;
   totalCities?: number;
   totalAwards?: number;
+  stats?: EntityStats;
 }
 
 export interface CompetitionItem {
   id: string;
+  name_lg?: string;
   long_name: string;
+  name_sh?: string;
   short_name: string;
+  name_3l?: string;
   three_letter_name: string;
   fg_color?: string;
   bg_color?: string;
@@ -189,26 +273,34 @@ export interface CompetitionItem {
   note?: string;
   inactive_fields?: string;
   nation?: NationItem;
+  confed?: ConfederationItem;
   confederation?: ConfederationItem;
+  comp?: CompetitionItem;
   parent?: CompetitionItem;
   is_virtual?: boolean;
   virtual_type?: string;
   clubsCount?: number;
   awardsCount?: number;
   totalChildren?: number;
+  stats?: EntityStats;
 }
 
 export interface ClubItem {
   id: string;
+  name_lg?: string;
   long_name: string;
+  name_sh?: string;
   short_name: string;
+  name_6l?: string;
   six_letter_name?: string;
+  name_3l?: string;
   three_letter_name?: string;
   nation_id?: string;
   comp_id?: string;
   note?: string;
   is_extinct?: boolean;
   nation?: NationItem;
+  comp?: CompetitionItem;
   competition?: CompetitionItem;
 }
 
@@ -223,18 +315,23 @@ export interface StadiumItem {
 export interface CityItem {
   id: string;
   name: string;
+  nation_id?: string;
   country_id?: string;
+  region?: string;
   categories?: string;
   nation?: NationItem;
 }
 
 export interface AwardItem {
   id: string;
+  name_lg?: string;
   long_name: string;
+  name_sh?: string;
   short_name: string;
   nation_id?: string;
   comp_id?: string;
   nation?: NationItem;
+  comp?: CompetitionItem;
   competition?: CompetitionItem;
 }
 

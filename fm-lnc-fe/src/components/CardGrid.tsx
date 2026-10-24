@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pagination, Empty } from 'antd';
 import EntityCard from './EntityCard';
-import { EntityType, EntityTypeValue } from '../types';
+import { EntityTypeValue } from '../types';
 
 interface CardGridProps {
   items: any[];

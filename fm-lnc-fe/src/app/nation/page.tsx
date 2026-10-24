@@ -22,12 +22,9 @@ import {
   TrophyOutlined,
   SafetyOutlined,
   BankOutlined,
-  EnvironmentOutlined,
-  StarOutlined,
   AppstoreOutlined,
   UnorderedListOutlined,
   ApartmentOutlined,
-  FilterOutlined,
 } from '@ant-design/icons';
 import {
   fetchAllNations,

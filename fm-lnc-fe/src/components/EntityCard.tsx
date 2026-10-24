@@ -2,17 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag, Button, Space, Tooltip, Popconfirm, Badge, message } from 'antd';
+import { Tag, Button, Tooltip, Popconfirm, message } from 'antd';
 import {
-  TrophyOutlined,
   SafetyOutlined,
-  BankOutlined,
-  EnvironmentOutlined,
-  StarOutlined,
-  GlobalOutlined,
   EditOutlined,
   DeleteOutlined,
-  FileTextOutlined,
   UserOutlined,
   FlagOutlined,
   EyeOutlined,
@@ -29,7 +23,6 @@ import {
   NationIcon,
   IntCompIcon,
   DomesticCompIcon,
-  CompIcon,
   ClubIcon,
   StadiumIcon,
   CityIcon,

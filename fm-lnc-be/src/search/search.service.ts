@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   Nation,
   Competition,
@@ -11,6 +11,14 @@ import {
   Person,
   Stage,
 } from '../entities';
+import {
+  mapClub,
+  mapCompetition,
+  mapNation,
+  mapStadium,
+  mapCity,
+  mapAward,
+} from '../common/entity-mapper';
 
 @Injectable()
 export class SearchService {
@@ -48,9 +56,9 @@ export class SearchService {
         .createQueryBuilder('c')
         .leftJoinAndSelect('c.nation', 'nation')
         .leftJoinAndSelect('c.competition', 'comp')
-        .where('c.long_name ILIKE :q', { q: `%${term}%` })
-        .orWhere('c.short_name ILIKE :q', { q: `%${term}%` })
-        .orWhere('c.three_letter_name ILIKE :q', { q: `%${term}%` })
+        .where('c.name_lg ILIKE :q', { q: `%${term}%` })
+        .orWhere('c.name_sh ILIKE :q', { q: `%${term}%` })
+        .orWhere('c.name_3l ILIKE :q', { q: `%${term}%` })
         .orWhere('c.id = :idVal', { idVal })
         .limit(limit)
         .getMany(),
@@ -59,9 +67,9 @@ export class SearchService {
         .createQueryBuilder('c')
         .leftJoinAndSelect('c.nation', 'nation')
         .leftJoinAndSelect('c.confederation', 'confed')
-        .where('c.long_name ILIKE :q', { q: `%${term}%` })
-        .orWhere('c.short_name ILIKE :q', { q: `%${term}%` })
-        .orWhere('c.three_letter_name ILIKE :q', { q: `%${term}%` })
+        .where('c.name_lg ILIKE :q', { q: `%${term}%` })
+        .orWhere('c.name_sh ILIKE :q', { q: `%${term}%` })
+        .orWhere('c.name_3l ILIKE :q', { q: `%${term}%` })
         .orWhere('c.id = :idVal', { idVal })
         .limit(limit)
         .getMany(),
@@ -69,9 +77,9 @@ export class SearchService {
       this.nationRepo
         .createQueryBuilder('n')
         .leftJoinAndSelect('n.confederation', 'confed')
-        .where('n.long_name ILIKE :q', { q: `%${term}%` })
-        .orWhere('n.short_name ILIKE :q', { q: `%${term}%` })
-        .orWhere('n.three_letter_name ILIKE :q', { q: `%${term}%` })
+        .where('n.name_lg ILIKE :q', { q: `%${term}%` })
+        .orWhere('n.name_sh ILIKE :q', { q: `%${term}%` })
+        .orWhere('n.name_3l ILIKE :q', { q: `%${term}%` })
         .orWhere('n.id = :idVal', { idVal })
         .limit(limit)
         .getMany(),
@@ -96,8 +104,8 @@ export class SearchService {
         .createQueryBuilder('a')
         .leftJoinAndSelect('a.nation', 'nation')
         .leftJoinAndSelect('a.competition', 'comp')
-        .where('a.long_name ILIKE :q', { q: `%${term}%` })
-        .orWhere('a.short_name ILIKE :q', { q: `%${term}%` })
+        .where('a.name_lg ILIKE :q', { q: `%${term}%` })
+        .orWhere('a.name_sh ILIKE :q', { q: `%${term}%` })
         .orWhere('a.id = :idVal', { idVal })
         .limit(limit)
         .getMany(),
@@ -121,12 +129,12 @@ export class SearchService {
     ]);
 
     return {
-      clubs,
-      competitions,
-      nations,
-      stadiums,
-      cities,
-      awards,
+      clubs: clubs.map(mapClub),
+      competitions: competitions.map((c) => mapCompetition(c)),
+      nations: nations.map((n) => mapNation(n)),
+      stadiums: stadiums.map(mapStadium),
+      cities: cities.map(mapCity),
+      awards: awards.map(mapAward),
       players,
       stages,
     };

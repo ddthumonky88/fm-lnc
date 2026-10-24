@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Input, Table, Tag, Popconfirm, Tooltip, message, Space, Pagination, type TableColumnsType } from 'antd';
-import { SearchOutlined, PlusOutlined, UserOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Button, Input, Table, Tag, Popconfirm, message, Pagination, type TableColumnsType, Space, Tooltip } from 'antd';
+import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
 import { fetchPlayers, deleteRecord, PlayerItem } from '../../services/api';
 import { useApp } from '../../context/AppContext';
-import { RecordType } from '../../types';
+import { RecordType } from '@/types';
 
 export default function PlayersPage() {
   const { openRecordModal, refreshSignal, setHeaderTitle, setHeaderId } = useApp();

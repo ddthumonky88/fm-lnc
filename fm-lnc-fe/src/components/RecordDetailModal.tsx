@@ -1,18 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Modal, Tag, Button, Tooltip, Input, Checkbox, message, Divider } from 'antd';
+import { Modal, Tag, Button, Tooltip, Input, Checkbox, message } from 'antd';
 import {
   CopyOutlined,
   CheckOutlined,
   EditOutlined,
   SaveOutlined,
-  TrophyOutlined,
   EnvironmentOutlined,
   UserOutlined,
-  FlagOutlined,
   InfoCircleOutlined,
-  GlobalOutlined,
   AppstoreOutlined,
   BgColorsOutlined,
   CloseOutlined,
@@ -23,14 +20,12 @@ import {
   NationIcon,
   IntCompIcon,
   DomesticCompIcon,
-  CompIcon,
   ClubIcon,
   StadiumIcon,
   CityIcon,
   AwardIcon,
 } from './EntityIcons';
 import {
-  getConfederationLogoUrl,
   getNationLogoUrl,
   createRecord,
   updateRecord,

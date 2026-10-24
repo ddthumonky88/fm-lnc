@@ -272,18 +272,18 @@ erDiagram
 
     NATIONS {
         varchar id PK
-        varchar long_name
-        varchar short_name
-        varchar three_letter_name
-        varchar confederation_id FK
+        varchar name_lg
+        varchar name_sh
+        varchar name_3l
+        varchar confed_id FK
         text inactive_fields
     }
 
     COMPETITIONS {
         varchar id PK
-        varchar long_name
-        varchar short_name
-        varchar three_letter_name
+        varchar name_lg
+        varchar name_sh
+        varchar name_3l
         varchar fg_color
         varchar bg_color
         varchar confed_id FK
@@ -297,10 +297,10 @@ erDiagram
 
     CLUBS {
         varchar id PK
-        varchar long_name
-        varchar short_name
-        varchar six_letter_name
-        varchar three_letter_name
+        varchar name_lg
+        varchar name_sh
+        varchar name_6l
+        varchar name_3l
         varchar nation_id FK
         varchar comp_id FK
         text note
@@ -311,8 +311,8 @@ erDiagram
     CITIES {
         varchar id PK
         varchar name
-        varchar country_id FK
-        varchar categories
+        varchar nation_id FK
+        varchar region
         text inactive_fields
     }
 
@@ -320,14 +320,13 @@ erDiagram
         varchar id PK
         varchar name
         varchar nation_id FK
-        text note
         text inactive_fields
     }
 
     AWARDS {
         varchar id PK
-        varchar long_name
-        varchar short_name
+        varchar name_lg
+        varchar name_sh
         varchar nation_id FK
         varchar comp_id FK
         text inactive_fields
@@ -354,25 +353,25 @@ erDiagram
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Châu lục / Liên đoàn (e.g. `'1'`, `'2'`, `'7'`) |
-| `name` | `VARCHAR(255)` | | No | Tên liên đoàn (e.g. `Europe`, `Asia`, `World`) |
+| `name` | `VARCHAR(255)` | | No | Tên liên đoàn chuẩn: `CAF`, `AFC`, `UEFA`, `CONCACAF`, `OFC`, `CONMEBOL`, `World` |
 
 #### 2. Bảng `nations` (Quốc gia)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Quốc gia trong Football Manager |
-| `long_name` | `VARCHAR(255)` | | No | Tên quốc gia đầy đủ (e.g. `Vietnam`, `England`) |
-| `short_name` | `VARCHAR(255)` | | No | Tên rút gọn (e.g. `Vietnam`, `England`) |
-| `three_letter_name` | `VARCHAR(50)` | | No | Mã 3 ký tự (e.g. `VIE`, `ENG`, `FRA`) |
-| `confederation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu tới `confederations.id` (ON DELETE SET NULL) |
+| `name_lg` | `VARCHAR(255)` | | No | Tên quốc gia đầy đủ (e.g. `Vietnam`, `England`) |
+| `name_sh` | `VARCHAR(255)` | | No | Tên rút gọn (e.g. `Vietnam`, `England`) |
+| `name_3l` | `VARCHAR(50)` | | No | Mã 3 ký tự (e.g. `VIE`, `ENG`, `FRA`) |
+| `confed_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu tới `confederations.id` (ON DELETE SET NULL) |
 | `inactive_fields` | `TEXT` | | Yes | Danh sách trường bị comment `#` khi xuất file `.lnc` |
 
 #### 3. Bảng `competitions` (Giải đấu & Phân hạng)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của giải đấu |
-| `long_name` | `VARCHAR(255)` | | No | Tên giải đấu đầy đủ (e.g. `English Premier Division`) |
-| `short_name` | `VARCHAR(255)` | | No | Tên rút gọn giải đấu (e.g. `Premier League`) |
-| `three_letter_name` | `VARCHAR(50)` | | Yes | Mã 3 ký tự (e.g. `PL`, `EPL`) |
+| `name_lg` | `VARCHAR(255)` | | No | Tên giải đấu đầy đủ (e.g. `English Premier Division`) |
+| `name_sh` | `VARCHAR(255)` | | No | Tên rút gọn giải đấu (e.g. `Premier League`) |
+| `name_3l` | `VARCHAR(50)` | | Yes | Mã 3 ký tự (e.g. `PL`, `EPL`) |
 | `fg_color` | `VARCHAR(100)` | | Yes | Mã màu chữ RGB (e.g. `255 255 255`) |
 | `bg_color` | `VARCHAR(100)` | | Yes | Mã màu nền RGB (e.g. `59 89 152`) |
 | `confed_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `confederations.id` (nếu là giải quốc tế) |
@@ -387,10 +386,10 @@ erDiagram
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Câu lạc bộ |
-| `long_name` | `VARCHAR(255)` | | No | Tên CLB đầy đủ (e.g. `Arsenal Football Club`) |
-| `short_name` | `VARCHAR(255)` | | No | Tên CLB rút gọn (e.g. `Arsenal`) |
-| `six_letter_name` | `VARCHAR(50)` | | Yes | Tên 6 ký tự hiển thị bảng tỉ số (e.g. `ARSENL`) |
-| `three_letter_name` | `VARCHAR(50)` | | Yes | Mã 3 ký tự (e.g. `ARS`) |
+| `name_lg` | `VARCHAR(255)` | | No | Tên CLB đầy đủ (e.g. `Arsenal Football Club`) |
+| `name_sh` | `VARCHAR(255)` | | No | Tên CLB rút gọn (e.g. `Arsenal`) |
+| `name_6l` | `VARCHAR(50)` | | Yes | Tên 6 ký tự hiển thị bảng tỉ số (e.g. `ARSENL`) |
+| `name_3l` | `VARCHAR(50)` | | Yes | Mã 3 ký tự (e.g. `ARS`) |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` |
 | `comp_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `competitions.id` (NULL nếu là CLB độc lập) |
 | `note` | `TEXT` | | Yes | Ghi chú CLB |
@@ -402,8 +401,8 @@ erDiagram
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Thành phố |
 | `name` | `VARCHAR(255)` | | No | Tên thành phố (e.g. `Hà Nội`, `London`) |
-| `country_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` |
-| `categories` | `VARCHAR(255)` | | Yes | Phân vùng miền / bang / khu vực |
+| `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` |
+| `region` | `VARCHAR(255)` | | Yes | Phân vùng miền / bang / khu vực |
 | `inactive_fields` | `TEXT` | | Yes | Danh sách trường comment out |
 
 #### 6. Bảng `stadiums` (Sân vận động)
@@ -412,15 +411,14 @@ erDiagram
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Sân vận động |
 | `name` | `VARCHAR(255)` | | No | Tên sân vận động (e.g. `Sân vận động Quốc gia Mỹ Đình`) |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` |
-| `note` | `TEXT` | | Yes | Ghi chú sân vận động |
 | `inactive_fields` | `TEXT` | | Yes | Danh sách trường comment out |
 
 #### 7. Bảng `awards` (Danh hiệu & Giải thưởng)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Giải thưởng |
-| `long_name` | `VARCHAR(255)` | | No | Tên giải thưởng đầy đủ (e.g. `Player of the Season`) |
-| `short_name` | `VARCHAR(255)` | | No | Tên giải thưởng rút gọn |
+| `name_lg` | `VARCHAR(255)` | | No | Tên giải thưởng đầy đủ (e.g. `Player of the Season`) |
+| `name_sh` | `VARCHAR(255)` | | No | Tên giải thưởng rút gọn |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` (nếu là giải thưởng quốc gia) |
 | `comp_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `competitions.id` (nếu gắn giải đấu) |
 | `inactive_fields` | `TEXT` | | Yes | Danh sách trường comment out |
@@ -456,21 +454,21 @@ Người dùng có thể tạm ngưng đồng bộ một trường dữ liệu (
 
 | Bảng CSDL | Trường dữ liệu | Command tương ứng trong file `.lnc` | Cú pháp xuất file |
 | :--- | :--- | :--- | :--- |
-| `nations` | `long_name` | `"NATION_LONG_NAME_CHANGE"` | `"NATION_LONG_NAME_CHANGE" <id> "<long_name>" 8` |
-| `nations` | `short_name` | `"NATION_SHORT_NAME_CHANGE"` | `"NATION_SHORT_NAME_CHANGE" <id> "<short_name>" 8` |
-| `nations` | `three_letter_name` | `"NATION_3LETTER_NAME_CHANGE"` | `"NATION_3LETTER_NAME_CHANGE" <id> "<three_letter_name>" 8` |
-| `competitions` | `long_name` | `"COMP_LONG_NAME_CHANGE"` | `"COMP_LONG_NAME_CHANGE" <id> "<long_name>" ""` |
-| `competitions` | `short_name` | `"COMP_SHORT_NAME_CHANGE"` | `"COMP_SHORT_NAME_CHANGE" <id> "<short_name>" ""` |
-| `competitions` | `three_letter_name` | `"COMP_3LETTER_NAME_CHANGE"` | `"COMP_3LETTER_NAME_CHANGE" <id> "<three_letter_name>" ""` |
+| `nations` | `name_lg` | `"NATION_LONG_NAME_CHANGE"` | `"NATION_LONG_NAME_CHANGE" <id> "<name_lg>" 8` |
+| `nations` | `name_sh` | `"NATION_SHORT_NAME_CHANGE"` | `"NATION_SHORT_NAME_CHANGE" <id> "<name_sh>" 8` |
+| `nations` | `name_3l` | `"NATION_3LETTER_NAME_CHANGE"` | `"NATION_3LETTER_NAME_CHANGE" <id> "<name_3l>" 8` |
+| `competitions` | `name_lg` | `"COMP_LONG_NAME_CHANGE"` | `"COMP_LONG_NAME_CHANGE" <id> "<name_lg>" ""` |
+| `competitions` | `name_sh` | `"COMP_SHORT_NAME_CHANGE"` | `"COMP_SHORT_NAME_CHANGE" <id> "<name_sh>" ""` |
+| `competitions` | `name_3l` | `"COMP_3LETTER_NAME_CHANGE"` | `"COMP_3LETTER_NAME_CHANGE" <id> "<name_3l>" ""` |
 | `competitions` | `fg_color`, `bg_color` | `"COMP_COLOUR_CHANGE"` | `"COMP_COLOUR_CHANGE" <id> 0 <fg_color> <bg_color> ""` |
-| `clubs` | `long_name` | `"CLUB_LONG_NAME_CHANGE"` | `"CLUB_LONG_NAME_CHANGE" <id> "<long_name>" ""` |
-| `clubs` | `short_name` | `"CLUB_SHORT_NAME_CHANGE"` | `"CLUB_SHORT_NAME_CHANGE" <id> "<short_name>" ""` |
-| `clubs` | `six_letter_name` | `"CLUB_6LETTER_NAME_CHANGE"` | `"CLUB_6LETTER_NAME_CHANGE" <id> "<six_letter_name>" ""` |
-| `clubs` | `three_letter_name` | `"CLUB_3LETTER_NAME_CHANGE"` | `"CLUB_3LETTER_NAME_CHANGE" <id> "<three_letter_name>" ""` |
+| `clubs` | `name_lg` | `"CLUB_NAME_CHANGE"` | `"CLUB_NAME_CHANGE" <id> "<name_lg>" ""` |
+| `clubs` | `name_sh` | `"CLUB_SHORT_NAME_CHANGE"` | `"CLUB_SHORT_NAME_CHANGE" <id> "<name_sh>" ""` |
+| `clubs` | `name_6l` | `"CLUB_6LETTER_NAME_CHANGE"` | `"CLUB_6LETTER_NAME_CHANGE" <id> "<name_6l>" ""` |
+| `clubs` | `name_3l` | `"CLUB_3LETTER_NAME_CHANGE"` | `"CLUB_3LETTER_NAME_CHANGE" <id> "<name_3l>" ""` |
 | `cities` | `name` | `"CITY_NAME_CHANGE"` | `"CITY_NAME_CHANGE" <id> "<name>" ""` |
 | `stadiums` | `name` | `"STADIUM_NAME_CHANGE"` | `"STADIUM_NAME_CHANGE" <id> "<name>" ""` |
-| `awards` | `long_name` | `"AWARD_LONG_NAME_CHANGE"` | `"AWARD_LONG_NAME_CHANGE" <id> "<long_name>" ""` |
-| `awards` | `short_name` | `"AWARD_SHORT_NAME_CHANGE"` | `"AWARD_SHORT_NAME_CHANGE" <id> "<short_name>" ""` |
+| `awards` | `name_lg` | `"AWARD_LONG_NAME_CHANGE"` | `"AWARD_LONG_NAME_CHANGE" <id> "<name_lg>" ""` |
+| `awards` | `name_sh` | `"AWARD_SHORT_NAME_CHANGE"` | `"AWARD_SHORT_NAME_CHANGE" <id> "<name_sh>" ""` |
 | `people` | `first_name`, `common_name`, `second_name` | `"CHANGE_PLAYER_NAME"` | `"CHANGE_PLAYER_NAME" <id> "<first_name>" "<common_name>" "<second_name>"` |
 | `stages` | `name` | `"STAGE_NAME_CHANGE"` | `"STAGE_NAME_CHANGE" <id> "<name>"` |
 
@@ -480,7 +478,7 @@ Người dùng có thể tạm ngưng đồng bộ một trường dữ liệu (
 
 ```sql
 -- 1. Cây phân cấp Quốc gia & Châu lục
-CREATE INDEX IF NOT EXISTS idx_nations_confed ON nations(confederation_id);
+CREATE INDEX IF NOT EXISTS idx_nations_confed ON nations(confed_id);
 CREATE INDEX IF NOT EXISTS idx_comps_confed ON competitions(confed_id);
 CREATE INDEX IF NOT EXISTS idx_comps_nation ON competitions(nation_id);
 CREATE INDEX IF NOT EXISTS idx_comps_parent ON competitions(parent_id);
@@ -492,14 +490,14 @@ CREATE INDEX IF NOT EXISTS idx_clubs_nation ON clubs(nation_id);
 CREATE INDEX IF NOT EXISTS idx_clubs_is_extinct ON clubs(is_extinct);
 
 -- 3. Thực thể trực thuộc Quốc gia
-CREATE INDEX IF NOT EXISTS idx_cities_country ON cities(country_id);
+CREATE INDEX IF NOT EXISTS idx_cities_nation ON cities(nation_id);
 CREATE INDEX IF NOT EXISTS idx_stadiums_nation ON stadiums(nation_id);
 CREATE INDEX IF NOT EXISTS idx_awards_nation ON awards(nation_id);
 CREATE INDEX IF NOT EXISTS idx_awards_comp ON awards(comp_id);
 
 -- 4. Tối ưu tìm kiếm văn bản
-CREATE INDEX IF NOT EXISTS idx_clubs_short_name ON clubs(short_name);
-CREATE INDEX IF NOT EXISTS idx_comps_short_name ON competitions(short_name);
+CREATE INDEX IF NOT EXISTS idx_clubs_name_sh ON clubs(name_sh);
+CREATE INDEX IF NOT EXISTS idx_comps_name_sh ON competitions(name_sh);
 CREATE INDEX IF NOT EXISTS idx_people_second_name ON people(second_name);
 ```
 
@@ -519,18 +517,18 @@ CREATE TABLE IF NOT EXISTS confederations (
 
 CREATE TABLE IF NOT EXISTS nations (
     id VARCHAR(64) PRIMARY KEY,
-    long_name VARCHAR(255) NOT NULL,
-    short_name VARCHAR(255) NOT NULL,
-    three_letter_name VARCHAR(50) NOT NULL,
-    confederation_id VARCHAR(64) REFERENCES confederations(id) ON DELETE SET NULL,
+    name_lg VARCHAR(255) NOT NULL,
+    name_sh VARCHAR(255) NOT NULL,
+    name_3l VARCHAR(50) NOT NULL,
+    confed_id VARCHAR(64) REFERENCES confederations(id) ON DELETE SET NULL,
     inactive_fields TEXT
 );
 
 CREATE TABLE IF NOT EXISTS competitions (
     id VARCHAR(64) PRIMARY KEY,
-    long_name VARCHAR(255) NOT NULL,
-    short_name VARCHAR(255) NOT NULL,
-    three_letter_name VARCHAR(50),
+    name_lg VARCHAR(255) NOT NULL,
+    name_sh VARCHAR(255) NOT NULL,
+    name_3l VARCHAR(50),
     fg_color VARCHAR(100),
     bg_color VARCHAR(100),
     confed_id VARCHAR(64) REFERENCES confederations(id) ON DELETE SET NULL,
@@ -544,10 +542,10 @@ CREATE TABLE IF NOT EXISTS competitions (
 
 CREATE TABLE IF NOT EXISTS clubs (
     id VARCHAR(64) PRIMARY KEY,
-    long_name VARCHAR(255) NOT NULL,
-    short_name VARCHAR(255) NOT NULL,
-    six_letter_name VARCHAR(50),
-    three_letter_name VARCHAR(50),
+    name_lg VARCHAR(255) NOT NULL,
+    name_sh VARCHAR(255) NOT NULL,
+    name_6l VARCHAR(50),
+    name_3l VARCHAR(50),
     nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
     comp_id VARCHAR(64) REFERENCES competitions(id) ON DELETE SET NULL,
     note TEXT,
@@ -558,8 +556,8 @@ CREATE TABLE IF NOT EXISTS clubs (
 CREATE TABLE IF NOT EXISTS cities (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    country_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
-    categories VARCHAR(255),
+    nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
+    region VARCHAR(255),
     inactive_fields TEXT
 );
 
@@ -567,14 +565,13 @@ CREATE TABLE IF NOT EXISTS stadiums (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
-    note TEXT,
     inactive_fields TEXT
 );
 
 CREATE TABLE IF NOT EXISTS awards (
     id VARCHAR(64) PRIMARY KEY,
-    long_name VARCHAR(255) NOT NULL,
-    short_name VARCHAR(255) NOT NULL,
+    name_lg VARCHAR(255) NOT NULL,
+    name_sh VARCHAR(255) NOT NULL,
     nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
     comp_id VARCHAR(64) REFERENCES competitions(id) ON DELETE SET NULL,
     inactive_fields TEXT
@@ -605,11 +602,30 @@ CREATE TABLE IF NOT EXISTS stages (
 
 ### 6.1. Quy tắc chung & Cấu trúc Phân cấp
 
-1. Toàn bộ API tuân theo chuẩn RESTful JSON. Mọi Game ID (`id`, `confederation_id`, `nation_id`, `comp_id`,...) đều có kiểu dữ liệu là chuỗi (`string`).
-2. **Quy tắc phân cấp giải đấu:**
+1. Toàn bộ API tuân theo chuẩn RESTful JSON. Mọi Game ID (`id`, `confed_id`, `nation_id`, `comp_id`,...) đều có kiểu dữ liệu là chuỗi (`string`).
+2. **Cấu trúc Envelope phản hồi chuẩn (Standard Response Envelope):**
+   ```json
+   {
+     "status": 200,
+     "success": true,
+     "message": "Success",
+     "data": { ... },
+     "error": null,
+     "timestamp": 1729792000000,
+     "path": "/api/...",
+     "correlationId": "f7a3b1c2-..."
+   }
+   ```
+3. **Chuẩn hóa đối tượng quan hệ lồng nhau (Nested Relations):**
+   - `nation`: `{ id, name_lg, name_sh, name_3l }`
+   - `confed`: `{ id, name }`
+   - `comp`: `{ id, name_lg, name_sh, name_3l }`
+   - `parent`: `{ id, name_lg, name_sh, name_3l }`
+4. **Đối tượng thống kê (`stats`):** Gom toàn bộ các trường số lượng thực thể con, loại bỏ tiền tố `"total-"` (e.g. `nations`, `intComps`, `comps`, `clubs`, `stadiums`, `cities`, `awards`, `children`).
+5. **Quy tắc phân cấp giải đấu:**
    - `GET /api/hierarchy/nations/:id/competitions`: **Chỉ trả về các giải đấu quốc nội cấp cha (`parent_id IS NULL`)** của quốc gia đó.
    - `GET /api/hierarchy/competitions/:id/sub-competitions`: **Trả về danh sách giải đấu con / phân hạng trực thuộc giải đấu cha `{id}` (`parent_id = :id`)**.
-3. **API Chi tiết quan hệ (`/info`):** Cung cấp dữ liệu đầy đủ kèm thực thể cha/con và bộ đếm thống kê cho 7 thực thể chính (`confederation`, `nation`, `competition`, `club`, `city`, `award`, `stadium`).
+6. **API Chi tiết quan hệ (`/info`):** Cung cấp dữ liệu đầy đủ kèm thực thể cha/con và bộ đếm thống kê cho 7 thực thể chính (`confederation`, `nation`, `competition`, `club`, `city`, `award`, `stadium`).
 
 ---
 
@@ -735,30 +751,45 @@ Hỗ trợ các loại thực thể (`:type`): `confederation`, `nation`, `compe
 
 ### 6.5. Search API (Tìm kiếm toàn văn)
 
-#### `GET /api/search`
+#### `POST /api/search`
 Tìm kiếm toàn văn đồng thời trên 8 bảng dữ liệu: Clubs, Competitions, Nations, Stadiums, Cities, Awards, Players, Stages. Hỗ trợ tìm kiếm theo chuỗi ký tự (case-insensitive) hoặc chính xác theo số ID.
 
-- **Query Parameters**:
-  - `q` *(string, required)*: Từ khóa tìm kiếm hoặc ID.
-  - `limit` *(number, optional, mặc định: 20)*: Số lượng kết quả tối đa cho từng nhóm thực thể.
+- **Request Body (JSON)**:
+  ```json
+  {
+    "keyword": "Liverpool",
+    "limit": 20
+  }
+  ```
 - **Phản hồi mẫu (`200 OK`)**:
   ```json
   {
-    "clubs": [
-      {
-        "id": "676",
-        "long_name": "Liverpool Football Club",
-        "short_name": "Liverpool",
-        "nation": { "id": "11", "long_name": "England" }
-      }
-    ],
-    "competitions": [],
-    "nations": [],
-    "stadiums": [],
-    "cities": [],
-    "awards": [],
-    "players": [],
-    "stages": []
+    "status": 200,
+    "success": true,
+    "message": "Search completed",
+    "data": {
+      "clubs": [
+        {
+          "id": "676",
+          "name_lg": "Liverpool Football Club",
+          "name_sh": "Liverpool",
+          "name_6l": "Liverpool",
+          "name_3l": "LIV",
+          "nation": { "id": "11", "name_lg": "England", "name_sh": "England", "name_3l": "ENG" }
+        }
+      ],
+      "competitions": [],
+      "nations": [],
+      "stadiums": [],
+      "cities": [],
+      "awards": [],
+      "players": [],
+      "stages": []
+    },
+    "error": null,
+    "timestamp": 1729792000000,
+    "path": "/api/search",
+    "correlationId": "8c2d1e0f-..."
   }
   ```
 

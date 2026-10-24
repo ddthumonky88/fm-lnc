@@ -50,9 +50,9 @@ export class LncService {
         out += `\n# NATION > ${confName}\n${hr}`;
         lastConf = confName;
       }
-      out += `"NATION_LONG_NAME_CHANGE"\t${nat.id}\t\t"${nat.long_name}"\t\t\t\t8\n`;
-      out += `"NATION_SHORT_NAME_CHANGE"\t${nat.id}\t\t"${nat.short_name}"\t\t\t\t8\n`;
-      out += `"NATION_3LETTER_NAME_CHANGE"\t${nat.id}\t\t"${nat.three_letter_name}"\t\t\t8\n\n`;
+      out += `"NATION_LONG_NAME_CHANGE"\t${nat.id}\t\t"${nat.name_lg}"\t\t\t\t8\n`;
+      out += `"NATION_SHORT_NAME_CHANGE"\t${nat.id}\t\t"${nat.name_sh}"\t\t\t\t8\n`;
+      out += `"NATION_3LETTER_NAME_CHANGE"\t${nat.id}\t\t"${nat.name_3l}"\t\t\t8\n\n`;
     }
 
     // 2. CITIES
@@ -61,9 +61,9 @@ export class LncService {
       order: { id: 'ASC' },
     });
     for (const c of cities) {
-      const code = c.nation?.three_letter_name || 'UNK';
-      const nat = c.nation?.short_name || 'Unknown';
-      const cat = c.categories ? ` > ${c.categories}` : '';
+      const code = c.nation?.name_3l || 'UNK';
+      const nat = c.nation?.name_sh || 'Unknown';
+      const cat = c.region ? ` > ${c.region}` : '';
       out += `# CITY > [${code}] ${nat}${cat}\n${hr}`;
       out += `"CITY_NAME_CHANGE"\t\t${c.id}\t\t"${c.name}"\t\t\t\t""\n\n`;
     }
@@ -76,8 +76,8 @@ export class LncService {
     for (const comp of comps) {
       const conf = comp.confederation?.name || 'INTERNATIONAL';
       const isInter = comp.is_international || !comp.nation_id;
-      const natCode = comp.nation?.three_letter_name || (isInter ? 'INT' : 'NAT');
-      const natName = comp.nation?.short_name || (isInter ? 'International' : 'National');
+      const natCode = comp.nation?.name_3l || (isInter ? 'INT' : 'NAT');
+      const natName = comp.nation?.name_sh || (isInter ? 'International' : 'National');
       const cat = comp.categories || (isInter ? 'International Competitions' : 'League/Cup');
 
       out += `# COMP > ${conf} > [${natCode}] ${natName} > ${cat}\n${hr}`;
@@ -96,13 +96,13 @@ export class LncService {
         const pfx = isInactive('colors') ? '#' : '';
         out += `${pfx}"COMP_COLOUR_CHANGE"\t\t${comp.id}\t\t0 ${comp.fg_color} ${comp.bg_color}\t\t""\n`;
       }
-      const pfxLong = isInactive('long_name') ? '#' : '';
-      const pfxShort = isInactive('short_name') ? '#' : '';
-      const pfx3 = isInactive('three_letter_name') ? '#' : '';
-      out += `${pfxLong}"COMP_LONG_NAME_CHANGE"\t${comp.id}\t\t"${comp.long_name}"\t\t\t\t\t""\n`;
-      out += `${pfxShort}"COMP_SHORT_NAME_CHANGE"\t${comp.id}\t\t"${comp.short_name}"\t\t\t\t\t""\n`;
-      if (comp.three_letter_name) {
-        out += `${pfx3}"COMP_3LETTER_NAME_CHANGE"\t${comp.id}\t\t"${comp.three_letter_name}"\t\t\t\t""\n\n`;
+      const pfxLong = isInactive('long_name') || isInactive('name_lg') ? '#' : '';
+      const pfxShort = isInactive('short_name') || isInactive('name_sh') ? '#' : '';
+      const pfx3 = isInactive('three_letter_name') || isInactive('name_3l') ? '#' : '';
+      out += `${pfxLong}"COMP_LONG_NAME_CHANGE"\t${comp.id}\t\t"${comp.name_lg}"\t\t\t\t\t""\n`;
+      out += `${pfxShort}"COMP_SHORT_NAME_CHANGE"\t${comp.id}\t\t"${comp.name_sh}"\t\t\t\t\t""\n`;
+      if (comp.name_3l) {
+        out += `${pfx3}"COMP_3LETTER_NAME_CHANGE"\t${comp.id}\t\t"${comp.name_3l}"\t\t\t\t""\n\n`;
       } else {
         out += '\n';
       }
@@ -134,20 +134,20 @@ export class LncService {
     for (const cl of clubs) {
       const confName = cl.nation?.confederation?.name || 'World';
       const conf = CONFED_CODE_MAP[confName] || confName.toUpperCase();
-      const code = cl.nation?.three_letter_name || 'NAT';
-      const nat = (cl.nation?.long_name || cl.nation?.short_name || 'Nation').toUpperCase();
+      const code = cl.nation?.name_3l || 'NAT';
+      const nat = (cl.nation?.name_lg || cl.nation?.name_sh || 'Nation').toUpperCase();
 
       let compPart = '';
       if (cl.competition) {
         const compId = cl.competition.id;
-        const compName = cl.competition.short_name || cl.competition.long_name;
+        const compName = cl.competition.name_sh || cl.competition.name_lg;
         const extra = cl.competition.note?.trim() ? ` ${cl.competition.note.trim()}` : '';
         compPart = `[${compId}] ${compName}${extra}`;
       } else {
         const isExtinct =
           cl.is_extinct ||
           cl.note?.toLowerCase().includes('extinct') ||
-          cl.long_name?.toLowerCase().includes('extinct');
+          cl.name_lg?.toLowerCase().includes('extinct');
         compPart = isExtinct ? '[EXTINCT]' : '[OTHER]';
       }
 
@@ -164,18 +164,18 @@ export class LncService {
         .filter(Boolean);
       const isInactive = (f: string) => inactiveList.includes(f);
 
-      const pfxLong = isInactive('long_name') ? '#' : '';
-      const pfxShort = isInactive('short_name') ? '#' : '';
-      const pfx6 = isInactive('six_letter_name') ? '#' : '';
-      const pfx3 = isInactive('three_letter_name') ? '#' : '';
+      const pfxLong = isInactive('long_name') || isInactive('name_lg') ? '#' : '';
+      const pfxShort = isInactive('short_name') || isInactive('name_sh') ? '#' : '';
+      const pfx6 = isInactive('six_letter_name') || isInactive('name_6l') ? '#' : '';
+      const pfx3 = isInactive('three_letter_name') || isInactive('name_3l') ? '#' : '';
 
-      out += `${pfxLong}"CLUB_NAME_CHANGE"\t\t${cl.id}\t"${cl.long_name}"\t\t\t\t\t\t""${noteStr}\n`;
-      out += `${pfxShort}"CLUB_SHORT_NAME_CHANGE"\t${cl.id}\t"${cl.short_name}"\t\t\t\t\t\t""${noteStr}\n`;
-      if (cl.six_letter_name) {
-        out += `${pfx6}"CLUB_6LETTER_NAME_CHANGE"\t${cl.id}\t"${cl.six_letter_name}"\t\t\t\t\t\t""${noteStr}\n`;
+      out += `${pfxLong}"CLUB_NAME_CHANGE"\t\t${cl.id}\t"${cl.name_lg}"\t\t\t\t\t\t""${noteStr}\n`;
+      out += `${pfxShort}"CLUB_SHORT_NAME_CHANGE"\t${cl.id}\t"${cl.name_sh}"\t\t\t\t\t\t""${noteStr}\n`;
+      if (cl.name_6l) {
+        out += `${pfx6}"CLUB_6LETTER_NAME_CHANGE"\t${cl.id}\t"${cl.name_6l}"\t\t\t\t\t\t""${noteStr}\n`;
       }
-      if (cl.three_letter_name) {
-        out += `${pfx3}"CLUB_3LETTER_NAME_CHANGE"\t${cl.id}\t"${cl.three_letter_name}"\t\t\t\t\t\t""${noteStr}\n`;
+      if (cl.name_3l) {
+        out += `${pfx3}"CLUB_3LETTER_NAME_CHANGE"\t${cl.id}\t"${cl.name_3l}"\t\t\t\t\t\t""${noteStr}\n`;
       }
       out += '\n';
     }
@@ -186,12 +186,11 @@ export class LncService {
       order: { id: 'ASC' },
     });
     for (const s of stadiums) {
-      const code = s.nation?.three_letter_name || 'UNK';
-      const nat = s.nation?.short_name || 'Standard';
-      const noteStr = s.note ? `  # ${s.note}` : '';
+      const code = s.nation?.name_3l || 'UNK';
+      const nat = s.nation?.name_sh || 'Standard';
       const pfx = (s.inactive_fields || '').includes('name') ? '#' : '';
       out += `# STADIUM > [${code}] ${nat} > Standard\n${hr}`;
-      out += `${pfx}"STADIUM_NAME_CHANGE"\t\t${s.id}\t\t"${s.name}"\t\t\t\t""${noteStr}\n\n`;
+      out += `${pfx}"STADIUM_NAME_CHANGE"\t\t${s.id}\t\t"${s.name}"\t\t\t\t""\n\n`;
     }
 
     // 6. AWARDS
@@ -200,19 +199,19 @@ export class LncService {
       order: { id: 'ASC' },
     });
     for (const a of awards) {
-      const code = a.nation?.three_letter_name || 'INT';
-      const nat = a.nation?.short_name || 'International';
-      const sub = a.competition?.short_name ? ` > ${a.competition.short_name}` : '';
+      const code = a.nation?.name_3l || 'INT';
+      const nat = a.nation?.name_sh || 'International';
+      const sub = a.competition?.name_sh ? ` > ${a.competition.name_sh}` : '';
       out += `# AWARDS > [${code}] ${nat}${sub}\n${hr}`;
       const inactList = (a.inactive_fields || '')
         .split(',')
         .map((s) => s.trim().toLowerCase())
         .filter(Boolean);
       const isInactive = (f: string) => inactList.includes(f);
-      const pfxLong = isInactive('long_name') ? '#' : '';
-      const pfxShort = isInactive('short_name') ? '#' : '';
-      out += `${pfxLong}"AWARD_LONG_NAME_CHANGE"\t${a.id}\t"${a.long_name}"\t\t\t\t\t\t""\n`;
-      out += `${pfxShort}"AWARD_SHORT_NAME_CHANGE"\t${a.id}\t"${a.short_name}"\t\t\t\t\t\t""\n\n`;
+      const pfxLong = isInactive('long_name') || isInactive('name_lg') ? '#' : '';
+      const pfxShort = isInactive('short_name') || isInactive('name_sh') ? '#' : '';
+      out += `${pfxLong}"AWARD_LONG_NAME_CHANGE"\t${a.id}\t"${a.name_lg}"\t\t\t\t\t\t""\n`;
+      out += `${pfxShort}"AWARD_SHORT_NAME_CHANGE"\t${a.id}\t"${a.name_sh}"\t\t\t\t\t\t""\n\n`;
     }
 
     // 7. PEOPLE
@@ -269,12 +268,12 @@ export class LncService {
 
     // Ensure confederations
     const confeds = [
-      { id: '1', name: 'Africa' },
-      { id: '2', name: 'Asia' },
-      { id: '3', name: 'Europe' },
-      { id: '4', name: 'North America' },
-      { id: '5', name: 'Oceania' },
-      { id: '6', name: 'South America' },
+      { id: '1', name: 'CAF' },
+      { id: '2', name: 'AFC' },
+      { id: '3', name: 'UEFA' },
+      { id: '4', name: 'CONCACAF' },
+      { id: '5', name: 'OFC' },
+      { id: '6', name: 'CONMEBOL' },
       { id: '7', name: 'World' },
     ];
     for (const c of confeds) {
@@ -286,7 +285,6 @@ export class LncService {
     const linesCityNat = contentCityNat.split(/\r?\n/);
     let curConfedId = '7';
     let curNationCode: string | null = null;
-    let curNationName: string | null = null;
     let curCityCat: string | null = null;
 
     const nationsMap: Map<string, Partial<Nation>> = new Map();
@@ -304,14 +302,8 @@ export class LncService {
         } else if (h.startsWith('CITY >')) {
           const parts = h.split('>').map((p) => p.trim());
           if (parts.length > 1) {
-            const m = parts[1].match(/\[([A-Z0-9]+)\]\s*(.*)/);
-            if (m) {
-              curNationCode = m[1].trim();
-              curNationName = m[2].trim();
-            } else {
-              curNationCode = null;
-              curNationName = parts[1];
-            }
+            const m = parts[1].match(/\[([A-Z0-9]+)\]/);
+            curNationCode = m ? m[1].trim() : null;
           }
           curCityCat = parts.length > 2 ? parts[2].trim() : null;
         }
@@ -325,24 +317,24 @@ export class LncService {
         const val = match[3].trim();
 
         if (cmd === 'NATION_LONG_NAME_CHANGE') {
-          const nat = nationsMap.get(id) || { id, confederation_id: curConfedId };
-          nat.long_name = val;
+          const nat = nationsMap.get(id) || { id, confed_id: curConfedId };
+          nat.name_lg = val;
           nationsMap.set(id, nat);
         } else if (cmd === 'NATION_SHORT_NAME_CHANGE') {
-          const nat = nationsMap.get(id) || { id, confederation_id: curConfedId };
-          nat.short_name = val;
+          const nat = nationsMap.get(id) || { id, confed_id: curConfedId };
+          nat.name_sh = val;
           nationsMap.set(id, nat);
         } else if (cmd === 'NATION_3LETTER_NAME_CHANGE') {
-          const nat = nationsMap.get(id) || { id, confederation_id: curConfedId };
-          nat.three_letter_name = val;
+          const nat = nationsMap.get(id) || { id, confed_id: curConfedId };
+          nat.name_3l = val;
           nationsMap.set(id, nat);
         } else if (cmd === 'CITY_NAME_CHANGE') {
           citiesList.push({
             id,
             name: val,
-            categories: curCityCat || undefined,
+            region: curCityCat || undefined,
             // Nation resolved later
-            country_id: curNationCode as any,
+            nation_id: curNationCode as any,
           });
         }
       }
@@ -352,19 +344,19 @@ export class LncService {
     const nameToNationId: Record<string, string> = {};
 
     const nationsArray: Nation[] = Array.from(nationsMap.values()).map((n) => {
-      const longName = n.long_name || `Nation ${n.id}`;
-      const shortName = n.short_name || longName;
-      const code = n.three_letter_name || 'UNK';
+      const longName = n.name_lg || `Nation ${n.id}`;
+      const shortName = n.name_sh || longName;
+      const code = n.name_3l || 'UNK';
       const idStr = String(n.id);
       codeToNationId[code] = idStr;
       nameToNationId[longName.toUpperCase()] = idStr;
       nameToNationId[shortName.toUpperCase()] = idStr;
       return {
         id: idStr,
-        long_name: longName,
-        short_name: shortName,
-        three_letter_name: code,
-        confederation_id: n.confederation_id ? String(n.confederation_id) : '7',
+        name_lg: longName,
+        name_sh: shortName,
+        name_3l: code,
+        confed_id: n.confed_id ? String(n.confed_id) : '7',
       } as Nation;
     });
 
@@ -377,8 +369,8 @@ export class LncService {
     const citiesArray: City[] = citiesList.map((c) => ({
       id: String(c.id),
       name: c.name,
-      categories: c.categories,
-      country_id: (c.country_id && codeToNationId[c.country_id as any]) || undefined,
+      region: c.region,
+      nation_id: (c.nation_id && codeToNationId[c.nation_id as any]) || undefined,
     } as City));
 
     for (let i = 0; i < citiesArray.length; i += chunkSize) {

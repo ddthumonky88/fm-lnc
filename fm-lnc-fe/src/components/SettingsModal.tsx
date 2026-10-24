@@ -6,12 +6,8 @@ import {
   Tabs,
   Input,
   Button,
-  Tag,
-  Tooltip,
   message,
-  Card,
   Spin,
-  Typography,
 } from 'antd';
 import {
   SettingOutlined,
@@ -28,9 +24,7 @@ import {
   BankOutlined,
   CompassOutlined,
   SaveOutlined,
-  DesktopOutlined,
   CloudUploadOutlined,
-  CloudServerOutlined,
 } from '@ant-design/icons';
 import {
   fetchAppConfig,
@@ -39,13 +33,9 @@ import {
   syncLncFromConfig,
   reloadLogosFromConfig,
   syncLocalLncToProd,
-  getApiBase,
-  getLocalApiBase,
   type AppPathsConfig,
   type ConfigStatusResponse,
 } from '../services/api';
-
-const { Text } = Typography;
 
 const DEFAULT_LOCAL_LNC_DIR = 'D:\\Games\\FM24_2026\\FootballManager24\\data\\database\\db\\2430\\lnc\\all';
 

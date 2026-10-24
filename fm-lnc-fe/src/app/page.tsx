@@ -10,28 +10,16 @@ import {
   Tag,
   Badge,
   Space,
-  Breadcrumb,
   message,
   Tooltip,
-  Popconfirm,
   type TableColumnsType,
 } from 'antd';
 import {
   SearchOutlined,
   PlusOutlined,
-  ReloadOutlined,
-  DownloadOutlined,
-  SyncOutlined,
-  TrophyOutlined,
   SafetyOutlined,
-  EnvironmentOutlined,
-  BankOutlined,
   StarOutlined,
   GlobalOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  UserOutlined,
-  FlagOutlined,
 } from '@ant-design/icons';
 import {
   fetchContinents,
@@ -50,8 +38,6 @@ import {
   fetchStages,
   fetchAllAwards,
   deleteRecord,
-  getExportUrl,
-  reimportLnc,
   ConfederationItem,
   NationItem,
   CompetitionItem,
@@ -65,7 +51,7 @@ import CardGrid from '../components/CardGrid';
 import CompetitionGroupView, { sortCompetitionsByCategory } from '../components/CompetitionGroupView';
 import { formatCategoryCode, getCategoryTagColor } from '../components/EntityCard';
 import CityGroupView from '../components/CityGroupView';
-import { NationIcon, IntCompIcon, DomesticCompIcon, CompIcon, StadiumIcon, CityIcon, AwardIcon } from '../components/EntityIcons';
+import { NationIcon, IntCompIcon, DomesticCompIcon, StadiumIcon, CityIcon, AwardIcon } from '../components/EntityIcons';
 import { useApp } from '../context/AppContext';
 import {
   HierarchyLevel,
@@ -75,7 +61,6 @@ import {
   RecordType,
   RecordTypeValue,
   EntityType,
-  EntityTypeValue,
 } from '../types';
 import { matchRecordSearch } from '../utils/search';
 

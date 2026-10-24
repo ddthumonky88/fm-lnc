@@ -2,12 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Badge, Empty, Select } from 'antd';
-import {
-  EnvironmentOutlined,
-  AppstoreOutlined,
-  CompassOutlined,
-  FilterOutlined,
-} from '@ant-design/icons';
+import { FilterOutlined } from '@ant-design/icons';
 import CardGrid from './CardGrid';
 import { CityIcon } from './EntityIcons';
 

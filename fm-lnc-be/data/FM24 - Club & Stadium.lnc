@@ -28433,9 +28433,9 @@
 "STADIUM_NAME_CHANGE" 		425197 		"Allianz Stadium (Sydney)" 					""
 "STADIUM_NAME_CHANGE" 		425585 		"McDonald Jones Stadium"					""
 "STADIUM_NAME_CHANGE" 		426510 		"Campbelltown Sports Stadium"					""
-"STADIUM_NAME_CHANGE" 		426512 		"Sky Stadium" 							"" # [NZL] x NS
+"STADIUM_NAME_CHANGE" 		426512 		"Sky Stadium" 							""
 "STADIUM_NAME_CHANGE" 		15016745 	"AAMI Park" 							""
-"STADIUM_NAME_CHANGE" 		88020658 	"Go Media Stadium" 						"" # [NZL]
+"STADIUM_NAME_CHANGE" 		88020658 	"Go Media Stadium" 						""
 
 
 # STADIUM > [AUS] AUSTRALIA > [OTHER]
@@ -29936,7 +29936,7 @@
 
 # STADIUM > [FRA] FRANCE > Ligue 1 (23/24)
 #====================================================================================
-"STADIUM_NAME_CHANGE"		926		"Stade Louis II"						"" # [MONACO]
+"STADIUM_NAME_CHANGE"		926		"Stade Louis II"						""
 "STADIUM_NAME_CHANGE"		938		"Stade Gabriel-Montpied"					""
 "STADIUM_NAME_CHANGE"		948		"Stade du Moustoir - Yves Allainmat"				""
 "STADIUM_NAME_CHANGE"		950		"Stade Saint-Symphorien"					""
@@ -31449,12 +31449,12 @@
 
 # STADIUM > [OFC] OFC Pro League
 #====================================================================================
-"STADIUM_NAME_CHANGE" 		103185 		"HFC Bank Stadium"			 			"" # [FIJ] x NS
-"STADIUM_NAME_CHANGE"		103188		"Lawson Tama Stadium"						"" # [SOL] x NS
-"STADIUM_NAME_CHANGE"		23209461	"Port Vila Municipal Stadium"					"" # [VAN] x NS
-"STADIUM_NAME_CHANGE"		23209916	"United Sports Centre"						"" # [NZL]
-"STADIUM_NAME_CHANGE"		23211715	"PNG Football Stadium"						"" # [PNG]
-"STADIUM_NAME_CHANGE"		34015501	"Stade Pater Te Hono Nui"					"" # [TAH]
+"STADIUM_NAME_CHANGE" 		103185 		"HFC Bank Stadium"			 			""
+"STADIUM_NAME_CHANGE"		103188		"Lawson Tama Stadium"						""
+"STADIUM_NAME_CHANGE"		23209461	"Port Vila Municipal Stadium"					""
+"STADIUM_NAME_CHANGE"		23209916	"United Sports Centre"						""
+"STADIUM_NAME_CHANGE"		23211715	"PNG Football Stadium"						""
+"STADIUM_NAME_CHANGE"		34015501	"Stade Pater Te Hono Nui"					""
 
 
 # STADIUM > [OMA] OMAN > National Stadium
@@ -32197,7 +32197,7 @@
 
 # STADIUM > [SGP] SINGAPORE > Singapore Premier League (2023)
 #====================================================================================
-"STADIUM_NAME_CHANGE"		103237		"Stadium Negara Hassanal Bolkiah"				"" # [BRU] x NS 
+"STADIUM_NAME_CHANGE"		103237		"Stadium Negara Hassanal Bolkiah"				""
 "STADIUM_NAME_CHANGE"		106744		"Jalan Besar ActiveSG Stadium"					""
 "STADIUM_NAME_CHANGE"		116305		"Jurong East Stadium"						""
 "STADIUM_NAME_CHANGE"		116307		"Bishan Stadium"						""
@@ -32355,7 +32355,7 @@
 "STADIUM_NAME_CHANGE"		4212295		"Estadio El Alcoraz"						""
 "STADIUM_NAME_CHANGE"		6706355		"Campo de Fútbol Municipal Nuevo Urritxe"			""
 "STADIUM_NAME_CHANGE"		67015508	"RCDE Stadium"							""
-"STADIUM_NAME_CHANGE" 		67212882 	"Estadi Nacional d'Andorra"					"" # [AND]
+"STADIUM_NAME_CHANGE" 		67212882 	"Estadi Nacional d'Andorra"					""
 
 
 # STADIUM > [ESP] SPAIN > [OTHER]
@@ -32504,7 +32504,7 @@
 
 # STADIUM > [SUI] SWITZERLAND > Swiss Challenge League (23/24)
 #====================================================================================
-"STADIUM_NAME_CHANGE"		129503		"Rheinpark Stadion"						"" # [LIE]
+"STADIUM_NAME_CHANGE"		129503		"Rheinpark Stadion"						""
 "STADIUM_NAME_CHANGE"		5720004		"Stadio Comunale Bellinzona"					""
 "STADIUM_NAME_CHANGE" 		5720014 	"Lidl Arena" 							""
 "STADIUM_NAME_CHANGE"		5722518		"Stadion Brügglifeld"						""
@@ -32942,19 +32942,19 @@
 "STADIUM_NAME_CHANGE"		978652		"Lumen Field"							""
 "STADIUM_NAME_CHANGE"		979452		"Toyota Stadium"						""
 "STADIUM_NAME_CHANGE"		981291		"Dick's Sporting Goods Park"					""
-"STADIUM_NAME_CHANGE" 		981891 		"Stade Saputo"							"" # [CAN]
+"STADIUM_NAME_CHANGE" 		981891 		"Stade Saputo"							""
 "STADIUM_NAME_CHANGE"		982921		"Sports Illustrated Stadium"					""
 "STADIUM_NAME_CHANGE"		20032542	"Bank of America Stadium"					""
 "STADIUM_NAME_CHANGE"		29144034	"Audi Field"							""
 "STADIUM_NAME_CHANGE"		29144036	"ScottsMiracle-Gro Field"					""
 "STADIUM_NAME_CHANGE"		29219876	"TQL Stadium"							""
-"STADIUM_NAME_CHANGE"		72003114	"BMO Field"							"" # [CAN]
+"STADIUM_NAME_CHANGE"		72003114	"BMO Field"							""
 "STADIUM_NAME_CHANGE"		72003128	"America First Field"						""
 "STADIUM_NAME_CHANGE"		72013734	"Children's Mercy Park"						""
 "STADIUM_NAME_CHANGE"		72013735	"PayPal Park"							""
 "STADIUM_NAME_CHANGE"		72018533	"Soldier Field"							""
 "STADIUM_NAME_CHANGE"		72020972	"Subaru Park"							""
-"STADIUM_NAME_CHANGE"		72021006	"BC Place"							"" # [CAN]
+"STADIUM_NAME_CHANGE"		72021006	"BC Place"							""
 "STADIUM_NAME_CHANGE"		72036654	"Shell Energy Stadium"						""
 "STADIUM_NAME_CHANGE"		72040432	"Dignity Health Sports Park"					""
 "STADIUM_NAME_CHANGE"		72041886	"Yankee Stadium"						""

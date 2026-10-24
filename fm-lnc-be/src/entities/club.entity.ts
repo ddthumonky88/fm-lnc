@@ -1,7 +1,6 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Nation } from './nation.entity';
 import { Competition } from './competition.entity';
-import { BigIntTransformer } from './transformer';
 
 @Entity('clubs')
 export class Club {
@@ -9,16 +8,16 @@ export class Club {
   id: string;
 
   @Column({ type: 'varchar', length: 255 })
-  long_name: string;
+  name_lg: string;
 
   @Column({ type: 'varchar', length: 255 })
-  short_name: string;
+  name_sh: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  six_letter_name: string;
+  name_6l: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  three_letter_name: string;
+  name_3l: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
   nation_id: string;

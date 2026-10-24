@@ -1,7 +1,6 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
 import { Nation } from './nation.entity';
 import { Competition } from './competition.entity';
-import { BigIntTransformer } from './transformer';
 
 @Entity('confederations')
 export class Confederation {

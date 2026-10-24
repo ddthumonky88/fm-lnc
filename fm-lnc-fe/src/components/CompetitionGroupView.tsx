@@ -1,15 +1,12 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Badge, Empty, Select, Tooltip } from 'antd';
+import { Badge, Empty, Select } from 'antd';
 import {
-  TrophyOutlined,
-  SafetyOutlined,
   StarOutlined,
   GlobalOutlined,
   AppstoreOutlined,
   FilterOutlined,
-  ApartmentOutlined,
 } from '@ant-design/icons';
 import CardGrid from './CardGrid';
 import SubCompetitionsDrawer from './SubCompetitionsDrawer';
