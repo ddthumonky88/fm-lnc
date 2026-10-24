@@ -352,14 +352,16 @@ export default function NationDetailPage() {
           {/* Nation Info Banner */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <img
-                src={getNationLogoUrl(nationId, nation?.three_letter_name)}
-                alt={nationShortName}
-                className="w-9 h-6 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+              {getNationLogoUrl(nationId, nation?.three_letter_name) ? (
+                <img
+                  src={getNationLogoUrl(nationId, nation?.three_letter_name)}
+                  alt={nationShortName}
+                  className="w-9 h-6 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : null}
               <div>
                 {/* Top: Tag ID (cho phép copy) + 3N */}
                 <div className="flex items-center gap-1.5 flex-wrap mb-1">

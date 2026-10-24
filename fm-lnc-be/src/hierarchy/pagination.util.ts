@@ -1,3 +1,5 @@
+import { PageData, buildPageData } from '../common/api-response';
+
 export interface SortCriteria {
   property: string;
   direction: 'ASC' | 'DESC';
@@ -51,20 +53,7 @@ export function applySort<T>(items: T[], sortCriteria: SortCriteria[]): T[] {
   });
 }
 
-export interface PaginatedResult<T> {
-  content: T[];
-  items: T[];
-  totalElements: number;
-  total: number;
-  totalPages: number;
-  size: number;
-  number: number;
-  page: number;
-  numberOfElements: number;
-  first: boolean;
-  last: boolean;
-  empty: boolean;
-}
+export type PaginatedResult<T> = PageData<T>;
 
 export function paginateAndSort<T>(
   items: T[],
@@ -84,23 +73,8 @@ export function paginateAndSort<T>(
 
   const page = Math.max(0, Number(options.page || 0));
   const size = Math.max(1, Number(options.size || 10));
-  const totalElements = sorted.length;
-  const totalPages = Math.ceil(totalElements / size);
   const start = page * size;
   const content = sorted.slice(start, start + size);
 
-  return {
-    content,
-    items: content,
-    totalElements,
-    total: totalElements,
-    totalPages,
-    size,
-    number: page,
-    page,
-    numberOfElements: content.length,
-    first: page === 0,
-    last: page >= totalPages - 1 || totalPages === 0,
-    empty: content.length === 0,
-  };
+  return buildPageData(content, page, size, sorted.length);
 }

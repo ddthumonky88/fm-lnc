@@ -2,8 +2,10 @@ import { Controller, Get, Param, Query, Res, NotFoundException } from '@nestjs/c
 import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { LogosService } from './logos.service';
+import { RawResponse } from '../common/raw-response.decorator';
 
 @ApiTags('Logos')
+@RawResponse()
 @Controller('api/logos')
 export class LogosController {
   constructor(private readonly logosService: LogosService) {}

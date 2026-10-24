@@ -285,16 +285,18 @@ function CompetitionsExplorerContent() {
           }
           return (
             <div className="flex items-center gap-1.5">
-              <div className="w-5 h-3.5 shrink-0 flex items-center justify-center">
-                <img
-                  src={getNationLogoUrl(record.nation_id, record.nation_three_letter)}
-                  alt={record.nation_name || 'Nation'}
-                  className="w-5 h-3.5 object-cover rounded shadow-2xs border border-slate-200"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
+              {getNationLogoUrl(record.nation_id, record.nation_three_letter) ? (
+                <div className="w-5 h-3.5 shrink-0 flex items-center justify-center">
+                  <img
+                    src={getNationLogoUrl(record.nation_id, record.nation_three_letter)}
+                    alt={record.nation_name || 'Nation'}
+                    className="w-5 h-3.5 object-cover rounded shadow-2xs border border-slate-200"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              ) : null}
               <span
                 onClick={() => router.push(`/nation/${record.nation_id}`)}
                 className="font-medium text-xs text-slate-700 hover:text-blue-600 hover:underline cursor-pointer truncate"
@@ -595,14 +597,16 @@ function CompetitionsExplorerContent() {
                         </Tag>
                       ) : (
                         <div className="flex items-center gap-1 text-[11px] text-slate-600 truncate">
-                          <img
-                            src={getNationLogoUrl(c.nation_id, c.nation_three_letter)}
-                            alt=""
-                            className="w-4 h-3 object-cover rounded shadow-2xs inline-block"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
+                          {getNationLogoUrl(c.nation_id, c.nation_three_letter) ? (
+                            <img
+                              src={getNationLogoUrl(c.nation_id, c.nation_three_letter)}
+                              alt=""
+                              className="w-4 h-3 object-cover rounded shadow-2xs inline-block"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : null}
                           <span className="truncate">{c.nation_name}</span>
                         </div>
                       )}

@@ -18,6 +18,7 @@ import {
   Confederation,
 } from '../entities';
 import { Repository } from 'typeorm';
+import { RawResponse } from '../common/raw-response.decorator';
 
 @ApiTags('LNC')
 @Controller(['api/lnc', 'api/fm'])
@@ -45,6 +46,7 @@ export class LncController {
       example: '"NATION_LONG_NAME_CHANGE" 560 "Việt Nam" 8\n"COMP_LONG_NAME_CHANGE" 11 "English Premier Division" ""',
     },
   })
+  @RawResponse()
   @Get('export')
   async exportLnc(@Res() res: Response, @Query('download') download?: string) {
     const content = await this.lncService.exportLnc();

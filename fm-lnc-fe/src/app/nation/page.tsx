@@ -66,7 +66,7 @@ function NationExplorerContent() {
   const loadNations = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchAllNations(selectedConfed);
+      const data = await fetchAllNations(selectedConfed ? { confedId: selectedConfed } : undefined);
       setNations(data);
     } catch (err: any) {
       console.error(err);
@@ -127,26 +127,31 @@ function NationExplorerContent() {
         key: 'flag',
         width: 70,
         align: 'center',
-        render: (_: any, record: NationItem) => (
-          <div className="w-7 h-5 mx-auto flex items-center justify-center">
-            <img
-              src={getNationLogoUrl(record.id, record.three_letter_name)}
-              alt={record.long_name}
-              className="w-7 h-5 object-cover rounded shadow-2xs border border-slate-200"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                if (fallback) fallback.style.display = 'flex';
-              }}
-            />
-            <span
-              style={{ display: 'none' }}
-              className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 items-center justify-center text-[10px] font-bold text-slate-600"
-            >
-              {record.three_letter_name || record.long_name[0]}
-            </span>
-          </div>
-        ),
+        render: (_: any, record: NationItem) => {
+          const flagUrl = getNationLogoUrl(record.id, record.three_letter_name);
+          return (
+            <div className="w-7 h-5 mx-auto flex items-center justify-center">
+              {flagUrl ? (
+                <img
+                  src={flagUrl}
+                  alt={record.long_name}
+                  className="w-7 h-5 object-cover rounded shadow-2xs border border-slate-200"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <span
+                style={{ display: flagUrl ? 'none' : 'flex' }}
+                className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 items-center justify-center text-[10px] font-bold text-slate-600"
+              >
+                {record.three_letter_name || record.long_name?.[0] || 'N'}
+              </span>
+            </div>
+          );
+        },
       },
       {
         title: 'Code',
@@ -406,16 +411,18 @@ function NationExplorerContent() {
 
                   {/* Flag & Title */}
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-5 shrink-0 flex items-center justify-center">
-                      <img
-                        src={getNationLogoUrl(n.id, n.three_letter_name)}
-                        alt={n.long_name}
-                        className="w-7 h-5 object-cover rounded shadow-2xs border border-slate-200"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </div>
+                    {getNationLogoUrl(n.id, n.three_letter_name) ? (
+                      <div className="w-7 h-5 shrink-0 flex items-center justify-center">
+                        <img
+                          src={getNationLogoUrl(n.id, n.three_letter_name)}
+                          alt={n.long_name}
+                          className="w-7 h-5 object-cover rounded shadow-2xs border border-slate-200"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : null}
                     {n.three_letter_name && (
                       <Tag color="geekblue" className="font-mono font-bold text-[10px] m-0 shrink-0">
                         {n.three_letter_name}

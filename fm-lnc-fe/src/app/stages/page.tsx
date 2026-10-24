@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Input, Table, Tag, Popconfirm, Tooltip, message, Space, type TableColumnsType } from 'antd';
+import { Button, Input, Table, Tag, Popconfirm, Tooltip, message, Space, Pagination, type TableColumnsType } from 'antd';
 import { SearchOutlined, PlusOutlined, FlagOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { fetchStages, deleteRecord, StageItem } from '../../services/api';
 import { useApp } from '../../context/AppContext';
@@ -13,41 +13,72 @@ export default function StagesPage() {
   const [stages, setStages] = useState<StageItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterText, setFilterText] = useState('');
+  const [debouncedKeyword, setDebouncedKeyword] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [sortField, setSortField] = useState('id');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedKeyword(filterText);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [filterText]);
 
   const loadStages = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchStages();
+      const data = await fetchStages({
+        page: page - 1,
+        size: pageSize,
+        sort: `${sortField},${sortOrder}`,
+        keyword: debouncedKeyword.trim() || undefined,
+      });
       setStages(data);
+      const totalCount = (data as any).totalElements ?? (data as any).total ?? data.length;
+      setTotal(totalCount);
     } catch (err: any) {
       console.error(err);
       message.error(err.message || 'Failed to load tournament stages');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize, sortField, sortOrder, debouncedKeyword]);
 
   useEffect(() => {
     setHeaderTitle('Tournament Stages');
     setHeaderId(undefined);
-    loadStages();
-  }, [loadStages, refreshSignal, setHeaderTitle, setHeaderId]);
+  }, [setHeaderTitle, setHeaderId]);
 
-  const filteredStages = useMemo(() => {
-    if (!filterText.trim()) return stages;
-    const q = filterText.toLowerCase();
-    return stages.filter(
-      (s) => s.name.toLowerCase().includes(q) || String(s.id).includes(q),
-    );
-  }, [stages, filterText]);
+  useEffect(() => {
+    loadStages();
+  }, [loadStages, refreshSignal]);
 
   const handleDelete = async (id: string) => {
     try {
       await deleteRecord(RecordType.STAGE, id);
       message.success('Stage deleted');
-      setStages((prev) => prev.filter((s) => String(s.id) !== String(id)));
+      loadStages();
     } catch (e: any) {
       message.error(e.message || 'Delete failed');
+    }
+  };
+
+  const handleTableChange = (pagination: any, _filters: any, sorter: any) => {
+    if (pagination.current && pagination.current !== page) {
+      setPage(pagination.current);
+    }
+    if (pagination.pageSize && pagination.pageSize !== pageSize) {
+      setPageSize(pagination.pageSize);
+      setPage(1);
+    }
+    const singleSorter = Array.isArray(sorter) ? sorter[0] : sorter;
+    if (singleSorter && singleSorter.field && singleSorter.order) {
+      setSortField(String(singleSorter.field));
+      setSortOrder(singleSorter.order === 'descend' ? 'desc' : 'asc');
     }
   };
 
@@ -59,7 +90,8 @@ export default function StagesPage() {
         key: 'id',
         width: 150,
         align: 'left',
-        sorter: (a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+        sorter: true,
+        sortOrder: sortField === 'id' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
         render: (id: string) => (
           <Tag color="magenta" className="font-mono font-semibold m-0 text-xs">
             {id}
@@ -70,7 +102,8 @@ export default function StagesPage() {
         title: 'Name',
         dataIndex: 'name',
         key: 'name',
-        sorter: (a, b) => a.name.localeCompare(b.name),
+        sorter: true,
+        sortOrder: sortField === 'name' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
         render: (name: string) => (
           <div className="flex items-center gap-2.5">
             <span className="w-7 h-7 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-xs text-rose-600 shrink-0">
@@ -115,7 +148,7 @@ export default function StagesPage() {
         ),
       },
     ],
-    [openRecordModal],
+    [openRecordModal, sortField, sortOrder],
   );
 
   return (
@@ -126,7 +159,7 @@ export default function StagesPage() {
           <FlagOutlined className="text-rose-600 text-sm" />
           <span className="font-bold text-[#1e3a8a] text-xs sm:text-sm">Tournament Stages</span>
           <Tag color="magenta" className="m-0 font-bold text-xs">
-            {filteredStages.length} records
+            {total} records
           </Tag>
         </div>
 
@@ -149,7 +182,7 @@ export default function StagesPage() {
         {/* Filter bar */}
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4 pb-2 border-b border-gray-100">
           <div className="text-xs text-gray-500">
-            Total: <strong className="text-gray-800">{filteredStages.length}</strong> tournament stages
+            Total: <strong className="text-gray-800">{total}</strong> tournament stages
           </div>
 
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
@@ -165,56 +198,70 @@ export default function StagesPage() {
         </div>
 
         {/* Mobile Vertical Cards (md:hidden) - 1 card per row */}
-        <div className="md:hidden grid grid-cols-1 gap-3">
-          {filteredStages.length === 0 ? (
-            <div className="py-12 text-center text-gray-400 text-xs italic">
-              No tournament stages found
-            </div>
-          ) : (
-            filteredStages.map((s) => (
-              <div
-                key={s.id}
-                className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between gap-2"
-              >
-                <div className="flex items-center justify-between pb-1.5 border-b border-gray-100">
-                  <Tag color="magenta" className="font-mono font-bold text-[10px] sm:text-xs m-0">
-                    ID: {s.id}
-                  </Tag>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      type="text"
-                      shape="circle"
-                      size="small"
-                      icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-                      onClick={() => openRecordModal(RecordType.STAGE, s)}
-                    />
-                    <Popconfirm
-                      title="Delete Record"
-                      description={`Delete stage "${s.name}"?`}
-                      onConfirm={() => handleDelete(String(s.id))}
-                      okText="Delete"
-                      cancelText="Cancel"
-                      okButtonProps={{ danger: true }}
-                    >
+        <div className="md:hidden">
+          <div className="grid grid-cols-1 gap-3">
+            {stages.length === 0 ? (
+              <div className="py-12 text-center text-gray-400 text-xs italic">
+                No tournament stages found
+              </div>
+            ) : (
+              stages.map((s) => (
+                <div
+                  key={s.id}
+                  className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between gap-2"
+                >
+                  <div className="flex items-center justify-between pb-1.5 border-b border-gray-100">
+                    <Tag color="magenta" className="font-mono font-bold text-[10px] sm:text-xs m-0">
+                      ID: {s.id}
+                    </Tag>
+                    <div className="flex items-center gap-1">
                       <Button
                         type="text"
                         shape="circle"
                         size="small"
-                        danger
-                        icon={<DeleteOutlined style={{ fontSize: 13 }} />}
+                        icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
+                        onClick={() => openRecordModal(RecordType.STAGE, s)}
                       />
-                    </Popconfirm>
+                      <Popconfirm
+                        title="Delete Record"
+                        description={`Delete stage "${s.name}"?`}
+                        onConfirm={() => handleDelete(String(s.id))}
+                        okText="Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                      >
+                        <Button
+                          type="text"
+                          shape="circle"
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined style={{ fontSize: 13 }} />}
+                        />
+                      </Popconfirm>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-xs text-rose-600 shrink-0">
+                      <FlagOutlined />
+                    </span>
+                    <span className="font-semibold text-slate-800 text-sm">{s.name}</span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2.5">
-                  <span className="w-7 h-7 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-xs text-rose-600 shrink-0">
-                    <FlagOutlined />
-                  </span>
-                  <span className="font-semibold text-slate-800 text-sm">{s.name}</span>
-                </div>
-              </div>
-            ))
+              ))
+            )}
+          </div>
+          {total > pageSize && (
+            <div className="mt-4 flex justify-center">
+              <Pagination
+                current={page}
+                pageSize={pageSize}
+                total={total}
+                size="small"
+                showSizeChanger={false}
+                onChange={(p) => setPage(p)}
+              />
+            </div>
           )}
         </div>
 
@@ -223,15 +270,18 @@ export default function StagesPage() {
           <Table<StageItem>
             rowKey="id"
             columns={columns}
-            dataSource={filteredStages}
+            dataSource={stages}
             loading={loading}
             pagination={{
-              defaultPageSize: 10,
+              current: page,
+              pageSize: pageSize,
+              total: total,
               showSizeChanger: true,
               pageSizeOptions: ['10', '20', '50', '100'],
               showTotal: (total, range) => `Showing ${range[0]} - ${range[1]} of ${total} records`,
               size: 'small',
             }}
+            onChange={handleTableChange}
             size="middle"
           />
         </div>

@@ -39,13 +39,6 @@ export class SearchFilterDto {
   })
   keyword?: string;
 
-  @ApiPropertyOptional({
-    description: 'Alias cho keyword',
-    type: String,
-    required: false,
-  })
-  q?: string;
-
   page?: number;
   size?: number;
   sort?: string | string[];

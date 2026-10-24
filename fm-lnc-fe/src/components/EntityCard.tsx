@@ -216,27 +216,31 @@ export default function EntityCard({
     }
     switch (type) {
       case EntityType.CONFEDERATION:
-      case 'confederation':
+      case 'confederation': {
+        const confedLogo = getConfederationLogoUrl(data.id);
         return (
           <div className="relative w-6 h-6 shrink-0 flex items-center justify-center">
-            <img
-              src={getConfederationLogoUrl(data.id)}
-              alt={data.name || 'Confederation'}
-              className="w-6 h-6 object-contain rounded bg-white shadow-2xs border border-slate-200"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                if (fallback) fallback.style.display = 'flex';
-              }}
-            />
+            {confedLogo ? (
+              <img
+                src={confedLogo}
+                alt={data.name || 'Confederation'}
+                className="w-6 h-6 object-contain rounded bg-white shadow-2xs border border-slate-200"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+            ) : null}
             <span
-              style={{ display: 'none' }}
+              style={{ display: confedLogo ? 'none' : 'flex' }}
               className="w-6 h-6 rounded-full bg-blue-50 border border-blue-200 items-center justify-center text-xs font-bold text-blue-700"
             >
               {data.name ? data.name[0] : 'C'}
             </span>
           </div>
         );
+      }
       case EntityType.NATION:
       case 'nation':
         return (
@@ -557,14 +561,16 @@ export default function EntityCard({
                     className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded text-xs text-slate-600 hover:text-sky-700 transition-all cursor-pointer"
                     aria-label="View info"
                   >
-                    <img
-                      src={getNationLogoUrl(nationInfo.id, nationInfo.code)}
-                      alt={nationInfo.name || 'Nation'}
-                      className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0 inline-block"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
+                    {getNationLogoUrl(nationInfo.id, nationInfo.code) ? (
+                      <img
+                        src={getNationLogoUrl(nationInfo.id, nationInfo.code)}
+                        alt={nationInfo.name || 'Nation'}
+                        className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0 inline-block"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : null}
                     {nationInfo.code && (
                       <span className="text-[10.5px] font-semibold text-inherit leading-none">
                         {nationInfo.code}

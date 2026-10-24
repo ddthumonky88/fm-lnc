@@ -16,6 +16,12 @@ interface CardGridProps {
   emptyText?: string;
   defaultPageSize?: number;
   columns?: number;
+  serverPagination?: {
+    current: number;
+    pageSize: number;
+    total: number;
+    onChange: (page: number, pageSize: number) => void;
+  };
 }
 
 export default function CardGrid({
@@ -29,18 +35,23 @@ export default function CardGrid({
   emptyText = 'No records found',
   defaultPageSize = 20,
   columns,
+  serverPagination,
 }: CardGridProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
-  // Reset page to 1 when items change or type changes
+  // Reset page to 1 when items change or type changes (only in client pagination mode)
   useEffect(() => {
-    setPage(1);
-  }, [items.length, type]);
+    if (!serverPagination) {
+      setPage(1);
+    }
+  }, [items.length, type, serverPagination]);
 
   useEffect(() => {
-    setPageSize(defaultPageSize);
-  }, [defaultPageSize]);
+    if (!serverPagination) {
+      setPageSize(defaultPageSize);
+    }
+  }, [defaultPageSize, serverPagination]);
 
   if (loading) {
     return (
@@ -59,8 +70,13 @@ export default function CardGrid({
     );
   }
 
-  const startIndex = (page - 1) * pageSize;
-  const pagedItems = items.slice(startIndex, startIndex + pageSize);
+  const isServer = Boolean(serverPagination);
+  const currentPage = isServer ? serverPagination!.current : page;
+  const currentPageSize = isServer ? serverPagination!.pageSize : pageSize;
+  const totalRecords = isServer ? serverPagination!.total : items.length;
+
+  const startIndex = (currentPage - 1) * currentPageSize;
+  const pagedItems = isServer ? items : items.slice(startIndex, startIndex + currentPageSize);
 
   const isNationOrConfed = String(type).toLowerCase() === 'nation' || String(type).toLowerCase() === 'confederation';
   const isFiveCols = String(type) === 'stadium' || String(type) === 'city' || columns === 5;
@@ -86,24 +102,28 @@ export default function CardGrid({
         ))}
       </div>
 
-      {items.length > 0 && (
+      {totalRecords > 0 && (
         <div className="flex flex-col sm:flex-row justify-between items-center mt-5 pt-3 border-t border-gray-100 gap-2">
           <span className="text-xs text-gray-500">
-            Showing {Math.min(startIndex + 1, items.length)} -{' '}
-            {Math.min(startIndex + pageSize, items.length)} of {items.length} records
+            Showing {Math.min(startIndex + 1, totalRecords)} -{' '}
+            {Math.min(startIndex + currentPageSize, totalRecords)} of {totalRecords} records
           </span>
           <Pagination
-            current={page}
-            pageSize={pageSize}
-            total={items.length}
+            current={currentPage}
+            pageSize={currentPageSize}
+            total={totalRecords}
             pageSizeOptions={['10', '20', '30', '40', '50', '100']}
             showSizeChanger
             showQuickJumper
             size="small"
             responsive
             onChange={(p, s) => {
-              setPage(p);
-              setPageSize(s);
+              if (isServer) {
+                serverPagination!.onChange(p, s);
+              } else {
+                setPage(p);
+                setPageSize(s);
+              }
             }}
           />
         </div>

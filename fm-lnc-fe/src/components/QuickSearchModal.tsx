@@ -204,14 +204,16 @@ export default function QuickSearchModal({
                     className="py-2 px-2 hover:bg-amber-50 rounded cursor-pointer flex items-center justify-between transition"
                   >
                     <div className="flex items-center gap-2.5">
-                      <img
-                        src={getNationLogoUrl(n.id, n.three_letter_name)}
-                        alt={n.short_name || n.long_name}
-                        className="w-5 h-3.5 object-cover rounded-xs border border-slate-200 shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+                      {getNationLogoUrl(n.id, n.three_letter_name) ? (
+                        <img
+                          src={getNationLogoUrl(n.id, n.three_letter_name)}
+                          alt={n.short_name || n.long_name}
+                          className="w-5 h-3.5 object-cover rounded-xs border border-slate-200 shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : null}
                       <div>
                         <div className="text-xs font-semibold text-gray-800">{n.long_name}</div>
                         <div className="text-[11px] text-gray-500">Code: {n.three_letter_name} &bull; {n.confederation?.name}</div>

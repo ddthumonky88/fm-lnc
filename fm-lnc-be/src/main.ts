@@ -5,6 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { DataSource } from 'typeorm';
 import * as os from 'os';
 import { runStartupMigrations } from './database/startup-migrations';
+import { applyEnvelopeToSwagger } from './common/swagger-envelope';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -52,7 +53,7 @@ async function bootstrap() {
     .addTag('Health', 'Health check')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = applyEnvelopeToSwagger(SwaggerModule.createDocument(app, config));
   const swaggerCustomOptions = {
     swaggerOptions: {
       persistAuthorization: true,

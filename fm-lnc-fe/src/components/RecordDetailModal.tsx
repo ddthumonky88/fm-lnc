@@ -740,14 +740,16 @@ export default function RecordDetailModal({
                     Nation:
                   </span>
                   <div className="flex items-center gap-1.5 min-w-0 text-left">
-                    <img
-                      src={getNationLogoUrl(nationId, nationCode)}
-                      alt={nationName || 'Nation'}
-                      className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
+                    {getNationLogoUrl(nationId, nationCode) ? (
+                      <img
+                        src={getNationLogoUrl(nationId, nationCode)}
+                        alt={nationName || 'Nation'}
+                        className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : null}
                     <span className={`font-bold text-xs sm:text-[13px] ${getValueClass(['nation_id', 'country_id', 'nation'])} truncate`}>
                       {nationName}
                     </span>

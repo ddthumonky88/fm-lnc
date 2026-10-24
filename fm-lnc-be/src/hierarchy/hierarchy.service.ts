@@ -37,7 +37,7 @@ export class HierarchyService {
 
   async getContinents(filter?: PaginationQueryDto) {
     let confeds = await this.confedRepo.find({ order: { id: 'ASC' } });
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const q = searchKey.toLowerCase();
       confeds = confeds.filter(
@@ -73,7 +73,7 @@ export class HierarchyService {
   async getNationsByContinent(confedId: string, filter?: PaginationQueryDto) {
     let whereClause = 'n.confederation_id = $1';
     const params: any[] = [String(confedId)];
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
       whereClause += ` AND (LOWER(n.long_name) LIKE $${params.length} OR LOWER(COALESCE(n.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(n.three_letter_name, '')) LIKE $${params.length} OR CAST(n.id AS TEXT) LIKE $${params.length})`;
@@ -117,7 +117,7 @@ export class HierarchyService {
   async getIntCompetitionsByContinent(confedId: string, filter?: PaginationQueryDto) {
     let whereClause = `c.confed_id = $1 AND (c.is_international = true OR c.nation_id IS NULL) AND (c.parent_id IS NULL OR c.parent_id = '')`;
     const params: any[] = [String(confedId)];
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
       whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
@@ -227,7 +227,7 @@ export class HierarchyService {
 
     let whereClause = `c.nation_id = $1 AND (c.parent_id IS NULL OR c.parent_id = '')`;
     const params: any[] = [strNationId];
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
       whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
@@ -359,7 +359,7 @@ export class HierarchyService {
       qb.andWhere('club.comp_id IS NULL');
     }
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
@@ -379,7 +379,7 @@ export class HierarchyService {
       .leftJoinAndSelect('club.nation', 'nation')
       .where('club.nation_id = :nationId', { nationId: String(nationId) });
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
@@ -398,7 +398,7 @@ export class HierarchyService {
       .leftJoinAndSelect('club.nation', 'nation')
       .where('club.comp_id = :compId', { compId: String(compId) });
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
@@ -417,7 +417,7 @@ export class HierarchyService {
       .leftJoinAndSelect('stadium.nation', 'nation')
       .where('stadium.nation_id = :nationId', { nationId: String(nationId) });
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
@@ -444,7 +444,7 @@ export class HierarchyService {
       }
     }
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
@@ -464,7 +464,7 @@ export class HierarchyService {
       .leftJoinAndSelect('award.competition', 'competition')
       .where('award.nation_id = :nationId AND award.comp_id IS NULL', { nationId: String(nationId) });
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
@@ -484,7 +484,7 @@ export class HierarchyService {
       .leftJoinAndSelect('award.competition', 'competition')
       .where('award.comp_id = :compId', { compId: String(compId) });
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.andWhere(
@@ -526,7 +526,7 @@ export class HierarchyService {
     const strId = String(compId);
     let whereClause = 'c.parent_id = $1';
     const params: any[] = [strId];
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
       whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
@@ -583,7 +583,7 @@ export class HierarchyService {
       .leftJoinAndSelect('award.nation', 'nation')
       .leftJoinAndSelect('award.competition', 'competition');
 
-    const searchKey = (filter?.keyword || filter?.q || '').trim();
+    const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
       qb.where(
@@ -600,8 +600,8 @@ export class HierarchyService {
     const filter =
       typeof queryOrFilter === 'object' && queryOrFilter !== null
         ? queryOrFilter
-        : { q: queryOrFilter };
-    const query = filter.keyword || filter.q;
+        : { keyword: queryOrFilter };
+    const query = filter.keyword;
     const qb = this.personRepo.createQueryBuilder('p');
     if (query && String(query).trim()) {
       const term = String(query).trim();
@@ -618,8 +618,8 @@ export class HierarchyService {
     const filter =
       typeof queryOrFilter === 'object' && queryOrFilter !== null
         ? queryOrFilter
-        : { q: queryOrFilter };
-    const query = filter.keyword || filter.q;
+        : { keyword: queryOrFilter };
+    const query = filter.keyword;
     const qb = this.stageRepo.createQueryBuilder('s');
     if (query && String(query).trim()) {
       const term = String(query).trim();
@@ -632,11 +632,11 @@ export class HierarchyService {
     return paginateAndSort(items, filter);
   }
 
-  async getAllNations(filterOrConfedId?: any, legacyQ?: string) {
+  async getAllNations(filterOrConfedId?: any, legacyKeyword?: string) {
     const filter: NationListFilterDto =
       typeof filterOrConfedId === 'object' && filterOrConfedId !== null
         ? filterOrConfedId
-        : { confedId: filterOrConfedId, q: legacyQ };
+        : { confedId: filterOrConfedId, keyword: legacyKeyword };
 
     let whereClause = '1=1';
     const params: any[] = [];
@@ -644,7 +644,7 @@ export class HierarchyService {
       params.push(String(filter.confedId));
       whereClause += ` AND n.confederation_id = $${params.length}`;
     }
-    const searchKey = (filter.keyword || filter.q || '').trim();
+    const searchKey = (filter.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
       whereClause += ` AND (LOWER(n.long_name) LIKE $${params.length} OR LOWER(COALESCE(n.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(n.three_letter_name, '')) LIKE $${params.length} OR CAST(n.id AS TEXT) LIKE $${params.length})`;
@@ -690,7 +690,7 @@ export class HierarchyService {
   async getAllCompetitions(
     filterOrConfedId?: any,
     legacyNationId?: string,
-    legacyQ?: string,
+    legacyKeyword?: string,
     legacyIsInternational?: boolean,
   ) {
     const filter: CompetitionListFilterDto =
@@ -699,7 +699,7 @@ export class HierarchyService {
         : {
             confedId: filterOrConfedId,
             nationId: legacyNationId,
-            q: legacyQ,
+            keyword: legacyKeyword,
             isInternational: legacyIsInternational,
           };
 
@@ -720,7 +720,7 @@ export class HierarchyService {
         whereClause += ` AND (c.is_international = false AND c.nation_id IS NOT NULL)`;
       }
     }
-    const searchKey = (filter.keyword || filter.q || '').trim();
+    const searchKey = (filter.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
       whereClause += ` AND (LOWER(c.long_name) LIKE $${params.length} OR LOWER(COALESCE(c.short_name, '')) LIKE $${params.length} OR LOWER(COALESCE(c.three_letter_name, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;

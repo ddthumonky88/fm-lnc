@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
 import {
@@ -19,6 +20,8 @@ import { SearchModule } from './search/search.module';
 import { LogosModule } from './logos/logos.module';
 import { ConfigModule } from './config/config.module';
 import { HealthController } from './health.controller';
+import { ResponseEnvelopeInterceptor } from './common/response-envelope.interceptor';
+import { AllExceptionsFilter } from './common/all-exceptions.filter';
 
 
 dotenv.config();
@@ -54,5 +57,9 @@ dotenv.config();
     SearchModule,
   ],
   controllers: [HealthController],
+  providers: [
+    { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+  ],
 })
 export class AppModule {}

@@ -371,7 +371,7 @@ export default function CompetitionDetailPage() {
           {/* Header & Competition Title Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              {nationId ? (
+              {nationId && getNationLogoUrl(nationId, nationCode) ? (
                 <img
                   src={getNationLogoUrl(nationId, nationCode)}
                   alt={nationName || 'Nation'}
@@ -380,7 +380,7 @@ export default function CompetitionDetailPage() {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-              ) : confedId ? (
+              ) : confedId && getConfederationLogoUrl(confedId) ? (
                 <img
                   src={getConfederationLogoUrl(confedId)}
                   alt="Confederation"

@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
+import { RawResponse } from './common/raw-response.decorator';
 
 @ApiTags('Health')
+@RawResponse()
 @Controller(['health', 'api/health'])
 export class HealthController {
   @ApiOperation({ summary: 'Kiểm tra trạng thái server' })

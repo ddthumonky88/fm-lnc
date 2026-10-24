@@ -387,26 +387,30 @@ export default function LncSortitoutsiExplorer() {
         dataIndex: 'name',
         key: 'name',
         sorter: (a, b) => a.name.localeCompare(b.name),
-        render: (name: string, record: ConfederationItem) => (
-          <div className="flex items-center gap-3">
-            <div className="relative w-8 h-8 shrink-0 flex items-center justify-center">
-              <img
-                src={getConfederationLogoUrl(record.id)}
-                alt={name}
-                className="w-8 h-8 object-contain rounded bg-white p-0.5 border border-slate-200 shadow-2xs"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = 'flex';
-                }}
-              />
-              <span
-                style={{ display: 'none' }}
-                className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 items-center justify-center text-xs font-bold text-blue-700 shrink-0"
-              >
-                {name ? name[0] : 'C'}
-              </span>
-            </div>
+        render: (name: string, record: ConfederationItem) => {
+          const confedLogo = getConfederationLogoUrl(record.id);
+          return (
+            <div className="flex items-center gap-3">
+              <div className="relative w-8 h-8 shrink-0 flex items-center justify-center">
+                {confedLogo ? (
+                  <img
+                    src={confedLogo}
+                    alt={name}
+                    className="w-8 h-8 object-contain rounded bg-white p-0.5 border border-slate-200 shadow-2xs"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <span
+                  style={{ display: confedLogo ? 'none' : 'flex' }}
+                  className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 items-center justify-center text-xs font-bold text-blue-700 shrink-0"
+                >
+                  {name ? name[0] : 'C'}
+                </span>
+              </div>
             <button
               type="button"
               onClick={() => router.push(`/confederation/${record.id}`)}
@@ -415,7 +419,8 @@ export default function LncSortitoutsiExplorer() {
               {name}
             </button>
           </div>
-        ),
+          );
+        },
       },
       {
         title: 'Countries',
@@ -658,14 +663,16 @@ export default function LncSortitoutsiExplorer() {
                         </Tag>
                       </div>
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <img
-                          src={getConfederationLogoUrl(c.id)}
-                          alt={c.name}
-                          className="w-6 h-6 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
+                        {getConfederationLogoUrl(c.id) ? (
+                          <img
+                            src={getConfederationLogoUrl(c.id)}
+                            alt={c.name}
+                            className="w-6 h-6 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : null}
                         <div className="font-bold text-xs text-slate-800 line-clamp-1" title={c.name}>{c.name}</div>
                       </div>
                     </div>
@@ -889,14 +896,16 @@ export default function LncSortitoutsiExplorer() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                 <div>
                   <h2 className="text-base font-bold text-gray-800 flex items-center gap-2.5">
-                    <img
-                      src={getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.three_letter_name)}
-                      alt={currentStep.title}
-                      className="w-8 h-5.5 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
+                    {getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.three_letter_name) ? (
+                      <img
+                        src={getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.three_letter_name)}
+                        alt={currentStep.title}
+                        className="w-8 h-5.5 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : null}
                     <span>{currentStep.title}</span>
                     <Tag color="cyan" className="font-bold m-0">
                       ID: {nationHub.nation?.id}
@@ -1089,7 +1098,7 @@ export default function LncSortitoutsiExplorer() {
                   <div className="bg-white rounded-lg border border-slate-200 p-3.5 sm:p-4 mb-4 shadow-2xs">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                       <div className="flex items-center gap-3">
-                        {compInfo?.nation ? (
+                        {compInfo?.nation && getNationLogoUrl(compInfo.nation.id, compInfo.nation.three_letter_name) ? (
                           <img
                             src={getNationLogoUrl(compInfo.nation.id, compInfo.nation.three_letter_name)}
                             alt={compInfo.nation.short_name || compInfo.nation.long_name}
@@ -1098,7 +1107,7 @@ export default function LncSortitoutsiExplorer() {
                               e.currentTarget.style.display = 'none';
                             }}
                           />
-                        ) : (compInfo?.confederation?.id || compInfo?.confed_id) ? (
+                        ) : (compInfo?.confederation?.id || compInfo?.confed_id) && getConfederationLogoUrl(compInfo.confederation?.id || compInfo.confed_id!) ? (
                           <img
                             src={getConfederationLogoUrl(compInfo.confederation?.id || compInfo.confed_id!)}
                             alt={compInfo.confederation?.name || 'Confederation'}
