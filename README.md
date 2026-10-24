@@ -146,7 +146,7 @@ Mở trình duyệt: `http://localhost:3000`
 ### Bước 1 — Tạo Services trên Render
 
 1. Vào [render.com](https://render.com) → **New** → **Blueprint**
-2. Kết nối GitHub repo `fm-lnc-manager-tool`
+2. Kết nối GitHub repo `fm-lnc`
 3. Render tự đọc `render.yaml` và tạo sẵn **Web Service (BE)** + **PostgreSQL**
 4. Chờ PostgreSQL service chạy xong → vào tab **"Info"** → copy **External Database URL**
 
@@ -188,4 +188,4 @@ confederations  (7 records)
 
 ## 📁 GitHub Repository
 
-**https://github.com/ddthumonky88/fm-lnc-manager-tool**
+**https://github.com/ddthumonky88/fm-lnc**
