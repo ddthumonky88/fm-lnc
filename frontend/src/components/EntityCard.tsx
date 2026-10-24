@@ -45,6 +45,82 @@ const formatCode = (code?: string | null) => {
   return code.trim();
 };
 
+export function formatCategoryCode(categoryStr?: string | null): string {
+  if (!categoryStr || typeof categoryStr !== 'string') return '';
+  const trimmed = categoryStr.trim();
+  if (!trimmed) return '';
+
+  const upper = trimmed.toUpperCase();
+  if (
+    upper === '[CUP]' ||
+    upper === '[YTH]' ||
+    upper === '[OTH]' ||
+    /^\[L\d+\]$/.test(upper) ||
+    upper === '[L]'
+  ) {
+    return upper;
+  }
+
+  const lower = trimmed.toLowerCase();
+
+  // 1. Youth => [YTH]
+  if (
+    lower.includes('youth') ||
+    lower.includes('u21') ||
+    lower.includes('u19') ||
+    lower.includes('u18') ||
+    lower.includes('u23')
+  ) {
+    return '[YTH]';
+  }
+
+  // 2. Cup => [CUP]
+  if (lower.includes('cup')) {
+    return '[CUP]';
+  }
+
+  // 3. League (n) => [Ln]
+  const leagueMatch =
+    trimmed.match(/league\s*\(\s*(\d+)\s*\)/i) ||
+    trimmed.match(/\((\d+)\)/) ||
+    trimmed.match(/league\s*(\d+)/i) ||
+    trimmed.match(/tier\s*(\d+)/i) ||
+    trimmed.match(/division\s*(\d+)/i);
+
+  if (leagueMatch) {
+    return `[L${leagueMatch[1]}]`;
+  }
+
+  if (
+    lower.includes('league') ||
+    lower.includes('division') ||
+    lower.includes('tier') ||
+    lower.includes('lower leagues')
+  ) {
+    return '[L]';
+  }
+
+  // 4. Other => [OTH]
+  return '[OTH]';
+}
+
+export function getCategoryTagColor(
+  categoryStr?: string | null,
+  isRedFn?: (val?: any) => boolean
+): string {
+  if (!categoryStr) return 'default';
+  const upper = String(categoryStr).trim().toUpperCase();
+  if (upper.includes('EXTINCT') || upper.includes('REMOVE')) {
+    return 'error';
+  }
+  const code = formatCategoryCode(categoryStr);
+  if (code.startsWith('[L')) return 'blue';
+  if (code === '[CUP]') return 'green';
+  if (code === '[YTH]') return 'purple';
+  if (isRedFn && isRedFn(categoryStr)) return 'error';
+  return 'default';
+}
+
 const parseColorInfo = (rgbStr?: string | null) => {
   if (!rgbStr || typeof rgbStr !== 'string') return null;
   const parts = rgbStr.trim().split(/\s+/).map(Number);
@@ -445,8 +521,8 @@ export default function EntityCard({
         }`}
       >
       <div>
-        {/* Top Header Bar: [flag / thẻ tên], 2 thẻ màu */}
-        {(nationInfo || bgInfo || fgInfo || data.is_extinct) && (
+        {/* Top Header Bar: [flag / thẻ tên], 2 thẻ màu, [Category Tag], [Extinct Tag] */}
+        {(nationInfo || bgInfo || fgInfo || data.is_extinct || (type !== 'city' && data.categories)) && (
           <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-gray-100 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap min-w-0">
               {/* [flag / thẻ tên] */}
@@ -526,11 +602,24 @@ export default function EntityCard({
               )}
             </div>
 
-            {data.is_extinct && (
-              <Tag color="red" className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight ml-auto">
-                Extinct
-              </Tag>
-            )}
+            <div className="flex items-center gap-1.5 ml-auto shrink-0 min-w-0">
+              {type !== 'city' && data.categories && (
+                <Tooltip title={data.categories} trigger="hover" destroyTooltipOnHide>
+                  <Tag
+                    color={getCategoryTagColor(data.categories, isRedKeyword)}
+                    className="m-0 text-[10px] sm:text-[10.5px] font-semibold shrink-0 py-0 px-1.5 leading-tight font-mono cursor-default"
+                  >
+                    {formatCategoryCode(data.categories)}
+                  </Tag>
+                </Tooltip>
+              )}
+
+              {data.is_extinct && (
+                <Tag color="red" className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight">
+                  Extinct
+                </Tag>
+              )}
+            </div>
           </div>
         )}
 
@@ -779,22 +868,6 @@ export default function EntityCard({
                 </>
               )}
 
-              {/* Category for other types (text format) */}
-              {type !== 'city' && data.categories && (
-                <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                  <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-14 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
-                    Category:
-                  </span>
-                  <span
-                    className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
-                      isRedKeyword(data.categories) ? 'text-red-600' : 'text-gray-800'
-                    }`}
-                    title={data.categories}
-                  >
-                    {data.categories}
-                  </span>
-                </div>
-              )}
 
               {/* Note */}
               {data.note && (

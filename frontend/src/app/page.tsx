@@ -63,6 +63,7 @@ import RecordModal from '../components/RecordModal';
 import QuickSearchModal from '../components/QuickSearchModal';
 import CardGrid from '../components/CardGrid';
 import CompetitionGroupView, { sortCompetitionsByCategory } from '../components/CompetitionGroupView';
+import { formatCategoryCode, getCategoryTagColor } from '../components/EntityCard';
 import CityGroupView from '../components/CityGroupView';
 import { CompIcon, StadiumIcon, CityIcon, AwardIcon } from '../components/EntityIcons';
 import { useApp } from '../context/AppContext';
@@ -1170,9 +1171,14 @@ export default function LncSortitoutsiExplorer() {
                               </Tag>
                             )}
                             {compInfo?.categories && (
-                              <Tag color="blue" className="m-0 text-xs">
-                                {compInfo.categories}
-                              </Tag>
+                              <Tooltip title={compInfo.categories} trigger="hover" destroyTooltipOnHide>
+                                <Tag
+                                  color={getCategoryTagColor(compInfo.categories)}
+                                  className="m-0 text-xs font-semibold font-mono cursor-default"
+                                >
+                                  {formatCategoryCode(compInfo.categories)}
+                                </Tag>
+                              </Tooltip>
                             )}
                           </div>
                           {compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (

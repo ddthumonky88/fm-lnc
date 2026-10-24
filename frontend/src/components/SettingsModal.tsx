@@ -340,29 +340,27 @@ export default function SettingsModal({
                           </span>
                         </div>
                       ))}
-                    </div>
-
-                    {/* Sync Actions */}
-                    <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
-                      <Button
-                        icon={<SyncOutlined spin={syncing} />}
-                        loading={syncing}
-                        onClick={handleSyncLnc}
-                        disabled={!lncStatus?.allFilesFound || syncingToProd}
-                        className="text-xs text-emerald-700 border-emerald-300 hover:border-emerald-500"
-                      >
-                        Đồng bộ DB Local
-                      </Button>
-                      <Button
-                        type="primary"
-                        icon={<CloudUploadOutlined spin={syncingToProd} />}
-                        loading={syncingToProd}
-                        onClick={handleSyncToProd}
-                        disabled={!lncStatus?.allFilesFound || syncing}
-                        className="text-xs bg-blue-600 hover:bg-blue-700"
-                      >
-                        Đẩy lên Cloud Prod
-                      </Button>
+                      {/* Sync Actions inside status card (2-col grid, never cut off) */}
+                      <div className="pt-2 border-t border-slate-200/70 grid grid-cols-2 gap-2">
+                        <Button
+                          icon={<SyncOutlined spin={syncing} />}
+                          loading={syncing}
+                          onClick={handleSyncLnc}
+                          disabled={!lncStatus?.allFilesFound || syncingToProd}
+                          className="text-xs text-emerald-700 border-emerald-300 hover:border-emerald-500 hover:text-emerald-800 bg-white h-8"
+                        >
+                          Đồng bộ DB Local
+                        </Button>
+                        <Button
+                          icon={<CloudUploadOutlined spin={syncingToProd} />}
+                          loading={syncingToProd}
+                          onClick={handleSyncToProd}
+                          disabled={!lncStatus?.allFilesFound || syncing}
+                          className="text-xs text-sky-700 border-sky-300 hover:border-sky-500 hover:text-sky-800 bg-white h-8"
+                        >
+                          Đẩy lên Cloud Prod
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ),
@@ -438,11 +436,10 @@ export default function SettingsModal({
 
                     <div className="pt-2 flex justify-end border-t border-slate-100">
                       <Button
-                        type="primary"
                         icon={<ReloadOutlined spin={reloadingLogos} />}
                         loading={reloadingLogos}
                         onClick={handleReloadLogos}
-                        className="bg-blue-600 hover:bg-blue-700 text-xs"
+                        className="text-xs text-purple-700 border-purple-300 hover:border-purple-500 hover:text-purple-800 bg-white h-8"
                       >
                         Quét & Nạp lại Logo
                       </Button>

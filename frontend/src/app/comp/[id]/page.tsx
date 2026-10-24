@@ -30,6 +30,7 @@ import CardGrid from '../../../components/CardGrid';
 import { CompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
+import { formatCategoryCode, getCategoryTagColor } from '../../../components/EntityCard';
 
 export default function CompetitionDetailPage() {
   const router = useRouter();
@@ -444,9 +445,14 @@ export default function CompetitionDetailPage() {
                     </Tag>
                   )}
                   {compInfo?.categories && (
-                    <Tag color="blue" className="m-0 text-xs">
-                      {compInfo.categories}
-                    </Tag>
+                    <Tooltip title={compInfo.categories} trigger="hover" destroyTooltipOnHide>
+                      <Tag
+                        color={getCategoryTagColor(compInfo.categories)}
+                        className="m-0 text-xs font-semibold font-mono"
+                      >
+                        {formatCategoryCode(compInfo.categories)}
+                      </Tag>
+                    </Tooltip>
                   )}
                   {compInfo?.parent_id && (
                     <Tag

@@ -43,6 +43,7 @@ import {
 } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { RecordType } from '../../types';
+import { formatCategoryCode, getCategoryTagColor } from '../../components/EntityCard';
 
 const parseColor = (rgbStr?: string | null) => {
   if (!rgbStr) return null;
@@ -310,18 +311,13 @@ function CompetitionsExplorerContent() {
         width: 110,
         render: (cat: string) => {
           if (!cat) return <span className="text-gray-300">-</span>;
-          const lower = cat.toLowerCase();
-          const color = lower.includes('league')
-            ? 'blue'
-            : lower.includes('cup')
-            ? 'green'
-            : lower.includes('youth')
-            ? 'purple'
-            : 'default';
+          const color = getCategoryTagColor(cat);
           return (
-            <Tag color={color} className="text-xs m-0">
-              {cat}
-            </Tag>
+            <Tooltip title={cat} trigger="hover" destroyTooltipOnHide>
+              <Tag color={color} className="text-xs m-0 font-semibold font-mono cursor-default">
+                {formatCategoryCode(cat)}
+              </Tag>
+            </Tooltip>
           );
         },
       },

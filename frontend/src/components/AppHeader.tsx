@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Button,
   Dropdown,
@@ -77,12 +77,6 @@ export default function AppHeader({
   headerLogo,
 }: AppHeaderProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const [isMobileBreadcrumbsOpen, setIsMobileBreadcrumbsOpen] = useState(false);
-
-  useEffect(() => {
-    setIsMobileBreadcrumbsOpen(false);
-  }, [pathname, breadcrumbs]);
 
   const effectiveBreadcrumbs: BreadcrumbStep[] = useMemo(() => {
     if (breadcrumbs && breadcrumbs.length > 0) {
@@ -317,8 +311,7 @@ export default function AppHeader({
       {/* Dedicated Breadcrumbs Bar (below main header) */}
       {effectiveBreadcrumbs.length > 1 && (
         <div className="bg-white border-t border-slate-100 px-3 sm:px-6 py-1.5 sm:py-2 transition-all">
-          {/* Desktop Breadcrumbs: full horizontal path (sm and up) */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs sm:text-[13px] font-bold uppercase tracking-tight flex-wrap">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-[13px] font-bold uppercase tracking-tight flex-wrap">
             {effectiveBreadcrumbs.map((crumb, idx) => {
               const isLast = idx === effectiveBreadcrumbs.length - 1;
               return (
@@ -352,66 +345,6 @@ export default function AppHeader({
                 </React.Fragment>
               );
             })}
-          </div>
-
-          {/* Mobile Breadcrumbs Sub-bar (sm:hidden) */}
-          <div className="sm:hidden">
-            <button
-              type="button"
-              onClick={() => setIsMobileBreadcrumbsOpen((prev) => !prev)}
-              className="w-full text-[#1d70b8] hover:text-[#0f3b6c] text-[11px] font-semibold tracking-wide uppercase cursor-pointer flex items-center justify-between select-none"
-            >
-              <span>{isMobileBreadcrumbsOpen ? 'HIDE BREADCRUMBS' : 'VIEW BREADCRUMBS'}</span>
-              <DownOutlined
-                className={`text-[9px] text-[#1d70b8] transition-transform duration-200 ${
-                  isMobileBreadcrumbsOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-
-            {isMobileBreadcrumbsOpen && (
-              <div className="mt-2 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1 text-[11px] font-bold uppercase tracking-tight">
-                {effectiveBreadcrumbs.map((crumb, idx) => {
-                  const isLast = idx === effectiveBreadcrumbs.length - 1;
-                  return (
-                    <React.Fragment key={idx}>
-                      {idx > 0 && (
-                        <span className="text-[#1d70b8] font-bold select-none px-0.5">&gt;</span>
-                      )}
-                      {isLast ? (
-                        <span className="font-bold text-[#0f3b6c] break-all">
-                          {crumb.title}
-                        </span>
-                      ) : crumb.href ? (
-                        <a
-                          onClick={() => {
-                            router.push(crumb.href!);
-                            setIsMobileBreadcrumbsOpen(false);
-                          }}
-                          className="text-[#1d70b8] hover:underline font-bold cursor-pointer"
-                        >
-                          {crumb.title}
-                        </a>
-                      ) : crumb.onClick ? (
-                        <a
-                          onClick={() => {
-                            crumb.onClick!();
-                            setIsMobileBreadcrumbsOpen(false);
-                          }}
-                          className="text-[#1d70b8] hover:underline font-bold cursor-pointer"
-                        >
-                          {crumb.title}
-                        </a>
-                      ) : (
-                        <span className="text-[#1d70b8] font-bold">
-                          {crumb.title}
-                        </span>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </div>
       )}
