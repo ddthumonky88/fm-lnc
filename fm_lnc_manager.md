@@ -708,13 +708,13 @@ export default function LncSortitoutsiExplorer() {
    ```
 2. **Khởi động Backend (NestJS):**
    ```bash
-   cd backend
+   cd fm-lnc-be
    npm install
    npm run start:dev   # Chạy tại http://localhost:3001
    ```
 3. **Khởi động Frontend (Next.js):**
    ```bash
-   cd frontend
+   cd fm-lnc-fe
    npm install
    npm run dev         # Chạy tại http://localhost:3000
    ```

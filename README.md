@@ -17,8 +17,8 @@
 ## 🗂️ Cấu trúc Project
 
 ```
-tool/
-├── backend/            # NestJS REST API
+fm-lnc/
+├── fm-lnc-be/          # NestJS REST API
 │   ├── src/
 │   │   ├── entities/   # TypeORM entities (Nation, Club, Competition, ...)
 │   │   ├── hierarchy/  # API truy vấn cấu trúc phân cấp
@@ -30,7 +30,7 @@ tool/
 │   │   ├── seed_lnc.py # Seed dữ liệu từ file .lnc vào PostgreSQL
 │   │   └── export_db.js# Export DB sang SQL dump
 │   └── Dockerfile
-├── frontend/           # Next.js App
+├── fm-lnc-fe/          # Next.js App
 │   └── src/app/
 │       ├── page.tsx         # Dashboard tổng quan
 │       ├── comp/            # Quản lý Competitions
@@ -54,7 +54,7 @@ tool/
 ### 1. Cài đặt Backend
 
 ```bash
-cd backend
+cd fm-lnc-be
 npm install
 ```
 
@@ -94,7 +94,7 @@ API chạy tại: `http://localhost:3001`
 ### 4. Cài đặt Frontend
 
 ```bash
-cd frontend
+cd fm-lnc-fe
 npm install
 ```
 
@@ -115,7 +115,7 @@ Mở trình duyệt: `http://localhost:3000`
 
 ## 📡 API Endpoints
 
-> 📖 **Xem tài liệu API chi tiết đầy đủ tham số và payload tại:** [API_DOCUMENTATION.md](file:///d:/Games/FM24_2026/FootballManager24/data/database/db/2430/lnc/all/tool/API_DOCUMENTATION.md)  
+> 📖 **Xem tài liệu API chi tiết đầy đủ tham số và payload tại:** [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)  
 > 🌐 **Swagger UI tương tác trực tiếp:** `http://localhost:3001/docs`
 
 | Method | Endpoint | Mô tả |
@@ -156,12 +156,12 @@ Mở trình duyệt: `http://localhost:3000`
 2. Chuyển sang tab **"URL"** → paste **External Database URL** từ Render
 3. Click **Test Connection** → OK → **Finish**
 4. Trong **Database Navigator**, click chuột phải vào database → **Tools** → **Execute Script**
-5. Chọn file `backend\scripts\db_dump_full.sql` → **Start**
+5. Chọn file `fm-lnc-be\scripts\db_dump_full.sql` → **Start**
 6. Chờ ~30 giây là xong (~28,000 records)
 
 ### Bước 3 — Backend tự deploy
 
-- Render tự build Dockerfile từ `backend/` và wire **toàn bộ biến DB** từ PostgreSQL service
+- Render tự build Dockerfile từ `fm-lnc-be/` và wire **toàn bộ biến DB** từ PostgreSQL service
 - Sau khi deploy (~3-5 phút), test:
   ```
   GET https://fm-lnc-backend.onrender.com/health

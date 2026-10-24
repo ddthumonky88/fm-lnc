@@ -3,8 +3,8 @@ services:
   - type: web
     name: fm-lnc-backend
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./fm-lnc-be/Dockerfile
+    dockerContext: ./fm-lnc-be
     region: singapore          # gần Việt Nam nhất
     plan: free
     envVars:
