@@ -219,21 +219,15 @@ function ConfederationDetailContent() {
             {/* Tab 1: Countries (Nations) */}
             {activeTab === 'NATIONS' && (
               <div>
-                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
-                  <div className="text-xs text-gray-500">
-                    Total: <strong className="text-gray-800">{filteredNations.length}</strong> countries
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                    <Input
-                      prefix={<SearchOutlined className="text-gray-400" />}
-                      placeholder="Filter countries..."
-                      value={tableFilter}
-                      onChange={(e) => setTableFilter(e.target.value)}
-                      allowClear
-                      className="flex-1 sm:w-64"
-                    />
-                  </div>
+                <div className="flex justify-end mb-4">
+                  <Input
+                    prefix={<SearchOutlined className="text-gray-400" />}
+                    placeholder="Filter countries..."
+                    value={tableFilter}
+                    onChange={(e) => setTableFilter(e.target.value)}
+                    allowClear
+                    className="w-full sm:w-64"
+                  />
                 </div>
 
                 <CardGrid

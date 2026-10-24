@@ -40,4 +40,32 @@ export class LogosController {
     res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
     return res.sendFile(filePath);
   }
+
+  @ApiOperation({ summary: 'Lấy logo Competition' })
+  @ApiParam({ name: 'id', description: 'Competition ID' })
+  @Get('competition/:id')
+  getCompetitionLogo(@Param('id') id: string, @Res() res: Response) {
+    const filePath = this.logosService.getCompetitionLogoPath(id);
+    if (!filePath) {
+      throw new NotFoundException(`Logo for competition ${id} not found`);
+    }
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    return res.sendFile(filePath);
+  }
+
+  @ApiOperation({ summary: 'Lấy logo Club' })
+  @ApiParam({ name: 'id', description: 'Club ID' })
+  @Get('club/:id')
+  getClubLogo(@Param('id') id: string, @Res() res: Response) {
+    const filePath = this.logosService.getClubLogoPath(id);
+    if (!filePath) {
+      throw new NotFoundException(`Logo for club ${id} not found`);
+    }
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    return res.sendFile(filePath);
+  }
 }

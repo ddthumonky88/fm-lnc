@@ -360,3 +360,90 @@ export function getNationLogoUrl(id: string, code?: string): string {
   const query = code ? `?code=${encodeURIComponent(code)}` : '';
   return `${getApiBase()}/logos/nation/${id}${query}`;
 }
+
+export function getCompetitionLogoUrl(id: string | number): string {
+  return `${getApiBase()}/logos/competition/${id}`;
+}
+
+export function getClubLogoUrl(id: string | number): string {
+  return `${getApiBase()}/logos/club/${id}`;
+}
+
+export interface AppPathsConfig {
+  lncDir: string;
+  confedLogoDir: string;
+  nationLogoDir: string;
+  compLogoDir: string;
+  clubLogoDir: string;
+}
+
+export interface DirCheckStatus {
+  path: string;
+  exists: boolean;
+  fileCount?: number;
+}
+
+export interface ConfigStatusResponse {
+  config: AppPathsConfig;
+  status: {
+    lnc: {
+      dir: string;
+      exists: boolean;
+      files: {
+        cityNation: { name: string; exists: boolean; size?: number; mtime?: string };
+        clubStadium: { name: string; exists: boolean; size?: number; mtime?: string };
+        compOther: { name: string; exists: boolean; size?: number; mtime?: string };
+      };
+      allFilesFound: boolean;
+    };
+    confedLogo: DirCheckStatus;
+    nationLogo: DirCheckStatus;
+    compLogo: DirCheckStatus;
+    clubLogo: DirCheckStatus;
+  };
+}
+
+export async function fetchAppConfig(): Promise<ConfigStatusResponse> {
+  const res = await fetch(`${getApiBase()}/config`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error('Failed to fetch config');
+  return res.json();
+}
+
+export async function updateAppConfig(config: Partial<AppPathsConfig>): Promise<ConfigStatusResponse> {
+  const res = await fetch(`${getApiBase()}/config`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(config),
+  });
+  if (!res.ok) throw new Error('Failed to update config');
+  return res.json();
+}
+
+export async function testDirectoryPath(targetPath: string) {
+  const res = await fetch(`${getApiBase()}/config/test`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: targetPath }),
+  });
+  if (!res.ok) throw new Error('Failed to test path');
+  return res.json();
+}
+
+export async function syncLncFromConfig() {
+  clearApiCache();
+  const res = await fetch(`${getApiBase()}/config/sync`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error('Sync failed');
+  return res.json();
+}
+
+export async function reloadLogosFromConfig() {
+  const res = await fetch(`${getApiBase()}/config/reload-logos`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error('Reload logos failed');
+  return res.json();
+}

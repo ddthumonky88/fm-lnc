@@ -6,20 +6,79 @@ import * as path from 'path';
 @Injectable()
 export class LncParserService {
   private readonly logger = new Logger(LncParserService.name);
+  private customBaseDir: string | null = null;
 
   constructor(private dataSource: DataSource) {}
 
-  async parseAndSeed(baseDir?: string) {
-    let dir = baseDir || process.env.LNC_FILES_DIR || path.resolve(__dirname, '../../../..');
-    
-    // Auto-detect if files are in parent or grandparent directory
-    if (!fs.existsSync(path.resolve(dir, 'FM24 - City & Nation.lnc'))) {
-      if (fs.existsSync(path.resolve(dir, '..', 'FM24 - City & Nation.lnc'))) {
-        dir = path.resolve(dir, '..');
-      } else if (fs.existsSync(path.resolve(dir, '../..', 'FM24 - City & Nation.lnc'))) {
-        dir = path.resolve(dir, '../..');
+  setBaseDir(dir: string) {
+    this.customBaseDir = dir;
+    this.logger.log(`Configured LNC base directory: ${dir}`);
+  }
+
+  getBaseDir(): string {
+    if (this.customBaseDir && fs.existsSync(this.customBaseDir)) {
+      return this.customBaseDir;
+    }
+    const candidates = [
+      this.customBaseDir,
+      process.env.LNC_FILES_DIR,
+      path.resolve(process.cwd(), 'data'),
+      path.resolve(__dirname, '../../data'),
+      path.resolve(__dirname, '../../../data'),
+      path.resolve(process.cwd(), '..'),
+      path.resolve(__dirname, '../../../..'),
+    ].filter(Boolean) as string[];
+
+    for (const candidate of candidates) {
+      if (fs.existsSync(path.resolve(candidate, 'FM24 - City & Nation.lnc'))) {
+        return candidate;
+      }
+      if (fs.existsSync(path.resolve(candidate, '..', 'FM24 - City & Nation.lnc'))) {
+        return path.resolve(candidate, '..');
       }
     }
+    return this.customBaseDir || path.resolve(process.cwd(), 'data');
+  }
+
+  checkLncFiles(dirToCheck?: string) {
+    const dir = dirToCheck || this.getBaseDir();
+    const exists = fs.existsSync(dir);
+    const fileCityNat = path.resolve(dir, 'FM24 - City & Nation.lnc');
+    const fileClubStadium = path.resolve(dir, 'FM24 - Club & Stadium.lnc');
+    const fileCompOther = path.resolve(dir, 'FM24 - Competition & Other.lnc');
+
+    const getFileInfo = (fPath: string, name: string) => {
+      const fileExists = fs.existsSync(fPath);
+      let size = 0;
+      let mtime: string | undefined;
+      if (fileExists) {
+        try {
+          const stat = fs.statSync(fPath);
+          size = stat.size;
+          mtime = stat.mtime.toISOString();
+        } catch {}
+      }
+      return { name, exists: fileExists, size, mtime };
+    };
+
+    const files = {
+      cityNation: getFileInfo(fileCityNat, 'FM24 - City & Nation.lnc'),
+      clubStadium: getFileInfo(fileClubStadium, 'FM24 - Club & Stadium.lnc'),
+      compOther: getFileInfo(fileCompOther, 'FM24 - Competition & Other.lnc'),
+    };
+
+    const allFilesFound = files.cityNation.exists && files.clubStadium.exists && files.compOther.exists;
+
+    return {
+      dir,
+      exists,
+      files,
+      allFilesFound,
+    };
+  }
+
+  async parseAndSeed(baseDir?: string) {
+    const dir = baseDir || this.getBaseDir();
 
     this.logger.log(`Starting parse & seed from: ${dir}`);
 
@@ -28,7 +87,7 @@ export class LncParserService {
     const fileCompOther = path.resolve(dir, 'FM24 - Competition & Other.lnc');
 
     if (!fs.existsSync(fileCityNat) || !fs.existsSync(fileClubStadium) || !fs.existsSync(fileCompOther)) {
-      throw new Error(`One or more .lnc files missing in directory ${dir}`);
+      throw new Error(`One or more .lnc files missing in directory "${dir}".`);
     }
 
     const queryRunner = this.dataSource.createQueryRunner();

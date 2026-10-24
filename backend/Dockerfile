@@ -25,6 +25,11 @@ RUN npm ci --omit=dev
 # Copy built dist from builder stage
 COPY --from=builder /app/dist ./dist
 
+# Copy seed data files (.lnc)
+COPY data ./data
+
+ENV LNC_FILES_DIR=/app/data
+
 # Expose port (Render injects PORT env var automatically)
 EXPOSE 3001
 

@@ -17,6 +17,7 @@ import { HierarchyModule } from './hierarchy/hierarchy.module';
 import { RecordsModule } from './records/records.module';
 import { SearchModule } from './search/search.module';
 import { LogosModule } from './logos/logos.module';
+import { ConfigModule } from './config/config.module';
 import { HealthController } from './health.controller';
 
 
@@ -24,6 +25,7 @@ dotenv.config();
 
 @Module({
   imports: [
+    ConfigModule,
     LogosModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
