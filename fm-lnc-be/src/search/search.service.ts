@@ -89,6 +89,7 @@ export class SearchService {
         .createQueryBuilder('s')
         .leftJoinAndSelect('s.nation', 'nation')
         .where('s.name ILIKE :q', { q: `%${term}%` })
+        .orWhere('s.type ILIKE :q', { q: `%${term}%` })
         .orWhere('s.id = :idVal', { idVal })
         .limit(limit)
         .getMany(),

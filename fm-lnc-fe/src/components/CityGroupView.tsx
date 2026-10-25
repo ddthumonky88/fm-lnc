@@ -56,7 +56,14 @@ export default function CityGroupView({
       if (!key) return 5;
       const upper = key.trim().toUpperCase();
       if (upper === '[REMOVE]' || upper === 'REMOVE' || upper.includes('REMOVE')) return 6;
-      if (upper === '[OTHER]' || upper === 'OTHER' || upper === '[OTHERS]' || upper === 'OTHERS' || upper.includes('OTHER')) return 4;
+      if (
+        upper === '[OTHER]' ||
+        upper === 'OTHER' ||
+        upper === '[OTHERS]' ||
+        upper === 'OTHERS' ||
+        upper.includes('OTHER')
+      )
+        return 4;
       if (upper.startsWith('[')) return 2;
       return 1;
     };
@@ -113,7 +120,14 @@ export default function CityGroupView({
       if (!key) return 5;
       const upper = key.trim().toUpperCase();
       if (upper === '[REMOVE]' || upper === 'REMOVE' || upper.includes('REMOVE')) return 6;
-      if (upper === '[OTHER]' || upper === 'OTHER' || upper === '[OTHERS]' || upper === 'OTHERS' || upper.includes('OTHER')) return 4;
+      if (
+        upper === '[OTHER]' ||
+        upper === 'OTHER' ||
+        upper === '[OTHERS]' ||
+        upper === 'OTHERS' ||
+        upper.includes('OTHER')
+      )
+        return 4;
       if (upper.startsWith('[')) return 2;
       return 1;
     };
@@ -153,8 +167,8 @@ export default function CityGroupView({
     selectedCategory === 'all'
       ? 'all'
       : categoryList.some((c) => c.value === selectedCategory)
-      ? selectedCategory
-      : 'all';
+        ? selectedCategory
+        : 'all';
 
   const renderToolbar = () => (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
@@ -179,9 +193,7 @@ export default function CityGroupView({
       </div>
 
       {extraRight && (
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {extraRight}
-        </div>
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">{extraRight}</div>
       )}
     </div>
   );

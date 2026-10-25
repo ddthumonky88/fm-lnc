@@ -2,12 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Badge, Empty, Select } from 'antd';
-import {
-  StarOutlined,
-  GlobalOutlined,
-  AppstoreOutlined,
-  FilterOutlined,
-} from '@ant-design/icons';
+import { StarOutlined, GlobalOutlined, AppstoreOutlined, FilterOutlined } from '@ant-design/icons';
 import CardGrid from './CardGrid';
 import SubCompetitionsDrawer from './SubCompetitionsDrawer';
 import { CompIcon, AwardIcon } from './EntityIcons';
@@ -22,11 +17,18 @@ export function getCompetitionGroup(target?: any): CompetitionCategory {
   if (id === '[OTHER]' || id === '[EXTINCT]' || item?.is_virtual) {
     return 'other';
   }
-  const cat = String(item?.type || item?.categories || item?.category || '').trim().toLowerCase();
+  const cat = String(item?.type || item?.categories || item?.category || '')
+    .trim()
+    .toLowerCase();
   if (!cat) return 'other';
   if (cat.includes('youth')) return 'youth';
   if (cat.includes('cup')) return 'cup';
-  if (cat.includes('league') || cat.includes('division') || cat.includes('tier') || cat.includes('lower leagues')) {
+  if (
+    cat.includes('league') ||
+    cat.includes('division') ||
+    cat.includes('tier') ||
+    cat.includes('lower leagues')
+  ) {
     return 'league';
   }
   return 'other';
@@ -100,7 +102,10 @@ export function sortCompetitionsByCategory(a: any, b: any): number {
   // Fallback: alphabetical by name
   const nameA = a.long_name || a.short_name || a.name || '';
   const nameB = b.long_name || b.short_name || b.name || '';
-  return String(nameA).localeCompare(String(nameB), undefined, { numeric: true, sensitivity: 'base' });
+  return String(nameA).localeCompare(String(nameB), undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
 }
 
 interface CompetitionGroupViewProps {
@@ -207,7 +212,7 @@ export default function CompetitionGroupView({
         items: otherItems,
       },
     ],
-    [leagueItems, cupItems, youthItems, otherItems]
+    [leagueItems, cupItems, youthItems, otherItems],
   );
 
   const selectOptions = useMemo(() => {
@@ -267,9 +272,7 @@ export default function CompetitionGroupView({
       </div>
 
       {extraRight && (
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {extraRight}
-        </div>
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">{extraRight}</div>
       )}
     </div>
   );
@@ -311,7 +314,9 @@ export default function CompetitionGroupView({
             if (activeItems.length === 0) {
               return (
                 <div className="py-12 bg-white rounded-lg border border-gray-100 shadow-sm">
-                  <Empty description={`No ${activeConfig?.label.toLowerCase()} competitions found`} />
+                  <Empty
+                    description={`No ${activeConfig?.label.toLowerCase()} competitions found`}
+                  />
                 </div>
               );
             }

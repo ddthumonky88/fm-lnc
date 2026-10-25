@@ -1,14 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Modal,
-  Tabs,
-  Input,
-  Button,
-  message,
-  Spin,
-} from 'antd';
+import { Modal, Tabs, Input, Button, message, Spin } from 'antd';
 import {
   SettingOutlined,
   FolderOpenOutlined,
@@ -37,7 +30,8 @@ import {
   type ConfigStatusResponse,
 } from '../services/api';
 
-const DEFAULT_LOCAL_LNC_DIR = 'D:\\Games\\FM24_2026\\FootballManager24\\data\\database\\db\\2430\\lnc\\all';
+const DEFAULT_LOCAL_LNC_DIR =
+  'D:\\Games\\FM24_2026\\FootballManager24\\data\\database\\db\\2430\\lnc\\all';
 
 interface SettingsModalProps {
   open: boolean;
@@ -45,11 +39,7 @@ interface SettingsModalProps {
   onRefreshData?: () => void;
 }
 
-export default function SettingsModal({
-  open,
-  onClose,
-  onRefreshData,
-}: SettingsModalProps) {
+export default function SettingsModal({ open, onClose, onRefreshData }: SettingsModalProps) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -122,7 +112,11 @@ export default function SettingsModal({
   };
 
   const handleSyncToProd = async () => {
-    if (!confirm('Bạn có chắc muốn đẩy toàn bộ nội dung từ các file .LNC local lên Cloud Database (Render)?')) {
+    if (
+      !confirm(
+        'Bạn có chắc muốn đẩy toàn bộ nội dung từ các file .LNC local lên Cloud Database (Render)?',
+      )
+    ) {
       return;
     }
     setSyncingToProd(true);
@@ -237,11 +231,15 @@ export default function SettingsModal({
                     {/* Local LNC Path */}
                     <div>
                       <div className="flex items-center justify-between mb-1 text-xs">
-                        <span className="font-semibold text-slate-700">Đường dẫn thư mục .LNC:</span>
+                        <span className="font-semibold text-slate-700">
+                          Đường dẫn thư mục .LNC:
+                        </span>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => setFormData({ ...formData, lncDir: DEFAULT_LOCAL_LNC_DIR })}
+                            onClick={() =>
+                              setFormData({ ...formData, lncDir: DEFAULT_LOCAL_LNC_DIR })
+                            }
                             className="text-[11px] text-blue-600 hover:underline cursor-pointer bg-transparent border-0 p-0"
                           >
                             Mặc định
@@ -412,12 +410,18 @@ export default function SettingsModal({
                         <div className="flex items-center gap-2">
                           <Input
                             value={formData[field.key]}
-                            onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, [field.key]: e.target.value })
+                            }
                             placeholder={field.placeholder}
                             className="flex-1 font-mono text-xs"
                             allowClear
                           />
-                          <Button onClick={() => handleTestPath(field.key)} size="small" className="text-xs shrink-0">
+                          <Button
+                            onClick={() => handleTestPath(field.key)}
+                            size="small"
+                            className="text-xs shrink-0"
+                          >
                             Kiểm tra
                           </Button>
                         </div>

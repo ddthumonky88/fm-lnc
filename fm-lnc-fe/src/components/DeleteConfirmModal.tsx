@@ -26,13 +26,17 @@ export default function DeleteConfirmModal({
       <div className="bg-white rounded-t-2xl sm:rounded-lg shadow-xl max-w-sm w-full overflow-hidden border-0 sm:border border-gray-200">
         <div className="bg-red-50 border-b border-red-200 px-5 py-3 flex items-center justify-between">
           <h3 className="font-bold text-sm text-red-800">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none"
+          >
             &times;
           </button>
         </div>
         <div className="p-5">
           <p className="text-xs text-gray-600 mb-4">
-            Are you sure you want to delete <strong className="text-gray-800">{itemName}</strong>? This action will update the database and exported .LNC files.
+            Are you sure you want to delete <strong className="text-gray-800">{itemName}</strong>?
+            This action will update the database and exported .LNC files.
           </p>
           <div className="flex justify-end gap-2">
             <button

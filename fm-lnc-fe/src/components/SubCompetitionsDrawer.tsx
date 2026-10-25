@@ -2,20 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Drawer,
-  Button,
-  Tag,
-  Empty,
-  Spin,
-  message,
-  Tooltip,
-} from 'antd';
-import {
-  PlusOutlined,
-  ReloadOutlined,
-  CopyOutlined,
-} from '@ant-design/icons';
+import { Drawer, Button, Tag, Empty, Spin, message, Tooltip } from 'antd';
+import { PlusOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons';
 import { fetchSubCompetitions } from '../services/api';
 import EntityCard from './EntityCard';
 import RecordModal from './RecordModal';
@@ -48,30 +36,33 @@ export default function SubCompetitionsDrawer({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Load sub-competitions
-  const loadSubCompetitions = useCallback(async (forceRefresh = false) => {
-    if (!parentComp?.id) return;
+  const loadSubCompetitions = useCallback(
+    async (forceRefresh = false) => {
+      if (!parentComp?.id) return;
 
-    // Use in-memory matching first if available
-    const localChildren = allCompetitions.filter(
-      (c) => String(c.parent_id) === String(parentComp.id)
-    );
-    if (localChildren.length > 0 && !forceRefresh) {
-      setSubComps(localChildren);
-    }
-
-    setLoading(true);
-    try {
-      const fetched = await fetchSubCompetitions(String(parentComp.id), forceRefresh);
-      setSubComps(fetched);
-    } catch (err: any) {
-      console.error('Failed to fetch sub-competitions:', err);
-      if (localChildren.length === 0) {
-        message.error('Failed to load sub-competitions');
+      // Use in-memory matching first if available
+      const localChildren = allCompetitions.filter(
+        (c) => String(c.parent_id) === String(parentComp.id),
+      );
+      if (localChildren.length > 0 && !forceRefresh) {
+        setSubComps(localChildren);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [parentComp?.id, allCompetitions]);
+
+      setLoading(true);
+      try {
+        const fetched = await fetchSubCompetitions(String(parentComp.id), forceRefresh);
+        setSubComps(fetched);
+      } catch (err: any) {
+        console.error('Failed to fetch sub-competitions:', err);
+        if (localChildren.length === 0) {
+          message.error('Failed to load sub-competitions');
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [parentComp?.id, allCompetitions],
+  );
 
   useEffect(() => {
     if (isOpen && parentComp?.id) {
@@ -96,7 +87,8 @@ export default function SubCompetitionsDrawer({
     }
   };
 
-  const parentShortName = parentComp?.short_name || parentComp?.long_name || `Competition ${parentComp?.id}`;
+  const parentShortName =
+    parentComp?.short_name || parentComp?.long_name || `Competition ${parentComp?.id}`;
 
   return (
     <>

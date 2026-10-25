@@ -48,10 +48,19 @@ import {
 import RecordModal from '../components/RecordModal';
 import QuickSearchModal from '../components/QuickSearchModal';
 import CardGrid from '../components/CardGrid';
-import CompetitionGroupView, { sortCompetitionsByCategory } from '../components/CompetitionGroupView';
+import CompetitionGroupView, {
+  sortCompetitionsByCategory,
+} from '../components/CompetitionGroupView';
 import { formatCategoryCode, getCategoryTagColor } from '../components/EntityCard';
 import CityGroupView from '../components/CityGroupView';
-import { NationIcon, IntCompIcon, DomesticCompIcon, StadiumIcon, CityIcon, AwardIcon } from '../components/EntityIcons';
+import {
+  NationIcon,
+  IntCompIcon,
+  DomesticCompIcon,
+  StadiumIcon,
+  CityIcon,
+  AwardIcon,
+} from '../components/EntityIcons';
 import { useApp } from '../context/AppContext';
 import {
   HierarchyLevel,
@@ -73,14 +82,8 @@ interface NavStep {
 
 export default function LncSortitoutsiExplorer() {
   const router = useRouter();
-  const {
-    setHeaderTitle,
-    setHeaderId,
-    setBreadcrumbs,
-    setBackHref,
-    setHeaderLogo,
-    refreshSignal,
-  } = useApp();
+  const { setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo, refreshSignal } =
+    useApp();
 
   const [navStack, setNavStack] = useState<NavStep[]>([
     { level: HierarchyLevel.CONTINENTS, title: 'HOME' },
@@ -89,7 +92,9 @@ export default function LncSortitoutsiExplorer() {
   const [loading, setLoading] = useState(false);
 
   // Tab state for Nation view
-  const [activeNationTab, setActiveNationTab] = useState<NationTabKeyValue>(NationTabKey.DOMESTIC_COMPS);
+  const [activeNationTab, setActiveNationTab] = useState<NationTabKeyValue>(
+    NationTabKey.DOMESTIC_COMPS,
+  );
   const [nationTabLoading, setNationTabLoading] = useState(false);
 
   // Search modal state
@@ -101,7 +106,9 @@ export default function LncSortitoutsiExplorer() {
   const [intComps, setIntComps] = useState<CompetitionItem[]>([]);
   const [nationHub, setNationHub] = useState<NationHubData | null>(null);
   const [detailRecords, setDetailRecords] = useState<any[]>([]);
-  const [compInfo, setCompInfo] = useState<(CompetitionItem & { clubsCount: number; awardsCount: number }) | null>(null);
+  const [compInfo, setCompInfo] = useState<
+    (CompetitionItem & { clubsCount: number; awardsCount: number }) | null
+  >(null);
 
   // CRUD modal state
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
@@ -121,50 +128,47 @@ export default function LncSortitoutsiExplorer() {
   };
 
   // Load records for active Nation tab
-  const loadNationDataForTab = useCallback(
-    async (nationId: string, tabKey: NationTabKeyValue) => {
-      setNationTabLoading(true);
-      try {
-        let data: any[] = [];
-        if (tabKey === NationTabKey.DOMESTIC_COMPS) {
-          data = await fetchDomesticCompetitions(nationId);
-        } else if (tabKey === NationTabKey.STADIUMS) {
-          data = await fetchStadiums(nationId);
-        } else if (tabKey === NationTabKey.CITIES) {
-          data = await fetchCities(nationId);
-        } else if (tabKey === NationTabKey.AWARDS) {
-          data = await fetchAwards(nationId);
-        }
-        setDetailRecords(data);
-        setNationHub((prev) => {
-          if (!prev) return prev;
-          const keyMap: Record<string, keyof typeof prev.counts> = {
-            [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
-            [NationTabKey.STADIUMS]: 'stadiums',
-            [NationTabKey.CITIES]: 'cities',
-            [NationTabKey.AWARDS]: 'awards',
-          };
-          const countKey = keyMap[tabKey];
-          if (countKey && prev.counts[countKey] !== data.length) {
-            return {
-              ...prev,
-              counts: {
-                ...prev.counts,
-                [countKey]: data.length,
-              },
-            };
-          }
-          return prev;
-        });
-      } catch (err: any) {
-        console.error(err);
-        message.error(err.message || 'Failed to load tab data');
-      } finally {
-        setNationTabLoading(false);
+  const loadNationDataForTab = useCallback(async (nationId: string, tabKey: NationTabKeyValue) => {
+    setNationTabLoading(true);
+    try {
+      let data: any[] = [];
+      if (tabKey === NationTabKey.DOMESTIC_COMPS) {
+        data = await fetchDomesticCompetitions(nationId);
+      } else if (tabKey === NationTabKey.STADIUMS) {
+        data = await fetchStadiums(nationId);
+      } else if (tabKey === NationTabKey.CITIES) {
+        data = await fetchCities(nationId);
+      } else if (tabKey === NationTabKey.AWARDS) {
+        data = await fetchAwards(nationId);
       }
-    },
-    [],
-  );
+      setDetailRecords(data);
+      setNationHub((prev) => {
+        if (!prev) return prev;
+        const keyMap: Record<string, keyof typeof prev.counts> = {
+          [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
+          [NationTabKey.STADIUMS]: 'stadiums',
+          [NationTabKey.CITIES]: 'cities',
+          [NationTabKey.AWARDS]: 'awards',
+        };
+        const countKey = keyMap[tabKey];
+        if (countKey && prev.counts[countKey] !== data.length) {
+          return {
+            ...prev,
+            counts: {
+              ...prev.counts,
+              [countKey]: data.length,
+            },
+          };
+        }
+        return prev;
+      });
+    } catch (err: any) {
+      console.error(err);
+      message.error(err.message || 'Failed to load tab data');
+    } finally {
+      setNationTabLoading(false);
+    }
+  }, []);
 
   // Switch Nation tab
   const handleSwitchNationTab = async (tabKey: NationTabKeyValue) => {
@@ -197,7 +201,7 @@ export default function LncSortitoutsiExplorer() {
     try {
       if (currentStep.level === 'CONTINENTS') {
         const data = await fetchContinents();
-        setContinents(data);
+        setContinents(Array.isArray(data) ? data : (data as any)?.content || []);
       } else if (currentStep.level === 'NATIONS' && currentStep.id !== undefined) {
         const data = await fetchNationsByContinent(String(currentStep.id));
         setNations(data);
@@ -214,12 +218,12 @@ export default function LncSortitoutsiExplorer() {
           targetTab === NationTabKey.DOMESTIC_COMPS
             ? hub.counts.domesticComps
             : targetTab === NationTabKey.STADIUMS
-            ? hub.counts.stadiums
-            : targetTab === NationTabKey.CITIES
-            ? hub.counts.cities
-            : targetTab === NationTabKey.AWARDS
-            ? hub.counts.awards
-            : 0;
+              ? hub.counts.stadiums
+              : targetTab === NationTabKey.CITIES
+                ? hub.counts.cities
+                : targetTab === NationTabKey.AWARDS
+                  ? hub.counts.awards
+                  : 0;
 
         if (countForActive === 0) {
           if (hub.counts.domesticComps > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
@@ -396,14 +400,14 @@ export default function LncSortitoutsiExplorer() {
                   {name ? name[0] : 'C'}
                 </span>
               </div>
-            <button
-              type="button"
-              onClick={() => router.push(`/confederation/${record.id}`)}
-              className="font-bold text-sm text-[#1d70b8] hover:underline text-left hover:text-blue-700 transition cursor-pointer"
-            >
-              {name}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => router.push(`/confederation/${record.id}`)}
+                className="font-bold text-sm text-[#1d70b8] hover:underline text-left hover:text-blue-700 transition cursor-pointer"
+              >
+                {name}
+              </button>
+            </div>
           );
         },
       },
@@ -493,8 +497,18 @@ export default function LncSortitoutsiExplorer() {
     }
 
     return [...list].sort((a, b) => {
-      const nameA = a.name || a.long_name || a.short_name || `${a.first_name || ''} ${a.second_name || ''}`.trim() || '';
-      const nameB = b.name || b.long_name || b.short_name || `${b.first_name || ''} ${b.second_name || ''}`.trim() || '';
+      const nameA =
+        a.name ||
+        a.long_name ||
+        a.short_name ||
+        `${a.first_name || ''} ${a.second_name || ''}`.trim() ||
+        '';
+      const nameB =
+        b.name ||
+        b.long_name ||
+        b.short_name ||
+        `${b.first_name || ''} ${b.second_name || ''}`.trim() ||
+        '';
       return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
     });
   }, [detailRecords, tableFilter, currentStep.level, activeNationTab, currentRecordType]);
@@ -588,7 +602,15 @@ export default function LncSortitoutsiExplorer() {
     } else {
       setHeaderLogo(null);
     }
-  }, [currentStep, navStack, setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo]);
+  }, [
+    currentStep,
+    navStack,
+    setHeaderTitle,
+    setHeaderId,
+    setBreadcrumbs,
+    setBackHref,
+    setHeaderLogo,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -603,341 +625,367 @@ export default function LncSortitoutsiExplorer() {
     <div>
       {/* Main Content Body */}
       <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-5 shadow-2xs min-h-[480px]">
-          {loading && (
-            <div className="text-center py-16 text-sm text-gray-500 flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <span>Loading data...</span>
-            </div>
-          )}
+        {loading && (
+          <div className="text-center py-16 text-sm text-gray-500 flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span>Loading data...</span>
+          </div>
+        )}
 
-          {/* 1. CONFEDERATIONS */}
-          {!loading && currentStep.level === 'CONTINENTS' && (
-            <div>
-              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4 pb-2 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-gray-700">Confederations</h2>
-                  <span className="text-xs text-gray-500">
-                    Total: <strong className="text-gray-800">{filteredContinents.length}</strong> confederations
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                  <Input
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                    placeholder="Filter confederations..."
-                    value={tableFilter}
-                    onChange={(e) => setTableFilter(e.target.value)}
-                    allowClear
-                    className="flex-1 sm:w-64"
-                  />
-                </div>
+        {/* 1. CONFEDERATIONS */}
+        {!loading && currentStep.level === 'CONTINENTS' && (
+          <div>
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4 pb-2 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-gray-700">Confederations</h2>
+                <span className="text-xs text-gray-500">
+                  Total: <strong className="text-gray-800">{filteredContinents.length}</strong>{' '}
+                  confederations
+                </span>
               </div>
 
-              {/* Mobile Cards (md:hidden) - 2 cards per row */}
-              <div className="md:hidden grid grid-cols-2 gap-2 sm:gap-3">
-                {filteredContinents.map((c) => (
-                  <div
-                    key={c.id}
-                    onClick={() => router.push(`/confederation/${c.id}`)}
-                    className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2 sm:p-3 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-1.5"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-1 mb-1.5">
-                        <Tag color="blue" className="font-mono font-bold text-[10px] m-0 shrink-0 px-1 py-0">
-                          {c.id}
-                        </Tag>
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {getConfederationLogoUrl(c.id) ? (
-                          <img
-                            src={getConfederationLogoUrl(c.id)}
-                            alt={c.name}
-                            className="w-6 h-6 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : null}
-                        <div className="font-bold text-xs text-slate-800 line-clamp-1" title={c.name}>{c.name}</div>
-                      </div>
-                    </div>
-
-                    <div className="pt-1.5 border-t border-slate-100 text-[11px] space-y-0.5 text-slate-600">
-                      <div className="flex items-center gap-1 truncate">
-                        <NationIcon size={12} className="text-cyan-600 shrink-0" />
-                        <span className="truncate"><strong>{c.totalNations || 0}</strong> nations</span>
-                      </div>
-                      <div className="flex items-center gap-1 truncate">
-                        <IntCompIcon size={12} className="text-purple-600 shrink-0" />
-                        <span className="truncate"><strong>{c.totalIntComps || 0}</strong> comps</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Desktop Table (hidden md:block) */}
-              <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                <Table<ConfederationItem>
-                  rowKey="id"
-                  columns={continentColumns}
-                  dataSource={filteredContinents}
-                  loading={loading}
-                  pagination={{
-                    defaultPageSize: 10,
-                    showSizeChanger: true,
-                    pageSizeOptions: ['10', '20', '50'],
-                    showTotal: (total, range) =>
-                      `Showing ${range[0]} - ${range[1]} of ${total} records`,
-                    size: 'small',
-                  }}
-                  scroll={{ x: 'max-content' }}
-                  size="middle"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* 2. INTERNATIONAL COMPETITIONS */}
-          {!loading && currentStep.level === 'INT_COMPETITIONS' && (
-            <div>
-              {/* Tabs switcher if confed has both countries and int comps */}
-              {(() => {
-                const currentConfed = continents.find((c) => c.id === currentStep.id);
-                if (!currentConfed || (currentConfed.totalNations || 0) === 0) return null;
-                return (
-                  <Tabs
-                    activeKey="INT_COMPETITIONS"
-                    onChange={(key) => {
-                      setTableFilter('');
-                      setNavStack((prev) => [
-                        ...prev.slice(0, -1),
-                        {
-                          level: key as HierarchyLevel,
-                          id: currentConfed.id,
-                          title: currentConfed.name,
-                        },
-                      ]);
-                    }}
-                    items={[
-                      {
-                        key: 'NATIONS',
-                        label: (
-                          <Space size={4} title="Countries">
-                            <NationIcon size={16} className="text-cyan-600" />
-                            <span className="hidden sm:inline">Countries</span>
-                            <Badge
-                              count={currentConfed.totalNations}
-                              overflowCount={99999}
-                              style={{ backgroundColor: '#94a3b8' }}
-                            />
-                          </Space>
-                        ),
-                      },
-                      {
-                        key: 'INT_COMPETITIONS',
-                        label: (
-                          <Space size={4} title="International Competitions">
-                            <IntCompIcon size={16} className="text-purple-600" />
-                            <span className="hidden sm:inline font-semibold">International Competitions</span>
-                            <Badge
-                              count={currentConfed.totalIntComps}
-                              overflowCount={99999}
-                              style={{ backgroundColor: '#9333ea' }}
-                            />
-                          </Space>
-                        ),
-                      },
-                    ]}
-                    className="mb-4"
-                  />
-                );
-              })()}
-
-              <CompetitionGroupView
-                items={filteredIntComps}
-                loading={loading}
-                onNavigate={pushStep}
-                onEdit={(rec) => {
-                  setEditingRecord(rec);
-                  setRecordModalType('competition');
-                  setIsRecordModalOpen(true);
-                }}
-                onDelete={handleDeleteDirect}
-                emptyText="No international competitions found"
-                extraRight={
-                  <>
-                    <Input
-                      prefix={<SearchOutlined className="text-gray-400" />}
-                      placeholder="Filter competitions..."
-                      value={tableFilter}
-                      onChange={(e) => setTableFilter(e.target.value)}
-                      allowClear
-                      className="w-48 sm:w-64"
-                    />
-                    <Button
-                      type="primary"
-                      icon={<PlusOutlined />}
-                      onClick={() => {
-                        setEditingRecord(null);
-                        setRecordModalType('competition');
-                        setIsRecordModalOpen(true);
-                      }}
-                      style={{ backgroundColor: '#059669', borderColor: '#059669' }}
-                      className="shrink-0"
-                      title="Add International Competition"
-                    >
-                      <span className="hidden sm:inline">Add International Competition</span>
-                    </Button>
-                  </>
-                }
-              />
-            </div>
-          )}
-
-          {/* 3. COUNTRIES (NATIONS) */}
-          {!loading && currentStep.level === 'NATIONS' && (
-            <div>
-              {/* Tabs switcher if confed has both countries and int comps */}
-              {(() => {
-                const currentConfed = continents.find((c) => c.id === currentStep.id);
-                if (!currentConfed || (currentConfed.totalIntComps || 0) === 0) return null;
-                return (
-                  <Tabs
-                    activeKey="NATIONS"
-                    onChange={(key) => {
-                      setTableFilter('');
-                      setNavStack((prev) => [
-                        ...prev.slice(0, -1),
-                        {
-                          level: key as HierarchyLevel,
-                          id: currentConfed.id,
-                          title: currentConfed.name,
-                        },
-                      ]);
-                    }}
-                    items={[
-                      {
-                        key: 'NATIONS',
-                        label: (
-                          <Space size={4} title="Countries">
-                            <NationIcon size={16} className="text-cyan-600" />
-                            <span className="hidden sm:inline font-semibold">Countries</span>
-                            <Badge
-                              count={currentConfed.totalNations}
-                              overflowCount={99999}
-                              style={{ backgroundColor: '#1d70b8' }}
-                            />
-                          </Space>
-                        ),
-                      },
-                      {
-                        key: 'INT_COMPETITIONS',
-                        label: (
-                          <Space size={4} title="International Competitions">
-                            <IntCompIcon size={16} className="text-purple-600" />
-                            <span className="hidden sm:inline">International Competitions</span>
-                            <Badge
-                              count={currentConfed.totalIntComps}
-                              overflowCount={99999}
-                              style={{ backgroundColor: '#94a3b8' }}
-                            />
-                          </Space>
-                        ),
-                      },
-                    ]}
-                    className="mb-4"
-                  />
-                );
-              })()}
-
-              <div className="flex justify-end mb-4">
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                 <Input
                   prefix={<SearchOutlined className="text-gray-400" />}
-                  placeholder="Filter countries..."
+                  placeholder="Filter confederations..."
                   value={tableFilter}
                   onChange={(e) => setTableFilter(e.target.value)}
                   allowClear
-                  className="w-full sm:w-64"
+                  className="flex-1 sm:w-64"
                 />
               </div>
+            </div>
 
-              <CardGrid
-                items={filteredNations}
-                type={EntityType.NATION}
-                columns={5}
+            {/* Mobile Cards (md:hidden) - 2 cards per row */}
+            <div className="md:hidden grid grid-cols-2 gap-2 sm:gap-3">
+              {filteredContinents.map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => router.push(`/confederation/${c.id}`)}
+                  className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2 sm:p-3 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-1.5"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-1 mb-1.5">
+                      <Tag
+                        color="blue"
+                        className="font-mono font-bold text-[10px] m-0 shrink-0 px-1 py-0"
+                      >
+                        {c.id}
+                      </Tag>
+                    </div>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {getConfederationLogoUrl(c.id) ? (
+                        <img
+                          src={getConfederationLogoUrl(c.id)}
+                          alt={c.name}
+                          className="w-6 h-6 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : null}
+                      <div className="font-bold text-xs text-slate-800 line-clamp-1" title={c.name}>
+                        {c.name}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-1.5 border-t border-slate-100 text-[11px] space-y-0.5 text-slate-600">
+                    <div className="flex items-center gap-1 truncate">
+                      <NationIcon size={12} className="text-cyan-600 shrink-0" />
+                      <span className="truncate">
+                        <strong>{c.totalNations || 0}</strong> nations
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 truncate">
+                      <IntCompIcon size={12} className="text-purple-600 shrink-0" />
+                      <span className="truncate">
+                        <strong>{c.totalIntComps || 0}</strong> comps
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (hidden md:block) */}
+            <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <Table<ConfederationItem>
+                rowKey="id"
+                columns={continentColumns}
+                dataSource={filteredContinents}
                 loading={loading}
-                onNavigate={(step) => router.push(`/nation/${step.id}`)}
-                emptyText="No countries found"
-                defaultPageSize={20}
+                pagination={{
+                  defaultPageSize: 10,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['10', '20', '50'],
+                  showTotal: (total, range) =>
+                    `Showing ${range[0]} - ${range[1]} of ${total} records`,
+                  size: 'small',
+                }}
+                scroll={{ x: 'max-content' }}
+                size="middle"
               />
             </div>
-          )}
+          </div>
+        )}
 
-          {/* 4. NATION HUB (TABS WITH ANTD PAGINATED TABLE) */}
-          {!loading && currentStep.level === 'NATION_HUB' && nationHub && (
-            <div>
-              {/* Header & Country Info */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                <div>
-                  <h2 className="text-base font-bold text-gray-800 flex items-center gap-2.5">
-                    {getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.three_letter_name) ? (
-                      <img
-                        src={getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.three_letter_name)}
-                        alt={currentStep.title}
-                        className="w-8 h-5.5 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : null}
-                    <span>{currentStep.title}</span>
-                    <Tag color="cyan" className="font-bold m-0">
-                      ID: {nationHub.nation?.id}
-                    </Tag>
-                  </h2>
-                </div>
-              </div>
-
-              {/* If no children exist */}
-              {visibleNationTabs.length === 0 ? (
-                <div className="text-center py-16 text-gray-400 italic">
-                  No child records available for this country.
-                </div>
-              ) : (
-                <div>
-                  {/* ANTD TABS */}
-                  <Tabs
-                    activeKey={activeNationTab}
-                    onChange={(key) => handleSwitchNationTab(key as NationTabKey)}
-                    type="line"
-                    size="middle"
-                    className="mb-2"
-                    items={visibleNationTabs.map((tab) => ({
-                      key: tab.key,
+        {/* 2. INTERNATIONAL COMPETITIONS */}
+        {!loading && currentStep.level === 'INT_COMPETITIONS' && (
+          <div>
+            {/* Tabs switcher if confed has both countries and int comps */}
+            {(() => {
+              const confedsList = Array.isArray(continents)
+                ? continents
+                : (continents as any)?.content || [];
+              const currentConfed = confedsList.find((c: any) => c.id === currentStep.id);
+              if (!currentConfed || (currentConfed.totalNations || 0) === 0) return null;
+              return (
+                <Tabs
+                  activeKey="INT_COMPETITIONS"
+                  onChange={(key) => {
+                    setTableFilter('');
+                    setNavStack((prev) => [
+                      ...prev.slice(0, -1),
+                      {
+                        level: key as HierarchyLevel,
+                        id: currentConfed.id,
+                        title: currentConfed.name,
+                      },
+                    ]);
+                  }}
+                  items={[
+                    {
+                      key: 'NATIONS',
                       label: (
-                        <Space size={4} title={tab.label}>
-                          {tab.icon}
-                          <span className="hidden sm:inline font-semibold text-xs sm:text-sm">{tab.label}</span>
+                        <Space size={4} title="Countries">
+                          <NationIcon size={16} className="text-cyan-600" />
+                          <span className="hidden sm:inline">Countries</span>
                           <Badge
-                            count={tab.count}
+                            count={currentConfed.totalNations}
                             overflowCount={99999}
-                            style={{
-                              backgroundColor: activeNationTab === tab.key ? '#1d70b8' : '#94a3b8',
-                            }}
+                            style={{ backgroundColor: '#94a3b8' }}
                           />
                         </Space>
                       ),
-                    }))}
-                  />
+                    },
+                    {
+                      key: 'INT_COMPETITIONS',
+                      label: (
+                        <Space size={4} title="International Competitions">
+                          <IntCompIcon size={16} className="text-purple-600" />
+                          <span className="hidden sm:inline font-semibold">
+                            International Competitions
+                          </span>
+                          <Badge
+                            count={currentConfed.totalIntComps}
+                            overflowCount={99999}
+                            style={{ backgroundColor: '#9333ea' }}
+                          />
+                        </Space>
+                      ),
+                    },
+                  ]}
+                  className="mb-4"
+                />
+              );
+            })()}
 
-                  {/* ACTIVE TAB CONTENT */}
-                  <div className="mt-2">
-                    {/* Header bar: Filter & Add button for tabs without built-in group toolbar */}
-                    {activeNationTab !== NationTabKey.DOMESTIC_COMPS && activeNationTab !== NationTabKey.CITIES && (
+            <CompetitionGroupView
+              items={filteredIntComps}
+              loading={loading}
+              onNavigate={pushStep}
+              onEdit={(rec) => {
+                setEditingRecord(rec);
+                setRecordModalType('competition');
+                setIsRecordModalOpen(true);
+              }}
+              onDelete={handleDeleteDirect}
+              emptyText="No international competitions found"
+              extraRight={
+                <>
+                  <Input
+                    prefix={<SearchOutlined className="text-gray-400" />}
+                    placeholder="Filter competitions..."
+                    value={tableFilter}
+                    onChange={(e) => setTableFilter(e.target.value)}
+                    allowClear
+                    className="w-48 sm:w-64"
+                  />
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      setEditingRecord(null);
+                      setRecordModalType('competition');
+                      setIsRecordModalOpen(true);
+                    }}
+                    style={{ backgroundColor: '#059669', borderColor: '#059669' }}
+                    className="shrink-0"
+                    title="Add International Competition"
+                  >
+                    <span className="hidden sm:inline">Add International Competition</span>
+                  </Button>
+                </>
+              }
+            />
+          </div>
+        )}
+
+        {/* 3. COUNTRIES (NATIONS) */}
+        {!loading && currentStep.level === 'NATIONS' && (
+          <div>
+            {/* Tabs switcher if confed has both countries and int comps */}
+            {(() => {
+              const confedsList = Array.isArray(continents)
+                ? continents
+                : (continents as any)?.content || [];
+              const currentConfed = confedsList.find((c: any) => c.id === currentStep.id);
+              if (!currentConfed || (currentConfed.totalIntComps || 0) === 0) return null;
+              return (
+                <Tabs
+                  activeKey="NATIONS"
+                  onChange={(key) => {
+                    setTableFilter('');
+                    setNavStack((prev) => [
+                      ...prev.slice(0, -1),
+                      {
+                        level: key as HierarchyLevel,
+                        id: currentConfed.id,
+                        title: currentConfed.name,
+                      },
+                    ]);
+                  }}
+                  items={[
+                    {
+                      key: 'NATIONS',
+                      label: (
+                        <Space size={4} title="Countries">
+                          <NationIcon size={16} className="text-cyan-600" />
+                          <span className="hidden sm:inline font-semibold">Countries</span>
+                          <Badge
+                            count={currentConfed.totalNations}
+                            overflowCount={99999}
+                            style={{ backgroundColor: '#1d70b8' }}
+                          />
+                        </Space>
+                      ),
+                    },
+                    {
+                      key: 'INT_COMPETITIONS',
+                      label: (
+                        <Space size={4} title="International Competitions">
+                          <IntCompIcon size={16} className="text-purple-600" />
+                          <span className="hidden sm:inline">International Competitions</span>
+                          <Badge
+                            count={currentConfed.totalIntComps}
+                            overflowCount={99999}
+                            style={{ backgroundColor: '#94a3b8' }}
+                          />
+                        </Space>
+                      ),
+                    },
+                  ]}
+                  className="mb-4"
+                />
+              );
+            })()}
+
+            <div className="flex justify-end mb-4">
+              <Input
+                prefix={<SearchOutlined className="text-gray-400" />}
+                placeholder="Filter countries..."
+                value={tableFilter}
+                onChange={(e) => setTableFilter(e.target.value)}
+                allowClear
+                className="w-full sm:w-64"
+              />
+            </div>
+
+            <CardGrid
+              items={filteredNations}
+              type={EntityType.NATION}
+              columns={5}
+              loading={loading}
+              onNavigate={(step) => router.push(`/nation/${step.id}`)}
+              emptyText="No countries found"
+              defaultPageSize={20}
+            />
+          </div>
+        )}
+
+        {/* 4. NATION HUB (TABS WITH ANTD PAGINATED TABLE) */}
+        {!loading && currentStep.level === 'NATION_HUB' && nationHub && (
+          <div>
+            {/* Header & Country Info */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+              <div>
+                <h2 className="text-base font-bold text-gray-800 flex items-center gap-2.5">
+                  {getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.three_letter_name) ? (
+                    <img
+                      src={getNationLogoUrl(
+                        nationHub.nation?.id,
+                        nationHub.nation?.three_letter_name,
+                      )}
+                      alt={currentStep.title}
+                      className="w-8 h-5.5 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
+                  <span>{currentStep.title}</span>
+                  <Tag color="cyan" className="font-bold m-0">
+                    ID: {nationHub.nation?.id}
+                  </Tag>
+                </h2>
+              </div>
+            </div>
+
+            {/* If no children exist */}
+            {visibleNationTabs.length === 0 ? (
+              <div className="text-center py-16 text-gray-400 italic">
+                No child records available for this country.
+              </div>
+            ) : (
+              <div>
+                {/* ANTD TABS */}
+                <Tabs
+                  activeKey={activeNationTab}
+                  onChange={(key) => handleSwitchNationTab(key as NationTabKey)}
+                  type="line"
+                  size="middle"
+                  className="mb-2"
+                  items={visibleNationTabs.map((tab) => ({
+                    key: tab.key,
+                    label: (
+                      <Space size={4} title={tab.label}>
+                        {tab.icon}
+                        <span className="hidden sm:inline font-semibold text-xs sm:text-sm">
+                          {tab.label}
+                        </span>
+                        <Badge
+                          count={tab.count}
+                          overflowCount={99999}
+                          style={{
+                            backgroundColor: activeNationTab === tab.key ? '#1d70b8' : '#94a3b8',
+                          }}
+                        />
+                      </Space>
+                    ),
+                  }))}
+                />
+
+                {/* ACTIVE TAB CONTENT */}
+                <div className="mt-2">
+                  {/* Header bar: Filter & Add button for tabs without built-in group toolbar */}
+                  {activeNationTab !== NationTabKey.DOMESTIC_COMPS &&
+                    activeNationTab !== NationTabKey.CITIES && (
                       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
                         <div className="text-xs text-gray-500">
-                          Category: <strong className="text-gray-800">{currentNationTabObj?.label}</strong> ({filteredDetailRecords.length} records)
+                          Category:{' '}
+                          <strong className="text-gray-800">{currentNationTabObj?.label}</strong> (
+                          {filteredDetailRecords.length} records)
                         </div>
 
                         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
@@ -960,280 +1008,383 @@ export default function LncSortitoutsiExplorer() {
                             }}
                             title={currentNationTabObj?.addLabel || 'Add Record'}
                           >
-                            <span className="hidden sm:inline">{currentNationTabObj?.addLabel || 'Add Record'}</span>
+                            <span className="hidden sm:inline">
+                              {currentNationTabObj?.addLabel || 'Add Record'}
+                            </span>
                           </Button>
                         </div>
                       </div>
                     )}
 
-                    {activeNationTab === NationTabKey.DOMESTIC_COMPS ? (
-                      <CompetitionGroupView
-                        items={filteredDetailRecords}
-                        loading={nationTabLoading}
-                        onNavigate={pushStep}
-                        onEdit={(rec) => {
-                          setEditingRecord(rec);
-                          setRecordModalType(currentRecordType);
-                          setIsRecordModalOpen(true);
-                        }}
-                        onDelete={handleDeleteDirect}
-                        emptyText="No competitions found"
-                        extraRight={
-                          <>
-                            <Input
-                              prefix={<SearchOutlined className="text-gray-400" />}
-                              placeholder="Filter competitions..."
-                              value={tableFilter}
-                              onChange={(e) => setTableFilter(e.target.value)}
-                              allowClear
-                              className="w-48 sm:w-64"
-                            />
-                            <Button
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              className="shrink-0"
-                              onClick={() => {
-                                setEditingRecord(null);
-                                setRecordModalType(currentRecordType);
-                                setIsRecordModalOpen(true);
-                              }}
-                              title={currentNationTabObj?.addLabel || 'Add Competition'}
-                            >
-                              <span className="hidden sm:inline">{currentNationTabObj?.addLabel || 'Add Competition'}</span>
-                            </Button>
-                          </>
-                        }
-                      />
-                    ) : activeNationTab === NationTabKey.CITIES ? (
-                      <CityGroupView
-                        items={filteredDetailRecords}
-                        loading={nationTabLoading}
-                        onNavigate={pushStep}
-                        onEdit={(rec) => {
-                          setEditingRecord(rec);
-                          setRecordModalType(currentRecordType);
-                          setIsRecordModalOpen(true);
-                        }}
-                        onDelete={handleDeleteDirect}
-                        emptyText="No cities found"
-                        extraRight={
-                          <>
-                            <Input
-                              prefix={<SearchOutlined className="text-gray-400" />}
-                              placeholder="Filter cities..."
-                              value={tableFilter}
-                              onChange={(e) => setTableFilter(e.target.value)}
-                              allowClear
-                              className="w-48 sm:w-64"
-                            />
-                            <Button
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              className="shrink-0"
-                              onClick={() => {
-                                setEditingRecord(null);
-                                setRecordModalType(currentRecordType);
-                                setIsRecordModalOpen(true);
-                              }}
-                              title={currentNationTabObj?.addLabel || 'Add City'}
-                            >
-                              <span className="hidden sm:inline">{currentNationTabObj?.addLabel || 'Add City'}</span>
-                            </Button>
-                          </>
-                        }
-                      />
-                    ) : (
-                      <CardGrid
-                        items={filteredDetailRecords}
-                        type={currentRecordType}
-                        loading={nationTabLoading}
-                        onNavigate={pushStep}
-                        onEdit={(rec) => {
-                          setEditingRecord(rec);
-                          setRecordModalType(currentRecordType);
-                          setIsRecordModalOpen(true);
-                        }}
-                        onDelete={handleDeleteDirect}
-                        emptyText={`No ${currentNationTabObj?.label.toLowerCase() || 'records'} found`}
-                        defaultPageSize={20}
-                      />
-                    )}
-                  </div>
+                  {activeNationTab === NationTabKey.DOMESTIC_COMPS ? (
+                    <CompetitionGroupView
+                      items={filteredDetailRecords}
+                      loading={nationTabLoading}
+                      onNavigate={pushStep}
+                      onEdit={(rec) => {
+                        setEditingRecord(rec);
+                        setRecordModalType(currentRecordType);
+                        setIsRecordModalOpen(true);
+                      }}
+                      onDelete={handleDeleteDirect}
+                      emptyText="No competitions found"
+                      extraRight={
+                        <>
+                          <Input
+                            prefix={<SearchOutlined className="text-gray-400" />}
+                            placeholder="Filter competitions..."
+                            value={tableFilter}
+                            onChange={(e) => setTableFilter(e.target.value)}
+                            allowClear
+                            className="w-48 sm:w-64"
+                          />
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            className="shrink-0"
+                            onClick={() => {
+                              setEditingRecord(null);
+                              setRecordModalType(currentRecordType);
+                              setIsRecordModalOpen(true);
+                            }}
+                            title={currentNationTabObj?.addLabel || 'Add Competition'}
+                          >
+                            <span className="hidden sm:inline">
+                              {currentNationTabObj?.addLabel || 'Add Competition'}
+                            </span>
+                          </Button>
+                        </>
+                      }
+                    />
+                  ) : activeNationTab === NationTabKey.CITIES ? (
+                    <CityGroupView
+                      items={filteredDetailRecords}
+                      loading={nationTabLoading}
+                      onNavigate={pushStep}
+                      onEdit={(rec) => {
+                        setEditingRecord(rec);
+                        setRecordModalType(currentRecordType);
+                        setIsRecordModalOpen(true);
+                      }}
+                      onDelete={handleDeleteDirect}
+                      emptyText="No cities found"
+                      extraRight={
+                        <>
+                          <Input
+                            prefix={<SearchOutlined className="text-gray-400" />}
+                            placeholder="Filter cities..."
+                            value={tableFilter}
+                            onChange={(e) => setTableFilter(e.target.value)}
+                            allowClear
+                            className="w-48 sm:w-64"
+                          />
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            className="shrink-0"
+                            onClick={() => {
+                              setEditingRecord(null);
+                              setRecordModalType(currentRecordType);
+                              setIsRecordModalOpen(true);
+                            }}
+                            title={currentNationTabObj?.addLabel || 'Add City'}
+                          >
+                            <span className="hidden sm:inline">
+                              {currentNationTabObj?.addLabel || 'Add City'}
+                            </span>
+                          </Button>
+                        </>
+                      }
+                    />
+                  ) : (
+                    <CardGrid
+                      items={filteredDetailRecords}
+                      type={currentRecordType}
+                      loading={nationTabLoading}
+                      onNavigate={pushStep}
+                      onEdit={(rec) => {
+                        setEditingRecord(rec);
+                        setRecordModalType(currentRecordType);
+                        setIsRecordModalOpen(true);
+                      }}
+                      onDelete={handleDeleteDirect}
+                      emptyText={`No ${currentNationTabObj?.label.toLowerCase() || 'records'} found`}
+                      defaultPageSize={20}
+                    />
+                  )}
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+        )}
 
-          {/* 5. DETAILED TABLE (SECTION 6 LEAF NODES) */}
-          {!loading &&
-            [
-              'DOMESTIC_COMPS',
-              'CLUBS_IN_COMP',
-              'INDEPENDENT_CLUBS',
-              'STADIUMS',
-              'CITIES',
-              'INDEPENDENT_AWARDS',
-              'COMP_AWARDS',
-              'GLOBAL_PLAYERS',
-              'GLOBAL_STAGES',
-              'GLOBAL_AWARDS',
-            ].includes(currentStep.level) && (
-              <div>
-                {(currentStep.level === 'CLUBS_IN_COMP' || currentStep.level === 'COMP_AWARDS') ? (
-                  <div className="bg-white rounded-lg border border-slate-200 p-3.5 sm:p-4 mb-4 shadow-2xs">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                      <div className="flex items-center gap-3">
-                        {compInfo?.nation && getNationLogoUrl(compInfo.nation.id, compInfo.nation.three_letter_name) ? (
-                          <img
-                            src={getNationLogoUrl(compInfo.nation.id, compInfo.nation.three_letter_name)}
-                            alt={compInfo.nation.short_name || compInfo.nation.long_name}
-                            className="w-8 h-6 object-cover rounded-xs border border-slate-200 shadow-2xs shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (compInfo?.confederation?.id || compInfo?.confed_id) && getConfederationLogoUrl(compInfo.confederation?.id || compInfo.confed_id!) ? (
-                          <img
-                            src={getConfederationLogoUrl(compInfo.confederation?.id || compInfo.confed_id!)}
-                            alt={compInfo.confederation?.name || 'Confederation'}
-                            className="w-8 h-8 object-contain shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (!compInfo?.nation_id || compInfo?.is_international) ? (
-                          <IntCompIcon size={24} className="text-purple-600 shrink-0" />
-                        ) : (
-                          <DomesticCompIcon size={24} className="text-amber-500 shrink-0" />
-                        )}
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h2 className="text-base sm:text-lg font-bold text-slate-800 m-0">
-                              {compInfo?.short_name || compInfo?.long_name || currentStep.title.replace(/ - (Clubs|Awards)$/, '')}
-                            </h2>
-                            {currentStep.id && (
-                              <Tag color="cyan" className="m-0 font-bold text-xs">
-                                ID: {currentStep.id}
+        {/* 5. DETAILED TABLE (SECTION 6 LEAF NODES) */}
+        {!loading &&
+          [
+            'DOMESTIC_COMPS',
+            'CLUBS_IN_COMP',
+            'INDEPENDENT_CLUBS',
+            'STADIUMS',
+            'CITIES',
+            'INDEPENDENT_AWARDS',
+            'COMP_AWARDS',
+            'GLOBAL_PLAYERS',
+            'GLOBAL_STAGES',
+            'GLOBAL_AWARDS',
+          ].includes(currentStep.level) && (
+            <div>
+              {currentStep.level === 'CLUBS_IN_COMP' || currentStep.level === 'COMP_AWARDS' ? (
+                <div className="bg-white rounded-lg border border-slate-200 p-3.5 sm:p-4 mb-4 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="flex items-center gap-3">
+                      {compInfo?.nation &&
+                      getNationLogoUrl(compInfo.nation.id, compInfo.nation.three_letter_name) ? (
+                        <img
+                          src={getNationLogoUrl(
+                            compInfo.nation.id,
+                            compInfo.nation.three_letter_name,
+                          )}
+                          alt={compInfo.nation.short_name || compInfo.nation.long_name}
+                          className="w-8 h-6 object-cover rounded-xs border border-slate-200 shadow-2xs shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (compInfo?.confederation?.id || compInfo?.confed_id) &&
+                        getConfederationLogoUrl(
+                          compInfo.confederation?.id || compInfo.confed_id!,
+                        ) ? (
+                        <img
+                          src={getConfederationLogoUrl(
+                            compInfo.confederation?.id || compInfo.confed_id!,
+                          )}
+                          alt={compInfo.confederation?.name || 'Confederation'}
+                          className="w-8 h-8 object-contain shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : !compInfo?.nation_id || compInfo?.is_international ? (
+                        <IntCompIcon size={24} className="text-purple-600 shrink-0" />
+                      ) : (
+                        <DomesticCompIcon size={24} className="text-amber-500 shrink-0" />
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h2 className="text-base sm:text-lg font-bold text-slate-800 m-0">
+                            {compInfo?.short_name ||
+                              compInfo?.long_name ||
+                              currentStep.title.replace(/ - (Clubs|Awards)$/, '')}
+                          </h2>
+                          {currentStep.id && (
+                            <Tag color="cyan" className="m-0 font-bold text-xs">
+                              ID: {currentStep.id}
+                            </Tag>
+                          )}
+                          {compInfo?.three_letter_name && (
+                            <Tag color="purple" className="m-0 font-bold text-xs">
+                              {compInfo.three_letter_name}
+                            </Tag>
+                          )}
+                          {compInfo?.categories && (
+                            <Tooltip
+                              title={compInfo.categories}
+                              trigger="hover"
+                              destroyTooltipOnHide
+                            >
+                              <Tag
+                                color={getCategoryTagColor(compInfo.categories)}
+                                className="m-0 text-xs font-semibold font-mono cursor-default"
+                              >
+                                {formatCategoryCode(compInfo.categories)}
                               </Tag>
-                            )}
-                            {compInfo?.three_letter_name && (
-                              <Tag color="purple" className="m-0 font-bold text-xs">
-                                {compInfo.three_letter_name}
-                              </Tag>
-                            )}
-                            {compInfo?.categories && (
-                              <Tooltip title={compInfo.categories} trigger="hover" destroyTooltipOnHide>
-                                <Tag
-                                  color={getCategoryTagColor(compInfo.categories)}
-                                  className="m-0 text-xs font-semibold font-mono cursor-default"
-                                >
-                                  {formatCategoryCode(compInfo.categories)}
-                                </Tag>
-                              </Tooltip>
-                            )}
-                          </div>
-                          {compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (
-                            <div className="text-xs text-slate-500 mt-0.5">
-                              {compInfo.long_name}
-                            </div>
+                            </Tooltip>
                           )}
                         </div>
+                        {compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (
+                          <div className="text-xs text-slate-500 mt-0.5">{compInfo.long_name}</div>
+                        )}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Competition Tabs: Clubs vs Awards */}
-                    <div className="border-t border-slate-100 mt-3 pt-3 flex items-center justify-between gap-3 flex-wrap">
-                      <div className="flex items-center gap-2">
+                  {/* Competition Tabs: Clubs vs Awards */}
+                  <div className="border-t border-slate-100 mt-3 pt-3 flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSwitchCompTab('CLUBS_IN_COMP')}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition cursor-pointer ${
+                          currentStep.level === 'CLUBS_IN_COMP'
+                            ? 'bg-blue-600 text-white shadow-2xs'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        <SafetyOutlined />
+                        <span>Clubs</span>
+                        <Badge
+                          count={
+                            compInfo?.clubsCount ??
+                            (currentStep.level === 'CLUBS_IN_COMP' ? detailRecords.length : 0)
+                          }
+                          overflowCount={9999}
+                          style={{
+                            backgroundColor:
+                              currentStep.level === 'CLUBS_IN_COMP' ? '#1d4ed8' : '#64748b',
+                            color: '#fff',
+                          }}
+                        />
+                      </button>
+
+                      {((compInfo?.awardsCount || 0) > 0 ||
+                        currentStep.level === 'COMP_AWARDS') && (
                         <button
                           type="button"
-                          onClick={() => handleSwitchCompTab('CLUBS_IN_COMP')}
+                          onClick={() => handleSwitchCompTab('COMP_AWARDS')}
                           className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition cursor-pointer ${
-                            currentStep.level === 'CLUBS_IN_COMP'
-                              ? 'bg-blue-600 text-white shadow-2xs'
+                            currentStep.level === 'COMP_AWARDS'
+                              ? 'bg-amber-500 text-white shadow-2xs'
                               : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                           }`}
                         >
-                          <SafetyOutlined />
-                          <span>Clubs</span>
+                          <StarOutlined />
+                          <span>Awards</span>
                           <Badge
-                            count={compInfo?.clubsCount ?? (currentStep.level === 'CLUBS_IN_COMP' ? detailRecords.length : 0)}
+                            count={
+                              compInfo?.awardsCount ??
+                              (currentStep.level === 'COMP_AWARDS' ? detailRecords.length : 0)
+                            }
                             overflowCount={9999}
                             style={{
-                              backgroundColor: currentStep.level === 'CLUBS_IN_COMP' ? '#1d4ed8' : '#64748b',
+                              backgroundColor:
+                                currentStep.level === 'COMP_AWARDS' ? '#d97706' : '#64748b',
                               color: '#fff',
                             }}
                           />
                         </button>
-
-                        {((compInfo?.awardsCount || 0) > 0 || currentStep.level === 'COMP_AWARDS') && (
-                          <button
-                            type="button"
-                            onClick={() => handleSwitchCompTab('COMP_AWARDS')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition cursor-pointer ${
-                              currentStep.level === 'COMP_AWARDS'
-                                ? 'bg-amber-500 text-white shadow-2xs'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                            }`}
-                          >
-                            <StarOutlined />
-                            <span>Awards</span>
-                            <Badge
-                              count={compInfo?.awardsCount ?? (currentStep.level === 'COMP_AWARDS' ? detailRecords.length : 0)}
-                              overflowCount={9999}
-                              style={{
-                                backgroundColor: currentStep.level === 'COMP_AWARDS' ? '#d97706' : '#64748b',
-                                color: '#fff',
-                              }}
-                            />
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                        <Input
-                          prefix={<SearchOutlined className="text-gray-400" />}
-                          placeholder={currentStep.level === 'COMP_AWARDS' ? 'Filter awards...' : 'Filter clubs...'}
-                          value={tableFilter}
-                          onChange={(e) => setTableFilter(e.target.value)}
-                          allowClear
-                          className="w-48 sm:w-60"
-                        />
-                        <Button
-                          type="primary"
-                          icon={<PlusOutlined />}
-                          onClick={() => {
-                            setEditingRecord(null);
-                            setRecordModalType(currentRecordType);
-                            setIsRecordModalOpen(true);
-                          }}
-                          title={currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
-                        >
-                          <span className="hidden sm:inline">
-                            {currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
-                          </span>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ) : currentStep.level !== 'DOMESTIC_COMPS' && currentStep.level !== 'CITIES' ? (
-                  <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
-                    <div>
-                      <h3 className="text-sm font-bold text-gray-700">
-                        Detailed Records: {currentStep.title}
-                      </h3>
-                      <div className="text-xs text-gray-500">
-                        Total: {filteredDetailRecords.length} records
-                      </div>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                       <Input
                         prefix={<SearchOutlined className="text-gray-400" />}
-                        placeholder="Filter records..."
+                        placeholder={
+                          currentStep.level === 'COMP_AWARDS'
+                            ? 'Filter awards...'
+                            : 'Filter clubs...'
+                        }
                         value={tableFilter}
                         onChange={(e) => setTableFilter(e.target.value)}
                         allowClear
-                        className="flex-1 sm:w-64"
+                        className="w-48 sm:w-60"
+                      />
+                      <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => {
+                          setEditingRecord(null);
+                          setRecordModalType(currentRecordType);
+                          setIsRecordModalOpen(true);
+                        }}
+                        title={currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
+                      >
+                        <span className="hidden sm:inline">
+                          {currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
+                        </span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : currentStep.level !== 'DOMESTIC_COMPS' && currentStep.level !== 'CITIES' ? (
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-700">
+                      Detailed Records: {currentStep.title}
+                    </h3>
+                    <div className="text-xs text-gray-500">
+                      Total: {filteredDetailRecords.length} records
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <Input
+                      prefix={<SearchOutlined className="text-gray-400" />}
+                      placeholder="Filter records..."
+                      value={tableFilter}
+                      onChange={(e) => setTableFilter(e.target.value)}
+                      allowClear
+                      className="flex-1 sm:w-64"
+                    />
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      className="shrink-0"
+                      onClick={() => {
+                        setEditingRecord(null);
+                        setRecordModalType(currentRecordType);
+                        setIsRecordModalOpen(true);
+                      }}
+                      title={
+                        currentRecordType === RecordType.PLAYER
+                          ? 'Add Player'
+                          : currentRecordType === RecordType.STAGE
+                            ? 'Add Stage'
+                            : currentRecordType === RecordType.AWARD
+                              ? 'Add Award'
+                              : currentRecordType === RecordType.CLUB
+                                ? 'Add Club'
+                                : currentRecordType === RecordType.COMPETITION
+                                  ? 'Add Competition'
+                                  : currentRecordType === RecordType.STADIUM
+                                    ? 'Add Stadium'
+                                    : currentRecordType === RecordType.CITY
+                                      ? 'Add City'
+                                      : 'Add Record'
+                      }
+                    >
+                      <span className="hidden sm:inline">
+                        {currentRecordType === RecordType.PLAYER
+                          ? 'Add Player'
+                          : currentRecordType === RecordType.STAGE
+                            ? 'Add Stage'
+                            : currentRecordType === RecordType.AWARD
+                              ? 'Add Award'
+                              : currentRecordType === RecordType.CLUB
+                                ? 'Add Club'
+                                : currentRecordType === RecordType.COMPETITION
+                                  ? 'Add Competition'
+                                  : currentRecordType === RecordType.STADIUM
+                                    ? 'Add Stadium'
+                                    : currentRecordType === RecordType.CITY
+                                      ? 'Add City'
+                                      : 'Add Record'}
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+
+              {currentStep.level === 'DOMESTIC_COMPS' ? (
+                <CompetitionGroupView
+                  items={filteredDetailRecords}
+                  loading={loading}
+                  onNavigate={pushStep}
+                  onEdit={(rec) => {
+                    setEditingRecord(rec);
+                    setRecordModalType(currentRecordType);
+                    setIsRecordModalOpen(true);
+                  }}
+                  onDelete={handleDeleteDirect}
+                  emptyText="No competitions found"
+                  extraRight={
+                    <>
+                      <Input
+                        prefix={<SearchOutlined className="text-gray-400" />}
+                        placeholder="Filter competitions..."
+                        value={tableFilter}
+                        onChange={(e) => setTableFilter(e.target.value)}
+                        allowClear
+                        className="w-48 sm:w-64"
                       />
                       <Button
                         type="primary"
@@ -1244,141 +1395,70 @@ export default function LncSortitoutsiExplorer() {
                           setRecordModalType(currentRecordType);
                           setIsRecordModalOpen(true);
                         }}
-                        title={
-                          currentRecordType === RecordType.PLAYER
-                            ? 'Add Player'
-                            : currentRecordType === RecordType.STAGE
-                            ? 'Add Stage'
-                            : currentRecordType === RecordType.AWARD
-                            ? 'Add Award'
-                            : currentRecordType === RecordType.CLUB
-                            ? 'Add Club'
-                            : currentRecordType === RecordType.COMPETITION
-                            ? 'Add Competition'
-                            : currentRecordType === RecordType.STADIUM
-                            ? 'Add Stadium'
-                            : currentRecordType === RecordType.CITY
-                            ? 'Add City'
-                            : 'Add Record'
-                        }
+                        title="Add Competition"
                       >
-                        <span className="hidden sm:inline">
-                          {currentRecordType === RecordType.PLAYER
-                            ? 'Add Player'
-                            : currentRecordType === RecordType.STAGE
-                            ? 'Add Stage'
-                            : currentRecordType === RecordType.AWARD
-                            ? 'Add Award'
-                            : currentRecordType === RecordType.CLUB
-                            ? 'Add Club'
-                            : currentRecordType === RecordType.COMPETITION
-                            ? 'Add Competition'
-                            : currentRecordType === RecordType.STADIUM
-                            ? 'Add Stadium'
-                            : currentRecordType === RecordType.CITY
-                            ? 'Add City'
-                            : 'Add Record'}
-                        </span>
+                        <span className="hidden sm:inline">Add Competition</span>
                       </Button>
-                    </div>
-                  </div>
-                ) : null}
-
-                {currentStep.level === 'DOMESTIC_COMPS' ? (
-                  <CompetitionGroupView
-                    items={filteredDetailRecords}
-                    loading={loading}
-                    onNavigate={pushStep}
-                    onEdit={(rec) => {
-                      setEditingRecord(rec);
-                      setRecordModalType(currentRecordType);
-                      setIsRecordModalOpen(true);
-                    }}
-                    onDelete={handleDeleteDirect}
-                    emptyText="No competitions found"
-                    extraRight={
-                      <>
-                        <Input
-                          prefix={<SearchOutlined className="text-gray-400" />}
-                          placeholder="Filter competitions..."
-                          value={tableFilter}
-                          onChange={(e) => setTableFilter(e.target.value)}
-                          allowClear
-                          className="w-48 sm:w-64"
-                        />
-                        <Button
-                          type="primary"
-                          icon={<PlusOutlined />}
-                          className="shrink-0"
-                          onClick={() => {
-                            setEditingRecord(null);
-                            setRecordModalType(currentRecordType);
-                            setIsRecordModalOpen(true);
-                          }}
-                          title="Add Competition"
-                        >
-                          <span className="hidden sm:inline">Add Competition</span>
-                        </Button>
-                      </>
-                    }
-                  />
-                ) : currentStep.level === 'CITIES' ? (
-                  <CityGroupView
-                    items={filteredDetailRecords}
-                    loading={loading}
-                    onNavigate={pushStep}
-                    onEdit={(rec) => {
-                      setEditingRecord(rec);
-                      setRecordModalType(currentRecordType);
-                      setIsRecordModalOpen(true);
-                    }}
-                    onDelete={handleDeleteDirect}
-                    emptyText="No cities found"
-                    extraRight={
-                      <>
-                        <Input
-                          prefix={<SearchOutlined className="text-gray-400" />}
-                          placeholder="Filter cities..."
-                          value={tableFilter}
-                          onChange={(e) => setTableFilter(e.target.value)}
-                          allowClear
-                          className="w-48 sm:w-64"
-                        />
-                        <Button
-                          type="primary"
-                          icon={<PlusOutlined />}
-                          className="shrink-0"
-                          onClick={() => {
-                            setEditingRecord(null);
-                            setRecordModalType(currentRecordType);
-                            setIsRecordModalOpen(true);
-                          }}
-                          title="Add City"
-                        >
-                          <span className="hidden sm:inline">Add City</span>
-                        </Button>
-                      </>
-                    }
-                  />
-                ) : (
-                  <CardGrid
-                    items={filteredDetailRecords}
-                    type={currentRecordType}
-                    loading={loading}
-                    onNavigate={pushStep}
-                    onEdit={(rec) => {
-                      setEditingRecord(rec);
-                      setRecordModalType(currentRecordType);
-                      setIsRecordModalOpen(true);
-                    }}
-                    onDelete={handleDeleteDirect}
-                    emptyText="No records found"
-                    defaultPageSize={20}
-                  />
-                )}
-              </div>
-            )}
-        </div>
+                    </>
+                  }
+                />
+              ) : currentStep.level === 'CITIES' ? (
+                <CityGroupView
+                  items={filteredDetailRecords}
+                  loading={loading}
+                  onNavigate={pushStep}
+                  onEdit={(rec) => {
+                    setEditingRecord(rec);
+                    setRecordModalType(currentRecordType);
+                    setIsRecordModalOpen(true);
+                  }}
+                  onDelete={handleDeleteDirect}
+                  emptyText="No cities found"
+                  extraRight={
+                    <>
+                      <Input
+                        prefix={<SearchOutlined className="text-gray-400" />}
+                        placeholder="Filter cities..."
+                        value={tableFilter}
+                        onChange={(e) => setTableFilter(e.target.value)}
+                        allowClear
+                        className="w-48 sm:w-64"
+                      />
+                      <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        className="shrink-0"
+                        onClick={() => {
+                          setEditingRecord(null);
+                          setRecordModalType(currentRecordType);
+                          setIsRecordModalOpen(true);
+                        }}
+                        title="Add City"
+                      >
+                        <span className="hidden sm:inline">Add City</span>
+                      </Button>
+                    </>
+                  }
+                />
+              ) : (
+                <CardGrid
+                  items={filteredDetailRecords}
+                  type={currentRecordType}
+                  loading={loading}
+                  onNavigate={pushStep}
+                  onEdit={(rec) => {
+                    setEditingRecord(rec);
+                    setRecordModalType(currentRecordType);
+                    setIsRecordModalOpen(true);
+                  }}
+                  onDelete={handleDeleteDirect}
+                  emptyText="No records found"
+                  defaultPageSize={20}
+                />
+              )}
+            </div>
+          )}
+      </div>
 
       {/* Modals */}
       <RecordModal

@@ -26,7 +26,12 @@ import {
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
 import CityGroupView from '../../../components/CityGroupView';
-import { DomesticCompIcon, StadiumIcon, CityIcon, AwardIcon } from '../../../components/EntityIcons';
+import {
+  DomesticCompIcon,
+  StadiumIcon,
+  CityIcon,
+  AwardIcon,
+} from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { matchRecordSearch } from '../../../utils/search';
@@ -115,7 +120,9 @@ export default function NationDetailPage() {
       const confedName = nation?.confederation?.name || 'Confederation';
       const nationCode = nation?.three_letter_name;
       const nationName = nation?.long_name;
-      const nationTitle = nationCode ? `[${nationCode}] ${nationName}` : (nationName || `Nation ${nationId}`);
+      const nationTitle = nationCode
+        ? `[${nationCode}] ${nationName}`
+        : nationName || `Nation ${nationId}`;
 
       setHeaderTitle(nationTitle);
       setHeaderId(hub.nation?.id);
@@ -134,7 +141,7 @@ export default function NationDetailPage() {
             ]
           : []),
         {
-          title: nationName || nationTitle,
+          title: nationCode || nation?.name_3l || nationName || nationTitle,
         },
       ]);
       setHeaderLogo({
@@ -158,7 +165,15 @@ export default function NationDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [nationId, loadTabRecords, setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo]);
+  }, [
+    nationId,
+    loadTabRecords,
+    setHeaderTitle,
+    setHeaderId,
+    setBreadcrumbs,
+    setBackHref,
+    setHeaderLogo,
+  ]);
 
   useEffect(() => {
     loadNationData();
@@ -240,7 +255,11 @@ export default function NationDetailPage() {
         label: (
           <Space size={4} title="Competitions">
             <DomesticCompIcon size={18} className="text-amber-500" />
-            <span className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}>Competitions</span>
+            <span
+              className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}
+            >
+              Competitions
+            </span>
             <Badge
               count={compCount}
               overflowCount={99999}
@@ -257,7 +276,9 @@ export default function NationDetailPage() {
         label: (
           <Space size={4} title="Stadiums">
             <StadiumIcon size={18} className="text-emerald-500" />
-            <span className={`hidden sm:inline ${activeTab === 'STADIUMS' ? 'font-bold' : ''}`}>Stadiums</span>
+            <span className={`hidden sm:inline ${activeTab === 'STADIUMS' ? 'font-bold' : ''}`}>
+              Stadiums
+            </span>
             <Badge
               count={stadiumCount}
               overflowCount={99999}
@@ -274,7 +295,9 @@ export default function NationDetailPage() {
         label: (
           <Space size={4} title="Cities">
             <CityIcon size={18} className="text-sky-500" />
-            <span className={`hidden sm:inline ${activeTab === 'CITIES' ? 'font-bold' : ''}`}>Cities</span>
+            <span className={`hidden sm:inline ${activeTab === 'CITIES' ? 'font-bold' : ''}`}>
+              Cities
+            </span>
             <Badge
               count={cityCount}
               overflowCount={99999}
@@ -291,7 +314,9 @@ export default function NationDetailPage() {
         label: (
           <Space size={4} title="Awards">
             <AwardIcon size={18} className="text-yellow-500" />
-            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>Awards</span>
+            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>
+              Awards
+            </span>
             <Badge
               count={awardCount}
               overflowCount={99999}
@@ -309,7 +334,11 @@ export default function NationDetailPage() {
         label: (
           <Space size={4} title="Competitions">
             <DomesticCompIcon size={18} className="text-amber-500" />
-            <span className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}>Competitions</span>
+            <span
+              className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}
+            >
+              Competitions
+            </span>
           </Space>
         ),
       });
@@ -332,7 +361,11 @@ export default function NationDetailPage() {
       const type = step.metadata?.is_extinct ? 'extinct' : 'other';
       const nId = step.nationId || step.metadata?.nation_id || nationId;
       router.push(`/comp/${type}?nationId=${nId}`);
-    } else if (step.level === 'CLUBS_IN_COMP' || step.level === 'COMP_AWARDS' || step.type === 'competition') {
+    } else if (
+      step.level === 'CLUBS_IN_COMP' ||
+      step.level === 'COMP_AWARDS' ||
+      step.type === 'competition'
+    ) {
       router.push(`/comp/${step.id}`);
     }
   };

@@ -48,7 +48,10 @@ import { formatCategoryCode, getCategoryTagColor } from '../../components/Entity
 
 const parseColor = (rgbStr?: string | null) => {
   if (!rgbStr) return null;
-  const parts = rgbStr.trim().split(/\s+/).map((n) => parseInt(n, 10));
+  const parts = rgbStr
+    .trim()
+    .split(/\s+/)
+    .map((n) => parseInt(n, 10));
   if (parts.length < 3 || parts.some(isNaN)) return null;
   const [r, g, b] = parts;
   const toHex = (n: number) => n.toString(16).padStart(2, '0');
@@ -91,10 +94,10 @@ function CompetitionsExplorerContent() {
   // Load dropdown choices
   useEffect(() => {
     fetchContinents()
-      .then(setConfederations)
+      .then((data: any) => setConfederations(Array.isArray(data) ? data : data?.content || []))
       .catch((e) => console.error('Failed to load confederations', e));
     fetchAllNations()
-      .then(setNations)
+      .then((data: any) => setNations(Array.isArray(data) ? data : data?.content || []))
       .catch((e) => console.error('Failed to load nations', e));
   }, []);
 
@@ -137,7 +140,12 @@ function CompetitionsExplorerContent() {
         const cat = (c.categories || '').toLowerCase();
         if (categoryFilter === 'league' && !cat.includes('league')) return false;
         if (categoryFilter === 'cup' && !cat.includes('cup')) return false;
-        if (categoryFilter === 'youth' && !cat.includes('youth') && !cat.includes('u21') && !cat.includes('u19'))
+        if (
+          categoryFilter === 'youth' &&
+          !cat.includes('youth') &&
+          !cat.includes('u21') &&
+          !cat.includes('u19')
+        )
           return false;
       }
 
@@ -699,7 +707,9 @@ function CompetitionsExplorerContent() {
 
 export default function CompetitionsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading competitions...</div>}>
+    <Suspense
+      fallback={<div className="p-8 text-center text-gray-400">Loading competitions...</div>}
+    >
       <CompetitionsExplorerContent />
     </Suspense>
   );

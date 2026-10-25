@@ -190,7 +190,8 @@ export class LncService {
       const code = s.nation?.name_3l || 'UNK';
       const nat = s.nation?.name_sh || 'Standard';
       const pfx = s.is_disabled ? '#' : '';
-      out += `# STADIUM > [${code}] ${nat} > Standard\n${hr}`;
+      const cat = s.type === 'training pitch' ? 'Training Ground' : 'Standard';
+      out += `# STADIUM > [${code}] ${nat} > ${cat}\n${hr}`;
       out += `${pfx}"STADIUM_NAME_CHANGE"\t\t${s.id}\t\t"${s.name}"\t\t\t\t""\n\n`;
     }
 

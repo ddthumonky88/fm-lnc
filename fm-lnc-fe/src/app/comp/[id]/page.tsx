@@ -54,7 +54,9 @@ export default function CompetitionDetailPage() {
   const nationIdParam = searchParams.get('nationId') || undefined;
   const compId = isVirtual ? undefined : rawId;
 
-  const [compInfo, setCompInfo] = useState<(CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }) | null>(null);
+  const [compInfo, setCompInfo] = useState<
+    (CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }) | null
+  >(null);
   const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS' | 'SUB_COMPS'>('CLUBS');
   const [clubs, setClubs] = useState<ClubItem[]>([]);
   const [awards, setAwards] = useState<AwardItem[]>([]);
@@ -120,7 +122,7 @@ export default function CompetitionDetailPage() {
           });
         }
         crumbs.push({
-          title: nationCode ? `[${nationCode}] ${nationName}` : nationName,
+          title: nationCode || nationName,
           href: `/nation/${targetNationId}`,
         });
         crumbs.push({
@@ -176,7 +178,7 @@ export default function CompetitionDetailPage() {
         }
         if (nationId) {
           crumbs.push({
-            title: nationName || 'Nation',
+            title: nationCode || info.nation?.name_3l || nationName || 'Nation',
             href: `/nation/${nationId}`,
           });
         }
@@ -195,10 +197,10 @@ export default function CompetitionDetailPage() {
           info.parent_id
             ? `/comp/${info.parent_id}${nationId ? `?nationId=${nationId}` : ''}`
             : nationId
-            ? `/nation/${nationId}`
-            : confedId
-            ? `/confederation/${confedId}`
-            : '/',
+              ? `/nation/${nationId}`
+              : confedId
+                ? `/confederation/${confedId}`
+                : '/',
         );
 
         if (nationId) {
@@ -304,7 +306,9 @@ export default function CompetitionDetailPage() {
         label: (
           <Space size={4} title="Clubs">
             <ClubIcon size={18} className="text-blue-500" />
-            <span className={`hidden sm:inline ${activeTab === 'CLUBS' ? 'font-bold' : ''}`}>Clubs</span>
+            <span className={`hidden sm:inline ${activeTab === 'CLUBS' ? 'font-bold' : ''}`}>
+              Clubs
+            </span>
             <Badge
               count={clubs.length}
               overflowCount={99999}
@@ -322,7 +326,9 @@ export default function CompetitionDetailPage() {
           label: (
             <Space size={4} title="Awards">
               <AwardIcon size={18} className="text-yellow-500" />
-              <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>Awards</span>
+              <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>
+                Awards
+              </span>
               <Badge
                 count={awards.length}
                 overflowCount={99999}
@@ -339,7 +345,9 @@ export default function CompetitionDetailPage() {
           label: (
             <Space size={4} title="Sub-Competitions">
               <CompIcon size={18} className="text-amber-500" />
-              <span className={`hidden sm:inline ${activeTab === 'SUB_COMPS' ? 'font-bold' : ''}`}>Sub-Competitions</span>
+              <span className={`hidden sm:inline ${activeTab === 'SUB_COMPS' ? 'font-bold' : ''}`}>
+                Sub-Competitions
+              </span>
               <Badge
                 count={subComps.length}
                 overflowCount={99999}
@@ -354,7 +362,10 @@ export default function CompetitionDetailPage() {
     return list;
   }, [clubs.length, awards.length, subComps.length, compInfo?.childrenCount, activeTab, isVirtual]);
 
-  const compTitle = compInfo?.short_name || compInfo?.long_name || (isVirtual ? (isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs') : `Competition ${compId}`);
+  const compTitle =
+    compInfo?.short_name ||
+    compInfo?.long_name ||
+    (isVirtual ? (isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs') : `Competition ${compId}`);
   const nationId = compInfo?.nation_id || compInfo?.nation?.id || nationIdParam;
   const nationName = compInfo?.nation_name || compInfo?.nation?.long_name;
   const nationCode = compInfo?.nation_three_letter || compInfo?.nation?.three_letter_name;
@@ -390,7 +401,10 @@ export default function CompetitionDetailPage() {
                   }}
                 />
               ) : isVirtual ? (
-                <ClubIcon size={24} className={isVirtualExtinct ? 'text-red-500' : 'text-blue-500'} />
+                <ClubIcon
+                  size={24}
+                  className={isVirtualExtinct ? 'text-red-500' : 'text-blue-500'}
+                />
               ) : (
                 <CompIcon size={24} className="text-amber-500" />
               )}
@@ -399,13 +413,7 @@ export default function CompetitionDetailPage() {
                 <div className="flex items-center gap-1.5 flex-wrap mb-1">
                   <Tooltip title={isVirtual ? undefined : 'Click to copy ID'}>
                     <Tag
-                      color={
-                        isVirtual
-                          ? isVirtualExtinct
-                            ? 'volcano'
-                            : 'geekblue'
-                          : 'cyan'
-                      }
+                      color={isVirtual ? (isVirtualExtinct ? 'volcano' : 'geekblue') : 'cyan'}
                       className={`m-0 font-mono font-bold text-xs inline-flex items-center gap-1.5 ${
                         !isVirtual ? 'cursor-pointer hover:opacity-80' : ''
                       }`}
@@ -417,7 +425,9 @@ export default function CompetitionDetailPage() {
                       }}
                     >
                       {!isVirtual && <CopyOutlined className="text-[11px]" />}
-                      <span>{isVirtual ? (isVirtualExtinct ? '[EXTINCT]' : '[OTHER]') : `ID: ${compId}`}</span>
+                      <span>
+                        {isVirtual ? (isVirtualExtinct ? '[EXTINCT]' : '[OTHER]') : `ID: ${compId}`}
+                      </span>
                     </Tag>
                   </Tooltip>
                   {compInfo?.three_letter_name && (
@@ -439,7 +449,11 @@ export default function CompetitionDetailPage() {
                     <Tag
                       color="orange"
                       className="m-0 font-bold text-xs cursor-pointer hover:opacity-80"
-                      onClick={() => router.push(`/comp/${compInfo.parent_id}${nationId ? `?nationId=${nationId}` : ''}`)}
+                      onClick={() =>
+                        router.push(
+                          `/comp/${compInfo.parent_id}${nationId ? `?nationId=${nationId}` : ''}`,
+                        )
+                      }
                     >
                       Parent: {compInfo.parent_name || compInfo.parent_id}
                     </Tag>
@@ -487,10 +501,14 @@ export default function CompetitionDetailPage() {
                 {activeTab === 'CLUBS'
                   ? filteredClubs.length
                   : activeTab === 'AWARDS'
-                  ? filteredAwards.length
-                  : filteredSubComps.length}
+                    ? filteredAwards.length
+                    : filteredSubComps.length}
               </strong>{' '}
-              {activeTab === 'CLUBS' ? 'clubs' : activeTab === 'AWARDS' ? 'awards' : 'sub-competitions'}
+              {activeTab === 'CLUBS'
+                ? 'clubs'
+                : activeTab === 'AWARDS'
+                  ? 'awards'
+                  : 'sub-competitions'}
             </div>
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <Input
@@ -499,8 +517,8 @@ export default function CompetitionDetailPage() {
                   activeTab === 'CLUBS'
                     ? 'Filter clubs...'
                     : activeTab === 'AWARDS'
-                    ? 'Filter awards...'
-                    : 'Filter sub-competitions...'
+                      ? 'Filter awards...'
+                      : 'Filter sub-competitions...'
                 }
                 value={tableFilter}
                 onChange={(e) => setTableFilter(e.target.value)}
@@ -534,16 +552,16 @@ export default function CompetitionDetailPage() {
                   activeTab === 'CLUBS'
                     ? 'Add Club'
                     : activeTab === 'AWARDS'
-                    ? 'Add Award'
-                    : 'Add Sub-Competition'
+                      ? 'Add Award'
+                      : 'Add Sub-Competition'
                 }
               >
                 <span className="hidden sm:inline">
                   {activeTab === 'CLUBS'
                     ? 'Add Club'
                     : activeTab === 'AWARDS'
-                    ? 'Add Award'
-                    : 'Add Sub-Competition'}
+                      ? 'Add Award'
+                      : 'Add Sub-Competition'}
                 </span>
               </Button>
             </div>
@@ -556,7 +574,9 @@ export default function CompetitionDetailPage() {
               type={EntityType.CLUB}
               columns={4}
               loading={loading}
-              onEdit={(rec) => openRecordModal(RecordType.CLUB, rec, nationId, isVirtual ? undefined : compId)}
+              onEdit={(rec) =>
+                openRecordModal(RecordType.CLUB, rec, nationId, isVirtual ? undefined : compId)
+              }
               onDelete={(rec) => handleDeleteClub(String(rec.id))}
               emptyText={
                 isVirtual

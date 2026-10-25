@@ -2,12 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Button,
-  Dropdown,
-  Tooltip,
-  type MenuProps,
-} from 'antd';
+import { Button, Dropdown, Tooltip, type MenuProps } from 'antd';
 import {
   MenuOutlined,
   SearchOutlined,
@@ -71,11 +66,12 @@ export default function AppHeader({
     if (breadcrumbs && breadcrumbs.length > 0) {
       return breadcrumbs;
     }
-    if (currentStepTitle && currentStepTitle !== 'HOME' && currentStepTitle !== 'Confederations & Nations') {
-      return [
-        { title: 'HOME', href: '/' },
-        { title: currentStepTitle },
-      ];
+    if (
+      currentStepTitle &&
+      currentStepTitle !== 'HOME' &&
+      currentStepTitle !== 'Confederations & Nations'
+    ) {
+      return [{ title: 'HOME', href: '/' }, { title: currentStepTitle }];
     }
     return [];
   }, [breadcrumbs, currentStepTitle]);
@@ -152,7 +148,12 @@ export default function AppHeader({
     },
     {
       key: 'sync',
-      icon: <SyncOutlined spin={isSyncing} className={isSyncing ? 'text-blue-600 text-sm' : 'text-slate-600 text-sm'} />,
+      icon: (
+        <SyncOutlined
+          spin={isSyncing}
+          className={isSyncing ? 'text-blue-600 text-sm' : 'text-slate-600 text-sm'}
+        />
+      ),
       label: (
         <div className="flex items-center justify-between gap-6 py-1 min-w-[190px]">
           <div className="flex flex-col">
@@ -172,7 +173,11 @@ export default function AppHeader({
     },
     {
       key: 'refresh',
-      icon: <ReloadOutlined className={isRefreshing ? 'animate-spin text-blue-600 text-sm' : 'text-slate-600 text-sm'} />,
+      icon: (
+        <ReloadOutlined
+          className={isRefreshing ? 'animate-spin text-blue-600 text-sm' : 'text-slate-600 text-sm'}
+        />
+      ),
       label: (
         <div className="flex items-center justify-between gap-6 py-1 min-w-[190px]">
           <div className="flex flex-col">
@@ -207,7 +212,9 @@ export default function AppHeader({
       label: (
         <div className="flex items-center justify-between gap-6 py-1 min-w-[190px]">
           <div className="flex flex-col">
-            <span className="font-semibold text-slate-800 text-xs sm:text-sm">Cấu hình thư mục</span>
+            <span className="font-semibold text-slate-800 text-xs sm:text-sm">
+              Cấu hình thư mục
+            </span>
             <span className="text-[11px] text-slate-400">File .LNC & thư mục logo</span>
           </div>
           <kbd className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
@@ -278,11 +285,7 @@ export default function AppHeader({
             </Tooltip>
           )}
 
-          <Dropdown
-            menu={{ items: actionMenuItems }}
-            placement="bottomRight"
-            trigger={['click']}
-          >
+          <Dropdown menu={{ items: actionMenuItems }} placement="bottomRight" trigger={['click']}>
             <Button
               type="primary"
               icon={<DownloadOutlined className="text-sm" />}
@@ -290,7 +293,9 @@ export default function AppHeader({
               className="bg-blue-600 hover:bg-blue-700 font-medium shadow-xs px-2.5 sm:px-3 h-8 sm:h-9 flex items-center gap-1 sm:gap-1.5 cursor-pointer"
               title="Export & Sync Menu"
             >
-              <span className="text-xs sm:text-sm font-semibold hidden sm:inline">Export / Sync</span>
+              <span className="text-xs sm:text-sm font-semibold hidden sm:inline">
+                Export / Sync
+              </span>
               <DownOutlined className="text-[9px] text-blue-200 ml-0.5" />
             </Button>
           </Dropdown>

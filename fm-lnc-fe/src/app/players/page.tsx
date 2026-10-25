@@ -1,8 +1,25 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Button, Input, Table, Tag, Popconfirm, message, Pagination, type TableColumnsType, Space, Tooltip } from 'antd';
-import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  Button,
+  Input,
+  Table,
+  Tag,
+  Popconfirm,
+  message,
+  Pagination,
+  type TableColumnsType,
+  Space,
+  Tooltip,
+} from 'antd';
+import {
+  SearchOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import { fetchPlayers, deleteRecord, PlayerItem } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { RecordType } from '@/types';
@@ -111,15 +128,19 @@ export default function PlayersPage() {
         dataIndex: 'second_name',
         key: 'second_name',
         sorter: true,
-        sortOrder: sortField === 'second_name' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
-        render: (text: string) => <span className="font-semibold text-slate-900">{text || '-'}</span>,
+        sortOrder:
+          sortField === 'second_name' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
+        render: (text: string) => (
+          <span className="font-semibold text-slate-900">{text || '-'}</span>
+        ),
       },
       {
         title: 'Common Name',
         dataIndex: 'common_name',
         key: 'common_name',
         sorter: true,
-        sortOrder: sortField === 'common_name' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
+        sortOrder:
+          sortField === 'common_name' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
         render: (text: string) => <span className="text-slate-700">{text || '-'}</span>,
       },
       {
@@ -252,17 +273,29 @@ export default function PlayersPage() {
 
                   <div className="text-xs space-y-1">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="w-8 text-gray-400 font-medium select-none shrink-0">FN:</span>
-                      <span className="font-bold text-[13px] text-gray-800">{p.first_name || '-'}</span>
+                      <span className="w-8 text-gray-400 font-medium select-none shrink-0">
+                        FN:
+                      </span>
+                      <span className="font-bold text-[13px] text-gray-800">
+                        {p.first_name || '-'}
+                      </span>
                     </div>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="w-8 text-gray-400 font-medium select-none shrink-0">SN:</span>
-                      <span className="font-bold text-[13px] text-gray-800">{p.second_name || '-'}</span>
+                      <span className="w-8 text-gray-400 font-medium select-none shrink-0">
+                        SN:
+                      </span>
+                      <span className="font-bold text-[13px] text-gray-800">
+                        {p.second_name || '-'}
+                      </span>
                     </div>
                     {p.common_name && (
                       <div className="flex items-baseline gap-1.5">
-                        <span className="w-8 text-gray-400 font-medium select-none shrink-0">CN:</span>
-                        <span className="font-bold text-[13px] text-gray-700 italic">{p.common_name}</span>
+                        <span className="w-8 text-gray-400 font-medium select-none shrink-0">
+                          CN:
+                        </span>
+                        <span className="font-bold text-[13px] text-gray-700 italic">
+                          {p.common_name}
+                        </span>
                       </div>
                     )}
                   </div>

@@ -176,9 +176,7 @@ export default function AppSidebar({
                 <div className="flex items-center gap-3 truncate">
                   <span
                     className={`shrink-0 transition-colors ${
-                      active
-                        ? 'text-white'
-                        : 'text-slate-400 group-hover:text-blue-400'
+                      active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
                     }`}
                   >
                     {item.icon}
@@ -192,7 +190,7 @@ export default function AppSidebar({
                       count={item.badge}
                       overflowCount={999}
                       style={{
-                        backgroundColor: active ? '#1e40af' : (item.badgeColor || '#334155'),
+                        backgroundColor: active ? '#1e40af' : item.badgeColor || '#334155',
                         color: '#ffffff',
                         fontSize: '10px',
                         height: '18px',

@@ -20,6 +20,14 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
               ALTER TABLE "competitions" ADD COLUMN "parent_id" VARCHAR(64);
           END IF;
 
+          -- Ensure type column exists on stadiums
+          IF NOT EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_schema = 'public' AND table_name = 'stadiums' AND column_name = 'type'
+          ) THEN
+              ALTER TABLE "stadiums" ADD COLUMN "type" VARCHAR(50) DEFAULT 'stadium';
+          END IF;
+
           -- 2. Drop existing foreign key constraints so column types can be altered safely
           FOR r IN (
               SELECT tc.table_name, tc.constraint_name

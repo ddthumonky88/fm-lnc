@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App } from 'antd';
 import enUS from 'antd/locale/en_US';
 import AppLayout from '../components/AppLayout';
 
@@ -32,11 +32,7 @@ export const viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.className} ${inter.variable}`}>
       <body className={`${inter.className} ${inter.variable} antialiased`}>
@@ -51,9 +47,9 @@ export default function RootLayout({
               },
             }}
           >
-            <AppLayout>
-              {children}
-            </AppLayout>
+            <App>
+              <AppLayout>{children}</AppLayout>
+            </App>
           </ConfigProvider>
         </AntdRegistry>
       </body>

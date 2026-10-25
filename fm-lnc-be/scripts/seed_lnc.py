@@ -90,6 +90,7 @@ def seed():
         id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         nation_id VARCHAR(64),
+        type VARCHAR(50) DEFAULT 'stadium',
         is_disabled BOOLEAN DEFAULT FALSE
     );
 
@@ -489,6 +490,7 @@ def seed():
     stadiums = {}
     cur_club_nat_code = None
     cur_comp_cat = None
+    cur_stad_cat = None
 
     with open(file_cs, 'r', encoding='utf-8', errors='ignore') as f:
         for line in f:
@@ -510,6 +512,7 @@ def seed():
                     if len(parts) > 1:
                         m = re.search(r'\[([A-Z0-9]+)\]\s*(.*)', parts[1])
                         if m: cur_club_nat_code = m.group(1).strip()
+                    cur_stad_cat = parts[2].strip() if len(parts) > 2 else None
                     continue
 
                 # Check if it's a commented command:
@@ -542,6 +545,7 @@ def seed():
                             stadiums[id_val] = {
                                 'name': val,
                                 'nation_code': cur_club_nat_code,
+                                'cat': cur_stad_cat,
                                 'note': None,
                                 'inactive_fields': set()
                             }
@@ -586,6 +590,7 @@ def seed():
                         stadiums[id_val] = {
                             'name': val,
                             'nation_code': cur_club_nat_code,
+                            'cat': cur_stad_cat,
                             'note': note,
                             'inactive_fields': set()
                         }
@@ -629,11 +634,18 @@ def seed():
     for sid, sdata in stadiums.items():
         nat_id = code_to_nation_id.get(sdata.get('nation_code'))
         inact_set = sdata.get('inactive_fields')
-        stadiums_batch.append((sid, sdata['name'], nat_id, bool(inact_set)))
+        is_training = bool(
+            (sdata.get('cat') and 'training' in sdata['cat'].lower())
+            or ('training' in sdata['name'].lower())
+            or ('pitch' in sdata['name'].lower())
+            or ('football base' in sdata['name'].lower())
+        )
+        stype = 'training pitch' if is_training else 'stadium'
+        stadiums_batch.append((sid, sdata['name'], nat_id, stype, bool(inact_set)))
 
     execute_batch(cur, """
-        INSERT INTO stadiums (id, name, nation_id, is_disabled)
-        VALUES (%s, %s, %s, %s);
+        INSERT INTO stadiums (id, name, nation_id, type, is_disabled)
+        VALUES (%s, %s, %s, %s, %s);
     """, stadiums_batch, page_size=2000)
     conn.commit()
 

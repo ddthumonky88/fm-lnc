@@ -1,8 +1,25 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Input, Table, Tag, Popconfirm, Tooltip, message, Space, Pagination, type TableColumnsType } from 'antd';
-import { SearchOutlined, PlusOutlined, FlagOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+  Button,
+  Input,
+  Table,
+  Tag,
+  Popconfirm,
+  Tooltip,
+  message,
+  Space,
+  Pagination,
+  type TableColumnsType,
+} from 'antd';
+import {
+  SearchOutlined,
+  PlusOutlined,
+  FlagOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 import { fetchStages, deleteRecord, StageItem } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { RecordType } from '../../types';

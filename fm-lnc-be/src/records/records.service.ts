@@ -137,6 +137,7 @@ export class RecordsService {
     data.id = String(data.id);
     if (type === RecordType.STADIUM) {
       delete data.note;
+      if (!data.type) data.type = 'stadium';
     }
 
     const existing = await repo.findOne({ where: { id: data.id } });

@@ -9,11 +9,7 @@ interface QuickSearchModalProps {
   onSelectItem: (item: any, type: string) => void;
 }
 
-export default function QuickSearchModal({
-  isOpen,
-  onClose,
-  onSelectItem,
-}: QuickSearchModalProps) {
+export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: QuickSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<{
@@ -58,7 +54,9 @@ export default function QuickSearchModal({
         // Sort each result group by ID ASC
         setResults({
           clubs: (res.clubs || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
-          competitions: (res.competitions || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
+          competitions: (res.competitions || []).sort(
+            (a: any, b: any) => Number(a.id) - Number(b.id),
+          ),
           nations: (res.nations || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
           stadiums: (res.stadiums || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
           cities: (res.cities || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
@@ -144,7 +142,8 @@ export default function QuickSearchModal({
                     <div>
                       <div className="text-xs font-semibold text-gray-800">{c.long_name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {c.short_name} {c.three_letter_name ? `(${c.three_letter_name})` : ''} &bull; {c.nation?.short_name || 'Free Club'}
+                        {c.short_name} {c.three_letter_name ? `(${c.three_letter_name})` : ''}{' '}
+                        &bull; {c.nation?.short_name || 'Free Club'}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
@@ -175,7 +174,8 @@ export default function QuickSearchModal({
                     <div>
                       <div className="text-xs font-semibold text-emerald-900">{comp.long_name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {comp.short_name} &bull; {comp.is_international ? 'International' : comp.nation?.short_name}
+                        {comp.short_name} &bull;{' '}
+                        {comp.is_international ? 'International' : comp.nation?.short_name}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
@@ -216,7 +216,9 @@ export default function QuickSearchModal({
                       ) : null}
                       <div>
                         <div className="text-xs font-semibold text-gray-800">{n.long_name}</div>
-                        <div className="text-[11px] text-gray-500">Code: {n.three_letter_name} &bull; {n.confederation?.name}</div>
+                        <div className="text-[11px] text-gray-500">
+                          Code: {n.three_letter_name} &bull; {n.confederation?.name}
+                        </div>
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
@@ -246,7 +248,9 @@ export default function QuickSearchModal({
                   >
                     <div>
                       <div className="text-xs font-semibold text-gray-800">{s.name}</div>
-                      <div className="text-[11px] text-gray-500">{s.nation?.short_name || 'Standard'}</div>
+                      <div className="text-[11px] text-gray-500">
+                        {s.nation?.short_name || 'Standard'}
+                      </div>
                     </div>
                     <span className="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
                       ID: {s.id}
@@ -275,7 +279,9 @@ export default function QuickSearchModal({
                   >
                     <div>
                       <div className="text-xs font-semibold text-gray-800">{ci.name}</div>
-                      <div className="text-[11px] text-gray-500">{ci.nation?.short_name} &bull; {ci.categories || 'Default'}</div>
+                      <div className="text-[11px] text-gray-500">
+                        {ci.nation?.short_name} &bull; {ci.categories || 'Default'}
+                      </div>
                     </div>
                     <span className="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
                       ID: {ci.id}
@@ -305,7 +311,11 @@ export default function QuickSearchModal({
                     <div>
                       <div className="text-xs font-semibold text-yellow-950">{a.long_name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {a.short_name} &bull; {a.competition?.short_name || a.competition?.long_name || a.nation?.short_name || 'Global Award'}
+                        {a.short_name} &bull;{' '}
+                        {a.competition?.short_name ||
+                          a.competition?.long_name ||
+                          a.nation?.short_name ||
+                          'Global Award'}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">

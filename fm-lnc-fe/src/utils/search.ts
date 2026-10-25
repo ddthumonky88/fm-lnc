@@ -34,7 +34,7 @@ export function normalizeSearchText(str: any): string {
 export function matchRecordSearch(
   record: any,
   query: string,
-  extraFields: (string | number | undefined | null)[] = []
+  extraFields: (string | number | undefined | null)[] = [],
 ): boolean {
   if (!record) return false;
   if (!query) return true;

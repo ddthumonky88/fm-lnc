@@ -477,6 +477,7 @@ export class LncParserService {
       let curClubNatCode: string | null = null;
       let curClubCompCat: string | null = null;
       let curStadNatCode: string | null = null;
+      let curStadCat: string | null = null;
 
       for (const l of clubStadiumLines) {
         let line = l.trim();
@@ -499,6 +500,7 @@ export class LncParserService {
               const m = parts[1].match(/\[([A-Z0-9]+)\]/);
               if (m) curStadNatCode = m[1].trim();
             }
+            curStadCat = parts.length > 2 ? parts[2].trim() : null;
             continue;
           } else if (h.startsWith('=')) {
             continue;
@@ -549,7 +551,14 @@ export class LncParserService {
             }
             if (note && !clubs[id].note) clubs[id].note = note;
           } else if (cmd === 'STADIUM_NAME_CHANGE') {
-            stadiums[id] = { name: val, nat_code: curStadNatCode, note, inactive: isCommented };
+            const isTraining = Boolean(
+              (curStadCat && curStadCat.toLowerCase().includes('training')) ||
+              val.toLowerCase().includes('training') ||
+              val.toLowerCase().includes('pitch') ||
+              val.toLowerCase().includes('football base')
+            );
+            const stadiumType = isTraining ? 'training pitch' : 'stadium';
+            stadiums[id] = { name: val, nat_code: curStadNatCode, note, inactive: isCommented, type: stadiumType };
           }
         }
       }
@@ -600,13 +609,14 @@ export class LncParserService {
         const inactStr = sdata.inactive ? 'name' : null;
 
         await queryRunner.query(
-          `INSERT INTO stadiums (id, name, nation_id, is_disabled)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO stadiums (id, name, nation_id, is_disabled, type)
+           VALUES ($1, $2, $3, $4, $5)
            ON CONFLICT (id) DO UPDATE SET
              name = EXCLUDED.name,
              nation_id = EXCLUDED.nation_id,
-             is_disabled = EXCLUDED.is_disabled`,
-          [id, sdata.name, natId, !!sdata.inactive],
+             is_disabled = EXCLUDED.is_disabled,
+             type = EXCLUDED.type`,
+          [id, sdata.name, natId, !!sdata.inactive, sdata.type || 'stadium'],
         );
       }
 

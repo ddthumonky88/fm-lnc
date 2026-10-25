@@ -55,7 +55,7 @@ function NationExplorerContent() {
   // Load confederations for filter dropdown
   useEffect(() => {
     fetchContinents()
-      .then(setConfederations)
+      .then((data: any) => setConfederations(Array.isArray(data) ? data : data?.content || []))
       .catch((e) => console.error('Failed to load confederations', e));
   }, []);
 
@@ -421,7 +421,10 @@ function NationExplorerContent() {
                       </div>
                     ) : null}
                     {n.three_letter_name && (
-                      <Tag color="geekblue" className="font-mono font-bold text-[10px] m-0 shrink-0">
+                      <Tag
+                        color="geekblue"
+                        className="font-mono font-bold text-[10px] m-0 shrink-0"
+                      >
                         {n.three_letter_name}
                       </Tag>
                     )}

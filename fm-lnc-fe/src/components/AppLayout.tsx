@@ -44,7 +44,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchContinents(refreshSignal > 0)
-      .then((data) => setTotalContinents(data.length))
+      .then((data: any) => {
+        const count = Array.isArray(data) ? data.length : data?.content?.length || 0;
+        setTotalContinents(count);
+      })
       .catch(() => {});
   }, [refreshSignal]);
 
@@ -203,7 +206,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             if (type === EntityType.NATION || type === 'nation') {
               router.push(`/?nationId=${item.id}&nationName=${encodeURIComponent(item.long_name)}`);
             } else if (type === EntityType.COMPETITION || type === 'competition') {
-              router.push(`/?compId=${item.id}&compName=${encodeURIComponent(item.short_name || item.long_name)}`);
+              router.push(
+                `/?compId=${item.id}&compName=${encodeURIComponent(item.short_name || item.long_name)}`,
+              );
             } else {
               handleOpenRecordModal(type as RecordType, item);
             }

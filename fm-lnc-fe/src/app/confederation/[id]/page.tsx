@@ -70,7 +70,23 @@ function ConfederationDetailContent() {
         }),
       ]);
 
-      const found = continents.find((c) => String(c.id) === String(confedId));
+      const continentsList: ConfederationItem[] = Array.isArray(continents)
+        ? continents
+        : Array.isArray((continents as any)?.content)
+          ? (continents as any).content
+          : [];
+      const nationsList: NationItem[] = Array.isArray(nationsData)
+        ? nationsData
+        : Array.isArray((nationsData as any)?.content)
+          ? (nationsData as any).content
+          : [];
+      const intCompsList: CompetitionItem[] = Array.isArray(intCompsData)
+        ? intCompsData
+        : Array.isArray((intCompsData as any)?.content)
+          ? (intCompsData as any).content
+          : [];
+
+      const found = continentsList.find((c) => String(c.id) === String(confedId));
       if (found) {
         setConfederation(found);
         setHeaderTitle(found.name);
@@ -91,12 +107,12 @@ function ConfederationDetailContent() {
           isFlag: false,
         });
       }
-      setNations(nationsData);
-      setIntComps(intCompsData);
+      setNations(nationsList);
+      setIntComps(intCompsList);
       if (!searchParams.get('tab')) {
-        if (nationsData.length === 0 && intCompsData.length > 0) {
+        if (nationsList.length === 0 && intCompsList.length > 0) {
           setActiveTab('INT_COMPETITIONS');
-        } else if (intCompsData.length === 0 && nationsData.length > 0) {
+        } else if (intCompsList.length === 0 && nationsList.length > 0) {
           setActiveTab('NATIONS');
         }
       }
@@ -178,7 +194,9 @@ function ConfederationDetailContent() {
                     label: (
                       <Space size={4} title="Countries">
                         <NationIcon size={18} className="text-cyan-600" />
-                        <span className={`hidden sm:inline ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}>
+                        <span
+                          className={`hidden sm:inline ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}
+                        >
                           Countries
                         </span>
                         <Badge
@@ -199,14 +217,17 @@ function ConfederationDetailContent() {
                     label: (
                       <Space size={4} title="International Competitions">
                         <IntCompIcon size={18} className="text-purple-600" />
-                        <span className={`hidden sm:inline ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}>
+                        <span
+                          className={`hidden sm:inline ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}
+                        >
                           International Competitions
                         </span>
                         <Badge
                           count={compsCount}
                           overflowCount={99999}
                           style={{
-                            backgroundColor: activeTab === 'INT_COMPETITIONS' ? '#1d70b8' : '#94a3b8',
+                            backgroundColor:
+                              activeTab === 'INT_COMPETITIONS' ? '#1d70b8' : '#94a3b8',
                           }}
                         />
                       </Space>
@@ -300,7 +321,9 @@ function ConfederationDetailContent() {
 
 export default function ConfederationDetailPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading confederation...</div>}>
+    <Suspense
+      fallback={<div className="p-8 text-center text-gray-400">Loading confederation...</div>}
+    >
       <ConfederationDetailContent />
     </Suspense>
   );

@@ -227,6 +227,7 @@ export function mapStadium(stadium: any) {
   return {
     id: String(stadium.id),
     name: stadium.name,
+    type: stadium.type || 'stadium',
     is_disabled: !!stadium.is_disabled,
     inactive_fields: stadium.is_disabled ? 'name' : null,
     nation,

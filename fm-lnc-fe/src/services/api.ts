@@ -86,9 +86,10 @@ export interface PageData<T> {
 
 export type PaginatedResponse<T> = PageData<T>;
 
-export type PaginatedList<T> = T[] & Partial<Omit<PageData<T>, 'content'>> & {
-  content?: T[];
-};
+export type PaginatedList<T> = T[] &
+  Partial<Omit<PageData<T>, 'content'>> & {
+    content?: T[];
+  };
 
 /**
  * Envelope chuẩn mà backend bọc quanh mọi response JSON.
@@ -107,12 +108,7 @@ export interface ApiEnvelope<T = unknown> {
 function isApiEnvelope(body: unknown): body is ApiEnvelope {
   if (!body || typeof body !== 'object') return false;
   const b = body as Record<string, unknown>;
-  return (
-    typeof b.success === 'boolean' &&
-    'data' in b &&
-    'timestamp' in b &&
-    'correlationId' in b
-  );
+  return typeof b.success === 'boolean' && 'data' in b && 'timestamp' in b && 'correlationId' in b;
 }
 
 function normalizeEntityFields(item: any): any {
@@ -129,13 +125,16 @@ function normalizeEntityFields(item: any): any {
   if (item.stats && typeof item.stats === 'object') {
     const s = item.stats;
     if (s.nations !== undefined && item.totalNations === undefined) item.totalNations = s.nations;
-    if (s.intComps !== undefined && item.totalIntComps === undefined) item.totalIntComps = s.intComps;
+    if (s.intComps !== undefined && item.totalIntComps === undefined)
+      item.totalIntComps = s.intComps;
     if (s.comps !== undefined && item.totalComps === undefined) item.totalComps = s.comps;
     if (s.clubs !== undefined && item.totalClubs === undefined) item.totalClubs = s.clubs;
-    if (s.stadiums !== undefined && item.totalStadiums === undefined) item.totalStadiums = s.stadiums;
+    if (s.stadiums !== undefined && item.totalStadiums === undefined)
+      item.totalStadiums = s.stadiums;
     if (s.cities !== undefined && item.totalCities === undefined) item.totalCities = s.cities;
     if (s.awards !== undefined && item.totalAwards === undefined) item.totalAwards = s.awards;
-    if (s.children !== undefined && item.totalChildren === undefined) item.totalChildren = s.children;
+    if (s.children !== undefined && item.totalChildren === undefined)
+      item.totalChildren = s.children;
   }
 
   // Name fields aliases
@@ -143,32 +142,51 @@ function normalizeEntityFields(item: any): any {
   if (item.long_name !== undefined && item.name_lg === undefined) item.name_lg = item.long_name;
   if (item.name_sh !== undefined && item.short_name === undefined) item.short_name = item.name_sh;
   if (item.short_name !== undefined && item.name_sh === undefined) item.name_sh = item.short_name;
-  if (item.name_3l !== undefined && item.three_letter_name === undefined) item.three_letter_name = item.name_3l;
-  if (item.three_letter_name !== undefined && item.name_3l === undefined) item.name_3l = item.three_letter_name;
-  if (item.name_6l !== undefined && item.six_letter_name === undefined) item.six_letter_name = item.name_6l;
-  if (item.six_letter_name !== undefined && item.name_6l === undefined) item.name_6l = item.six_letter_name;
+  if (item.name_3l !== undefined && item.three_letter_name === undefined)
+    item.three_letter_name = item.name_3l;
+  if (item.three_letter_name !== undefined && item.name_3l === undefined)
+    item.name_3l = item.three_letter_name;
+  if (item.name_6l !== undefined && item.six_letter_name === undefined)
+    item.six_letter_name = item.name_6l;
+  if (item.six_letter_name !== undefined && item.name_6l === undefined)
+    item.name_6l = item.six_letter_name;
 
   // City region / categories
   if (item.region !== undefined && item.categories === undefined) item.categories = item.region;
   if (item.categories !== undefined && item.region === undefined) item.region = item.categories;
 
-  // Competition type / categories
+  // Competition & Stadium type / categories
   if (item.type !== undefined && item.categories === undefined) item.categories = item.type;
   if (item.categories !== undefined && item.type === undefined) item.type = item.categories;
+  if (item.type === undefined && item.stadium_type !== undefined) item.type = item.stadium_type;
 
   // City & Stadium is_disabled
-  if (item.is_disabled !== undefined && item.isDisabled === undefined) item.isDisabled = item.is_disabled;
-  if (item.isDisabled !== undefined && item.is_disabled === undefined) item.is_disabled = item.isDisabled;
-  if (item.is_disabled === undefined && item.inactive_fields !== undefined) {
-    item.is_disabled = Boolean(item.inactive_fields && item.inactive_fields.includes('name'));
+  if (item.is_disabled !== undefined && item.isDisabled === undefined)
+    item.isDisabled = item.is_disabled;
+  if (item.isDisabled !== undefined && item.is_disabled === undefined)
+    item.is_disabled = item.isDisabled;
+  const isClubRecord =
+    item.six_letter_name !== undefined ||
+    item.name_6l !== undefined ||
+    item.comp_id !== undefined ||
+    item.is_extinct !== undefined;
+  if (!isClubRecord && item.is_disabled === undefined && item.inactive_fields !== undefined) {
+    const list = String(item.inactive_fields)
+      .split(',')
+      .map((s: string) => s.trim().toLowerCase());
+    item.is_disabled = list.includes('name');
     item.isDisabled = item.is_disabled;
   }
 
   // Confed / nation ID aliases
-  if (item.confed_id !== undefined && item.confederation_id === undefined) item.confederation_id = item.confed_id;
-  if (item.confederation_id !== undefined && item.confed_id === undefined) item.confed_id = item.confederation_id;
-  if (item.nation_id !== undefined && item.country_id === undefined) item.country_id = item.nation_id;
-  if (item.country_id !== undefined && item.nation_id === undefined) item.nation_id = item.country_id;
+  if (item.confed_id !== undefined && item.confederation_id === undefined)
+    item.confederation_id = item.confed_id;
+  if (item.confederation_id !== undefined && item.confed_id === undefined)
+    item.confed_id = item.confederation_id;
+  if (item.nation_id !== undefined && item.country_id === undefined)
+    item.country_id = item.nation_id;
+  if (item.country_id !== undefined && item.nation_id === undefined)
+    item.nation_id = item.country_id;
 
   // Nested relations
   if (item.confed && !item.confederation) item.confederation = item.confed;
@@ -321,6 +339,7 @@ export interface StadiumItem {
   id: string;
   name: string;
   nation_id?: string;
+  type?: 'stadium' | 'training pitch' | string;
   is_disabled?: boolean;
   isDisabled?: boolean;
   note?: string;
@@ -407,9 +426,15 @@ async function cachedFetch<T>(url: string, forceRefresh = false, ttl = CACHE_TTL
   const promise = (async () => {
     try {
       const res = await fetch(url);
-      const data = await parseApiResponse<T>(res, `Request failed with status ${res.status}`);
-      apiCache.set(url, { data, timestamp: Date.now() });
-      return data;
+      const data = await parseApiResponse<any>(res, `Request failed with status ${res.status}`);
+      let processedData = data;
+      if (data && typeof data === 'object' && Array.isArray(data.content)) {
+        const arr = [...data.content] as any;
+        Object.assign(arr, data);
+        processedData = arr;
+      }
+      apiCache.set(url, { data: processedData, timestamp: Date.now() });
+      return processedData as T;
     } finally {
       inFlightRequests.delete(url);
     }
@@ -506,13 +531,14 @@ async function cachedPost<T>(
         body: JSON.stringify(payload),
       });
       const data = await parseApiResponse<any>(res, `Request failed with status ${res.status}`);
-      apiCache.set(cacheKey, { data, timestamp: Date.now() });
+      let processedData = data;
       if (data && typeof data === 'object' && Array.isArray(data.content)) {
-        const arr = data.content as any;
+        const arr = [...data.content] as any;
         Object.assign(arr, data);
-        return arr as T;
+        processedData = arr;
       }
-      return data as T;
+      apiCache.set(cacheKey, { data: processedData, timestamp: Date.now() });
+      return processedData as T;
     } finally {
       inFlightRequests.delete(cacheKey);
     }
@@ -526,8 +552,17 @@ export async function fetchContinents(
   queryOrForceRefresh?: PaginationQuery | boolean,
   maybeForceRefresh = false,
 ): Promise<PaginatedList<ConfederationItem>> {
-  const { filter, forceRefresh } = normalizeFilterAndRefresh(queryOrForceRefresh, maybeForceRefresh, undefined, 20);
-  return cachedPost<PaginatedList<ConfederationItem>>(`${getApiBase()}/hierarchy/continents`, filter, forceRefresh);
+  const { filter, forceRefresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    maybeForceRefresh,
+    undefined,
+    20,
+  );
+  return cachedPost<PaginatedList<ConfederationItem>>(
+    `${getApiBase()}/hierarchy/continents`,
+    filter,
+    forceRefresh,
+  );
 }
 
 export async function fetchAllNations(
@@ -543,25 +578,40 @@ export async function fetchAllNations(
       confedId: optionsOrConfedId,
       keyword: typeof maybeQueryOrForceRefresh === 'string' ? maybeQueryOrForceRefresh : '',
     };
-    refresh = typeof maybeQueryOrForceRefresh === 'boolean' ? maybeQueryOrForceRefresh : forceRefresh;
+    refresh =
+      typeof maybeQueryOrForceRefresh === 'boolean' ? maybeQueryOrForceRefresh : forceRefresh;
   } else if (typeof optionsOrConfedId === 'boolean') {
     refresh = optionsOrConfedId;
   } else if (typeof optionsOrConfedId === 'object' && optionsOrConfedId !== null) {
     filter = { ...optionsOrConfedId };
-    refresh = typeof maybeQueryOrForceRefresh === 'boolean' ? maybeQueryOrForceRefresh : forceRefresh;
+    refresh =
+      typeof maybeQueryOrForceRefresh === 'boolean' ? maybeQueryOrForceRefresh : forceRefresh;
   }
   if (filter.size === undefined) filter.size = 300;
   if (filter.page === undefined) filter.page = 0;
   if (filter.keyword === undefined) filter.keyword = '';
-  return cachedPost<PaginatedList<NationItem>>(`${getApiBase()}/hierarchy/nations`, filter, refresh);
+  return cachedPost<PaginatedList<NationItem>>(
+    `${getApiBase()}/hierarchy/nations`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchAllCompetitions(
   queryOrForceRefresh?: CompetitionFilterQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CompetitionItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 500);
-  return cachedPost<PaginatedList<CompetitionItem>>(`${getApiBase()}/hierarchy/competitions`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    500,
+  );
+  return cachedPost<PaginatedList<CompetitionItem>>(
+    `${getApiBase()}/hierarchy/competitions`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchNationsByContinent(
@@ -569,8 +619,17 @@ export async function fetchNationsByContinent(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<NationItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 100);
-  return cachedPost<PaginatedList<NationItem>>(`${getApiBase()}/hierarchy/continents/${confedId}/nations`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    100,
+  );
+  return cachedPost<PaginatedList<NationItem>>(
+    `${getApiBase()}/hierarchy/continents/${confedId}/nations`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchIntCompetitions(
@@ -578,12 +637,27 @@ export async function fetchIntCompetitions(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CompetitionItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 100);
-  return cachedPost<PaginatedList<CompetitionItem>>(`${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    100,
+  );
+  return cachedPost<PaginatedList<CompetitionItem>>(
+    `${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`,
+    filter,
+    refresh,
+  );
 }
 
-export async function fetchNationHub(nationId: string, forceRefresh = false): Promise<NationHubData> {
-  return cachedFetch<NationHubData>(`${getApiBase()}/hierarchy/nations/${nationId}/hub`, forceRefresh);
+export async function fetchNationHub(
+  nationId: string,
+  forceRefresh = false,
+): Promise<NationHubData> {
+  return cachedFetch<NationHubData>(
+    `${getApiBase()}/hierarchy/nations/${nationId}/hub`,
+    forceRefresh,
+  );
 }
 
 export async function fetchDomesticCompetitions(
@@ -591,8 +665,17 @@ export async function fetchDomesticCompetitions(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CompetitionItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 100);
-  return cachedPost<PaginatedList<CompetitionItem>>(`${getApiBase()}/hierarchy/nations/${nationId}/competitions`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    100,
+  );
+  return cachedPost<PaginatedList<CompetitionItem>>(
+    `${getApiBase()}/hierarchy/nations/${nationId}/competitions`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchIndependentClubs(
@@ -610,7 +693,11 @@ export async function fetchIndependentClubs(
   if (filter.size === undefined) filter.size = 500;
   if (filter.page === undefined) filter.page = 0;
   if (filter.keyword === undefined) filter.keyword = '';
-  return cachedPost<PaginatedList<ClubItem>>(`${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs`, filter, refresh);
+  return cachedPost<PaginatedList<ClubItem>>(
+    `${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchAllClubsInNation(
@@ -618,8 +705,17 @@ export async function fetchAllClubsInNation(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<ClubItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 1000);
-  return cachedPost<PaginatedList<ClubItem>>(`${getApiBase()}/hierarchy/nations/${nationId}/all-clubs`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    1000,
+  );
+  return cachedPost<PaginatedList<ClubItem>>(
+    `${getApiBase()}/hierarchy/nations/${nationId}/all-clubs`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchClubsInComp(
@@ -627,39 +723,94 @@ export async function fetchClubsInComp(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<ClubItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 100);
-  return cachedPost<PaginatedList<ClubItem>>(`${getApiBase()}/hierarchy/competitions/${compId}/clubs`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    100,
+  );
+  return cachedPost<PaginatedList<ClubItem>>(
+    `${getApiBase()}/hierarchy/competitions/${compId}/clubs`,
+    filter,
+    refresh,
+  );
 }
 
-export async function fetchCompetitionInfo(compId: string, forceRefresh = false): Promise<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }> {
-  return cachedFetch<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }>(`${getApiBase()}/hierarchy/competitions/${compId}/info`, forceRefresh);
+export async function fetchCompetitionInfo(
+  compId: string,
+  forceRefresh = false,
+): Promise<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }> {
+  return cachedFetch<
+    CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }
+  >(`${getApiBase()}/hierarchy/competitions/${compId}/info`, forceRefresh);
 }
 
-export async function fetchConfederationInfo(confedId: string, forceRefresh = false): Promise<ConfederationItem & { totalNations: number; totalIntComps: number; totalComps: number; totalClubs: number; totalStadiums: number; totalCities: number; totalAwards: number }> {
+export async function fetchConfederationInfo(
+  confedId: string,
+  forceRefresh = false,
+): Promise<
+  ConfederationItem & {
+    totalNations: number;
+    totalIntComps: number;
+    totalComps: number;
+    totalClubs: number;
+    totalStadiums: number;
+    totalCities: number;
+    totalAwards: number;
+  }
+> {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/continents/${confedId}/info`, forceRefresh);
 }
 
-export async function fetchNationInfo(nationId: string, forceRefresh = false): Promise<NationItem & { counts: any }> {
+export async function fetchNationInfo(
+  nationId: string,
+  forceRefresh = false,
+): Promise<NationItem & { counts: any }> {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/nations/${nationId}/info`, forceRefresh);
 }
 
-export async function fetchClubInfo(clubId: string, forceRefresh = false): Promise<ClubItem & { competition_name?: string; parent_competition_name?: string; nation_name?: string; nation_three_letter?: string }> {
+export async function fetchClubInfo(
+  clubId: string,
+  forceRefresh = false,
+): Promise<
+  ClubItem & {
+    competition_name?: string;
+    parent_competition_name?: string;
+    nation_name?: string;
+    nation_three_letter?: string;
+  }
+> {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/clubs/${clubId}/info`, forceRefresh);
 }
 
-export async function fetchCityInfo(cityId: string, forceRefresh = false): Promise<CityItem & { nation_name?: string; nation_three_letter?: string }> {
+export async function fetchCityInfo(
+  cityId: string,
+  forceRefresh = false,
+): Promise<CityItem & { nation_name?: string; nation_three_letter?: string }> {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/cities/${cityId}/info`, forceRefresh);
 }
 
-export async function fetchAwardInfo(awardId: string, forceRefresh = false): Promise<AwardItem & { nation_name?: string; nation_three_letter?: string; competition_name?: string }> {
+export async function fetchAwardInfo(
+  awardId: string,
+  forceRefresh = false,
+): Promise<
+  AwardItem & { nation_name?: string; nation_three_letter?: string; competition_name?: string }
+> {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/awards/${awardId}/info`, forceRefresh);
 }
 
-export async function fetchStadiumInfo(stadiumId: string, forceRefresh = false): Promise<StadiumItem & { nation_name?: string; nation_three_letter?: string }> {
+export async function fetchStadiumInfo(
+  stadiumId: string,
+  forceRefresh = false,
+): Promise<StadiumItem & { nation_name?: string; nation_three_letter?: string }> {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/stadiums/${stadiumId}/info`, forceRefresh);
 }
 
-export async function fetchEntityInfo(type: string, id: string, forceRefresh = false): Promise<any> {
+export async function fetchEntityInfo(
+  type: string,
+  id: string,
+  forceRefresh = false,
+): Promise<any> {
   return cachedFetch<any>(`${getApiBase()}/records/${type}/${id}/info`, forceRefresh);
 }
 
@@ -668,8 +819,17 @@ export async function fetchSubCompetitions(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CompetitionItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 100);
-  return cachedPost<PaginatedList<CompetitionItem>>(`${getApiBase()}/hierarchy/competitions/${compId}/sub-competitions`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    100,
+  );
+  return cachedPost<PaginatedList<CompetitionItem>>(
+    `${getApiBase()}/hierarchy/competitions/${compId}/sub-competitions`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchStadiums(
@@ -677,8 +837,17 @@ export async function fetchStadiums(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<StadiumItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 200);
-  return cachedPost<PaginatedList<StadiumItem>>(`${getApiBase()}/hierarchy/nations/${nationId}/stadiums`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    200,
+  );
+  return cachedPost<PaginatedList<StadiumItem>>(
+    `${getApiBase()}/hierarchy/nations/${nationId}/stadiums`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchCities(
@@ -686,8 +855,17 @@ export async function fetchCities(
   queryOrForceRefresh?: CityFilterQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CityItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 200);
-  return cachedPost<PaginatedList<CityItem>>(`${getApiBase()}/hierarchy/nations/${nationId}/cities`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    200,
+  );
+  return cachedPost<PaginatedList<CityItem>>(
+    `${getApiBase()}/hierarchy/nations/${nationId}/cities`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchAwards(
@@ -695,8 +873,17 @@ export async function fetchAwards(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<AwardItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 200);
-  return cachedPost<PaginatedList<AwardItem>>(`${getApiBase()}/hierarchy/nations/${nationId}/awards`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    200,
+  );
+  return cachedPost<PaginatedList<AwardItem>>(
+    `${getApiBase()}/hierarchy/nations/${nationId}/awards`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchAwardsInComp(
@@ -704,15 +891,29 @@ export async function fetchAwardsInComp(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<AwardItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 100);
-  return cachedPost<PaginatedList<AwardItem>>(`${getApiBase()}/hierarchy/competitions/${compId}/awards`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    100,
+  );
+  return cachedPost<PaginatedList<AwardItem>>(
+    `${getApiBase()}/hierarchy/competitions/${compId}/awards`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchAllAwards(
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<AwardItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrForceRefresh, forceRefresh, undefined, 100);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    100,
+  );
   return cachedPost<PaginatedList<AwardItem>>(`${getApiBase()}/hierarchy/awards`, filter, refresh);
 }
 
@@ -720,15 +921,29 @@ export async function fetchPlayers(
   queryOrFilter?: PaginationQuery | string | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<PlayerItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrFilter, forceRefresh, 'keyword', 20);
-  return cachedPost<PaginatedList<PlayerItem>>(`${getApiBase()}/hierarchy/players`, filter, refresh);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrFilter,
+    forceRefresh,
+    'keyword',
+    20,
+  );
+  return cachedPost<PaginatedList<PlayerItem>>(
+    `${getApiBase()}/hierarchy/players`,
+    filter,
+    refresh,
+  );
 }
 
 export async function fetchStages(
   queryOrFilter?: PaginationQuery | string | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<StageItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(queryOrFilter, forceRefresh, 'keyword', 20);
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrFilter,
+    forceRefresh,
+    'keyword',
+    20,
+  );
   return cachedPost<PaginatedList<StageItem>>(`${getApiBase()}/hierarchy/stages`, filter, refresh);
 }
 
@@ -844,10 +1059,15 @@ export async function fetchAppConfig(): Promise<ConfigStatusResponse> {
   const res = await fetch(`${getLocalApiBase()}/config`, {
     cache: 'no-store',
   });
-  return parseApiResponse<ConfigStatusResponse>(res, 'Không thể tải cấu hình thư mục local từ backend localhost:3001');
+  return parseApiResponse<ConfigStatusResponse>(
+    res,
+    'Không thể tải cấu hình thư mục local từ backend localhost:3001',
+  );
 }
 
-export async function updateAppConfig(config: Partial<AppPathsConfig>): Promise<ConfigStatusResponse> {
+export async function updateAppConfig(
+  config: Partial<AppPathsConfig>,
+): Promise<ConfigStatusResponse> {
   const res = await fetch(`${getLocalApiBase()}/config`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -899,4 +1119,3 @@ export async function syncLocalLncToProd(): Promise<{ success: boolean; message:
   const lncContent = await exportRes.text();
   return uploadLncFiles([{ name: 'FM24_Merged_Names.lnc', content: lncContent }]);
 }
-

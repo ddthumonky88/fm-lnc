@@ -78,13 +78,14 @@ export default function CardGrid({
   const startIndex = (currentPage - 1) * currentPageSize;
   const pagedItems = isServer ? items : items.slice(startIndex, startIndex + currentPageSize);
 
-  const isNationOrConfed = String(type).toLowerCase() === 'nation' || String(type).toLowerCase() === 'confederation';
+  const isNationOrConfed =
+    String(type).toLowerCase() === 'nation' || String(type).toLowerCase() === 'confederation';
   const isFiveCols = String(type) === 'stadium' || String(type) === 'city' || columns === 5;
   const gridClasses = isNationOrConfed
     ? 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3.5'
     : isFiveCols
-    ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5'
-    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4';
+      ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5'
+      : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4';
 
   return (
     <div>
