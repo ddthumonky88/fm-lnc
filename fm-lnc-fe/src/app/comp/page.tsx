@@ -308,11 +308,12 @@ function CompetitionsExplorerContent() {
         },
       },
       {
-        title: 'Category',
-        dataIndex: 'categories',
-        key: 'cat',
-        width: 110,
-        render: (cat: string) => {
+        title: 'Type',
+        dataIndex: 'type',
+        key: 'type',
+        width: 120,
+        render: (_: any, record: CompetitionItem) => {
+          const cat = record.type || record.categories;
           if (!cat) return <span className="text-gray-300">-</span>;
           const color = getCategoryTagColor(cat);
           return (

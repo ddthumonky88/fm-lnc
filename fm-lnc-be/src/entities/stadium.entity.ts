@@ -12,8 +12,8 @@ export class Stadium {
   @Column({ type: 'varchar', length: 64, nullable: true })
   nation_id: string;
 
-  @Column({ type: 'text', nullable: true })
-  inactive_fields: string;
+  @Column({ type: 'boolean', default: false })
+  is_disabled: boolean;
 
   @ManyToOne(() => Nation, (nation) => nation.stadiums, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'nation_id' })

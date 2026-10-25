@@ -17,12 +17,12 @@ export type CompetitionCategory = 'league' | 'cup' | 'youth' | 'other';
 
 export function getCompetitionGroup(target?: any): CompetitionCategory {
   if (!target) return 'other';
-  const item = typeof target === 'object' ? target : { categories: target };
+  const item = typeof target === 'object' ? target : { type: target, categories: target };
   const id = String(item?.id || '');
   if (id === '[OTHER]' || id === '[EXTINCT]' || item?.is_virtual) {
     return 'other';
   }
-  const cat = String(item?.categories || item?.category || '').trim().toLowerCase();
+  const cat = String(item?.type || item?.categories || item?.category || '').trim().toLowerCase();
   if (!cat) return 'other';
   if (cat.includes('youth')) return 'youth';
   if (cat.includes('cup')) return 'cup';
@@ -65,8 +65,8 @@ export function sortCompetitionsByCategory(a: any, b: any): number {
 
   // 2. Within 'league': league (1) > league (2) > ...
   if (groupA === 'league') {
-    const catA = String(a.categories || '').trim();
-    const catB = String(b.categories || '').trim();
+    const catA = String(a.type || a.categories || '').trim();
+    const catB = String(b.type || b.categories || '').trim();
     const tierA = getLeagueTier(catA);
     const tierB = getLeagueTier(catB);
     if (tierA !== tierB) {
@@ -83,16 +83,16 @@ export function sortCompetitionsByCategory(a: any, b: any): number {
     if (weightA !== weightB) {
       return weightA - weightB;
     }
-    const catA = String(a.categories || '').trim();
-    const catB = String(b.categories || '').trim();
+    const catA = String(a.type || a.categories || '').trim();
+    const catB = String(b.type || b.categories || '').trim();
     const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
     if (catComp !== 0) return catComp;
   }
 
   // 4. Within 'cup' or 'youth'
   if (groupA === 'cup' || groupA === 'youth') {
-    const catA = String(a.categories || '').trim();
-    const catB = String(b.categories || '').trim();
+    const catA = String(a.type || a.categories || '').trim();
+    const catB = String(b.type || b.categories || '').trim();
     const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
     if (catComp !== 0) return catComp;
   }

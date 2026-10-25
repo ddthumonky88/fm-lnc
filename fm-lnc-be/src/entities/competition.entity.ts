@@ -31,10 +31,7 @@ export class Competition {
   nation_id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  categories: string;
-
-  @Column({ type: 'boolean', default: false })
-  is_international: boolean;
+  type: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
   parent_id: string;

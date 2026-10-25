@@ -128,7 +128,9 @@ export default function RecordDetailModal({
     name: '',
     fg_color: '',
     bg_color: '',
+    type: '',
     categories: '',
+    is_disabled: false,
     is_international: false,
     is_extinct: false,
     note: '',
@@ -196,7 +198,9 @@ export default function RecordDetailModal({
         name: activeData.name || activeData.long_name || '',
         fg_color: activeData.fg_color || '',
         bg_color: activeData.bg_color || '',
-        categories: activeData.categories || '',
+        type: activeData.type || activeData.categories || '',
+        categories: activeData.type || activeData.categories || '',
+        is_disabled: Boolean(activeData.is_disabled || activeData.isDisabled || (activeData.inactive_fields && activeData.inactive_fields.includes('name'))),
         is_international: !!activeData.is_international,
         is_extinct: !!activeData.is_extinct,
         note: activeData.note || '',
@@ -408,6 +412,11 @@ export default function RecordDetailModal({
         payload.fg_color = payload.fg_color?.trim() || null;
         payload.bg_color = payload.bg_color?.trim() || null;
         payload.parent_id = formData.parent_id?.trim() ? String(formData.parent_id).trim() : null;
+        payload.type = (formData.type || formData.categories || '').trim() || null;
+      }
+
+      if (isCity || isStadium) {
+        payload.is_disabled = !!formData.is_disabled;
       }
 
       if (mode === 'create') {
@@ -855,14 +864,14 @@ export default function RecordDetailModal({
                 </div>
               )}
 
-              {/* Categories (Non-City) */}
-              {!isCity && currentData.categories && (
+              {/* Type / Categories (Non-City) */}
+              {!isCity && (currentData.type || currentData.categories) && (
                 <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
-                  <span className={getLabelClass(['categories', 'category'], 'pt-0.5')}>
-                    Category:
+                  <span className={getLabelClass(['type', 'categories', 'category'], 'pt-0.5')}>
+                    Type:
                   </span>
                   <div className="flex items-center gap-1 flex-wrap text-left">
-                    {String(currentData.categories)
+                    {String(currentData.type || currentData.categories)
                       .split(',')
                       .map((cat: string, idx: number) => (
                         <Tag color="cyan" key={idx} className="m-0 text-xs font-medium">
@@ -915,8 +924,13 @@ export default function RecordDetailModal({
             </div>
 
             {/* Scope & Status Badges */}
-            {(currentData.is_extinct || isVirtual) && (
+            {(currentData.is_extinct || isVirtual || ((isCity || isStadium) && currentData.is_disabled)) && (
               <div className="flex items-center gap-1.5 flex-wrap">
+                {(isCity || isStadium) && currentData.is_disabled && (
+                  <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
+                    Disabled in .lnc
+                  </Tag>
+                )}
                 {currentData.is_extinct && (
                   <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
                     Extinct Club
@@ -1125,16 +1139,16 @@ export default function RecordDetailModal({
               </div>
             )}
 
-            {/* Competition Categories */}
+            {/* Competition Type / Category */}
             {isComp && (
               <div>
-                <label className={getFormLabelClass(['categories', 'category'])}>
-                  Categories (comma-separated)
+                <label className={getFormLabelClass(['type', 'categories', 'category'])}>
+                  Type / Category
                 </label>
                 <Input
-                  value={formData.categories}
-                  onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
-                  placeholder="e.g. NATIONAL_TEAM,CONTINENTAL"
+                  value={formData.type || formData.categories}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value, categories: e.target.value })}
+                  placeholder="e.g. League (1), Cup, Youth, UEFA"
                   className="rounded-lg"
                 />
               </div>
@@ -1158,14 +1172,14 @@ export default function RecordDetailModal({
               </div>
             )}
 
-            {/* Checkboxes: International / Extinct */}
+            {/* Checkboxes: Disabled / Extinct */}
             <div className="flex items-center gap-4 flex-wrap pt-1">
-              {isComp && (
+              {(isCity || isStadium) && (
                 <Checkbox
-                  checked={formData.is_international}
-                  onChange={(e) => setFormData({ ...formData, is_international: e.target.checked })}
+                  checked={formData.is_disabled}
+                  onChange={(e) => setFormData({ ...formData, is_disabled: e.target.checked })}
                 >
-                  <span className="text-xs text-slate-700 font-medium">International Competition</span>
+                  <span className="text-xs text-red-600 font-medium">Disable in .lnc (Comment out)</span>
                 </Checkbox>
               )}
               {isClub && (

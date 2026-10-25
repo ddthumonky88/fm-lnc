@@ -152,6 +152,18 @@ function normalizeEntityFields(item: any): any {
   if (item.region !== undefined && item.categories === undefined) item.categories = item.region;
   if (item.categories !== undefined && item.region === undefined) item.region = item.categories;
 
+  // Competition type / categories
+  if (item.type !== undefined && item.categories === undefined) item.categories = item.type;
+  if (item.categories !== undefined && item.type === undefined) item.type = item.categories;
+
+  // City & Stadium is_disabled
+  if (item.is_disabled !== undefined && item.isDisabled === undefined) item.isDisabled = item.is_disabled;
+  if (item.isDisabled !== undefined && item.is_disabled === undefined) item.is_disabled = item.isDisabled;
+  if (item.is_disabled === undefined && item.inactive_fields !== undefined) {
+    item.is_disabled = Boolean(item.inactive_fields && item.inactive_fields.includes('name'));
+    item.isDisabled = item.is_disabled;
+  }
+
   // Confed / nation ID aliases
   if (item.confed_id !== undefined && item.confederation_id === undefined) item.confederation_id = item.confed_id;
   if (item.confederation_id !== undefined && item.confed_id === undefined) item.confed_id = item.confederation_id;
@@ -268,6 +280,7 @@ export interface CompetitionItem {
   parent_long_name?: string;
   parent_short_name?: string;
   childrenCount?: number;
+  type?: string;
   categories?: string;
   is_international?: boolean;
   note?: string;
@@ -308,7 +321,10 @@ export interface StadiumItem {
   id: string;
   name: string;
   nation_id?: string;
+  is_disabled?: boolean;
+  isDisabled?: boolean;
   note?: string;
+  inactive_fields?: string;
   nation?: NationItem;
 }
 
@@ -319,6 +335,9 @@ export interface CityItem {
   country_id?: string;
   region?: string;
   categories?: string;
+  is_disabled?: boolean;
+  isDisabled?: boolean;
+  inactive_fields?: string;
   nation?: NationItem;
 }
 

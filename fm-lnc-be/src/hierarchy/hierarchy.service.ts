@@ -64,7 +64,7 @@ export class HierarchyService {
         const totalIntComps = await this.compRepo
           .createQueryBuilder('comp')
           .where('comp.confed_id = :cid', { cid: String(c.id) })
-          .andWhere('(comp.is_international = true OR comp.nation_id IS NULL)')
+          .andWhere('comp.nation_id IS NULL')
           .getCount();
 
         return {
@@ -124,12 +124,12 @@ export class HierarchyService {
   }
 
   async getIntCompetitionsByContinent(confedId: string, filter?: PaginationQueryDto) {
-    let whereClause = `c.confed_id = $1 AND (c.is_international = true OR c.nation_id IS NULL) AND (c.parent_id IS NULL OR c.parent_id = '')`;
+    let whereClause = `c.confed_id = $1 AND c.nation_id IS NULL AND (c.parent_id IS NULL OR c.parent_id = '')`;
     const params: any[] = [String(confedId)];
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.type, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.compRepo.query(
@@ -149,7 +149,7 @@ export class HierarchyService {
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
+      ORDER BY c.type ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
@@ -235,7 +235,7 @@ export class HierarchyService {
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.type, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.compRepo.query(
@@ -255,7 +255,7 @@ export class HierarchyService {
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
+      ORDER BY c.type ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
@@ -295,6 +295,7 @@ export class HierarchyService {
       name_lg: '[OTHER] Other Clubs',
       name_sh: 'Other Clubs',
       name_3l: 'OTH',
+      type: 'Other',
       categories: 'Other',
       nation: nationRef,
       confed: null,
@@ -314,6 +315,7 @@ export class HierarchyService {
       name_lg: '[EXTINCT] Extinct Clubs',
       name_sh: 'Extinct Clubs',
       name_3l: 'EXT',
+      type: 'Other',
       categories: 'Other',
       nation: nationRef,
       confed: null,
@@ -335,10 +337,10 @@ export class HierarchyService {
       return name.toLowerCase().includes(qTerm) || cat.toLowerCase().includes(qTerm);
     };
 
-    if (otherClubsCount > 0 && matchVirtual(virtualOther.name_lg, virtualOther.categories)) {
+    if (otherClubsCount > 0 && matchVirtual(virtualOther.name_lg, virtualOther.type || virtualOther.categories)) {
       virtualItems.push(virtualOther);
     }
-    if (extinctClubsCount > 0 && matchVirtual(virtualExtinct.name_lg, virtualExtinct.categories)) {
+    if (extinctClubsCount > 0 && matchVirtual(virtualExtinct.name_lg, virtualExtinct.type || virtualExtinct.categories)) {
       virtualItems.push(virtualExtinct);
     }
 
@@ -538,7 +540,7 @@ export class HierarchyService {
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
-      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.categories, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
+      whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.type, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
     }
 
     const raw = await this.compRepo.query(
@@ -558,7 +560,7 @@ export class HierarchyService {
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
+      ORDER BY c.type ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
@@ -711,9 +713,9 @@ export class HierarchyService {
     }
     if (filter.isInternational !== undefined) {
       if (filter.isInternational) {
-        whereClause += ` AND (c.is_international = true OR c.nation_id IS NULL)`;
+        whereClause += ` AND c.nation_id IS NULL`;
       } else {
-        whereClause += ` AND (c.is_international = false AND c.nation_id IS NOT NULL)`;
+        whereClause += ` AND c.nation_id IS NOT NULL`;
       }
     }
     const searchKey = (filter.keyword || '').trim();
@@ -739,7 +741,7 @@ export class HierarchyService {
       LEFT JOIN nations n ON c.nation_id = n.id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
-      ORDER BY c.categories ASC NULLS LAST, c.name_lg ASC;`,
+      ORDER BY c.type ASC NULLS LAST, c.name_lg ASC;`,
       params,
     );
 
@@ -765,7 +767,7 @@ export class HierarchyService {
         this.compRepo
           .createQueryBuilder('comp')
           .where('comp.confed_id = :cid', { cid: strId })
-          .andWhere('(comp.is_international = true OR comp.nation_id IS NULL)')
+          .andWhere('comp.nation_id IS NULL')
           .andWhere('(comp.parent_id IS NULL OR comp.parent_id = \'\')')
           .getCount(),
         this.compRepo

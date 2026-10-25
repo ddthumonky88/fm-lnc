@@ -93,6 +93,13 @@ function ConfederationDetailContent() {
       }
       setNations(nationsData);
       setIntComps(intCompsData);
+      if (!searchParams.get('tab')) {
+        if (nationsData.length === 0 && intCompsData.length > 0) {
+          setActiveTab('INT_COMPETITIONS');
+        } else if (intCompsData.length === 0 && nationsData.length > 0) {
+          setActiveTab('NATIONS');
+        }
+      }
     } catch (err: any) {
       console.error(err);
       message.error(err.message || 'Failed to load confederation details');

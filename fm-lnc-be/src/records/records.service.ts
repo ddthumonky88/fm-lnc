@@ -30,6 +30,13 @@ function normalizeInputData(data: any): any {
   if (d.categories !== undefined && d.region === undefined) d.region = d.categories;
   if (d.region !== undefined && d.categories === undefined) d.categories = d.region;
 
+  if (d.categories !== undefined && d.type === undefined) d.type = d.categories;
+  if (d.type !== undefined && d.categories === undefined) d.categories = d.type;
+
+  if (d.isDisabled !== undefined && d.is_disabled === undefined) d.is_disabled = !!d.isDisabled;
+  if (d.is_disabled !== undefined) d.is_disabled = !!d.is_disabled;
+  else if (d.inactive_fields !== undefined) d.is_disabled = Boolean(d.inactive_fields && String(d.inactive_fields).trim() !== '');
+
   if (d.confederation_id !== undefined && d.confed_id === undefined) d.confed_id = d.confederation_id;
   if (d.country_id !== undefined && d.nation_id === undefined) d.nation_id = d.country_id;
 

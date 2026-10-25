@@ -537,7 +537,7 @@ export default function EntityCard({
       >
       <div>
         {/* Top Header Bar: [flag / thẻ tên], 2 thẻ màu, [Category Tag], [Extinct Tag] */}
-        {(nationInfo || bgInfo || fgInfo || data.is_extinct || (type !== 'city' && data.categories)) && (
+        {(nationInfo || bgInfo || fgInfo || data.is_extinct || data.is_disabled || data.isDisabled || (type !== 'city' && (data.type || data.categories))) && (
           <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-gray-100 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap min-w-0">
               {/* [flag / thẻ tên] */}
@@ -620,13 +620,13 @@ export default function EntityCard({
             </div>
 
             <div className="flex items-center gap-1.5 ml-auto shrink-0 min-w-0">
-              {type !== 'city' && data.categories && (
-                <Tooltip title={data.categories} trigger="hover" destroyTooltipOnHide>
+              {type !== 'city' && (data.type || data.categories) && (
+                <Tooltip title={data.type || data.categories} trigger="hover" destroyTooltipOnHide>
                   <Tag
-                    color={getCategoryTagColor(data.categories, isRedKeyword)}
+                    color={getCategoryTagColor(data.type || data.categories, isRedKeyword)}
                     className="m-0 text-[10px] sm:text-[10.5px] font-semibold shrink-0 py-0 px-1.5 leading-tight font-mono cursor-default"
                   >
-                    {formatCategoryCode(data.categories)}
+                    {formatCategoryCode(data.type || data.categories)}
                   </Tag>
                 </Tooltip>
               )}
@@ -634,6 +634,12 @@ export default function EntityCard({
               {data.is_extinct && (
                 <Tag color="red" className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight">
                   Extinct
+                </Tag>
+              )}
+
+              {(data.is_disabled || data.isDisabled) && (
+                <Tag color="red" className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight">
+                  Disabled
                 </Tag>
               )}
             </div>

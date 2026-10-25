@@ -15,8 +15,8 @@ export class City {
   @Column({ type: 'varchar', length: 255, nullable: true })
   region: string;
 
-  @Column({ type: 'text', nullable: true })
-  inactive_fields: string;
+  @Column({ type: 'boolean', default: false })
+  is_disabled: boolean;
 
   @ManyToOne(() => Nation, (nation) => nation.cities, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'nation_id' })

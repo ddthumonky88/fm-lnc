@@ -52,6 +52,7 @@ export function matchRecordSearch(
     record.common_name,
     record.three_letter_name,
     record.six_letter_name,
+    record.type,
     record.categories,
     record.note,
     record.region_name,

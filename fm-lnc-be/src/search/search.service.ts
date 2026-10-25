@@ -70,6 +70,7 @@ export class SearchService {
         .where('c.name_lg ILIKE :q', { q: `%${term}%` })
         .orWhere('c.name_sh ILIKE :q', { q: `%${term}%` })
         .orWhere('c.name_3l ILIKE :q', { q: `%${term}%` })
+        .orWhere('c.type ILIKE :q', { q: `%${term}%` })
         .orWhere('c.id = :idVal', { idVal })
         .limit(limit)
         .getMany(),

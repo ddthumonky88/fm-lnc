@@ -55,7 +55,7 @@ def seed():
         name VARCHAR(255) NOT NULL,
         nation_id VARCHAR(64),
         region VARCHAR(255),
-        inactive_fields TEXT
+        is_disabled BOOLEAN DEFAULT FALSE
     );
 
     CREATE TABLE competitions (
@@ -67,8 +67,7 @@ def seed():
         bg_color VARCHAR(100),
         confed_id VARCHAR(64),
         nation_id VARCHAR(64),
-        categories VARCHAR(255),
-        is_international BOOLEAN DEFAULT FALSE,
+        type VARCHAR(255),
         parent_id VARCHAR(64),
         note TEXT,
         inactive_fields TEXT
@@ -91,7 +90,7 @@ def seed():
         id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         nation_id VARCHAR(64),
-        inactive_fields TEXT
+        is_disabled BOOLEAN DEFAULT FALSE
     );
 
     CREATE TABLE awards (
@@ -124,7 +123,8 @@ def seed():
         (4, 'CONCACAF'),
         (5, 'OFC'),
         (6, 'CONMEBOL'),
-        (7, 'World')
+        (7, 'World'),
+        (8, 'EXTINCT')
     ]
     execute_batch(cur, "INSERT INTO confederations (id, name) VALUES (%s, %s);", confeds)
     conn.commit()
@@ -137,7 +137,7 @@ def seed():
         'OFC': 5, 'OCEANIA': 5,
         'CONMEBOL': 6, 'SOUTH AMERICA': 6,
         'WORLD': 7, 'INTERNATIONAL': 7, 'FIFA': 7,
-        'OTHER': 7
+        'EXTINCT': 8, 'OTHER': 8
     }
 
     # 2. Parse City & Nation
@@ -253,11 +253,10 @@ def seed():
         elif cdata['nation_name']:
             nat_id = name_to_nation_id.get(cdata['nation_name'].upper())
         inact_set = cdata.get('inactive_fields')
-        inact_str = ','.join(sorted(inact_set)) if inact_set else None
-        cities_batch.append((cid, cname, nat_id, cdata['category'], inact_str))
+        cities_batch.append((cid, cname, nat_id, cdata['category'], bool(inact_set)))
 
     execute_batch(cur, """
-        INSERT INTO cities (id, name, nation_id, region, inactive_fields)
+        INSERT INTO cities (id, name, nation_id, region, is_disabled)
         VALUES (%s, %s, %s, %s, %s);
     """, cities_batch, page_size=1000)
     conn.commit()
@@ -441,13 +440,13 @@ def seed():
         parent_id = cdata.get('parent_id')
         inact_set = cdata.get('inactive_fields')
         inact_str = ','.join(sorted(inact_set)) if inact_set else None
-        comps_batch.append((cid, lname, sname, code, fg, bg, conf_id, nat_id, cdata.get('category'), is_inter, inact_str, parent_id))
+        comps_batch.append((cid, lname, sname, code, fg, bg, conf_id, nat_id, cdata.get('category'), inact_str, parent_id))
         comp_name_to_id[lname.lower()] = cid
         comp_name_to_id[sname.lower()] = cid
 
     execute_batch(cur, """
-        INSERT INTO competitions (id, name_lg, name_sh, name_3l, fg_color, bg_color, confed_id, nation_id, categories, is_international, inactive_fields, parent_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO competitions (id, name_lg, name_sh, name_3l, fg_color, bg_color, confed_id, nation_id, type, inactive_fields, parent_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """, comps_batch, page_size=1000)
     conn.commit()
 
@@ -630,11 +629,10 @@ def seed():
     for sid, sdata in stadiums.items():
         nat_id = code_to_nation_id.get(sdata.get('nation_code'))
         inact_set = sdata.get('inactive_fields')
-        inact_str = ','.join(sorted(inact_set)) if inact_set else None
-        stadiums_batch.append((sid, sdata['name'], nat_id, inact_str))
+        stadiums_batch.append((sid, sdata['name'], nat_id, bool(inact_set)))
 
     execute_batch(cur, """
-        INSERT INTO stadiums (id, name, nation_id, inactive_fields)
+        INSERT INTO stadiums (id, name, nation_id, is_disabled)
         VALUES (%s, %s, %s, %s);
     """, stadiums_batch, page_size=2000)
     conn.commit()

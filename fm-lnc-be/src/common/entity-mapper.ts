@@ -121,8 +121,9 @@ export function mapCompetition(comp: any, extraStats?: any) {
     name_3l: comp.three_letter_name ?? comp.name_3l ?? null,
     fg_color: comp.fg_color ?? null,
     bg_color: comp.bg_color ?? null,
-    categories: comp.categories ?? null,
-    is_international: !!comp.is_international,
+    type: comp.type ?? comp.categories ?? null,
+    categories: comp.type ?? comp.categories ?? null,
+    is_international: comp.is_international !== undefined ? !!comp.is_international : (!comp.nation && !comp.nation_id),
     note: comp.note ?? null,
     inactive_fields: comp.inactive_fields ?? null,
     nation,
@@ -202,8 +203,10 @@ export function mapCity(city: any) {
   return {
     id: String(city.id),
     name: city.name,
-    region: city.categories ?? city.region ?? null,
-    inactive_fields: city.inactive_fields ?? null,
+    region: city.region ?? city.categories ?? null,
+    categories: city.region ?? city.categories ?? null,
+    is_disabled: !!city.is_disabled,
+    inactive_fields: city.is_disabled ? 'name' : null,
     nation,
   };
 }
@@ -224,6 +227,8 @@ export function mapStadium(stadium: any) {
   return {
     id: String(stadium.id),
     name: stadium.name,
+    is_disabled: !!stadium.is_disabled,
+    inactive_fields: stadium.is_disabled ? 'name' : null,
     nation,
   };
 }

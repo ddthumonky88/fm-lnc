@@ -64,8 +64,9 @@ export class LncService {
       const code = c.nation?.name_3l || 'UNK';
       const nat = c.nation?.name_sh || 'Unknown';
       const cat = c.region ? ` > ${c.region}` : '';
+      const pfx = c.is_disabled ? '#' : '';
       out += `# CITY > [${code}] ${nat}${cat}\n${hr}`;
-      out += `"CITY_NAME_CHANGE"\t\t${c.id}\t\t"${c.name}"\t\t\t\t""\n\n`;
+      out += `${pfx}"CITY_NAME_CHANGE"\t\t${c.id}\t\t"${c.name}"\t\t\t\t""\n\n`;
     }
 
     // 3. COMPETITIONS
@@ -75,10 +76,10 @@ export class LncService {
     });
     for (const comp of comps) {
       const conf = comp.confederation?.name || 'INTERNATIONAL';
-      const isInter = comp.is_international || !comp.nation_id;
+      const isInter = !comp.nation_id;
       const natCode = comp.nation?.name_3l || (isInter ? 'INT' : 'NAT');
       const natName = comp.nation?.name_sh || (isInter ? 'International' : 'National');
-      const cat = comp.categories || (isInter ? 'International Competitions' : 'League/Cup');
+      const cat = comp.type || (isInter ? 'International Competitions' : 'League/Cup');
 
       out += `# COMP > ${conf} > [${natCode}] ${natName} > ${cat}\n${hr}`;
       const inactList = (comp.inactive_fields || '')
@@ -188,7 +189,7 @@ export class LncService {
     for (const s of stadiums) {
       const code = s.nation?.name_3l || 'UNK';
       const nat = s.nation?.name_sh || 'Standard';
-      const pfx = (s.inactive_fields || '').includes('name') ? '#' : '';
+      const pfx = s.is_disabled ? '#' : '';
       out += `# STADIUM > [${code}] ${nat} > Standard\n${hr}`;
       out += `${pfx}"STADIUM_NAME_CHANGE"\t\t${s.id}\t\t"${s.name}"\t\t\t\t""\n\n`;
     }
@@ -263,7 +264,8 @@ export class LncService {
       OFC: '5', OCEANIA: '5',
       CONMEBOL: '6', 'SOUTH AMERICA': '6',
       WORLD: '7', INTERNATIONAL: '7', FIFA: '7',
-      OTHER: '7',
+      EXTINCT: '8',
+      OTHER: '8',
     };
 
     // Ensure confederations
@@ -275,6 +277,7 @@ export class LncService {
       { id: '5', name: 'OFC' },
       { id: '6', name: 'CONMEBOL' },
       { id: '7', name: 'World' },
+      { id: '8', name: 'EXTINCT' },
     ];
     for (const c of confeds) {
       await this.confedRepo.save(c);
