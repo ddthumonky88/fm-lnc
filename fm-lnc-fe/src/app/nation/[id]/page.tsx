@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Breadcrumb, Tabs, Tag, Badge, Input, Button, Space, message, Spin, Tooltip } from 'antd';
 import {
@@ -18,10 +18,12 @@ import {
   fetchDomesticCompetitions,
   fetchStadiums,
   fetchCities,
+  fetchRegions,
   fetchAwards,
   getNationLogoUrl,
   deleteRecord,
   NationHubData,
+  RegionItem,
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
@@ -32,7 +34,7 @@ import {
   CityIcon,
   AwardIcon,
 } from '../../../components/EntityIcons';
-import { EntityType, RecordType } from '../../../types';
+import { EntityType, RecordType, NationTabKey, NationTabKeyValue } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { matchRecordSearch } from '../../../utils/search';
 
@@ -52,46 +54,83 @@ export default function NationDetailPage() {
   const nationId = params?.id ? String(params.id) : '';
 
   const [nationHub, setNationHub] = useState<NationHubData | null>(null);
-  const [activeTab, setActiveTab] = useState<'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS'>(
-    'DOMESTIC_COMPS',
-  );
+  const [activeTab, setActiveTab] = useState<NationTabKeyValue>(NationTabKey.DOMESTIC_COMPS);
   const [records, setRecords] = useState<any[]>([]);
-  const [tableFilter, setTableFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [tabLoading, setTabLoading] = useState(false);
 
+  // Regions state for City filter
+  const [regions, setRegions] = useState<RegionItem[]>([]);
+  const [selectedRegionId, setSelectedRegionId] = useState<number | string>('all');
+
+  // Server pagination and search states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  const selectedRegionIdRef = useRef(selectedRegionId);
+  useEffect(() => {
+    selectedRegionIdRef.current = selectedRegionId;
+  }, [selectedRegionId]);
+
+  const pageSizeRef = useRef(pageSize);
+  useEffect(() => {
+    pageSizeRef.current = pageSize;
+  }, [pageSize]);
+
   // Load records for active tab
   const loadTabRecords = useCallback(
-    async (tabKey: 'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS') => {
+    async (
+      tabKey: NationTabKeyValue,
+      page = 1,
+      keyword = '',
+      size = 20,
+      regionId?: number | string,
+    ) => {
       if (!nationId) return;
       setTabLoading(true);
       try {
-        let data: any[] = [];
-        if (tabKey === 'DOMESTIC_COMPS') {
-          data = await fetchDomesticCompetitions(nationId);
-        } else if (tabKey === 'STADIUMS') {
-          data = await fetchStadiums(nationId);
-        } else if (tabKey === 'CITIES') {
-          data = await fetchCities(nationId);
-        } else if (tabKey === 'AWARDS') {
-          data = await fetchAwards(nationId);
+        const effRegionId = regionId !== undefined ? regionId : selectedRegionIdRef.current;
+        const query: any = { page: page - 1, size, keyword };
+        if (tabKey === NationTabKey.CITIES && effRegionId && effRegionId !== 'all') {
+          query.regionId = Number(effRegionId);
         }
-        setRecords(data);
+        let data: any[] = [];
+        if (tabKey === NationTabKey.DOMESTIC_COMPS) {
+          data = await fetchDomesticCompetitions(nationId, query);
+        } else if (tabKey === NationTabKey.STADIUMS) {
+          data = await fetchStadiums(nationId, query);
+        } else if (tabKey === NationTabKey.CITIES) {
+          data = await fetchCities(nationId, query);
+        } else if (tabKey === NationTabKey.AWARDS) {
+          data = await fetchAwards(nationId, query);
+        }
+        const list = Array.isArray(data) ? data : (data as any)?.content || [];
+        setRecords(list);
+        const total = (data as any)?.totalElements ?? (data as any)?.total ?? list.length;
+        setTotalRecords(total);
         setNationHub((prev) => {
           if (!prev) return prev;
           const keyMap: Record<string, keyof typeof prev.counts> = {
-            DOMESTIC_COMPS: 'domesticComps',
-            STADIUMS: 'stadiums',
-            CITIES: 'cities',
-            AWARDS: 'awards',
+            [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
+            [NationTabKey.STADIUMS]: 'stadiums',
+            [NationTabKey.CITIES]: 'cities',
+            [NationTabKey.AWARDS]: 'awards',
           };
           const countKey = keyMap[tabKey];
-          if (countKey && prev.counts[countKey] !== data.length) {
+          if (countKey && !keyword && (tabKey !== NationTabKey.CITIES || effRegionId === 'all')) {
             return {
               ...prev,
               counts: {
                 ...prev.counts,
-                [countKey]: data.length,
+                [countKey]: total,
               },
             };
           }
@@ -114,6 +153,11 @@ export default function NationDetailPage() {
     try {
       const hub = await fetchNationHub(nationId);
       setNationHub(hub);
+
+      // Fetch regions for City filter
+      fetchRegions(nationId)
+        .then((regs) => setRegions(regs || []))
+        .catch((err) => console.error('Failed to load regions', err));
 
       const nation = hub.nation;
       const confedId = nation?.confederation_id;
@@ -150,15 +194,28 @@ export default function NationDetailPage() {
         isFlag: true,
       });
 
-      // Select first tab that has records
-      let defaultTab: 'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS' = 'DOMESTIC_COMPS';
-      if (hub.counts.domesticComps > 0) defaultTab = 'DOMESTIC_COMPS';
-      else if (hub.counts.stadiums > 0) defaultTab = 'STADIUMS';
-      else if (hub.counts.cities > 0) defaultTab = 'CITIES';
-      else if (hub.counts.awards > 0) defaultTab = 'AWARDS';
+      // Keep active tab if it exists and has records, otherwise fallback to first non-empty tab
+      let targetTab: NationTabKeyValue = activeTabRef.current;
+      const countForTarget =
+        targetTab === NationTabKey.DOMESTIC_COMPS
+          ? hub.counts.domesticComps
+          : targetTab === NationTabKey.STADIUMS
+            ? hub.counts.stadiums
+            : targetTab === NationTabKey.CITIES
+              ? hub.counts.cities
+              : targetTab === NationTabKey.AWARDS
+                ? hub.counts.awards
+                : 0;
 
-      setActiveTab(defaultTab);
-      await loadTabRecords(defaultTab);
+      if (!countForTarget || countForTarget === 0) {
+        if (hub.counts.domesticComps > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
+        else if (hub.counts.stadiums > 0) targetTab = NationTabKey.STADIUMS;
+        else if (hub.counts.cities > 0) targetTab = NationTabKey.CITIES;
+        else if (hub.counts.awards > 0) targetTab = NationTabKey.AWARDS;
+      }
+
+      setActiveTab(targetTab);
+      await loadTabRecords(targetTab, 1, '', pageSizeRef.current, selectedRegionIdRef.current);
     } catch (err: any) {
       console.error(err);
       message.error(err.message || 'Failed to load nation hub');
@@ -183,13 +240,39 @@ export default function NationDetailPage() {
       setHeaderLogo(null);
       setHeaderId(undefined);
     };
-  }, [loadNationData, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
+  }, [nationId, refreshSignal]);
 
-  const handleSwitchTab = async (key: 'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS') => {
-    setActiveTab(key);
-    setTableFilter('');
+  const handlePageChange = (newPage: number, newPageSize?: number) => {
+    const effSize = newPageSize && newPageSize !== pageSize ? newPageSize : pageSize;
+    if (newPageSize && newPageSize !== pageSize) {
+      setPageSize(newPageSize);
+    }
+    setCurrentPage(newPage);
+    loadTabRecords(activeTab, newPage, searchKeyword, effSize, selectedRegionId);
+  };
+
+  const handleSearchSubmit = () => {
+    const kw = searchInput.trim();
+    setSearchKeyword(kw);
+    setCurrentPage(1);
+    loadTabRecords(activeTab, 1, kw, pageSize, selectedRegionId);
+  };
+
+  const handleSelectRegion = (regionVal: number | string) => {
+    setSelectedRegionId(regionVal);
+    setCurrentPage(1);
+    loadTabRecords(NationTabKey.CITIES, 1, searchKeyword, pageSize, regionVal);
+  };
+
+  const handleSwitchTab = async (key: string) => {
+    const tabKey = key as NationTabKeyValue;
+    setActiveTab(tabKey);
+    setSearchInput('');
+    setSearchKeyword('');
+    setCurrentPage(1);
     setRecords([]);
-    await loadTabRecords(key);
+    setSelectedRegionId('all');
+    await loadTabRecords(tabKey, 1, '', pageSize, 'all');
   };
 
   const handleDelete = async (type: RecordType, id: string) => {
@@ -200,10 +283,10 @@ export default function NationDetailPage() {
       setNationHub((prev) => {
         if (!prev) return prev;
         const keyMap: Record<string, keyof typeof prev.counts> = {
-          DOMESTIC_COMPS: 'domesticComps',
-          STADIUMS: 'stadiums',
-          CITIES: 'cities',
-          AWARDS: 'awards',
+          [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
+          [NationTabKey.STADIUMS]: 'stadiums',
+          [NationTabKey.CITIES]: 'cities',
+          [NationTabKey.AWARDS]: 'awards',
         };
         const countKey = keyMap[activeTab];
         if (countKey && prev.counts[countKey] > 0) {
@@ -223,9 +306,9 @@ export default function NationDetailPage() {
     }
   };
 
-  // Filtered records
+  // Filtered / enriched records
   const filteredRecords = useMemo(() => {
-    const enriched = !nationHub?.nation
+    return !nationHub?.nation
       ? records
       : records.map((r) => ({
           ...r,
@@ -236,10 +319,14 @@ export default function NationDetailPage() {
             r.nation?.three_letter_name ||
             nationHub.nation.three_letter_name,
         }));
+  }, [records, nationHub]);
 
-    if (!tableFilter.trim()) return enriched;
-    return enriched.filter((r) => matchRecordSearch(r, tableFilter));
-  }, [records, tableFilter, nationHub]);
+  const serverPagination = {
+    current: currentPage,
+    pageSize,
+    total: totalRecords,
+    onChange: handlePageChange,
+  };
 
   // Tab configurations: Hide any tab that has 0 records
   const tabItems = useMemo(() => {
@@ -251,19 +338,21 @@ export default function NationDetailPage() {
 
     if (compCount > 0) {
       list.push({
-        key: 'DOMESTIC_COMPS',
+        key: NationTabKey.DOMESTIC_COMPS,
         label: (
           <Space size={4} title="Competitions">
             <DomesticCompIcon size={18} className="text-amber-500" />
             <span
-              className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}
+              className={`hidden sm:inline ${activeTab === NationTabKey.DOMESTIC_COMPS ? 'font-bold' : ''}`}
             >
               Competitions
             </span>
             <Badge
               count={compCount}
               overflowCount={99999}
-              style={{ backgroundColor: activeTab === 'DOMESTIC_COMPS' ? '#1d70b8' : '#94a3b8' }}
+              style={{
+                backgroundColor: activeTab === NationTabKey.DOMESTIC_COMPS ? '#1d70b8' : '#94a3b8',
+              }}
             />
           </Space>
         ),
@@ -272,17 +361,21 @@ export default function NationDetailPage() {
 
     if (stadiumCount > 0) {
       list.push({
-        key: 'STADIUMS',
+        key: NationTabKey.STADIUMS,
         label: (
           <Space size={4} title="Stadiums">
             <StadiumIcon size={18} className="text-emerald-500" />
-            <span className={`hidden sm:inline ${activeTab === 'STADIUMS' ? 'font-bold' : ''}`}>
+            <span
+              className={`hidden sm:inline ${activeTab === NationTabKey.STADIUMS ? 'font-bold' : ''}`}
+            >
               Stadiums
             </span>
             <Badge
               count={stadiumCount}
               overflowCount={99999}
-              style={{ backgroundColor: activeTab === 'STADIUMS' ? '#1d70b8' : '#94a3b8' }}
+              style={{
+                backgroundColor: activeTab === NationTabKey.STADIUMS ? '#1d70b8' : '#94a3b8',
+              }}
             />
           </Space>
         ),
@@ -291,17 +384,19 @@ export default function NationDetailPage() {
 
     if (cityCount > 0) {
       list.push({
-        key: 'CITIES',
+        key: NationTabKey.CITIES,
         label: (
           <Space size={4} title="Cities">
             <CityIcon size={18} className="text-sky-500" />
-            <span className={`hidden sm:inline ${activeTab === 'CITIES' ? 'font-bold' : ''}`}>
+            <span
+              className={`hidden sm:inline ${activeTab === NationTabKey.CITIES ? 'font-bold' : ''}`}
+            >
               Cities
             </span>
             <Badge
               count={cityCount}
               overflowCount={99999}
-              style={{ backgroundColor: activeTab === 'CITIES' ? '#1d70b8' : '#94a3b8' }}
+              style={{ backgroundColor: activeTab === NationTabKey.CITIES ? '#1d70b8' : '#94a3b8' }}
             />
           </Space>
         ),
@@ -310,17 +405,19 @@ export default function NationDetailPage() {
 
     if (awardCount > 0) {
       list.push({
-        key: 'AWARDS',
+        key: NationTabKey.AWARDS,
         label: (
           <Space size={4} title="Awards">
             <AwardIcon size={18} className="text-yellow-500" />
-            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>
+            <span
+              className={`hidden sm:inline ${activeTab === NationTabKey.AWARDS ? 'font-bold' : ''}`}
+            >
               Awards
             </span>
             <Badge
               count={awardCount}
               overflowCount={99999}
-              style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
+              style={{ backgroundColor: activeTab === NationTabKey.AWARDS ? '#1d70b8' : '#94a3b8' }}
             />
           </Space>
         ),
@@ -330,12 +427,12 @@ export default function NationDetailPage() {
     // Fallback: If nation has 0 for everything, keep Competitions tab so user can add records
     if (list.length === 0) {
       list.push({
-        key: 'DOMESTIC_COMPS',
+        key: NationTabKey.DOMESTIC_COMPS,
         label: (
           <Space size={4} title="Competitions">
             <DomesticCompIcon size={18} className="text-amber-500" />
             <span
-              className={`hidden sm:inline ${activeTab === 'DOMESTIC_COMPS' ? 'font-bold' : ''}`}
+              className={`hidden sm:inline ${activeTab === NationTabKey.DOMESTIC_COMPS ? 'font-bold' : ''}`}
             >
               Competitions
             </span>
@@ -350,7 +447,7 @@ export default function NationDetailPage() {
   // Keep activeTab synchronized with available tabs
   useEffect(() => {
     if (tabItems.length > 0 && !tabItems.some((t) => t.key === activeTab)) {
-      const nextTab = tabItems[0].key as 'DOMESTIC_COMPS' | 'STADIUMS' | 'CITIES' | 'AWARDS';
+      const nextTab = tabItems[0].key as NationTabKeyValue;
       setActiveTab(nextTab);
       loadTabRecords(nextTab);
     }
@@ -358,9 +455,14 @@ export default function NationDetailPage() {
 
   const handleNavigate = (step: any) => {
     if (step.level === 'INDEPENDENT_CLUBS') {
-      const type = step.metadata?.is_extinct ? 'extinct' : 'other';
       const nId = step.nationId || step.metadata?.nation_id || nationId;
-      router.push(`/comp/${type}?nationId=${nId}`);
+      const fakeId =
+        step.id && (String(step.id).startsWith('oth-') || String(step.id).startsWith('ext-'))
+          ? step.id
+          : step.metadata?.is_extinct
+            ? `ext-${nId}`
+            : `oth-${nId}`;
+      router.push(`/comp/${fakeId}`);
     } else if (
       step.level === 'CLUBS_IN_COMP' ||
       step.level === 'COMP_AWARDS' ||
@@ -408,22 +510,14 @@ export default function NationDetailPage() {
                       className="font-mono font-bold m-0 text-xs cursor-pointer hover:opacity-80 inline-flex items-center gap-1.5"
                     >
                       <CopyOutlined className="text-[11px]" />
-                      <span>ID: {nationId}</span>
+                      <span>{nationId}</span>
                     </Tag>
                   </Tooltip>
-                  {nation?.three_letter_name && (
-                    <Tag color="purple" className="font-mono font-bold m-0 text-xs">
-                      {nation.three_letter_name}
-                    </Tag>
-                  )}
                 </div>
                 {/* Bottom: Tên (thường là short name) */}
                 <h2 className="text-base sm:text-lg font-bold text-gray-800 m-0 leading-snug">
                   {nationShortName}
                 </h2>
-                {nationLongName && nationLongName !== nationShortName && (
-                  <div className="text-xs text-gray-500 mt-0.5">{nationLongName}</div>
-                )}
               </div>
             </div>
           </div>
@@ -437,7 +531,7 @@ export default function NationDetailPage() {
           />
 
           {/* Tab 1: Domestic Competitions */}
-          {activeTab === 'DOMESTIC_COMPS' && (
+          {activeTab === NationTabKey.DOMESTIC_COMPS && (
             <CompetitionGroupView
               items={filteredRecords}
               loading={tabLoading}
@@ -445,16 +539,25 @@ export default function NationDetailPage() {
               onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec, nationId)}
               onDelete={(rec) => handleDelete(RecordType.COMPETITION, rec.id)}
               emptyText="No domestic competitions found"
+              serverPagination={serverPagination}
               extraRight={
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Input
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                    placeholder="Filter competitions..."
-                    value={tableFilter}
-                    onChange={(e) => setTableFilter(e.target.value)}
-                    allowClear
-                    className="flex-1 sm:w-64"
-                  />
+                  <Space.Compact className="flex-1 sm:w-64">
+                    <Input
+                      placeholder="Search competitions..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onPressEnter={handleSearchSubmit}
+                      allowClear
+                    />
+                    <Button
+                      type="primary"
+                      icon={<SearchOutlined />}
+                      onClick={handleSearchSubmit}
+                      title="Search"
+                      className="shrink-0 bg-blue-600"
+                    />
+                  </Space.Compact>
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
@@ -470,18 +573,26 @@ export default function NationDetailPage() {
           )}
 
           {/* Tab 2: Stadiums */}
-          {activeTab === 'STADIUMS' && (
+          {activeTab === NationTabKey.STADIUMS && (
             <div>
               <div className="flex justify-end items-center gap-2.5 sm:gap-3 mb-4">
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Input
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                    placeholder="Filter stadiums..."
-                    value={tableFilter}
-                    onChange={(e) => setTableFilter(e.target.value)}
-                    allowClear
-                    className="flex-1 sm:w-64"
-                  />
+                  <Space.Compact className="flex-1 sm:w-64">
+                    <Input
+                      placeholder="Search stadiums..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onPressEnter={handleSearchSubmit}
+                      allowClear
+                    />
+                    <Button
+                      type="primary"
+                      icon={<SearchOutlined />}
+                      onClick={handleSearchSubmit}
+                      title="Search"
+                      className="shrink-0 bg-blue-600"
+                    />
+                  </Space.Compact>
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
@@ -495,8 +606,9 @@ export default function NationDetailPage() {
               <CardGrid
                 items={filteredRecords}
                 type={EntityType.STADIUM}
-                columns={4}
+                cardSize="small"
                 loading={tabLoading}
+                serverPagination={serverPagination}
                 onEdit={(rec) => openRecordModal(RecordType.STADIUM, rec, nationId)}
                 onDelete={(rec) => handleDelete(RecordType.STADIUM, rec.id)}
                 emptyText="No stadiums found"
@@ -506,24 +618,36 @@ export default function NationDetailPage() {
           )}
 
           {/* Tab 3: Cities */}
-          {activeTab === 'CITIES' && (
+          {activeTab === NationTabKey.CITIES && (
             <CityGroupView
               items={filteredRecords}
               loading={tabLoading}
+              regions={regions}
+              selectedRegion={selectedRegionId}
+              onSelectRegion={handleSelectRegion}
               onNavigate={handleNavigate}
               onEdit={(rec) => openRecordModal(RecordType.CITY, rec, nationId)}
               onDelete={(rec) => handleDelete(RecordType.CITY, rec.id)}
               emptyText="No cities found"
+              serverPagination={serverPagination}
               extraRight={
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Input
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                    placeholder="Filter cities..."
-                    value={tableFilter}
-                    onChange={(e) => setTableFilter(e.target.value)}
-                    allowClear
-                    className="flex-1 sm:w-64"
-                  />
+                  <Space.Compact className="flex-1 sm:w-64">
+                    <Input
+                      placeholder="Search cities..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onPressEnter={handleSearchSubmit}
+                      allowClear
+                    />
+                    <Button
+                      type="primary"
+                      icon={<SearchOutlined />}
+                      onClick={handleSearchSubmit}
+                      title="Search"
+                      className="shrink-0 bg-blue-600"
+                    />
+                  </Space.Compact>
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
@@ -538,18 +662,26 @@ export default function NationDetailPage() {
           )}
 
           {/* Tab 4: Awards */}
-          {activeTab === 'AWARDS' && (
+          {activeTab === NationTabKey.AWARDS && (
             <div>
               <div className="flex justify-end items-center gap-2.5 sm:gap-3 mb-4">
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Input
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                    placeholder="Filter awards..."
-                    value={tableFilter}
-                    onChange={(e) => setTableFilter(e.target.value)}
-                    allowClear
-                    className="flex-1 sm:w-64"
-                  />
+                  <Space.Compact className="flex-1 sm:w-64">
+                    <Input
+                      placeholder="Search awards..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onPressEnter={handleSearchSubmit}
+                      allowClear
+                    />
+                    <Button
+                      type="primary"
+                      icon={<SearchOutlined />}
+                      onClick={handleSearchSubmit}
+                      title="Search"
+                      className="shrink-0 bg-blue-600"
+                    />
+                  </Space.Compact>
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
@@ -565,6 +697,7 @@ export default function NationDetailPage() {
                 type={EntityType.AWARD}
                 columns={4}
                 loading={tabLoading}
+                serverPagination={serverPagination}
                 onEdit={(rec) => openRecordModal(RecordType.AWARD, rec, nationId)}
                 onDelete={(rec) => handleDelete(RecordType.AWARD, rec.id)}
                 emptyText="No awards found"

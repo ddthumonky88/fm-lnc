@@ -11,14 +11,19 @@ import {
   Award,
   Person,
   Stage,
+  Region,
 } from '../entities';
 import { paginateAndSort } from './pagination.util';
 import {
   PaginationQueryDto,
+  SearchFilterDto,
   NationListFilterDto,
+  IntCompetitionFilterDto,
+  DomesticCompetitionFilterDto,
   CompetitionListFilterDto,
   IndependentClubFilterDto,
   CityFilterDto,
+  ClubSearchQueryDto,
 } from './dto/pagination.dto';
 import {
   mapNation,
@@ -42,9 +47,10 @@ export class HierarchyService {
     @InjectRepository(Award) private awardRepo: Repository<Award>,
     @InjectRepository(Person) private personRepo: Repository<Person>,
     @InjectRepository(Stage) private stageRepo: Repository<Stage>,
+    @InjectRepository(Region) private regionRepo: Repository<Region>,
   ) {}
 
-  async getContinents(filter?: PaginationQueryDto) {
+  async getListConfederations(filter?: SearchFilterDto) {
     let confeds = await this.confedRepo.find({ order: { id: 'ASC' } });
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
@@ -78,6 +84,11 @@ export class HierarchyService {
       }),
     );
 
+    return results;
+  }
+
+  async getContinents(filter?: PaginationQueryDto) {
+    const results = await this.getListConfederations(filter);
     return paginateAndSort(results, filter);
   }
 
@@ -123,10 +134,27 @@ export class HierarchyService {
     return paginateAndSort(items, filter);
   }
 
-  async getIntCompetitionsByContinent(confedId: string, filter?: PaginationQueryDto) {
-    let whereClause = `c.confed_id = $1 AND c.nation_id IS NULL AND (c.parent_id IS NULL OR c.parent_id = '')`;
-    const params: any[] = [String(confedId)];
-    const searchKey = (filter?.keyword || '').trim();
+  async getIntCompetitions(filterOrConfedId?: any, legacyKeyword?: string) {
+    const filter: IntCompetitionFilterDto =
+      typeof filterOrConfedId === 'object' && filterOrConfedId !== null
+        ? filterOrConfedId
+        : { confedId: filterOrConfedId, keyword: legacyKeyword };
+
+    let whereClause = `c.nation_id IS NULL AND (c.parent_id IS NULL OR c.parent_id = '')`;
+    const params: any[] = [];
+    if (
+      filter.confedId !== undefined &&
+      filter.confedId !== null &&
+      String(filter.confedId).trim() !== '' &&
+      String(filter.confedId).toLowerCase() !== 'all' &&
+      String(filter.confedId).toLowerCase() !== 'null' &&
+      String(filter.confedId).toLowerCase() !== 'undefined'
+    ) {
+      params.push(String(filter.confedId));
+      whereClause += ` AND c.confed_id = $${params.length}`;
+    }
+
+    const searchKey = (filter.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
       whereClause += ` AND (LOWER(c.name_lg) LIKE $${params.length} OR LOWER(COALESCE(c.name_sh, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_3l, '')) LIKE $${params.length} OR LOWER(COALESCE(c.type, '')) LIKE $${params.length} OR CAST(c.id AS TEXT) LIKE $${params.length})`;
@@ -160,6 +188,10 @@ export class HierarchyService {
     );
 
     return paginateAndSort(items, filter);
+  }
+
+  async getIntCompetitionsByContinent(confedId: string, filter?: PaginationQueryDto) {
+    return this.getIntCompetitions({ confedId, ...filter });
   }
 
   async getNationHub(nationId: string) {
@@ -200,7 +232,7 @@ export class HierarchyService {
     );
     const otherClubsCount = countsRaw[0]?.other_count || 0;
     const extinctClubsCount = countsRaw[0]?.extinct_count || 0;
-    const extraComps = (otherClubsCount > 0 ? 1 : 0) + (extinctClubsCount > 0 ? 1 : 0);
+    const extraComps = 2;
 
     return {
       nation: mapNation(nation),
@@ -223,15 +255,43 @@ export class HierarchyService {
     };
   }
 
-  async getDomesticCompetitions(nationId: string, filter?: PaginationQueryDto) {
-    const strNationId = String(nationId);
-    const nation = await this.nationRepo.findOne({
-      where: { id: strNationId },
-      relations: ['confederation'],
-    });
+  async getDomesticCompetitions(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
+    let nationId: string | null = null;
+    let filter: any = {};
 
-    let whereClause = `c.nation_id = $1 AND (c.parent_id IS NULL OR c.parent_id = '')`;
-    const params: any[] = [strNationId];
+    if (typeof nationIdOrFilter === 'object' && nationIdOrFilter !== null) {
+      filter = { ...nationIdOrFilter };
+      nationId = filter.nationId;
+    } else {
+      nationId = nationIdOrFilter;
+      filter = legacyFilter || {};
+    }
+
+    const hasNation =
+      nationId !== undefined &&
+      nationId !== null &&
+      String(nationId).trim() !== '' &&
+      String(nationId).toLowerCase() !== 'all' &&
+      String(nationId).toLowerCase() !== 'null' &&
+      String(nationId).toLowerCase() !== 'undefined';
+
+    const strNationId = hasNation ? String(nationId) : null;
+    const nation = strNationId
+      ? await this.nationRepo.findOne({
+          where: { id: strNationId },
+          relations: ['confederation'],
+        })
+      : null;
+
+    let whereClause = `(c.parent_id IS NULL OR c.parent_id = '')`;
+    const params: any[] = [];
+    if (strNationId) {
+      params.push(strNationId);
+      whereClause += ` AND c.nation_id = $${params.length}`;
+    } else {
+      whereClause += ` AND c.nation_id IS NOT NULL`;
+    }
+
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       params.push(`%${searchKey.toLowerCase()}%`);
@@ -271,6 +331,10 @@ export class HierarchyService {
       ),
     );
 
+    if (!strNationId) {
+      return paginateAndSort(comps, filter);
+    }
+
     const countsRaw = await this.clubRepo.query(
       `SELECT
         COUNT(*) FILTER (WHERE comp_id IS NULL AND (is_extinct = false OR is_extinct IS NULL))::int as other_count,
@@ -291,7 +355,7 @@ export class HierarchyService {
     };
 
     const virtualOther = {
-      id: '[OTHER]',
+      id: `oth-${strNationId}`,
       name_lg: '[OTHER] Other Clubs',
       name_sh: 'Other Clubs',
       name_3l: 'OTH',
@@ -311,7 +375,7 @@ export class HierarchyService {
     };
 
     const virtualExtinct = {
-      id: '[EXTINCT]',
+      id: `ext-${strNationId}`,
       name_lg: '[EXTINCT] Extinct Clubs',
       name_sh: 'Extinct Clubs',
       name_3l: 'EXT',
@@ -334,59 +398,71 @@ export class HierarchyService {
     const qTerm = searchKey.toLowerCase();
     const matchVirtual = (name: string, cat: string) => {
       if (!qTerm) return true;
-      return name.toLowerCase().includes(qTerm) || cat.toLowerCase().includes(qTerm);
+      return (
+        name.toLowerCase().includes(qTerm) ||
+        cat.toLowerCase().includes(qTerm) ||
+        'other'.includes(qTerm) ||
+        'extinct'.includes(qTerm)
+      );
     };
 
-    if (otherClubsCount > 0 && matchVirtual(virtualOther.name_lg, virtualOther.type || virtualOther.categories)) {
+    if (matchVirtual(virtualOther.name_lg, virtualOther.type || virtualOther.categories)) {
       virtualItems.push(virtualOther);
     }
-    if (extinctClubsCount > 0 && matchVirtual(virtualExtinct.name_lg, virtualExtinct.type || virtualExtinct.categories)) {
+    if (matchVirtual(virtualExtinct.name_lg, virtualExtinct.type || virtualExtinct.categories)) {
       virtualItems.push(virtualExtinct);
     }
 
     return paginateAndSort([...virtualItems, ...comps], filter);
   }
 
-  async getIndependentClubs(nationId: string, filterOrExtinct?: any, legacyExtinct?: string) {
-    const filter: IndependentClubFilterDto =
-      typeof filterOrExtinct === 'object' && filterOrExtinct !== null
-        ? filterOrExtinct
-        : { extinct: filterOrExtinct !== undefined ? filterOrExtinct : legacyExtinct };
-
-    const qb = this.clubRepo
-      .createQueryBuilder('club')
-      .leftJoinAndSelect('club.nation', 'nation')
-      .where('club.nation_id = :nationId', { nationId: String(nationId) });
-
-    const extinct = String(filter.extinct);
-    if (extinct === 'true') {
-      qb.andWhere('club.is_extinct = true');
-    } else if (extinct === 'false') {
-      qb.andWhere('club.comp_id IS NULL')
-        .andWhere('(club.is_extinct = false OR club.is_extinct IS NULL)');
-    } else {
-      qb.andWhere('club.comp_id IS NULL');
-    }
-
-    const searchKey = (filter?.keyword || '').trim();
-    if (searchKey) {
-      const term = `%${searchKey.toLowerCase()}%`;
-      qb.andWhere(
-        '(LOWER(club.name_lg) LIKE :term OR LOWER(COALESCE(club.name_sh, \'\')) LIKE :term OR LOWER(COALESCE(club.name_3l, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
-        { term },
-      );
-    }
-
-    const items = await qb.orderBy('club.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapClub), filter);
-  }
-
-  async getAllClubsInNation(nationId: string, filter?: PaginationQueryDto) {
+  async searchClubs(filter: ClubSearchQueryDto) {
     const qb = this.clubRepo
       .createQueryBuilder('club')
       .leftJoinAndSelect('club.competition', 'competition')
-      .leftJoinAndSelect('club.nation', 'nation')
-      .where('club.nation_id = :nationId', { nationId: String(nationId) });
+      .leftJoinAndSelect('club.nation', 'nation');
+
+    const nationId =
+      filter?.nationId !== undefined &&
+      filter?.nationId !== null &&
+      String(filter.nationId).trim() !== '' &&
+      String(filter.nationId).toLowerCase() !== 'all' &&
+      String(filter.nationId).toLowerCase() !== 'null' &&
+      String(filter.nationId).toLowerCase() !== 'undefined'
+        ? String(filter.nationId).trim()
+        : null;
+
+    const compId =
+      filter?.compId !== undefined &&
+      filter?.compId !== null &&
+      String(filter.compId).trim() !== '' &&
+      String(filter.compId).toLowerCase() !== 'all' &&
+      String(filter.compId).toLowerCase() !== 'null' &&
+      String(filter.compId).toLowerCase() !== 'undefined'
+        ? String(filter.compId).trim()
+        : null;
+
+    if (compId && (compId.startsWith('oth-') || compId === '[OTHER]' || compId === 'other')) {
+      const targetNationId = compId.startsWith('oth-') ? compId.slice(4) : nationId;
+      if (targetNationId && String(targetNationId).toLowerCase() !== 'all') {
+        qb.where('club.nation_id = :nationId', { nationId: targetNationId });
+      }
+      qb.andWhere('club.comp_id IS NULL')
+        .andWhere('(club.is_extinct = false OR club.is_extinct IS NULL)');
+    } else if (compId && (compId.startsWith('ext-') || compId === '[EXTINCT]' || compId === 'extinct')) {
+      const targetNationId = compId.startsWith('ext-') ? compId.slice(4) : nationId;
+      if (targetNationId && String(targetNationId).toLowerCase() !== 'all') {
+        qb.where('club.nation_id = :nationId', { nationId: targetNationId });
+      }
+      qb.andWhere('club.is_extinct = true');
+    } else {
+      if (compId) {
+        qb.andWhere('club.comp_id = :compId', { compId });
+      }
+      if (nationId) {
+        qb.andWhere('club.nation_id = :nationId', { nationId });
+      }
+    }
 
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
@@ -401,30 +477,68 @@ export class HierarchyService {
     return paginateAndSort(items.map(mapClub), filter);
   }
 
-  async getClubsInCompetition(compId: string, filter?: PaginationQueryDto) {
-    const qb = this.clubRepo
-      .createQueryBuilder('club')
-      .leftJoinAndSelect('club.nation', 'nation')
-      .where('club.comp_id = :compId', { compId: String(compId) });
-
-    const searchKey = (filter?.keyword || '').trim();
-    if (searchKey) {
-      const term = `%${searchKey.toLowerCase()}%`;
-      qb.andWhere(
-        '(LOWER(club.name_lg) LIKE :term OR LOWER(COALESCE(club.name_sh, \'\')) LIKE :term OR LOWER(COALESCE(club.name_3l, \'\')) LIKE :term OR CAST(club.id AS TEXT) LIKE :term)',
-        { term },
-      );
+  async getIndependentClubs(nationIdOrFilter?: any, filterOrExtinct?: any, legacyExtinct?: string) {
+    let nationId: string | null = null;
+    let filter: any = {};
+    if (typeof nationIdOrFilter === 'object' && nationIdOrFilter !== null) {
+      filter = { ...nationIdOrFilter };
+      nationId = filter.nationId || null;
+    } else {
+      nationId = nationIdOrFilter;
+      filter =
+        typeof filterOrExtinct === 'object' && filterOrExtinct !== null
+          ? { ...filterOrExtinct }
+          : { extinct: filterOrExtinct !== undefined ? filterOrExtinct : legacyExtinct };
     }
-
-    const items = await qb.orderBy('club.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapClub), filter);
+    const isExtinct = String(filter.extinct) === 'true';
+    const compId = nationId ? (isExtinct ? `ext-${nationId}` : `oth-${nationId}`) : filter.compId;
+    return this.searchClubs({ ...filter, nationId, compId });
   }
 
-  async getStadiums(nationId: string, filter?: PaginationQueryDto) {
+  async getAllClubsInNation(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
+    let nationId: string | null = null;
+    let filter: any = {};
+    if (typeof nationIdOrFilter === 'object' && nationIdOrFilter !== null) {
+      filter = { ...nationIdOrFilter };
+      nationId = filter.nationId || null;
+    } else {
+      nationId = nationIdOrFilter;
+      filter = legacyFilter || {};
+    }
+    return this.searchClubs({ ...filter, nationId });
+  }
+
+  async getClubsInCompetition(compIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
+    let compId: string | null = null;
+    let filter: any = {};
+    if (typeof compIdOrFilter === 'object' && compIdOrFilter !== null) {
+      filter = { ...compIdOrFilter };
+      compId = filter.compId || null;
+    } else {
+      compId = compIdOrFilter;
+      filter = legacyFilter || {};
+    }
+    return this.searchClubs({ ...filter, compId });
+  }
+
+  async getStadiums(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
+    let nationId: string | null = null;
+    let filter: any = {};
+    if (typeof nationIdOrFilter === 'object' && nationIdOrFilter !== null) {
+      filter = { ...nationIdOrFilter };
+      nationId = filter.nationId || null;
+    } else {
+      nationId = nationIdOrFilter;
+      filter = legacyFilter || {};
+    }
+
     const qb = this.stadiumRepo
       .createQueryBuilder('stadium')
-      .leftJoinAndSelect('stadium.nation', 'nation')
-      .where('stadium.nation_id = :nationId', { nationId: String(nationId) });
+      .leftJoinAndSelect('stadium.nation', 'nation');
+
+    if (nationId && String(nationId).toLowerCase() !== 'all') {
+      qb.where('stadium.nation_id = :nationId', { nationId: String(nationId) });
+    }
 
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
@@ -439,13 +553,32 @@ export class HierarchyService {
     return paginateAndSort(items.map(mapStadium), filter);
   }
 
-  async getCities(nationId: string, filter?: CityFilterDto) {
+  async getCities(nationIdOrFilter?: any, legacyFilter?: CityFilterDto) {
+    let nationId: string | null = null;
+    let filter: any = {};
+    if (typeof nationIdOrFilter === 'object' && nationIdOrFilter !== null) {
+      filter = { ...nationIdOrFilter };
+      nationId = filter.nationId || null;
+    } else {
+      nationId = nationIdOrFilter;
+      filter = legacyFilter || {};
+    }
+
     const qb = this.cityRepo
       .createQueryBuilder('city')
-      .leftJoinAndSelect('city.nation', 'nation')
-      .where('city.nation_id = :nationId', { nationId: String(nationId) });
+      .leftJoinAndSelect('city.nation', 'nation');
 
-    if (filter?.category && filter.category !== 'all') {
+    if (nationId && String(nationId).toLowerCase() !== 'all') {
+      qb.where('city.nation_id = :nationId', { nationId: String(nationId) });
+    }
+
+    if (filter?.regionId !== undefined && filter?.regionId !== null && String(filter.regionId) !== 'all') {
+      if (String(filter.regionId) === '__uncategorized__' || Number(filter.regionId) === 0) {
+        qb.andWhere('(city.region_id IS NULL OR city.region IS NULL OR TRIM(city.region) = \'\')');
+      } else {
+        qb.andWhere('city.region_id = :regId', { regId: Number(filter.regionId) });
+      }
+    } else if (filter?.category && filter.category !== 'all') {
       if (filter.category === '__uncategorized__') {
         qb.andWhere('(city.region IS NULL OR TRIM(city.region) = \'\')');
       } else {
@@ -466,12 +599,76 @@ export class HierarchyService {
     return paginateAndSort(items.map(mapCity), filter);
   }
 
-  async getAwardsByNation(nationId: string, filter?: PaginationQueryDto) {
+  async getRegionsByNation(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
+    let nationId: string | null = null;
+    let filter: any = {};
+    if (typeof nationIdOrFilter === 'object' && nationIdOrFilter !== null) {
+      filter = { ...nationIdOrFilter };
+      nationId = filter.nationId || null;
+    } else {
+      nationId = nationIdOrFilter;
+      filter = legacyFilter || {};
+    }
+
+    const qb = this.regionRepo.createQueryBuilder('region');
+    if (nationId && String(nationId).toLowerCase() !== 'all') {
+      qb.where('region.nation_id = :nationId', { nationId: String(nationId) });
+    }
+
+    const searchKey = (filter?.keyword || '').trim();
+    if (searchKey) {
+      const term = `%${searchKey.toLowerCase()}%`;
+      qb.andWhere('LOWER(region.name) LIKE :term', { term });
+    }
+
+    const regions = await qb.orderBy('region.name', 'ASC').getMany();
+
+    // Query city counts per region
+    let cityCountsQuery = this.cityRepo
+      .createQueryBuilder('city')
+      .select('city.region_id', 'region_id')
+      .addSelect('COUNT(*)', 'count');
+
+    if (nationId && String(nationId).toLowerCase() !== 'all') {
+      cityCountsQuery = cityCountsQuery.where('city.nation_id = :nationId', { nationId: String(nationId) });
+    }
+    const cityCounts = await cityCountsQuery.groupBy('city.region_id').getRawMany();
+
+    const countMap = new Map<number, number>();
+    for (const c of cityCounts) {
+      if (c.region_id) {
+        countMap.set(Number(c.region_id), parseInt(c.count, 10));
+      }
+    }
+
+    return regions.map((r) => ({
+      id: r.id,
+      name: r.name,
+      nation_id: r.nation_id,
+      citiesCount: countMap.get(r.id) || 0,
+    }));
+  }
+
+  async getAwardsByNation(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
+    let nationId: string | null = null;
+    let filter: any = {};
+    if (typeof nationIdOrFilter === 'object' && nationIdOrFilter !== null) {
+      filter = { ...nationIdOrFilter };
+      nationId = filter.nationId || null;
+    } else {
+      nationId = nationIdOrFilter;
+      filter = legacyFilter || {};
+    }
+
     const qb = this.awardRepo
       .createQueryBuilder('award')
       .leftJoinAndSelect('award.nation', 'nation')
       .leftJoinAndSelect('award.competition', 'competition')
-      .where('award.nation_id = :nationId AND award.comp_id IS NULL', { nationId: String(nationId) });
+      .where('award.comp_id IS NULL');
+
+    if (nationId && String(nationId).toLowerCase() !== 'all') {
+      qb.andWhere('award.nation_id = :nationId', { nationId: String(nationId) });
+    }
 
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
@@ -486,12 +683,35 @@ export class HierarchyService {
     return paginateAndSort(items.map(mapAward), filter);
   }
 
-  async getAwardsByCompetition(compId: string, filter?: PaginationQueryDto) {
+  async getAwardsByCompetition(compIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
+    let compId: string | null = null;
+    let filter: any = {};
+    if (typeof compIdOrFilter === 'object' && compIdOrFilter !== null) {
+      filter = { ...compIdOrFilter };
+      compId = filter.compId || null;
+    } else {
+      compId = compIdOrFilter;
+      filter = legacyFilter || {};
+    }
+
+    const strCompId = String(compId || '');
+    if (
+      strCompId.startsWith('oth-') ||
+      strCompId.startsWith('ext-') ||
+      strCompId === '[OTHER]' ||
+      strCompId === '[EXTINCT]'
+    ) {
+      return paginateAndSort([], filter);
+    }
+
     const qb = this.awardRepo
       .createQueryBuilder('award')
       .leftJoinAndSelect('award.nation', 'nation')
-      .leftJoinAndSelect('award.competition', 'competition')
-      .where('award.comp_id = :compId', { compId: String(compId) });
+      .leftJoinAndSelect('award.competition', 'competition');
+
+    if (compId && String(compId).toLowerCase() !== 'all') {
+      qb.where('award.comp_id = :compId', { compId: String(compId) });
+    }
 
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
@@ -508,6 +728,78 @@ export class HierarchyService {
 
   async getCompetitionInfo(compId: string) {
     const strId = String(compId);
+    if (
+      strId.startsWith('oth-') ||
+      strId === '[OTHER]' ||
+      strId === 'other' ||
+      strId.startsWith('ext-') ||
+      strId === '[EXTINCT]' ||
+      strId === 'extinct'
+    ) {
+      const isExtinct = strId.startsWith('ext-') || strId === '[EXTINCT]' || strId === 'extinct';
+      const nationId = strId.startsWith('oth-')
+        ? strId.slice(4)
+        : strId.startsWith('ext-')
+          ? strId.slice(4)
+          : null;
+      const nation = nationId
+        ? await this.nationRepo.findOne({
+            where: { id: nationId },
+            relations: ['confederation'],
+          })
+        : null;
+
+      let count = 0;
+      if (nationId) {
+        const countsRaw = await this.clubRepo.query(
+          `SELECT
+            COUNT(*) FILTER (WHERE comp_id IS NULL AND (is_extinct = false OR is_extinct IS NULL))::int as other_count,
+            COUNT(*) FILTER (WHERE is_extinct = true)::int as extinct_count
+          FROM clubs
+          WHERE nation_id = $1;`,
+          [nationId],
+        );
+        count = isExtinct ? (countsRaw[0]?.extinct_count || 0) : (countsRaw[0]?.other_count || 0);
+      }
+
+      const fakeId = isExtinct
+        ? (nationId ? `ext-${nationId}` : '[EXTINCT]')
+        : (nationId ? `oth-${nationId}` : '[OTHER]');
+      const shortName = isExtinct ? 'Extinct Clubs' : 'Other Clubs';
+      const longName = isExtinct ? '[EXTINCT] Extinct Clubs' : '[OTHER] Other Clubs';
+      const threeLetter = isExtinct ? 'EXT' : 'OTH';
+
+      return {
+        id: fakeId,
+        long_name: longName,
+        short_name: shortName,
+        three_letter_name: threeLetter,
+        name_lg: longName,
+        name_sh: shortName,
+        name_3l: threeLetter,
+        type: 'Other',
+        categories: 'Other',
+        nation_id: nationId,
+        nation: mapNationRef(nation),
+        nation_name: nation?.name_lg || nation?.name_sh,
+        nation_three_letter: nation?.name_3l,
+        confed_id: nation?.confed_id,
+        confederation: nation?.confederation
+          ? { id: String(nation.confederation.id), name: nation.confederation.name }
+          : null,
+        parent_id: null,
+        parent: null,
+        is_virtual: true,
+        virtual_type: isExtinct ? 'EXTINCT' : 'OTHER',
+        clubsCount: count,
+        awardsCount: 0,
+        childrenCount: 0,
+        stats: {
+          children: count,
+        },
+      };
+    }
+
     const comp = await this.compRepo.findOne({
       where: { id: strId },
       relations: ['nation', 'confederation', 'parent'],
@@ -636,7 +928,14 @@ export class HierarchyService {
 
     let whereClause = '1=1';
     const params: any[] = [];
-    if (filter.confedId) {
+    if (
+      filter.confedId !== undefined &&
+      filter.confedId !== null &&
+      String(filter.confedId).trim() !== '' &&
+      String(filter.confedId).toLowerCase() !== 'all' &&
+      String(filter.confedId).toLowerCase() !== 'null' &&
+      String(filter.confedId).toLowerCase() !== 'undefined'
+    ) {
       params.push(String(filter.confedId));
       whereClause += ` AND n.confed_id = $${params.length}`;
     }
@@ -648,7 +947,7 @@ export class HierarchyService {
 
     const raw = await this.nationRepo.query(
       `SELECT n.id, n.name_lg, n.name_sh, n.name_3l, n.confed_id, conf.name as confederation_name,
-        (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id)::int as total_comps,
+        (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id AND (c.parent_id IS NULL OR c.parent_id = ''))::int as total_comps,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.nation_id = n.id)::int as total_clubs,
         (SELECT COUNT(*) FROM stadiums s WHERE s.nation_id = n.id)::int as total_stadiums,
         (SELECT COUNT(*) FROM cities ci WHERE ci.nation_id = n.id)::int as total_cities,
@@ -717,6 +1016,13 @@ export class HierarchyService {
       } else {
         whereClause += ` AND c.nation_id IS NOT NULL`;
       }
+    }
+    if (filter.topLevelOnly) {
+      whereClause += ` AND (c.parent_id IS NULL OR c.parent_id = '')`;
+    }
+    if (filter.category && filter.category !== 'all') {
+      params.push(`%${filter.category.toLowerCase()}%`);
+      whereClause += ` AND (LOWER(COALESCE(c.type, '')) LIKE $${params.length} OR LOWER(COALESCE(c.name_lg, '')) LIKE $${params.length})`;
     }
     const searchKey = (filter.keyword || '').trim();
     if (searchKey) {

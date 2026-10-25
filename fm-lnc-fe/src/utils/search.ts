@@ -64,6 +64,18 @@ export function matchRecordSearch(
     record.nation?.long_name,
     record.nation?.short_name,
     record.nation?.three_letter_name,
+    record.comp_name,
+    record.competition_name,
+    record.comp?.name,
+    record.comp?.long_name,
+    record.comp?.short_name,
+    record.comp?.name_sh,
+    record.comp?.name_lg,
+    record.competition?.name,
+    record.competition?.long_name,
+    record.competition?.short_name,
+    record.competition?.name_sh,
+    record.competition?.name_lg,
     ...extraFields,
   ];
 

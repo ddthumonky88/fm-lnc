@@ -5,6 +5,7 @@ import { Competition } from './competition.entity';
 import { Club } from './club.entity';
 import { Stadium } from './stadium.entity';
 import { Award } from './award.entity';
+import { Region } from './region.entity';
 
 @Entity('nations')
 export class Nation {
@@ -32,6 +33,9 @@ export class Nation {
 
   @OneToMany(() => City, (city) => city.nation)
   cities: City[];
+
+  @OneToMany(() => Region, (region) => region.nation)
+  regions: Region[];
 
   @OneToMany(() => Competition, (comp) => comp.nation)
   competitions: Competition[];

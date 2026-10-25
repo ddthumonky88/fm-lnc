@@ -622,16 +622,48 @@ CREATE TABLE IF NOT EXISTS stages (
    - `comp`: `{ id, name_lg, name_sh, name_3l }`
    - `parent`: `{ id, name_lg, name_sh, name_3l }`
 4. **Đối tượng thống kê (`stats`):** Gom toàn bộ các trường số lượng thực thể con, loại bỏ tiền tố `"total-"` (e.g. `nations`, `intComps`, `comps`, `clubs`, `stadiums`, `cities`, `awards`, `children`).
-5. **Quy tắc phân cấp giải đấu:**
-   - `GET /api/hierarchy/nations/:id/competitions`: **Chỉ trả về các giải đấu quốc nội cấp cha (`parent_id IS NULL`)** của quốc gia đó.
-   - `GET /api/hierarchy/competitions/:id/sub-competitions`: **Trả về danh sách giải đấu con / phân hạng trực thuộc giải đấu cha `{id}` (`parent_id = :id`)**.
-6. **API Chi tiết quan hệ (`/info`):** Cung cấp dữ liệu đầy đủ kèm thực thể cha/con và bộ đếm thống kê cho 7 thực thể chính (`confederation`, `nation`, `competition`, `club`, `city`, `award`, `stadium`).
+5. **Form chuẩn cho các API Tìm kiếm & Phân trang phân cấp (Hierarchy Search API Contract):**
+   - **Phương thức**: `POST`
+   - **URL Query Parameters** (phân trang, sắp xếp & phạm vi lọc):
+     - `page`: số trang (0-indexed, mặc định: `0`)
+     - `size`: số lượng bản ghi trên một trang (mặc định: `10`, `20` hoặc `100`)
+     - `sort`: sắp xếp theo trường và chiều, ví dụ: `name,asc`, `name,desc`, `id,asc`
+     - Phạm vi bộ lọc theo URL Query: `confedId`, `nationId`, `compId`, `regionId`, `category`
+   - **Request Body (JSON)**:
+     ```json
+     {
+       "keyword": "từ khóa tìm kiếm"
+     }
+     ```
+   - **Cấu trúc Phản hồi**: Trả về envelope bọc cấu trúc phân trang `PageData<T>`:
+     ```json
+     {
+       "content": [ ... ],
+       "page": 0,
+       "size": 10,
+       "totalElements": 24,
+       "totalPages": 3,
+       "hasPrevious": false,
+       "hasNext": true,
+       "first": true,
+       "last": false
+     }
+     ```
+6. **Quy chuẩn Gộp chung API Tìm kiếm Câu lạc bộ (`/api/hierarchy/club/search`):**
+   - Toàn bộ các thao tác tìm kiếm CLB (theo giải đấu, CLB tự do, CLB giải thể, hoặc toàn bộ CLB quốc gia) đã được gộp về duy nhất endpoint:  
+     `POST /api/hierarchy/club/search?nationId=xxx&compId=yyyy&page=0&size=10&sort=name%2Casc`
+   - Cơ chế **Fake Competitions** được tự động khởi tạo khi xem giải đấu quốc nội:
+     - **CLB tự do (Other Clubs)**: `compId = oth-{nationId}` *(ví dụ: `oth-145` cho Việt Nam, `oth-765` cho Anh)*
+     - **CLB đã giải thể (Extinct Clubs)**: `compId = ext-{nationId}` *(ví dụ: `ext-145` cho Việt Nam, `ext-765` cho Anh)*
+     - **CLB theo giải đấu cụ thể**: `compId = {compId}` *(ví dụ: `compId = 14` cho Sky Bet League Two)*
+     - **Toàn bộ CLB trong một quốc gia**: `nationId = {nationId}` *(không truyền `compId`)*
+   - Khi gọi `POST /api/hierarchy/domestic-competitions/search?nationId={id}`, hệ thống luôn sinh ra 2 thực thể ảo `oth-{id}` và `ext-{id}` xếp ở đầu danh sách kèm theo số lượng `clubsCount`, đồng thời hỗ trợ xem chi tiết qua `GET /api/hierarchy/competitions/:id/info`.
 
 ---
 
 ### 6.2. Health Check API
 
-#### `GET /health`
+#### `GET /health` hoặc `GET /api/health`
 Kiểm tra tình trạng hoạt động của NestJS Backend Server.
 - **Method**: `GET`
 - **Phản hồi (`200 OK`)**:
@@ -649,54 +681,56 @@ Kiểm tra tình trạng hoạt động của NestJS Backend Server.
 Prefix: `/api/hierarchy`
 
 #### 1. Confederations (Châu lục / Liên đoàn)
-- **`GET /api/hierarchy/continents`**
-  - Lấy danh sách 7 liên đoàn kèm số lượng quốc gia (`totalNations`) và giải đấu quốc tế (`totalIntComps`).
-- **`GET /api/hierarchy/continents/:id/info`**
+- **`GET /api/hierarchy/list-confederations`**
+  - Trả về danh sách tất cả các liên đoàn châu lục (7 confederations) kèm số lượng quốc gia (`totalNations`) và giải đấu quốc tế (`totalIntComps`).
+- **`GET /api/hierarchy/continents/:id/info`** *(hoặc `/confederations/:id/info`)*
   - Thông tin chi tiết một liên đoàn kèm bộ đếm tổng thể (`totalNations`, `totalIntComps`, `totalComps`, `totalClubs`, `totalStadiums`, `totalCities`, `totalAwards`).
 
 #### 2. Nations (Quốc gia)
-- **`GET /api/hierarchy/continents/:id/nations`**
-  - Lấy danh sách quốc gia thuộc một liên đoàn kèm các bộ đếm số lượng thực thể con.
-- **`GET /api/hierarchy/nations`**
-  - Danh sách toàn bộ quốc gia trong hệ thống.
-  - Query params: `confedId` *(lọc theo liên đoàn)*, `q` *(tìm kiếm tên hoặc mã ID)*.
+- **`POST /api/hierarchy/nations/search?confedId={confedId}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm và phân trang quốc gia (lọc theo châu lục qua `confedId`, hoặc toàn bộ nếu `confedId` rỗng).
+  - Request Body: `{"keyword": ""}`.
 - **`GET /api/hierarchy/nations/:id/info`**
   - Chi tiết quốc gia kèm đối tượng liên đoàn cha và thống kê chi tiết (`domesticComps`, `parentComps`, `independentClubs`, `extinctClubs`, `allClubs`, `stadiums`, `cities`, `awards`).
 - **`GET /api/hierarchy/nations/:id/hub`**
   - Tổng quan giao diện Hub của một quốc gia.
 
 #### 3. Competitions (Giải đấu)
-- **`GET /api/hierarchy/continents/:id/international-competitions`**
-  - Danh sách giải đấu quốc tế cấp cha (`parent_id IS NULL`) của liên đoàn (e.g. Champions League, Euro, World Cup).
-- **`GET /api/hierarchy/nations/:id/competitions`**
-  - Danh sách giải đấu quốc nội cấp cha (`parent_id IS NULL`) của quốc gia đó.
-  - Tự động bổ sung 2 danh mục ảo: `[OTHER]` (CLB tự do) và `[EXTINCT]` (CLB giải thể).
+- **`POST /api/hierarchy/int-competitions/search?confedId={confedId}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm giải đấu quốc tế cấp cha (`parent_id IS NULL`) của liên đoàn (e.g. Champions League, Euro, World Cup, AFC Champions League).
+  - Request Body: `{"keyword": ""}`.
+- **`POST /api/hierarchy/domestic-competitions/search?nationId={nationId}&page=0&size=20&sort=name%2Casc`**
+  - Danh sách giải đấu quốc nội cấp cha (`parent_id IS NULL`) của quốc gia.
+  - Tự động bổ sung 2 giải đấu ảo `oth-{nationId}` (Other Clubs) và `ext-{nationId}` (Extinct Clubs) kèm bộ đếm số CLB.
+  - Request Body: `{"keyword": ""}`.
 - **`GET /api/hierarchy/competitions/:id/sub-competitions`**
-  - Danh sách các giải đấu con / phân hạng trực thuộc giải đấu cha `{id}` (`parent_id = :id`).
+  - Danh sách giải đấu con / phân hạng trực thuộc giải đấu cha `{id}` (`parent_id = :id`).
 - **`GET /api/hierarchy/competitions/:id/info`**
   - Thông tin chi tiết giải đấu, màu sắc RGB, số lượng CLB (`clubsCount`), giải thưởng (`awardsCount`), giải đấu con (`childrenCount`), thông tin giải cha và quốc gia liên kết.
-- **`GET /api/hierarchy/competitions`**
-  - Tìm kiếm và lọc giải đấu đa chiều (`confedId`, `nationId`, `isInternational`, `q`).
-- **`GET /api/hierarchy/competitions/:id/clubs`**
-  - Danh sách các câu lạc bộ thi đấu tại giải đấu `{id}`.
-- **`GET /api/hierarchy/competitions/:id/awards`**
-  - Danh sách giải thưởng thuộc về giải đấu `{id}`.
+  - Hỗ trợ đầy đủ cho cả giải đấu thông thường và fake competitions (`oth-{nationId}`, `ext-{nationId}`).
 
-#### 4. Clubs (Câu lạc bộ)
+#### 4. Clubs (Câu lạc bộ - API Hợp nhất)
+- **`POST /api/hierarchy/club/search?nationId={nationId}&compId={compId}&page=0&size=10&sort=name%2Casc`**
+  - **API duy nhất cho toàn bộ nhu cầu tìm kiếm và xem danh sách CLB**:
+    - **CLB tự do (Other Clubs)**: truyền `compId=oth-{nationId}` (ví dụ: `oth-145`).
+    - **CLB đã giải thể (Extinct Clubs)**: truyền `compId=ext-{nationId}` (ví dụ: `ext-145`).
+    - **CLB trong một giải đấu**: truyền `compId={compId}` (ví dụ: `compId=14`).
+    - **Tất cả CLB thuộc quốc gia**: truyền `nationId={nationId}` (không truyền `compId`).
+  - Request Body: `{"keyword": ""}`.
 - **`GET /api/hierarchy/clubs/:id/info`**
   - Thông tin chi tiết CLB kèm quốc gia (`nation`), giải đấu trực thuộc (`competition`) và giải đấu cha.
-- **`GET /api/hierarchy/nations/:id/independent-clubs`**
-  - Danh sách CLB độc lập/tự do của quốc gia. Query param: `extinct=true` để lấy CLB đã giải thể.
-- **`GET /api/hierarchy/nations/:id/all-clubs`**
-  - Lấy tất cả câu lạc bộ thuộc quốc gia.
 
-#### 5. Sân vận động, Thành phố, Giải thưởng, Nhân sự & Giai đoạn
-- **`GET /api/hierarchy/cities/:id/info`** & **`GET /api/hierarchy/nations/:id/cities`**
-  - Thông tin chi tiết và danh sách thành phố thuộc quốc gia.
-- **`GET /api/hierarchy/stadiums/:id/info`** & **`GET /api/hierarchy/nations/:id/stadiums`**
-  - Thông tin chi tiết và danh sách sân vận động thuộc quốc gia.
-- **`GET /api/hierarchy/awards/:id/info`** & **`GET /api/hierarchy/nations/:id/awards`** & **`GET /api/hierarchy/awards`**
-  - Quản lý danh hiệu / giải thưởng độc lập hoặc gắn với giải đấu.
+#### 5. Sân vận động, Thành phố, Khu vực & Giải thưởng
+- **`POST /api/hierarchy/stadiums/search?nationId={nationId}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm và phân trang sân vận động theo quốc gia (Request Body: `{"keyword": ""}`).
+- **`POST /api/hierarchy/cities/search?nationId={nationId}&regionId={regionId}&category={category}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm và phân trang thành phố theo quốc gia và phân loại vùng miền / region (Request Body: `{"keyword": ""}`).
+- **`POST /api/hierarchy/regions/search?nationId={nationId}&page=0&size=100&sort=name%2Casc`**
+  - Danh sách khu vực (regions) trong một quốc gia kèm số lượng thành phố tương ứng.
+- **`POST /api/hierarchy/awards/search?nationId={nationId}&compId={compId}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm giải thưởng theo quốc gia hoặc theo giải đấu (Request Body: `{"keyword": ""}`).
+- **`GET /api/hierarchy/cities/:id/info`** & **`GET /api/hierarchy/stadiums/:id/info`** & **`GET /api/hierarchy/awards/:id/info`**
+  - Thông tin chi tiết kèm các liên kết quan hệ cho thành phố, sân vận động, và giải thưởng.
 - **`GET /api/hierarchy/players`**
   - Danh sách cầu thủ, HLV, nhân sự (Query param: `q`).
 - **`GET /api/hierarchy/stages`**

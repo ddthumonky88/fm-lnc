@@ -2,14 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Breadcrumb, Tabs, Tag, Badge, Input, Button, Space, message, Spin, Tooltip } from 'antd';
-import {
-  GlobalOutlined,
-  TrophyOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-} from '@ant-design/icons';
+import { Tabs, Badge, Input, Button, Space, message } from 'antd';
+import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   fetchContinents,
   fetchNationsByContinent,
@@ -24,7 +18,6 @@ import CompetitionGroupView from '../../../components/CompetitionGroupView';
 import { NationIcon, IntCompIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
-import { matchRecordSearch } from '../../../utils/search';
 
 function ConfederationDetailContent() {
   const params = useParams();
@@ -47,43 +40,26 @@ function ConfederationDetailContent() {
   const [nations, setNations] = useState<NationItem[]>([]);
   const [intComps, setIntComps] = useState<CompetitionItem[]>([]);
   const [activeTab, setActiveTab] = useState<'NATIONS' | 'INT_COMPETITIONS'>(initialTab);
-  const [tableFilter, setTableFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [tabLoading, setTabLoading] = useState(false);
 
-  // Load Confederation data
-  const loadData = useCallback(async () => {
+  // Server pagination and search states (pageSize = 20)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalNationsRecords, setTotalNationsRecords] = useState(0);
+  const [totalIntCompsRecords, setTotalIntCompsRecords] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  // Load Confederation metadata (title, logo, badges)
+  const loadConfedInfo = useCallback(async () => {
     if (!confedId) return;
-    setLoading(true);
     try {
-      const [continents, nationsData, intCompsData] = await Promise.all([
-        fetchContinents().catch((err) => {
-          console.error('Failed to fetch continents:', err);
-          return [];
-        }),
-        fetchNationsByContinent(confedId).catch((err) => {
-          console.error('Failed to fetch nations:', err);
-          return [];
-        }),
-        fetchIntCompetitions(confedId).catch((err) => {
-          console.error('Failed to fetch international competitions:', err);
-          return [];
-        }),
-      ]);
-
+      const continents = await fetchContinents();
       const continentsList: ConfederationItem[] = Array.isArray(continents)
         ? continents
         : Array.isArray((continents as any)?.content)
           ? (continents as any).content
-          : [];
-      const nationsList: NationItem[] = Array.isArray(nationsData)
-        ? nationsData
-        : Array.isArray((nationsData as any)?.content)
-          ? (nationsData as any).content
-          : [];
-      const intCompsList: CompetitionItem[] = Array.isArray(intCompsData)
-        ? intCompsData
-        : Array.isArray((intCompsData as any)?.content)
-          ? (intCompsData as any).content
           : [];
 
       const found = continentsList.find((c) => String(c.id) === String(confedId));
@@ -106,51 +82,80 @@ function ConfederationDetailContent() {
           alt: found.name,
           isFlag: false,
         });
-      }
-      setNations(nationsList);
-      setIntComps(intCompsList);
-      if (!searchParams.get('tab')) {
-        if (nationsList.length === 0 && intCompsList.length > 0) {
-          setActiveTab('INT_COMPETITIONS');
-        } else if (intCompsList.length === 0 && nationsList.length > 0) {
-          setActiveTab('NATIONS');
-        }
+        if (found.totalNations !== undefined) setTotalNationsRecords(found.totalNations);
+        if (found.totalIntComps !== undefined) setTotalIntCompsRecords(found.totalIntComps);
       }
     } catch (err: any) {
-      console.error(err);
-      message.error(err.message || 'Failed to load confederation details');
-    } finally {
-      setLoading(false);
+      console.error('Failed to load confederation info:', err);
     }
   }, [confedId, setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo]);
 
+  // Load tab records with server pagination & API keyword search
+  const loadTabData = useCallback(
+    async (tab: 'NATIONS' | 'INT_COMPETITIONS', page = 1, keyword = '', size = 20) => {
+      if (!confedId) return;
+      setTabLoading(true);
+      try {
+        const query = { page: page - 1, size, keyword };
+        if (tab === 'NATIONS') {
+          const data = await fetchNationsByContinent(confedId, query);
+          const list = Array.isArray(data) ? data : (data as any)?.content || [];
+          setNations(list);
+          const total = Number((data as any)?.totalElements ?? (data as any)?.total ?? list.length);
+          setTotalNationsRecords(total);
+        } else {
+          const data = await fetchIntCompetitions(confedId, query);
+          const list = Array.isArray(data) ? data : (data as any)?.content || [];
+          setIntComps(list);
+          const total = Number((data as any)?.totalElements ?? (data as any)?.total ?? list.length);
+          setTotalIntCompsRecords(total);
+        }
+      } catch (err: any) {
+        console.error('Failed to load confederation tab data:', err);
+        message.error(err.message || 'Failed to load records');
+      } finally {
+        setTabLoading(false);
+        setLoading(false);
+      }
+    },
+    [confedId],
+  );
+
   useEffect(() => {
-    loadData();
+    loadConfedInfo();
+    loadTabData(activeTab, 1, '', pageSize);
     return () => {
       setBreadcrumbs([]);
       setBackHref(null);
       setHeaderLogo(null);
       setHeaderId(undefined);
     };
-  }, [loadData, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
+  }, [loadConfedInfo, loadTabData, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
 
-  // Client-side filter for nations
-  const filteredNations = useMemo(() => {
-    return nations
-      .filter((n) => matchRecordSearch(n, tableFilter))
-      .sort((a, b) =>
-        (a.long_name || a.short_name || '').localeCompare(
-          b.long_name || b.short_name || '',
-          undefined,
-          { numeric: true, sensitivity: 'base' },
-        ),
-      );
-  }, [nations, tableFilter]);
+  const handlePageChange = (newPage: number, newPageSize?: number) => {
+    const effSize = newPageSize && newPageSize !== pageSize ? newPageSize : pageSize;
+    if (newPageSize && newPageSize !== pageSize) {
+      setPageSize(newPageSize);
+    }
+    setCurrentPage(newPage);
+    loadTabData(activeTab, newPage, searchKeyword, effSize);
+  };
 
-  // Client-side filter for international competitions
-  const filteredIntComps = useMemo(() => {
-    return intComps.filter((c) => matchRecordSearch(c, tableFilter));
-  }, [intComps, tableFilter]);
+  const handleSearchSubmit = () => {
+    const kw = searchInput.trim();
+    setSearchKeyword(kw);
+    setCurrentPage(1);
+    loadTabData(activeTab, 1, kw, pageSize);
+  };
+
+  const handleSwitchTab = (key: string) => {
+    const tabKey = key as 'NATIONS' | 'INT_COMPETITIONS';
+    setActiveTab(tabKey);
+    setSearchInput('');
+    setSearchKeyword('');
+    setCurrentPage(1);
+    loadTabData(tabKey, 1, '', pageSize);
+  };
 
   const handleNavigate = (step: any) => {
     if (step.level === 'NATION_HUB' || step.level === 'NATIONS' || step.type === 'nation') {
@@ -163,6 +168,18 @@ function ConfederationDetailContent() {
       router.push(`/comp/${step.id}`);
     }
   };
+
+  const currentTotal = activeTab === 'NATIONS' ? totalNationsRecords : totalIntCompsRecords;
+
+  const serverPagination = {
+    current: currentPage,
+    pageSize,
+    total: currentTotal,
+    onChange: handlePageChange,
+  };
+
+  const nationsCount = confederation?.totalNations ?? totalNationsRecords;
+  const compsCount = confederation?.totalIntComps ?? totalIntCompsRecords;
 
   return (
     <div>
@@ -178,15 +195,10 @@ function ConfederationDetailContent() {
             {/* Tabs: Countries vs International Competitions */}
             <Tabs
               activeKey={activeTab}
-              onChange={(key) => {
-                setTableFilter('');
-                setActiveTab(key as any);
-              }}
+              onChange={handleSwitchTab}
               type="line"
               items={(() => {
                 const list: any[] = [];
-                const nationsCount = nations.length;
-                const compsCount = intComps.filter((c) => !c.parent_id).length;
 
                 if (nationsCount > 0) {
                   list.push({
@@ -256,21 +268,37 @@ function ConfederationDetailContent() {
             {activeTab === 'NATIONS' && (
               <div>
                 <div className="flex justify-end mb-4">
-                  <Input
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                    placeholder="Filter countries..."
-                    value={tableFilter}
-                    onChange={(e) => setTableFilter(e.target.value)}
-                    allowClear
-                    className="w-full sm:w-64"
-                  />
+                  <Space.Compact className="w-full sm:w-64">
+                    <Input
+                      placeholder="Search countries..."
+                      value={searchInput}
+                      onChange={(e) => {
+                        setSearchInput(e.target.value);
+                        if (e.target.value === '' && searchKeyword !== '') {
+                          setSearchKeyword('');
+                          setCurrentPage(1);
+                          loadTabData('NATIONS', 1, '', pageSize);
+                        }
+                      }}
+                      onPressEnter={handleSearchSubmit}
+                      allowClear
+                    />
+                    <Button
+                      type="primary"
+                      icon={<SearchOutlined />}
+                      onClick={handleSearchSubmit}
+                      title="Search"
+                      className="shrink-0 bg-blue-600"
+                    />
+                  </Space.Compact>
                 </div>
 
                 <CardGrid
-                  items={filteredNations}
+                  items={nations}
                   type={EntityType.NATION}
-                  columns={5}
-                  loading={loading}
+                  cardSize="small"
+                  loading={tabLoading}
+                  serverPagination={serverPagination}
                   onNavigate={handleNavigate}
                   emptyText="No countries found"
                   defaultPageSize={20}
@@ -282,25 +310,41 @@ function ConfederationDetailContent() {
             {activeTab === 'INT_COMPETITIONS' && (
               <div>
                 <CompetitionGroupView
-                  items={filteredIntComps}
-                  loading={loading}
+                  items={intComps}
+                  loading={tabLoading}
                   onNavigate={handleNavigate}
-                  onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec)}
+                  onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec, undefined, confedId)}
                   emptyText="No international competitions found"
+                  serverPagination={serverPagination}
                   extraRight={
                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                      <Input
-                        prefix={<SearchOutlined className="text-gray-400" />}
-                        placeholder="Filter competitions..."
-                        value={tableFilter}
-                        onChange={(e) => setTableFilter(e.target.value)}
-                        allowClear
-                        className="flex-1 sm:w-64"
-                      />
+                      <Space.Compact className="flex-1 sm:w-64">
+                        <Input
+                          placeholder="Search competitions..."
+                          value={searchInput}
+                          onChange={(e) => {
+                            setSearchInput(e.target.value);
+                            if (e.target.value === '' && searchKeyword !== '') {
+                              setSearchKeyword('');
+                              setCurrentPage(1);
+                              loadTabData('INT_COMPETITIONS', 1, '', pageSize);
+                            }
+                          }}
+                          onPressEnter={handleSearchSubmit}
+                          allowClear
+                        />
+                        <Button
+                          type="primary"
+                          icon={<SearchOutlined />}
+                          onClick={handleSearchSubmit}
+                          title="Search"
+                          className="shrink-0 bg-blue-600"
+                        />
+                      </Space.Compact>
                       <Button
                         type="primary"
                         icon={<PlusOutlined />}
-                        onClick={() => openRecordModal(RecordType.COMPETITION, null)}
+                        onClick={() => openRecordModal(RecordType.COMPETITION, null, undefined, confedId)}
                         style={{ backgroundColor: '#059669', borderColor: '#059669' }}
                         className="shrink-0"
                         title="Add International Competition"

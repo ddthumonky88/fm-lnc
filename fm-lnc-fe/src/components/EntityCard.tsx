@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag, Button, Tooltip, Popconfirm, message } from 'antd';
+import { Tag, Button, Tooltip, Popconfirm, App } from 'antd';
 import {
   SafetyOutlined,
   EditOutlined,
@@ -10,14 +10,14 @@ import {
   UserOutlined,
   FlagOutlined,
   EyeOutlined,
-  InfoCircleOutlined,
-  ApartmentOutlined,
+  BranchesOutlined,
   CopyOutlined,
   CheckOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
-import { getConfederationLogoUrl, getNationLogoUrl } from '../services/api';
+import { getConfederationLogoUrl, getFifaFlagUrl } from '../services/api';
 import RecordDetailModal from './RecordDetailModal';
 import {
   NationIcon,
@@ -31,9 +31,23 @@ import {
 
 export { EntityType };
 
-interface EntityCardProps {
+export interface EntityCardField {
+  label: React.ReactNode;
+  value: React.ReactNode;
+  isInactive?: boolean;
+  isRed?: boolean;
+  lineClamp?: number;
+  align?: 'start' | 'baseline' | 'center';
+  title?: string;
+}
+
+export interface EntityCardProps {
   type: EntityType | string;
   data: any;
+  values?: EntityCardField[];
+  cardSize?: 'small' | 'large';
+  largeStyle?: '1-line' | '2-line';
+  cardStyle?: '1-line' | '2-line';
   onNavigate?: (step: any) => void;
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
@@ -57,20 +71,20 @@ export function formatCategoryCode(categoryStr?: string | null): string {
   const trimmed = categoryStr.trim();
   if (!trimmed) return '';
 
-  const upper = trimmed.toUpperCase();
+  const upper = trimmed.toUpperCase().replace(/^\[/, '').replace(/\]$/, '');
   if (
-    upper === '[CUP]' ||
-    upper === '[YTH]' ||
-    upper === '[OTH]' ||
-    /^\[L\d+\]$/.test(upper) ||
-    upper === '[L]'
+    upper === 'CUP' ||
+    upper === 'YTH' ||
+    upper === 'OTH' ||
+    /^L\d+$/.test(upper) ||
+    upper === 'L'
   ) {
     return upper;
   }
 
   const lower = trimmed.toLowerCase();
 
-  // 1. Youth => [YTH]
+  // 1. Youth => YTH
   if (
     lower.includes('youth') ||
     lower.includes('u21') ||
@@ -78,15 +92,15 @@ export function formatCategoryCode(categoryStr?: string | null): string {
     lower.includes('u18') ||
     lower.includes('u23')
   ) {
-    return '[YTH]';
+    return 'YTH';
   }
 
-  // 2. Cup => [CUP]
+  // 2. Cup => CUP
   if (lower.includes('cup')) {
-    return '[CUP]';
+    return 'CUP';
   }
 
-  // 3. League (n) => [Ln]
+  // 3. League (n) => Ln
   const leagueMatch =
     trimmed.match(/league\s*\(\s*(\d+)\s*\)/i) ||
     trimmed.match(/\((\d+)\)/) ||
@@ -95,7 +109,7 @@ export function formatCategoryCode(categoryStr?: string | null): string {
     trimmed.match(/division\s*(\d+)/i);
 
   if (leagueMatch) {
-    return `[L${leagueMatch[1]}]`;
+    return `L${leagueMatch[1]}`;
   }
 
   if (
@@ -104,11 +118,11 @@ export function formatCategoryCode(categoryStr?: string | null): string {
     lower.includes('tier') ||
     lower.includes('lower leagues')
   ) {
-    return '[L]';
+    return 'L';
   }
 
-  // 4. Other => [OTH]
-  return '[OTH]';
+  // 4. Other => OTH
+  return 'OTH';
 }
 
 export function getCategoryTagColor(
@@ -121,9 +135,9 @@ export function getCategoryTagColor(
     return 'error';
   }
   const code = formatCategoryCode(categoryStr);
-  if (code.startsWith('[L')) return 'blue';
-  if (code === '[CUP]') return 'green';
-  if (code === '[YTH]') return 'purple';
+  if (code.startsWith('L') || code.startsWith('[L')) return 'blue';
+  if (code === 'CUP' || code === '[CUP]') return 'green';
+  if (code === 'YTH' || code === '[YTH]') return 'purple';
   if (isRedFn && isRedFn(categoryStr)) return 'error';
   return 'default';
 }
@@ -149,15 +163,30 @@ const parseColorInfo = (rgbStr?: string | null) => {
 export default function EntityCard({
   type,
   data,
+  values,
+  cardSize,
+  largeStyle = '1-line',
+  cardStyle,
   onNavigate,
   onEdit,
   onDelete,
   onViewChildren,
 }: EntityCardProps) {
+  const { message } = App.useApp();
   const router = useRouter();
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
   const [idCopied, setIdCopied] = useState(false);
+
+  const entityTypeStr = String(type).toLowerCase();
+  const isSmall =
+    cardSize !== undefined
+      ? cardSize === 'small'
+      : entityTypeStr === 'nation' ||
+        entityTypeStr === 'stadium' ||
+        entityTypeStr === 'city';
+
+  const is2Line = !isSmall && (largeStyle === '2-line' || cardStyle === '2-line');
 
   const isRedKeyword = (val?: any): boolean => {
     if (!val || typeof val !== 'string') return false;
@@ -394,13 +423,23 @@ export default function EntityCard({
     if (isInfoOpen) return;
     if (!onNavigate) return;
     if (data.is_virtual) {
+      const isExtinct =
+        data.virtual_type === 'EXTINCT' ||
+        String(data.id).startsWith('ext-') ||
+        data.id === '[EXTINCT]';
+      const nId =
+        data.nation_id ||
+        (typeof data.id === 'string' && data.id.includes('-')
+          ? data.id.split('-')[1]
+          : undefined);
+      const fakeId = isExtinct ? `ext-${nId}` : `oth-${nId}`;
       onNavigate({
         level: 'INDEPENDENT_CLUBS',
-        id: data.virtual_type === 'EXTINCT' ? 'extinct' : 'other',
+        id: fakeId,
         virtualId: data.id,
-        nationId: data.nation_id,
+        nationId: nId,
         title: data.long_name || data.short_name,
-        metadata: { is_extinct: data.virtual_type === 'EXTINCT', nation_id: data.nation_id },
+        metadata: { is_extinct: isExtinct, nation_id: nId },
       });
     } else if (type === EntityType.NATION || type === 'nation') {
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
@@ -436,7 +475,7 @@ export default function EntityCard({
       if (count <= 0) return null;
 
       return (
-        <Tooltip title={`Nations: ${count}`} trigger="hover" destroyTooltipOnHide>
+        <Tooltip title={`Nations: ${count}`} trigger="hover" destroyOnHidden>
           <Button
             type="text"
             shape="circle"
@@ -456,7 +495,7 @@ export default function EntityCard({
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
 
       return (
-        <Tooltip title={`Details`} trigger="hover" destroyTooltipOnHide>
+        <Tooltip title={`Details`} trigger="hover" destroyOnHidden>
           <Button
             type="text"
             shape="circle"
@@ -494,16 +533,12 @@ export default function EntityCard({
       return (
         <div className="flex items-center gap-0.5">
           {hasChildren && (
-            <Tooltip
-              title={`Sub-Competitions (${childrenCnt})`}
-              trigger="hover"
-              destroyTooltipOnHide
-            >
+            <Tooltip title={`Sub-Competitions (${childrenCnt})`} trigger="hover" destroyOnHidden>
               <Button
                 type="text"
                 shape="circle"
                 size="small"
-                icon={<ApartmentOutlined style={{ color: '#d97706', fontSize: 13 }} />}
+                icon={<BranchesOutlined style={{ color: '#d97706', fontSize: 13 }} />}
                 onClick={(e) => {
                   e.stopPropagation();
                   (e.currentTarget as HTMLElement)?.blur();
@@ -513,7 +548,7 @@ export default function EntityCard({
             </Tooltip>
           )}
           {(hasClubs || hasAwards) && (
-            <Tooltip title={titleParts.join(' | ')} trigger="hover" destroyTooltipOnHide>
+            <Tooltip title={titleParts.join(' | ')} trigger="hover" destroyOnHidden>
               <Button
                 type="text"
                 shape="circle"
@@ -548,56 +583,85 @@ export default function EntityCard({
           }
           handleNavigateAction();
         }}
-        className={`bg-white border border-gray-200 hover:border-blue-400 rounded-lg px-3 py-2 sm:px-3.5 sm:py-2.5 shadow-sm hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
+        className={`bg-blue-50/70 hover:bg-blue-50 border border-blue-200/80 hover:border-blue-400 rounded-lg ${
+          isSmall ? 'px-2.5 py-2' : 'px-3 py-2 sm:px-3.5 sm:py-2.5'
+        } shadow-2xs hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
           isNavigable ? 'cursor-pointer' : ''
         }`}
       >
         <div>
-          {/* Top Header Bar: [flag / thẻ tên], 2 thẻ màu, [Category Tag], [Extinct Tag] */}
-          {(nationInfo ||
+          {/* Top Header Bar: [Thẻ ID], 2 thẻ màu, [Disabled Tag] */}
+          {((data.id !== undefined && data.id !== null && data.id !== '') ||
             bgInfo ||
             fgInfo ||
-            data.is_extinct ||
             data.is_disabled ||
-            data.isDisabled ||
-            (type !== 'city' && (data.type || data.categories))) && (
-            <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-gray-100 min-w-0">
+            data.isDisabled) && (
+            <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-blue-200/60 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                {/* [flag / thẻ tên] */}
-                {nationInfo && (
-                  <Tooltip
-                    title={nationInfo.name ? `${nationInfo.name} • Chi tiết` : 'Chi tiết'}
-                    trigger="hover"
-                    destroyTooltipOnHide
-                  >
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        (e.currentTarget as HTMLElement)?.blur();
-                        setModalMode('view');
-                        setIsInfoOpen(true);
-                      }}
-                      className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded text-xs text-slate-600 hover:text-sky-700 transition-all cursor-pointer"
-                      aria-label="View info"
-                    >
-                      {getNationLogoUrl(nationInfo.id, nationInfo.code) ? (
-                        <img
-                          src={getNationLogoUrl(nationInfo.id, nationInfo.code)}
-                          alt={nationInfo.name || 'Nation'}
-                          className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0 inline-block"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
+                {/* Thẻ ID chuyển lên header (thay thế thẻ flag) */}
+                {data.id !== undefined && data.id !== null && data.id !== '' && (
+                  <div onClick={(e) => e.stopPropagation()} className="flex items-center shrink-0">
+                    {isSpecialCard ? (
+                      <Tag
+                        style={{
+                          border:
+                            isRedKeyword(data.id) || isRedKeyword(data.virtual_type)
+                              ? '1px solid #f87171'
+                              : '1px solid #cbd5e1',
+                          color:
+                            isRedKeyword(data.id) || isRedKeyword(data.virtual_type)
+                              ? '#dc2626'
+                              : '#334155',
+                          backgroundColor:
+                            isRedKeyword(data.id) || isRedKeyword(data.virtual_type)
+                              ? '#fef2f2'
+                              : '#ffffff',
+                        }}
+                        className="m-0 font-mono font-bold text-xs shrink-0 select-none py-0 px-1.5 leading-tight shadow-2xs"
+                      >
+                        {String(data.id).replace(/^\[/, '').replace(/\]$/, '')}
+                      </Tag>
+                    ) : (
+                      <Tooltip
+                        title={idCopied ? 'Đã sao chép!' : 'Nhấn để copy ID'}
+                        trigger="hover"
+                        destroyOnHidden
+                      >
+                        <Tag
+                          onClick={handleCopyId}
+                          style={{
+                            border: isRedKeyword(data.id)
+                              ? '1px solid #f87171'
+                              : '1px solid #60a5fa',
+                            color: isRedKeyword(data.id) ? '#dc2626' : '#1d4ed8',
+                            backgroundColor: isRedKeyword(data.id)
+                              ? '#fef2f2'
+                              : 'rgba(239, 246, 255, 0.85)',
                           }}
-                        />
-                      ) : null}
-                      {nationInfo.code && (
-                        <span className="text-[10.5px] font-semibold text-inherit leading-none">
-                          {nationInfo.code}
-                        </span>
-                      )}
-                    </button>
-                  </Tooltip>
+                          className="m-0 font-mono font-bold text-xs hover:opacity-85 cursor-pointer select-all transition-all inline-flex items-center gap-1 shrink-0 py-0.5 px-2 leading-tight shadow-2xs"
+                          title={
+                            data.is_virtual ||
+                            data.id === '[EXTINCT]' ||
+                            data.id === '[OTHER]' ||
+                            data.id === '[REMOVE]'
+                              ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
+                                ? 'Extinct Clubs'
+                                : data.id === '[REMOVE]' || data.virtual_type === 'REMOVE'
+                                  ? 'Removed Records'
+                                  : 'Other Clubs (Unassigned)'
+                              : undefined
+                          }
+                        >
+                          <span>{String(data.id).replace(/^\[/, '').replace(/\]$/, '')}</span>
+                          {idCopied ? (
+                            <CheckOutlined className="text-emerald-500 text-[10px]" />
+                          ) : (
+                            <CopyOutlined className="text-[10px] text-blue-500 hover:text-blue-700" />
+                          )}
+                        </Tag>
+                      </Tooltip>
+                    )}
+                  </div>
                 )}
 
                 {/* 2 thẻ màu */}
@@ -617,7 +681,7 @@ export default function EntityCard({
                         }
                       >
                         <span
-                          className="inline-block w-3.5 h-3.5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
+                          className="inline-block w-5 h-5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
                           style={{
                             backgroundColor: bgInfo.css,
                           }}
@@ -635,7 +699,7 @@ export default function EntityCard({
                         }
                       >
                         <span
-                          className="inline-block w-3.5 h-3.5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
+                          className="inline-block w-5 h-5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
                           style={{
                             backgroundColor: fgInfo.css,
                           }}
@@ -647,482 +711,350 @@ export default function EntityCard({
               </div>
 
               <div className="flex items-center gap-1.5 ml-auto shrink-0 min-w-0">
-                {type !== 'city' && type !== 'stadium' && (data.type || data.categories) && (
-                  <Tooltip
-                    title={data.type || data.categories}
-                    trigger="hover"
-                    destroyTooltipOnHide
-                  >
-                    <Tag
-                      color={getCategoryTagColor(data.type || data.categories, isRedKeyword)}
-                      className="m-0 text-[10px] sm:text-[10.5px] font-semibold shrink-0 py-0 px-1.5 leading-tight font-mono cursor-default"
-                    >
-                      {formatCategoryCode(data.type || data.categories)}
-                    </Tag>
-                  </Tooltip>
-                )}
-
-                {(type === 'stadium' || type === EntityType.STADIUM) && (
+                {(data.is_disabled || data.isDisabled) && (
                   <Tag
-                    color={data.type === 'training pitch' ? 'cyan' : 'emerald'}
-                    className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1.5 leading-tight"
+                    style={{
+                      border: '1px solid #f87171',
+                      color: '#dc2626',
+                      backgroundColor: '#fef2f2',
+                    }}
+                    className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight shadow-2xs"
                   >
-                    {data.type === 'training pitch' ? 'Training Pitch' : 'Stadium'}
+                    Disabled
                   </Tag>
                 )}
-
-                {data.is_extinct && (
-                  <Tag
-                    color="red"
-                    className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight"
-                  >
-                    Extinct
-                  </Tag>
-                )}
-
-                {(type === 'city' ||
-                  type === 'stadium' ||
-                  type === EntityType.CITY ||
-                  type === EntityType.STADIUM) &&
-                  (data.is_disabled || data.isDisabled) && (
-                    <Tag
-                      color="red"
-                      className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight"
-                    >
-                      Disabled
-                    </Tag>
-                  )}
               </div>
             </div>
           )}
 
-          {/* Fields List formatted as [label]: on line 1, [value] on line 2 on mobile; inline on desktop */}
+          {/* Fields List formatted as [label]: [value] (1:3 ratio) with support for custom values or type-based defaults */}
           {(() => {
-            const isPlayer = type === 'player' || type === EntityType.PLAYER;
-            const isCityOrStadium =
-              type === 'city' ||
-              type === EntityType.CITY ||
-              type === 'stadium' ||
-              type === EntityType.STADIUM;
+            // Determine default fields list based on entity type and data
+            const getDefaultFields = (): EntityCardField[] => {
+              const fields: EntityCardField[] = [];
+              const entityTypeStr = String(type).toLowerCase();
 
-            const hasId = data.id !== undefined && data.id !== null && data.id !== '';
+              // Specific Entity Type Fields
+              if (entityTypeStr === 'player') {
+                fields.push({
+                  label: 'FN:',
+                  value: data.first_name || '-',
+                });
+                fields.push({
+                  label: 'SN:',
+                  value: data.second_name || '-',
+                });
+                if (data.common_name) {
+                  fields.push({
+                    label: 'CN:',
+                    value: (
+                      <span className="font-bold text-xs sm:text-[13px] leading-snug truncate text-gray-700 italic min-w-0 block">
+                        {data.common_name}
+                      </span>
+                    ),
+                  });
+                }
+              } else if (entityTypeStr === 'city') {
+                fields.push({
+                  label: 'Name:',
+                  value: title,
+                  align: 'start',
+                  lineClamp: 3,
+                  isInactive: isInactive('name') || isInactive('long_name') || isTitleInactive,
+                  isRed: isRedKeyword(title),
+                });
+                const regionVal = data.region || data.categories;
+                if (regionVal) {
+                  fields.push({
+                    label: 'Region:',
+                    value: regionVal,
+                    align: 'start',
+                    lineClamp: 2,
+                    isInactive: isInactive('categories') || isInactive('region'),
+                    isRed: isRedKeyword(regionVal),
+                  });
+                }
+              } else if (entityTypeStr === 'stadium') {
+                fields.push({
+                  label: 'Name:',
+                  value: title,
+                  align: 'start',
+                  lineClamp: 3,
+                  isInactive: isInactive('name') || isInactive('long_name') || isTitleInactive,
+                  isRed: isRedKeyword(title),
+                });
+              } else if (entityTypeStr === 'club') {
+                fields.push({
+                  label: 'LN:',
+                  value: data.is_virtual ? '-' : data.long_name || title,
+                  align: 'start',
+                  lineClamp: 2,
+                  isInactive: isInactive('long_name') || isInactive('name') || isTitleInactive,
+                  isRed: isRedKeyword(data.long_name || title),
+                });
 
-            {
-              /* Reusable ID field row for middle/top of card body */
-            }
-            const renderIdRow = (customLabelWidth?: string) => {
-              if (!hasId) {
-                return null;
-              }
-              const lblWidth = customLabelWidth || 'sm:w-8';
-              return (
-                <div className="sm:flex sm:items-center sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                  <span
-                    className={`text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline ${lblWidth} sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none`}
-                  >
-                    ID:
-                  </span>
-                  <div className="flex sm:inline-flex items-center gap-1.5 min-w-0">
-                    {/* Nút info cạnh ID text - KHÔNG hiển thị cho card [OTHER], [EXTINCT], [REMOVE] */}
-                    {!isSpecialCard && (
-                      <Tooltip title="Chi tiết" trigger="hover" destroyTooltipOnHide>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            (e.currentTarget as HTMLElement)?.blur();
-                            setModalMode('view');
-                            setIsInfoOpen(true);
-                          }}
-                          className="w-4 h-4 rounded-full flex items-center justify-center text-sky-500 hover:text-sky-600 hover:bg-sky-50 transition-colors cursor-pointer shrink-0"
-                          aria-label="Chi tiết"
-                        >
-                          <InfoCircleOutlined className="text-[11.5px]" />
-                        </button>
-                      </Tooltip>
-                    )}
+                if (hasThreeLetter || data.short_name || data.is_virtual) {
+                  fields.push({
+                    label: 'SN:',
+                    value: data.is_virtual ? '-' : data.short_name || title,
+                    align: 'start',
+                    lineClamp: 2,
+                    isInactive: isInactive('short_name'),
+                    isRed: isRedKeyword(data.short_name || title),
+                  });
+                }
 
-                    {/* ID text: Với [OTHER], [EXTINCT], [REMOVE] thì KHÔNG copy, chỉ hiển thị text thường màu đỏ */}
-                    {isSpecialCard ? (
-                      <span
-                        className={`font-mono font-bold text-xs sm:text-[13px] shrink-0 select-none ${
-                          isRedKeyword(data.id) || isRedKeyword(data.virtual_type)
-                            ? 'text-red-600'
-                            : 'text-gray-700'
-                        }`}
-                      >
-                        {data.id}
-                      </span>
-                    ) : (
-                      <Tooltip
-                        title={idCopied ? 'Đã sao chép!' : 'Nhấn để copy ID'}
-                        trigger="hover"
-                        destroyTooltipOnHide
-                      >
-                        <span
-                          onClick={handleCopyId}
-                          className={`font-mono font-bold text-xs sm:text-[13px] hover:text-blue-600 cursor-pointer select-all transition-colors inline-flex items-center gap-1 group/id shrink-0 ${
-                            isRedKeyword(data.id) ? 'text-red-600' : 'text-gray-800'
-                          }`}
-                          title={
-                            data.is_virtual ||
-                            data.id === '[EXTINCT]' ||
-                            data.id === '[OTHER]' ||
-                            data.id === '[REMOVE]'
-                              ? data.virtual_type === 'EXTINCT' || data.id === '[EXTINCT]'
-                                ? 'Extinct Clubs'
-                                : data.id === '[REMOVE]' || data.virtual_type === 'REMOVE'
-                                  ? 'Removed Records'
-                                  : 'Other Clubs (Unassigned)'
-                              : undefined
-                          }
-                        >
-                          <span>{data.id}</span>
-                          {idCopied ? (
-                            <CheckOutlined className="text-emerald-500 text-[10px]" />
-                          ) : (
-                            <CopyOutlined className="text-gray-400 group-hover/id:text-blue-500 opacity-0 group-hover/id:opacity-100 transition-opacity text-[10px]" />
-                          )}
-                        </span>
-                      </Tooltip>
-                    )}
-                  </div>
-                </div>
-              );
-            };
+                fields.push({
+                  label: '6N:',
+                  value: code6 || '-',
+                  isInactive: isInactive('six_letter_name'),
+                });
 
-            return (
-              /* Fields List formatted as [label]: \n [value] on mobile; [label]: [value] inline on desktop */
-              <div className="space-y-1.5 sm:space-y-1 mb-1 text-xs">
-                {isPlayer ? (
-                  <>
-                    {/* Trường ID ở dòng đầu tiên của nội dung */}
-                    {renderIdRow()}
+                fields.push({
+                  label: '3N:',
+                  value: data.is_virtual ? '-' : code3 || '-',
+                  isInactive: isInactive('three_letter_name'),
+                });
 
-                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
-                        FN:
-                      </span>
-                      <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline text-gray-800">
-                        {data.first_name || '-'}
-                      </span>
-                    </div>
-                    <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                      <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
-                        SN:
-                      </span>
-                      <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline text-gray-800">
-                        {data.second_name || '-'}
-                      </span>
-                    </div>
-                    {data.common_name && (
-                      <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                        <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
-                          CN:
-                        </span>
-                        <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate text-gray-700 italic block sm:inline">
-                          {data.common_name}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                ) : isCityOrStadium ? (
-                  <>
-                    {/* Trường ID ở dòng đầu tiên của nội dung */}
-                    {renderIdRow('sm:w-10 sm:w-12')}
+                // Comp
+                const compObj = data.comp || data.competition;
+                const compNameSh =
+                  compObj?.name_sh ||
+                  compObj?.short_name ||
+                  data.comp_name ||
+                  data.competition_name;
+                const compValue = data.is_extinct ? 'EXT' : compNameSh || '-';
+                const isExt = data.is_extinct || compValue === 'EXT';
 
-                    <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                      <span
-                        className={`text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
-                          isInactive('name') || isInactive('long_name')
-                            ? 'text-red-600 font-normal'
-                            : 'text-gray-400 font-medium'
-                        }`}
-                      >
-                        Name:
-                      </span>
-                      <span
-                        className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-3 break-words block sm:inline ${
-                          isInactive('name') ||
-                          isInactive('long_name') ||
-                          isTitleInactive ||
-                          isRedKeyword(title)
-                            ? 'text-red-600'
+                fields.push({
+                  label: 'Comp:',
+                  value: (
+                    <span
+                      className={`font-bold text-xs sm:text-[13px] leading-snug truncate min-w-0 block ${
+                        isExt
+                          ? 'text-red-600'
+                          : compValue === '-'
+                            ? 'text-gray-400 font-normal'
                             : 'text-gray-800'
-                        }`}
-                        style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          wordBreak: 'break-word',
-                        }}
-                        title={title}
-                      >
-                        {title}
-                      </span>
-                    </div>
-                    {data.categories && (
-                      <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1.5 sm:mt-1">
-                        <span
-                          className={`text-[10.5px] sm:text-xs block sm:inline sm:w-10 sm:w-12 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
-                            isInactive('categories')
-                              ? 'text-red-600 font-normal'
-                              : 'text-gray-400 font-medium'
-                          }`}
-                        >
-                          Region:
-                        </span>
-                        <span
-                          className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-2 break-words block sm:inline ${
-                            isInactive('categories') || isRedKeyword(data.categories)
-                              ? 'text-red-600'
-                              : 'text-gray-800'
-                          }`}
-                          style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            wordBreak: 'break-word',
-                          }}
-                          title={data.categories}
-                        >
-                          {data.categories}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {/* Trường ID ở dòng đầu tiên của nội dung (nằm trên LN) */}
-                    {renderIdRow()}
-
-                    {/* LN */}
-                    <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                      <span
-                        className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
-                          isInactive('long_name') || isInactive('name')
-                            ? 'text-red-600 font-normal'
-                            : 'text-gray-400 font-medium'
-                        }`}
-                      >
-                        LN:
-                      </span>
-                      <span
-                        className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-3 break-words block sm:inline ${
-                          isInactive('long_name') ||
-                          isInactive('name') ||
-                          isTitleInactive ||
-                          isRedKeyword(data.long_name || title)
-                            ? 'text-red-600'
-                            : 'text-gray-800'
-                        }`}
-                        style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          wordBreak: 'break-word',
-                        }}
-                        title={data.is_virtual ? '-' : data.long_name || title}
-                      >
-                        {data.is_virtual ? '-' : data.long_name || title}
-                      </span>
-                    </div>
-
-                    {/* SN */}
-                    {(hasThreeLetter || data.short_name || data.is_virtual) && (
-                      <div className="sm:flex sm:items-start sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                        <span
-                          className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 pt-0.5 leading-none ${
-                            isInactive('short_name')
-                              ? 'text-red-600 font-normal'
-                              : 'text-gray-400 font-medium'
-                          }`}
-                        >
-                          SN:
-                        </span>
-                        <span
-                          className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] line-clamp-3 break-words block sm:inline ${
-                            isInactive('short_name') || isRedKeyword(data.short_name || title)
-                              ? 'text-red-600'
-                              : 'text-gray-800'
-                          }`}
-                          style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            wordBreak: 'break-word',
-                          }}
-                          title={data.is_virtual ? '-' : data.short_name || title}
-                        >
-                          {data.is_virtual ? '-' : data.short_name || title}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* 6N */}
-                    {(type === 'club' || type === EntityType.CLUB || data.six_letter_name) && (
-                      <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                        <span
-                          className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none ${
-                            isInactive('six_letter_name')
-                              ? 'text-red-600 font-normal'
-                              : 'text-gray-400 font-medium'
-                          }`}
-                        >
-                          6N:
-                        </span>
-                        <span
-                          className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
-                            isInactive('six_letter_name') ? 'text-red-600' : 'text-gray-800'
-                          }`}
-                        >
-                          {code6 || '-'}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* 3N */}
-                    {(hasThreeLetter || data.three_letter_name || data.is_virtual) && (
-                      <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                        <span
-                          className={`text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none ${
-                            isInactive('three_letter_name')
-                              ? 'text-red-600 font-normal'
-                              : 'text-gray-400 font-medium'
-                          }`}
-                        >
-                          3N:
-                        </span>
-                        <span
-                          className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
-                            isInactive('three_letter_name') ? 'text-red-600' : 'text-gray-800'
-                          }`}
-                        >
-                          {data.is_virtual ? '-' : code3 || '-'}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Comp for Club */}
-                    {(type === 'club' || type === EntityType.CLUB) &&
-                      (() => {
-                        const compObj = data.comp || data.competition;
-                        const compNameSh =
-                          compObj?.name_sh ||
-                          compObj?.short_name ||
-                          data.comp_name ||
-                          data.competition_name;
-                        const compValue = data.is_extinct ? 'EXT' : compNameSh || '-';
-                        const isExt = data.is_extinct || compValue === 'EXT';
-
-                        return (
-                          <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                            <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
-                              Comp:
-                            </span>
-                            <span
-                              className={`font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline ${
-                                isExt
-                                  ? 'text-red-600'
-                                  : compValue === '-'
-                                    ? 'text-gray-400 font-normal'
-                                    : 'text-gray-800'
-                              }`}
-                              title={compObj?.name_lg || compObj?.long_name || compValue}
-                            >
-                              {compValue}
-                            </span>
-                          </div>
-                        );
-                      })()}
-
-                    {/* Stage Type */}
-                    {(type === 'stage' || type === EntityType.STAGE) && (
-                      <div className="sm:flex sm:items-baseline sm:gap-1.5 min-w-0 mt-1 sm:mt-0">
-                        <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
-                          Type:
-                        </span>
-                        <span className="font-bold text-xs sm:text-[13px] leading-snug sm:leading-5 truncate block sm:inline text-gray-800">
-                          Tournament Stage
-                        </span>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Note */}
-                {data.note && (
-                  <div className="sm:flex sm:items-baseline sm:gap-1.5 text-[11px] sm:text-xs text-gray-500 min-w-0 mt-1 sm:mt-0">
-                    <span className="text-gray-400 font-medium text-[10.5px] sm:text-xs block sm:inline sm:w-8 sm:shrink-0 select-none mb-0.5 sm:mb-0 leading-none">
-                      Note:
+                      }`}
+                      title={compObj?.name_lg || compObj?.long_name || compValue}
+                    >
+                      {compValue}
                     </span>
-                    <span className="truncate text-gray-600 block sm:inline" title={data.note}>
+                  ),
+                });
+              } else if (entityTypeStr === 'stage') {
+                fields.push({
+                  label: 'Name:',
+                  value: data.name || title,
+                  align: 'start',
+                  lineClamp: 2,
+                  isInactive: isInactive('name'),
+                  isRed: isRedKeyword(data.name || title),
+                });
+                fields.push({
+                  label: 'Type:',
+                  value: 'Tournament Stage',
+                });
+              } else {
+                // Default: Competition, Nation, Award, Confederation, etc.
+                fields.push({
+                  label: 'LN:',
+                  value: data.is_virtual ? '-' : data.long_name || title,
+                  align: 'start',
+                  lineClamp: 2,
+                  isInactive: isInactive('long_name') || isInactive('name') || isTitleInactive,
+                  isRed: isRedKeyword(data.long_name || title),
+                });
+
+                if (hasThreeLetter || data.short_name || data.is_virtual) {
+                  fields.push({
+                    label: 'SN:',
+                    value: data.is_virtual ? '-' : data.short_name || title,
+                    align: 'start',
+                    lineClamp: 2,
+                    isInactive: isInactive('short_name'),
+                    isRed: isRedKeyword(data.short_name || title),
+                  });
+                }
+
+                if (
+                  entityTypeStr !== 'award' &&
+                  (hasThreeLetter || data.three_letter_name || data.is_virtual)
+                ) {
+                  fields.push({
+                    label: '3N:',
+                    value: data.is_virtual ? '-' : code3 || '-',
+                    isInactive: isInactive('three_letter_name'),
+                  });
+                }
+              }
+
+              // Note field if exists
+              if (data.note) {
+                fields.push({
+                  label: 'Note:',
+                  align: 'start',
+                  value: (
+                    <span className="truncate text-gray-600 italic min-w-0 block" title={data.note}>
                       {data.note}
                     </span>
-                  </div>
-                )}
+                  ),
+                });
+              }
+
+              return fields;
+            };
+
+            const renderedFields: EntityCardField[] = values || getDefaultFields();
+            const bodyHeightClass = isSmall
+              ? 'h-[140px]'
+              : is2Line
+                ? entityTypeStr === 'club'
+                  ? 'h-[175px]'
+                  : entityTypeStr === 'player'
+                    ? 'h-[110px]'
+                    : 'h-[145px]'
+                : entityTypeStr === 'club'
+                  ? 'h-[135px]'
+                  : entityTypeStr === 'player'
+                    ? 'h-[75px]'
+                    : 'h-[95px]';
+
+            return (
+              /* Fields List: Small card and Large card (2-line) stack label and value; Large card (1-line) uses 1:4 ratio */
+              <div
+                className={`space-y-1 mb-1 text-xs ${bodyHeightClass} overflow-hidden flex flex-col justify-start`}
+              >
+                {renderedFields.map((field, idx) => {
+                  const isNode = React.isValidElement(field.value);
+
+                  // 2 Line layout (Small card OR Large card with 2-line style)
+                  if (isSmall || is2Line) {
+                    return (
+                      <div key={idx} className="flex flex-col gap-0.5 min-w-0">
+                        <span
+                          className={`text-[10px] sm:text-[10.5px] select-none leading-none whitespace-nowrap uppercase tracking-wider block ${
+                            field.isInactive
+                              ? 'text-red-600 font-semibold'
+                              : 'text-gray-400 font-medium'
+                          }`}
+                        >
+                          {field.label}
+                        </span>
+                        <div className="min-w-0">
+                          {isNode ? (
+                            field.value
+                          ) : (
+                            <span
+                              className={`font-bold text-xs leading-[16px] break-words min-w-0 block ${
+                                field.lineClamp ? `line-clamp-${field.lineClamp}` : 'truncate'
+                              } ${
+                                field.isInactive || field.isRed ? 'text-red-600' : 'text-gray-800'
+                              }`}
+                              style={
+                                field.lineClamp
+                                  ? {
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: field.lineClamp,
+                                      WebkitBoxOrient: 'vertical',
+                                      overflow: 'hidden',
+                                      wordBreak: 'break-word',
+                                    }
+                                  : undefined
+                              }
+                              title={
+                                field.title ||
+                                (typeof field.value === 'string' ? field.value : undefined)
+                              }
+                            >
+                              {field.value}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Large Card: 1:4 ratio (grid-cols-5: label 1 col, value 4 cols)
+                  return (
+                    <div
+                      key={idx}
+                      className={`grid grid-cols-5 gap-1.5 min-w-0 ${
+                        field.align === 'start'
+                          ? 'items-start'
+                          : field.align === 'center'
+                            ? 'items-center'
+                            : 'items-baseline'
+                      }`}
+                    >
+                      <span
+                        className={`col-span-1 text-xs select-none leading-none whitespace-nowrap ${
+                          field.isInactive
+                            ? 'text-red-600 font-normal'
+                            : 'text-gray-400 font-medium'
+                        } ${field.align === 'start' ? 'pt-0.5' : ''}`}
+                      >
+                        {field.label}
+                      </span>
+                      <div className="col-span-4 min-w-0">
+                        {isNode ? (
+                          field.value
+                        ) : (
+                          <span
+                            className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] break-words min-w-0 block ${
+                              field.lineClamp ? `line-clamp-${field.lineClamp}` : 'truncate'
+                            } ${
+                              field.isInactive || field.isRed ? 'text-red-600' : 'text-gray-800'
+                            }`}
+                            style={
+                              field.lineClamp
+                                ? {
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: field.lineClamp,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    wordBreak: 'break-word',
+                                  }
+                                : undefined
+                            }
+                            title={
+                              field.title ||
+                              (typeof field.value === 'string' ? field.value : undefined)
+                            }
+                          >
+                            {field.value}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             );
           })()}
         </div>
 
-        {/* Card Footer: Action Buttons (Eye, Edit, Delete) */}
-        {(Boolean(renderChildButtons()) || canEdit || canDelete) && (
-          <div className="pt-1 mt-auto border-t border-gray-100 flex items-center justify-end gap-0.5">
+        {/* Card Footer: Action Buttons (Eye, Info) */}
+        {(Boolean(renderChildButtons()) || !isSpecialCard) && (
+          <div className="pt-1 mt-auto border-t border-blue-200/60 flex items-center justify-end gap-1">
             {renderChildButtons()}
 
-            {(canEdit || canDelete) && (
-              <div className="flex items-center gap-0.5 shrink-0">
-                {canEdit && (
-                  <Tooltip
-                    title="Edit"
-                    trigger="hover"
-                    destroyTooltipOnHide
-                    open={isInfoOpen ? false : undefined}
-                  >
-                    <Button
-                      type="text"
-                      shape="circle"
-                      size="small"
-                      icon={<EditOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        (e.currentTarget as HTMLElement)?.blur();
-                        setModalMode('edit');
-                        setIsInfoOpen(true);
-                      }}
-                    />
-                  </Tooltip>
-                )}
-                {canDelete && (
-                  <Popconfirm
-                    title="Delete Record"
-                    description={`Are you sure you want to delete "${title}"?`}
-                    onConfirm={() => onDelete(data)}
-                    okText="Delete"
-                    cancelText="Cancel"
-                    okButtonProps={{ danger: true }}
-                  >
-                    <Tooltip title="Delete" trigger="hover" destroyTooltipOnHide>
-                      <Button
-                        type="text"
-                        shape="circle"
-                        size="small"
-                        danger
-                        icon={<DeleteOutlined style={{ fontSize: 13 }} />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          (e.currentTarget as HTMLElement)?.blur();
-                        }}
-                      />
-                    </Tooltip>
-                  </Popconfirm>
-                )}
-              </div>
+            {!isSpecialCard && (
+              <Tooltip title="Chi tiết" trigger="hover" destroyOnHidden>
+                <Button
+                  type="text"
+                  shape="circle"
+                  size="small"
+                  icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    (e.currentTarget as HTMLElement)?.blur();
+                    setModalMode('view');
+                    setIsInfoOpen(true);
+                  }}
+                />
+              </Tooltip>
             )}
           </div>
         )}
@@ -1135,6 +1067,8 @@ export default function EntityCard({
         data={data}
         type={type}
         initialMode={modalMode}
+        onDelete={onDelete}
+        onEdit={onEdit}
       />
     </>
   );

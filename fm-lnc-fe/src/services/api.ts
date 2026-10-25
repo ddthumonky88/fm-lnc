@@ -62,6 +62,8 @@ export interface CompetitionFilterQuery extends PaginationQuery {
   confedId?: string;
   nationId?: string;
   isInternational?: boolean;
+  category?: string;
+  topLevelOnly?: boolean;
 }
 
 export interface IndependentClubFilterQuery extends PaginationQuery {
@@ -70,6 +72,7 @@ export interface IndependentClubFilterQuery extends PaginationQuery {
 
 export interface CityFilterQuery extends PaginationQuery {
   category?: string;
+  regionId?: number;
 }
 
 export interface PageData<T> {
@@ -347,12 +350,20 @@ export interface StadiumItem {
   nation?: NationItem;
 }
 
+export interface RegionItem {
+  id: number;
+  name: string;
+  nation_id: string;
+  citiesCount?: number;
+}
+
 export interface CityItem {
   id: string;
   name: string;
   nation_id?: string;
   country_id?: string;
   region?: string;
+  region_id?: number;
   categories?: string;
   is_disabled?: boolean;
   isDisabled?: boolean;
@@ -448,7 +459,7 @@ function normalizeFilterAndRefresh<T extends PaginationQuery>(
   queryOrFilter?: T | boolean | string,
   maybeForceRefresh = false,
   stringParamKey?: keyof T,
-  defaultSize = 10,
+  defaultSize = 20,
 ): { filter: T; forceRefresh: boolean } {
   let filter: any = {};
   let forceRefresh = false;
@@ -495,9 +506,63 @@ async function cachedPost<T>(
 
   // Luôn gắn ?page=...&size=... lên URL query string
   const effectivePage = page !== undefined && page !== null && page !== '' ? page : 0;
-  const effectiveSize = size !== undefined && size !== null && size !== '' ? size : 10;
+  const effectiveSize = size !== undefined && size !== null && size !== '' ? size : 20;
 
-  const queryParams = new URLSearchParams();
+  const [baseUrl, existingSearch] = url.split('?');
+  const queryParams = new URLSearchParams(existingSearch || '');
+  if (
+    rawPayload.confedId !== undefined &&
+    rawPayload.confedId !== null &&
+    rawPayload.confedId !== '' &&
+    String(rawPayload.confedId).toLowerCase() !== 'all'
+  ) {
+    queryParams.set('confedId', String(rawPayload.confedId));
+    delete payload.confedId;
+  }
+  if (
+    rawPayload.nationId !== undefined &&
+    rawPayload.nationId !== null &&
+    rawPayload.nationId !== '' &&
+    String(rawPayload.nationId).toLowerCase() !== 'all'
+  ) {
+    queryParams.set('nationId', String(rawPayload.nationId));
+    delete payload.nationId;
+  }
+  if (
+    rawPayload.compId !== undefined &&
+    rawPayload.compId !== null &&
+    rawPayload.compId !== '' &&
+    String(rawPayload.compId).toLowerCase() !== 'all'
+  ) {
+    queryParams.set('compId', String(rawPayload.compId));
+    delete payload.compId;
+  }
+  if (
+    rawPayload.regionId !== undefined &&
+    rawPayload.regionId !== null &&
+    rawPayload.regionId !== '' &&
+    String(rawPayload.regionId).toLowerCase() !== 'all'
+  ) {
+    queryParams.set('regionId', String(rawPayload.regionId));
+    delete payload.regionId;
+  }
+  if (
+    rawPayload.category !== undefined &&
+    rawPayload.category !== null &&
+    rawPayload.category !== '' &&
+    String(rawPayload.category).toLowerCase() !== 'all'
+  ) {
+    queryParams.set('category', String(rawPayload.category));
+    delete payload.category;
+  }
+  if (
+    rawPayload.extinct !== undefined &&
+    rawPayload.extinct !== null &&
+    rawPayload.extinct !== ''
+  ) {
+    queryParams.set('extinct', String(rawPayload.extinct));
+    delete payload.extinct;
+  }
   queryParams.set('page', String(effectivePage));
   queryParams.set('size', String(effectiveSize));
   if (sort !== undefined && sort !== null && sort !== '') {
@@ -509,7 +574,7 @@ async function cachedPost<T>(
   }
 
   const queryString = queryParams.toString();
-  const finalUrl = `${url}?${queryString}`;
+  const finalUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
   const cacheKey = `POST::${finalUrl}::${JSON.stringify(payload)}`;
   const now = Date.now();
   if (!forceRefresh) {
@@ -535,6 +600,9 @@ async function cachedPost<T>(
       if (data && typeof data === 'object' && Array.isArray(data.content)) {
         const arr = [...data.content] as any;
         Object.assign(arr, data);
+        if (data.totalElements !== undefined && arr.total === undefined) {
+          arr.total = data.totalElements;
+        }
         processedData = arr;
       }
       apiCache.set(cacheKey, { data: processedData, timestamp: Date.now() });
@@ -548,21 +616,29 @@ async function cachedPost<T>(
   return promise;
 }
 
+export async function fetchListConfederations(
+  queryOrForceRefresh?: PaginationQuery | boolean,
+  maybeForceRefresh = false,
+): Promise<ConfederationItem[]> {
+  const forceRefresh =
+    typeof queryOrForceRefresh === 'boolean' ? queryOrForceRefresh : maybeForceRefresh;
+  const kw =
+    typeof queryOrForceRefresh === 'object' && queryOrForceRefresh !== null
+      ? queryOrForceRefresh.keyword || (queryOrForceRefresh as any).q || ''
+      : '';
+  const url = kw
+    ? `${getApiBase()}/hierarchy/list-confederations?keyword=${encodeURIComponent(kw)}`
+    : `${getApiBase()}/hierarchy/list-confederations`;
+  return cachedFetch<ConfederationItem[]>(url, forceRefresh);
+}
+
 export async function fetchContinents(
   queryOrForceRefresh?: PaginationQuery | boolean,
   maybeForceRefresh = false,
 ): Promise<PaginatedList<ConfederationItem>> {
-  const { filter, forceRefresh } = normalizeFilterAndRefresh(
-    queryOrForceRefresh,
-    maybeForceRefresh,
-    undefined,
-    20,
-  );
-  return cachedPost<PaginatedList<ConfederationItem>>(
-    `${getApiBase()}/hierarchy/continents`,
-    filter,
-    forceRefresh,
-  );
+  return fetchListConfederations(queryOrForceRefresh, maybeForceRefresh) as Promise<
+    PaginatedList<ConfederationItem>
+  >;
 }
 
 export async function fetchAllNations(
@@ -591,7 +667,7 @@ export async function fetchAllNations(
   if (filter.page === undefined) filter.page = 0;
   if (filter.keyword === undefined) filter.keyword = '';
   return cachedPost<PaginatedList<NationItem>>(
-    `${getApiBase()}/hierarchy/nations`,
+    `${getApiBase()}/hierarchy/nations/search`,
     filter,
     refresh,
   );
@@ -605,7 +681,7 @@ export async function fetchAllCompetitions(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    500,
+    20,
   );
   return cachedPost<PaginatedList<CompetitionItem>>(
     `${getApiBase()}/hierarchy/competitions`,
@@ -615,7 +691,7 @@ export async function fetchAllCompetitions(
 }
 
 export async function fetchNationsByContinent(
-  confedId: string,
+  confedId?: string | null,
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<NationItem>> {
@@ -623,17 +699,32 @@ export async function fetchNationsByContinent(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    100,
+    20,
   );
+  if (
+    confedId !== undefined &&
+    confedId !== null &&
+    String(confedId).trim() !== '' &&
+    String(confedId).toLowerCase() !== 'all'
+  ) {
+    (filter as any).confedId = String(confedId);
+  }
   return cachedPost<PaginatedList<NationItem>>(
-    `${getApiBase()}/hierarchy/continents/${confedId}/nations`,
+    `${getApiBase()}/hierarchy/nations/search`,
     filter,
     refresh,
   );
 }
 
+export async function searchNations(
+  query?: PaginationQuery & { confedId?: string | null },
+  forceRefresh = false,
+): Promise<PaginatedList<NationItem>> {
+  return fetchNationsByContinent(query?.confedId, query, forceRefresh);
+}
+
 export async function fetchIntCompetitions(
-  confedId: string,
+  confedId?: string | null,
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CompetitionItem>> {
@@ -641,13 +732,28 @@ export async function fetchIntCompetitions(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    100,
+    20,
   );
+  if (
+    confedId !== undefined &&
+    confedId !== null &&
+    String(confedId).trim() !== '' &&
+    String(confedId).toLowerCase() !== 'all'
+  ) {
+    (filter as any).confedId = String(confedId);
+  }
   return cachedPost<PaginatedList<CompetitionItem>>(
-    `${getApiBase()}/hierarchy/continents/${confedId}/international-competitions`,
+    `${getApiBase()}/hierarchy/int-competitions/search`,
     filter,
     refresh,
   );
+}
+
+export async function searchIntCompetitions(
+  query?: PaginationQuery & { confedId?: string | null },
+  forceRefresh = false,
+): Promise<PaginatedList<CompetitionItem>> {
+  return fetchIntCompetitions(query?.confedId, query, forceRefresh);
 }
 
 export async function fetchNationHub(
@@ -661,7 +767,7 @@ export async function fetchNationHub(
 }
 
 export async function fetchDomesticCompetitions(
-  nationId: string,
+  nationId?: string | null,
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CompetitionItem>> {
@@ -669,13 +775,28 @@ export async function fetchDomesticCompetitions(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    100,
+    20,
   );
+  if (
+    nationId !== undefined &&
+    nationId !== null &&
+    String(nationId).trim() !== '' &&
+    String(nationId).toLowerCase() !== 'all'
+  ) {
+    (filter as any).nationId = String(nationId);
+  }
   return cachedPost<PaginatedList<CompetitionItem>>(
-    `${getApiBase()}/hierarchy/nations/${nationId}/competitions`,
+    `${getApiBase()}/hierarchy/domestic-competitions/search`,
     filter,
     refresh,
   );
+}
+
+export async function searchDomesticCompetitions(
+  query?: PaginationQuery & { nationId?: string | null },
+  forceRefresh = false,
+): Promise<PaginatedList<CompetitionItem>> {
+  return fetchDomesticCompetitions(query?.nationId, query, forceRefresh);
 }
 
 export async function fetchIndependentClubs(
@@ -690,12 +811,19 @@ export async function fetchIndependentClubs(
   } else if (typeof filterOrExtinct === 'object' && filterOrExtinct !== null) {
     filter = { ...filterOrExtinct };
   }
-  if (filter.size === undefined) filter.size = 500;
+  if (filter.size === undefined) filter.size = 20;
   if (filter.page === undefined) filter.page = 0;
   if (filter.keyword === undefined) filter.keyword = '';
+  const isExtinct = String(filter.extinct) === 'true';
+  const compId = isExtinct ? `ext-${nationId}` : `oth-${nationId}`;
+  delete filter.extinct;
   return cachedPost<PaginatedList<ClubItem>>(
-    `${getApiBase()}/hierarchy/nations/${nationId}/independent-clubs`,
-    filter,
+    `${getApiBase()}/hierarchy/club/search`,
+    {
+      ...filter,
+      nationId,
+      compId,
+    },
     refresh,
   );
 }
@@ -709,10 +837,13 @@ export async function fetchAllClubsInNation(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    1000,
+    20,
   );
+  if (nationId && String(nationId).toLowerCase() !== 'all') {
+    (filter as any).nationId = String(nationId);
+  }
   return cachedPost<PaginatedList<ClubItem>>(
-    `${getApiBase()}/hierarchy/nations/${nationId}/all-clubs`,
+    `${getApiBase()}/hierarchy/club/search`,
     filter,
     refresh,
   );
@@ -727,10 +858,36 @@ export async function fetchClubsInComp(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    100,
+    20,
   );
+  if (compId && String(compId).toLowerCase() !== 'all') {
+    (filter as any).compId = String(compId);
+  }
   return cachedPost<PaginatedList<ClubItem>>(
-    `${getApiBase()}/hierarchy/competitions/${compId}/clubs`,
+    `${getApiBase()}/hierarchy/club/search`,
+    filter,
+    refresh,
+  );
+}
+
+export async function searchClubs(
+  query?: PaginationQuery & { nationId?: string | null; compId?: string | null },
+  forceRefresh = false,
+): Promise<PaginatedList<ClubItem>> {
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    query,
+    forceRefresh,
+    undefined,
+    20,
+  );
+  if (query?.nationId && String(query.nationId).toLowerCase() !== 'all') {
+    (filter as any).nationId = String(query.nationId);
+  }
+  if (query?.compId && String(query.compId).toLowerCase() !== 'all') {
+    (filter as any).compId = String(query.compId);
+  }
+  return cachedPost<PaginatedList<ClubItem>>(
+    `${getApiBase()}/hierarchy/club/search`,
     filter,
     refresh,
   );
@@ -823,7 +980,7 @@ export async function fetchSubCompetitions(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    100,
+    1000,
   );
   return cachedPost<PaginatedList<CompetitionItem>>(
     `${getApiBase()}/hierarchy/competitions/${compId}/sub-competitions`,
@@ -841,10 +998,13 @@ export async function fetchStadiums(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    200,
+    20,
   );
+  if (nationId && String(nationId).toLowerCase() !== 'all') {
+    (filter as any).nationId = String(nationId);
+  }
   return cachedPost<PaginatedList<StadiumItem>>(
-    `${getApiBase()}/hierarchy/nations/${nationId}/stadiums`,
+    `${getApiBase()}/hierarchy/stadiums/search`,
     filter,
     refresh,
   );
@@ -859,10 +1019,32 @@ export async function fetchCities(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    200,
+    20,
   );
+  if (nationId && String(nationId).toLowerCase() !== 'all') {
+    (filter as any).nationId = String(nationId);
+  }
   return cachedPost<PaginatedList<CityItem>>(
-    `${getApiBase()}/hierarchy/nations/${nationId}/cities`,
+    `${getApiBase()}/hierarchy/cities/search`,
+    filter,
+    refresh,
+  );
+}
+
+export async function fetchRegions(
+  nationId: string,
+  queryOrForceRefresh?: PaginationQuery | boolean,
+  forceRefresh = false,
+): Promise<RegionItem[]> {
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+  );
+  if (nationId && String(nationId).toLowerCase() !== 'all') {
+    (filter as any).nationId = String(nationId);
+  }
+  return cachedPost<RegionItem[]>(
+    `${getApiBase()}/hierarchy/regions/search`,
     filter,
     refresh,
   );
@@ -877,10 +1059,13 @@ export async function fetchAwards(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    200,
+    20,
   );
+  if (nationId && String(nationId).toLowerCase() !== 'all') {
+    (filter as any).nationId = String(nationId);
+  }
   return cachedPost<PaginatedList<AwardItem>>(
-    `${getApiBase()}/hierarchy/nations/${nationId}/awards`,
+    `${getApiBase()}/hierarchy/awards/search`,
     filter,
     refresh,
   );
@@ -895,10 +1080,13 @@ export async function fetchAwardsInComp(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    100,
+    20,
   );
+  if (compId && String(compId).toLowerCase() !== 'all') {
+    (filter as any).compId = String(compId);
+  }
   return cachedPost<PaginatedList<AwardItem>>(
-    `${getApiBase()}/hierarchy/competitions/${compId}/awards`,
+    `${getApiBase()}/hierarchy/awards/search`,
     filter,
     refresh,
   );
@@ -912,7 +1100,7 @@ export async function fetchAllAwards(
     queryOrForceRefresh,
     forceRefresh,
     undefined,
-    100,
+    20,
   );
   return cachedPost<PaginatedList<AwardItem>>(`${getApiBase()}/hierarchy/awards`, filter, refresh);
 }
@@ -1009,6 +1197,15 @@ export function getNationLogoUrl(id: string, code?: string): string {
   if (!ENABLE_IMAGE_LOGOS) return '';
   const query = code ? `?code=${encodeURIComponent(code)}` : '';
   return `${getLocalApiBase()}/logos/nation/${id}${query}`;
+}
+
+/**
+ * Cờ quốc gia lấy từ nguồn FIFA (dùng mã 3 ký tự FIFA, vd: AUS, ENG, VIE).
+ */
+export function getFifaFlagUrl(code?: string | null): string {
+  const c = (code || '').trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(c)) return '';
+  return `https://api.fifa.com/api/v3/picture/flags-sq-2/${c}`;
 }
 
 export function getCompetitionLogoUrl(id: string | number): string {

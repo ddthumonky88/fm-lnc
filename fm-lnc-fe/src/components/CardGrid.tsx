@@ -9,6 +9,9 @@ interface CardGridProps {
   items: any[];
   type: EntityTypeValue;
   loading?: boolean;
+  cardSize?: 'small' | 'large';
+  largeStyle?: '1-line' | '2-line';
+  cardStyle?: '1-line' | '2-line';
   onNavigate?: (step: any) => void;
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
@@ -28,6 +31,9 @@ export default function CardGrid({
   items,
   type,
   loading,
+  cardSize,
+  largeStyle,
+  cardStyle,
   onNavigate,
   onEdit,
   onDelete,
@@ -40,12 +46,26 @@ export default function CardGrid({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
-  // Reset page to 1 when items change or type changes (only in client pagination mode)
+  // Keep page within valid bounds when items or pageSize changes (client mode)
+  useEffect(() => {
+    if (!serverPagination) {
+      if (items.length === 0) {
+        setPage(1);
+      } else {
+        const maxPage = Math.max(1, Math.ceil(items.length / pageSize));
+        if (page > maxPage) {
+          setPage(maxPage);
+        }
+      }
+    }
+  }, [items.length, pageSize, serverPagination, page]);
+
+  // Reset page to 1 when type changes
   useEffect(() => {
     if (!serverPagination) {
       setPage(1);
     }
-  }, [items.length, type, serverPagination]);
+  }, [type, serverPagination]);
 
   useEffect(() => {
     if (!serverPagination) {
@@ -71,21 +91,29 @@ export default function CardGrid({
   }
 
   const isServer = Boolean(serverPagination);
-  const currentPage = isServer ? serverPagination!.current : page;
-  const currentPageSize = isServer ? serverPagination!.pageSize : pageSize;
   const totalRecords = isServer ? serverPagination!.total : items.length;
+  const currentPageSize = isServer ? serverPagination!.pageSize : pageSize;
+  const maxPage = Math.max(1, Math.ceil(totalRecords / currentPageSize));
+  const currentPage = isServer ? serverPagination!.current : Math.min(page, maxPage);
 
   const startIndex = (currentPage - 1) * currentPageSize;
   const pagedItems = isServer ? items : items.slice(startIndex, startIndex + currentPageSize);
+  const showingStart = totalRecords === 0 ? 0 : startIndex + 1;
+  const showingEnd = Math.min(startIndex + pagedItems.length, totalRecords);
 
-  const isNationOrConfed =
-    String(type).toLowerCase() === 'nation' || String(type).toLowerCase() === 'confederation';
-  const isFiveCols = String(type) === 'stadium' || String(type) === 'city' || columns === 5;
-  const gridClasses = isNationOrConfed
-    ? 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3.5'
-    : isFiveCols
+  const entityTypeStr = String(type).toLowerCase();
+  const isSmall =
+    cardSize !== undefined
+      ? cardSize === 'small'
+      : entityTypeStr === 'nation' ||
+        entityTypeStr === 'stadium' ||
+        entityTypeStr === 'city';
+
+  const gridClasses = isSmall
+    ? 'grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-2.5'
+    : columns === 5
       ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5'
-      : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4';
+      : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5';
 
   return (
     <div>
@@ -95,6 +123,8 @@ export default function CardGrid({
             key={item.id}
             type={type}
             data={item}
+            cardSize={isSmall ? 'small' : 'large'}
+            largeStyle={largeStyle || cardStyle}
             onNavigate={onNavigate}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -106,8 +136,7 @@ export default function CardGrid({
       {totalRecords > 0 && (
         <div className="flex flex-col sm:flex-row justify-between items-center mt-5 pt-3 border-t border-gray-100 gap-2">
           <span className="text-xs text-gray-500">
-            Showing {Math.min(startIndex + 1, totalRecords)} -{' '}
-            {Math.min(startIndex + currentPageSize, totalRecords)} of {totalRecords} records
+            Showing {showingStart} - {showingEnd} of {totalRecords} records
           </span>
           <Pagination
             current={currentPage}

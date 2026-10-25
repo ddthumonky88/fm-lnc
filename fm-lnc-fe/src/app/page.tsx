@@ -10,7 +10,7 @@ import {
   Tag,
   Badge,
   Space,
-  message,
+  App,
   Tooltip,
   type TableColumnsType,
 } from 'antd';
@@ -82,13 +82,13 @@ interface NavStep {
 
 export default function LncSortitoutsiExplorer() {
   const router = useRouter();
+  const { message } = App.useApp();
   const { setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo, refreshSignal } =
     useApp();
 
   const [navStack, setNavStack] = useState<NavStep[]>([
     { level: HierarchyLevel.CONTINENTS, title: 'HOME' },
   ]);
-  const [tableFilter, setTableFilter] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Tab state for Nation view
@@ -96,6 +96,14 @@ export default function LncSortitoutsiExplorer() {
     NationTabKey.DOMESTIC_COMPS,
   );
   const [nationTabLoading, setNationTabLoading] = useState(false);
+
+  // Server pagination and search states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [tableFilter, setTableFilter] = useState('');
 
   // Search modal state
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -118,65 +126,77 @@ export default function LncSortitoutsiExplorer() {
   const currentStep = navStack[navStack.length - 1];
 
   const pushStep = useCallback((step: NavStep) => {
-    setTableFilter('');
+    setSearchInput('');
+    setSearchKeyword('');
+    setCurrentPage(1);
     setNavStack((prev) => [...prev, step]);
   }, []);
 
   const jumpTo = (index: number) => {
-    setTableFilter('');
+    setSearchInput('');
+    setSearchKeyword('');
+    setCurrentPage(1);
     setNavStack(navStack.slice(0, index + 1));
   };
 
   // Load records for active Nation tab
-  const loadNationDataForTab = useCallback(async (nationId: string, tabKey: NationTabKeyValue) => {
-    setNationTabLoading(true);
-    try {
-      let data: any[] = [];
-      if (tabKey === NationTabKey.DOMESTIC_COMPS) {
-        data = await fetchDomesticCompetitions(nationId);
-      } else if (tabKey === NationTabKey.STADIUMS) {
-        data = await fetchStadiums(nationId);
-      } else if (tabKey === NationTabKey.CITIES) {
-        data = await fetchCities(nationId);
-      } else if (tabKey === NationTabKey.AWARDS) {
-        data = await fetchAwards(nationId);
-      }
-      setDetailRecords(data);
-      setNationHub((prev) => {
-        if (!prev) return prev;
-        const keyMap: Record<string, keyof typeof prev.counts> = {
-          [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
-          [NationTabKey.STADIUMS]: 'stadiums',
-          [NationTabKey.CITIES]: 'cities',
-          [NationTabKey.AWARDS]: 'awards',
-        };
-        const countKey = keyMap[tabKey];
-        if (countKey && prev.counts[countKey] !== data.length) {
-          return {
-            ...prev,
-            counts: {
-              ...prev.counts,
-              [countKey]: data.length,
-            },
-          };
+  const loadNationDataForTab = useCallback(
+    async (nationId: string, tabKey: NationTabKeyValue, page = 1, keyword = '', size = 20) => {
+      setNationTabLoading(true);
+      try {
+        const query = { page: page - 1, size, keyword };
+        let data: any[] = [];
+        if (tabKey === NationTabKey.DOMESTIC_COMPS) {
+          data = await fetchDomesticCompetitions(nationId, query);
+        } else if (tabKey === NationTabKey.STADIUMS) {
+          data = await fetchStadiums(nationId, query);
+        } else if (tabKey === NationTabKey.CITIES) {
+          data = await fetchCities(nationId, query);
+        } else if (tabKey === NationTabKey.AWARDS) {
+          data = await fetchAwards(nationId, query);
         }
-        return prev;
-      });
-    } catch (err: any) {
-      console.error(err);
-      message.error(err.message || 'Failed to load tab data');
-    } finally {
-      setNationTabLoading(false);
-    }
-  }, []);
+        setDetailRecords(data);
+        const total = (data as any)?.totalElements ?? (data as any)?.total ?? data.length;
+        setTotalRecords(total);
+        setNationHub((prev) => {
+          if (!prev) return prev;
+          const keyMap: Record<string, keyof typeof prev.counts> = {
+            [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
+            [NationTabKey.STADIUMS]: 'stadiums',
+            [NationTabKey.CITIES]: 'cities',
+            [NationTabKey.AWARDS]: 'awards',
+          };
+          const countKey = keyMap[tabKey];
+          if (countKey && !keyword) {
+            return {
+              ...prev,
+              counts: {
+                ...prev.counts,
+                [countKey]: total,
+              },
+            };
+          }
+          return prev;
+        });
+      } catch (err: any) {
+        console.error(err);
+        message.error(err.message || 'Failed to load tab data');
+      } finally {
+        setNationTabLoading(false);
+      }
+    },
+    [message],
+  );
 
   // Switch Nation tab
   const handleSwitchNationTab = async (tabKey: NationTabKeyValue) => {
     setActiveNationTab(tabKey);
-    setTableFilter('');
+    setSearchInput('');
+    setSearchKeyword('');
+    setCurrentPage(1);
     setDetailRecords([]);
     if (currentStep.id !== undefined) {
-      await loadNationDataForTab(String(currentStep.id), tabKey);
+      await loadNationDataForTab(String(currentStep.id), tabKey, 1, '', pageSize);
     }
   };
 
@@ -184,6 +204,7 @@ export default function LncSortitoutsiExplorer() {
   const handleSwitchCompTab = (targetLevel: 'CLUBS_IN_COMP' | 'COMP_AWARDS') => {
     if (currentStep.level === targetLevel) return;
     setTableFilter('');
+    setCurrentPage(1);
     setNavStack((prev) => {
       const copy = [...prev];
       copy[copy.length - 1] = {
@@ -196,96 +217,118 @@ export default function LncSortitoutsiExplorer() {
   };
 
   // Load level data
-  const loadCurrentLevelData = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (currentStep.level === 'CONTINENTS') {
-        const data = await fetchContinents();
-        setContinents(Array.isArray(data) ? data : (data as any)?.content || []);
-      } else if (currentStep.level === 'NATIONS' && currentStep.id !== undefined) {
-        const data = await fetchNationsByContinent(String(currentStep.id));
-        setNations(data);
-      } else if (currentStep.level === 'INT_COMPETITIONS' && currentStep.id !== undefined) {
-        const data = await fetchIntCompetitions(String(currentStep.id));
-        setIntComps(data);
-      } else if (currentStep.level === 'NATION_HUB' && currentStep.id !== undefined) {
-        const hub = await fetchNationHub(String(currentStep.id));
-        setNationHub(hub);
+  const loadCurrentLevelData = useCallback(
+    async (page = 1, keyword = '', size = 20) => {
+      setLoading(true);
+      try {
+        const query = { page: page - 1, size, keyword };
+        if (currentStep.level === 'CONTINENTS') {
+          const data = await fetchContinents(query);
+          const list = Array.isArray(data) ? data : (data as any)?.content || [];
+          setContinents(list);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? list.length);
+        } else if (currentStep.level === 'NATIONS' && currentStep.id !== undefined) {
+          const data = await fetchNationsByContinent(String(currentStep.id), query);
+          setNations(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'INT_COMPETITIONS' && currentStep.id !== undefined) {
+          const data = await fetchIntCompetitions(String(currentStep.id), query);
+          setIntComps(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'NATION_HUB' && currentStep.id !== undefined) {
+          const hub = await fetchNationHub(String(currentStep.id));
+          setNationHub(hub);
 
-        // Auto select tab that has count > 0
-        let targetTab: NationTabKeyValue = activeNationTab;
-        const countForActive =
-          targetTab === NationTabKey.DOMESTIC_COMPS
-            ? hub.counts.domesticComps
-            : targetTab === NationTabKey.STADIUMS
-              ? hub.counts.stadiums
-              : targetTab === NationTabKey.CITIES
-                ? hub.counts.cities
-                : targetTab === NationTabKey.AWARDS
-                  ? hub.counts.awards
-                  : 0;
+          // Auto select tab that has count > 0
+          let targetTab: NationTabKeyValue = activeNationTab;
+          const countForActive =
+            targetTab === NationTabKey.DOMESTIC_COMPS
+              ? hub.counts.domesticComps
+              : targetTab === NationTabKey.STADIUMS
+                ? hub.counts.stadiums
+                : targetTab === NationTabKey.CITIES
+                  ? hub.counts.cities
+                  : targetTab === NationTabKey.AWARDS
+                    ? hub.counts.awards
+                    : 0;
 
-        if (countForActive === 0) {
-          if (hub.counts.domesticComps > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
-          else if (hub.counts.awards > 0) targetTab = NationTabKey.AWARDS;
-          else if (hub.counts.stadiums > 0) targetTab = NationTabKey.STADIUMS;
-          else if (hub.counts.cities > 0) targetTab = NationTabKey.CITIES;
+          if (countForActive === 0) {
+            if (hub.counts.domesticComps > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
+            else if (hub.counts.awards > 0) targetTab = NationTabKey.AWARDS;
+            else if (hub.counts.stadiums > 0) targetTab = NationTabKey.STADIUMS;
+            else if (hub.counts.cities > 0) targetTab = NationTabKey.CITIES;
+          }
+          setActiveNationTab(targetTab);
+
+          const hasAnyChildren = Object.values(hub.counts).some((c: any) => c > 0);
+          if (hasAnyChildren) {
+            await loadNationDataForTab(String(currentStep.id), targetTab, page, keyword, size);
+          } else {
+            setDetailRecords([]);
+            setTotalRecords(0);
+          }
+        } else if (currentStep.level === 'DOMESTIC_COMPS' && currentStep.id !== undefined) {
+          const data = await fetchDomesticCompetitions(String(currentStep.id), query);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'INDEPENDENT_CLUBS' && currentStep.id !== undefined) {
+          const isExtinct = currentStep.metadata?.is_extinct;
+          const data = await fetchIndependentClubs(String(currentStep.id), {
+            extinct: isExtinct,
+            ...query,
+          });
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'CLUBS_IN_COMP' && currentStep.id !== undefined) {
+          const [info, data] = await Promise.all([
+            fetchCompetitionInfo(String(currentStep.id)).catch(() => null),
+            fetchClubsInComp(String(currentStep.id), query),
+          ]);
+          if (info) setCompInfo(info);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'STADIUMS' && currentStep.id !== undefined) {
+          const data = await fetchStadiums(String(currentStep.id), query);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'CITIES' && currentStep.id !== undefined) {
+          const data = await fetchCities(String(currentStep.id), query);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'INDEPENDENT_AWARDS' && currentStep.id !== undefined) {
+          const data = await fetchAwards(String(currentStep.id), query);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'COMP_AWARDS' && currentStep.id !== undefined) {
+          const [info, data] = await Promise.all([
+            fetchCompetitionInfo(String(currentStep.id)).catch(() => null),
+            fetchAwardsInComp(String(currentStep.id), query),
+          ]);
+          if (info) setCompInfo(info);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'GLOBAL_PLAYERS') {
+          const data = await fetchPlayers(query);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'GLOBAL_STAGES') {
+          const data = await fetchStages(query);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
+        } else if (currentStep.level === 'GLOBAL_AWARDS') {
+          const data = await fetchAllAwards(query);
+          setDetailRecords(data);
+          setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
         }
-        setActiveNationTab(targetTab);
-
-        const hasAnyChildren = Object.values(hub.counts).some((c: any) => c > 0);
-        if (hasAnyChildren) {
-          await loadNationDataForTab(String(currentStep.id), targetTab);
-        } else {
-          setDetailRecords([]);
-        }
-      } else if (currentStep.level === 'DOMESTIC_COMPS' && currentStep.id !== undefined) {
-        const data = await fetchDomesticCompetitions(String(currentStep.id));
-        setDetailRecords(data);
-      } else if (currentStep.level === 'INDEPENDENT_CLUBS' && currentStep.id !== undefined) {
-        const isExtinct = currentStep.metadata?.is_extinct;
-        const data = await fetchIndependentClubs(String(currentStep.id), isExtinct);
-        setDetailRecords(data);
-      } else if (currentStep.level === 'CLUBS_IN_COMP' && currentStep.id !== undefined) {
-        const [info, data] = await Promise.all([
-          fetchCompetitionInfo(String(currentStep.id)).catch(() => null),
-          fetchClubsInComp(String(currentStep.id)),
-        ]);
-        if (info) setCompInfo(info);
-        setDetailRecords(data);
-      } else if (currentStep.level === 'STADIUMS' && currentStep.id !== undefined) {
-        const data = await fetchStadiums(String(currentStep.id));
-        setDetailRecords(data);
-      } else if (currentStep.level === 'CITIES' && currentStep.id !== undefined) {
-        const data = await fetchCities(String(currentStep.id));
-        setDetailRecords(data);
-      } else if (currentStep.level === 'INDEPENDENT_AWARDS' && currentStep.id !== undefined) {
-        const data = await fetchAwards(String(currentStep.id));
-        setDetailRecords(data);
-      } else if (currentStep.level === 'COMP_AWARDS' && currentStep.id !== undefined) {
-        const [info, data] = await Promise.all([
-          fetchCompetitionInfo(String(currentStep.id)).catch(() => null),
-          fetchAwardsInComp(String(currentStep.id)),
-        ]);
-        if (info) setCompInfo(info);
-        setDetailRecords(data);
-      } else if (currentStep.level === 'GLOBAL_PLAYERS') {
-        const data = await fetchPlayers();
-        setDetailRecords(data);
-      } else if (currentStep.level === 'GLOBAL_STAGES') {
-        const data = await fetchStages();
-        setDetailRecords(data);
-      } else if (currentStep.level === 'GLOBAL_AWARDS') {
-        const data = await fetchAllAwards();
-        setDetailRecords(data);
+      } catch (e: any) {
+        console.error(e);
+        message.error(e.message || 'Failed to load data');
+      } finally {
+        setLoading(false);
       }
-    } catch (e: any) {
-      console.error(e);
-      message.error(e.message || 'Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  }, [currentStep, activeNationTab, loadNationDataForTab]);
+    },
+    [currentStep, activeNationTab, loadNationDataForTab, message],
+  );
 
   useEffect(() => {
     loadCurrentLevelData();
@@ -464,54 +507,53 @@ export default function LncSortitoutsiExplorer() {
   );
 
   const filteredNations = useMemo(() => {
-    return nations
-      .filter((n) => matchRecordSearch(n, tableFilter))
-      .sort((a, b) =>
-        (a.long_name || a.short_name || '').localeCompare(
-          b.long_name || b.short_name || '',
-          undefined,
-          { numeric: true, sensitivity: 'base' },
-        ),
-      );
-  }, [nations, tableFilter]);
+    return nations;
+  }, [nations]);
 
   const filteredIntComps = useMemo(() => {
-    return intComps
-      .filter((c) => matchRecordSearch(c, tableFilter))
-      .sort(sortCompetitionsByCategory);
-  }, [intComps, tableFilter]);
+    return [...intComps].sort(sortCompetitionsByCategory);
+  }, [intComps]);
 
   const filteredDetailRecords = useMemo(() => {
-    let list = detailRecords;
-    if (tableFilter.trim()) {
-      list = list.filter((item) => matchRecordSearch(item, tableFilter));
-    }
+    return detailRecords;
+  }, [detailRecords]);
 
-    if (
-      currentStep.level === 'DOMESTIC_COMPS' ||
-      currentStep.level === 'INT_COMPETITIONS' ||
-      (currentStep.level === 'NATIONS' && activeNationTab === 'domesticComps') ||
-      currentRecordType === 'competition'
-    ) {
-      return [...list].sort(sortCompetitionsByCategory);
+  const handlePageChange = (newPage: number, newPageSize?: number) => {
+    const effSize = newPageSize && newPageSize !== pageSize ? newPageSize : pageSize;
+    if (newPageSize && newPageSize !== pageSize) {
+      setPageSize(newPageSize);
     }
+    setCurrentPage(newPage);
+    if (currentStep.level === HierarchyLevel.NATION_HUB && currentStep.id !== undefined) {
+      loadNationDataForTab(
+        String(currentStep.id),
+        activeNationTab,
+        newPage,
+        searchKeyword,
+        effSize,
+      );
+    } else {
+      loadCurrentLevelData(newPage, searchKeyword, effSize);
+    }
+  };
 
-    return [...list].sort((a, b) => {
-      const nameA =
-        a.name ||
-        a.long_name ||
-        a.short_name ||
-        `${a.first_name || ''} ${a.second_name || ''}`.trim() ||
-        '';
-      const nameB =
-        b.name ||
-        b.long_name ||
-        b.short_name ||
-        `${b.first_name || ''} ${b.second_name || ''}`.trim() ||
-        '';
-      return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
-    });
-  }, [detailRecords, tableFilter, currentStep.level, activeNationTab, currentRecordType]);
+  const handleSearchSubmit = () => {
+    const kw = searchInput.trim();
+    setSearchKeyword(kw);
+    setCurrentPage(1);
+    if (currentStep.level === HierarchyLevel.NATION_HUB && currentStep.id !== undefined) {
+      loadNationDataForTab(String(currentStep.id), activeNationTab, 1, kw, pageSize);
+    } else {
+      loadCurrentLevelData(1, kw, pageSize);
+    }
+  };
+
+  const serverPagination = {
+    current: currentPage,
+    pageSize,
+    total: totalRecords,
+    onChange: handlePageChange,
+  };
 
   // Configuration of tabs for Nation Hub (100% English, no Vietnamese subtitles)
   const nationTabsConfig = useMemo(() => {
@@ -636,14 +678,6 @@ export default function LncSortitoutsiExplorer() {
         {!loading && currentStep.level === 'CONTINENTS' && (
           <div>
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4 pb-2 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-gray-700">Confederations</h2>
-                <span className="text-xs text-gray-500">
-                  Total: <strong className="text-gray-800">{filteredContinents.length}</strong>{' '}
-                  confederations
-                </span>
-              </div>
-
               <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                 <Input
                   prefix={<SearchOutlined className="text-gray-400" />}
@@ -745,6 +779,7 @@ export default function LncSortitoutsiExplorer() {
                   activeKey="INT_COMPETITIONS"
                   onChange={(key) => {
                     setTableFilter('');
+                    setCurrentPage(1);
                     setNavStack((prev) => [
                       ...prev.slice(0, -1),
                       {
@@ -847,6 +882,7 @@ export default function LncSortitoutsiExplorer() {
                   activeKey="NATIONS"
                   onChange={(key) => {
                     setTableFilter('');
+                    setCurrentPage(1);
                     setNavStack((prev) => [
                       ...prev.slice(0, -1),
                       {
@@ -892,21 +928,30 @@ export default function LncSortitoutsiExplorer() {
             })()}
 
             <div className="flex justify-end mb-4">
-              <Input
-                prefix={<SearchOutlined className="text-gray-400" />}
-                placeholder="Filter countries..."
-                value={tableFilter}
-                onChange={(e) => setTableFilter(e.target.value)}
-                allowClear
-                className="w-full sm:w-64"
-              />
+              <Space.Compact className="w-full sm:w-64">
+                <Input
+                  placeholder="Search countries..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onPressEnter={handleSearchSubmit}
+                  allowClear
+                />
+                <Button
+                  type="primary"
+                  icon={<SearchOutlined />}
+                  onClick={handleSearchSubmit}
+                  title="Search"
+                  className="shrink-0 bg-blue-600"
+                />
+              </Space.Compact>
             </div>
 
             <CardGrid
               items={filteredNations}
               type={EntityType.NATION}
-              columns={5}
+              cardSize="small"
               loading={loading}
+              serverPagination={serverPagination}
               onNavigate={(step) => router.push(`/nation/${step.id}`)}
               emptyText="No countries found"
               defaultPageSize={20}
@@ -936,7 +981,7 @@ export default function LncSortitoutsiExplorer() {
                   ) : null}
                   <span>{currentStep.title}</span>
                   <Tag color="cyan" className="font-bold m-0">
-                    ID: {nationHub.nation?.id}
+                    {nationHub.nation?.id}
                   </Tag>
                 </h2>
               </div>
@@ -1028,16 +1073,25 @@ export default function LncSortitoutsiExplorer() {
                       }}
                       onDelete={handleDeleteDirect}
                       emptyText="No competitions found"
+                      serverPagination={serverPagination}
                       extraRight={
-                        <>
-                          <Input
-                            prefix={<SearchOutlined className="text-gray-400" />}
-                            placeholder="Filter competitions..."
-                            value={tableFilter}
-                            onChange={(e) => setTableFilter(e.target.value)}
-                            allowClear
-                            className="w-48 sm:w-64"
-                          />
+                        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                          <Space.Compact className="w-48 sm:w-64">
+                            <Input
+                              placeholder="Search competitions..."
+                              value={searchInput}
+                              onChange={(e) => setSearchInput(e.target.value)}
+                              onPressEnter={handleSearchSubmit}
+                              allowClear
+                            />
+                            <Button
+                              type="primary"
+                              icon={<SearchOutlined />}
+                              onClick={handleSearchSubmit}
+                              title="Search"
+                              className="shrink-0 bg-blue-600"
+                            />
+                          </Space.Compact>
                           <Button
                             type="primary"
                             icon={<PlusOutlined />}
@@ -1053,7 +1107,7 @@ export default function LncSortitoutsiExplorer() {
                               {currentNationTabObj?.addLabel || 'Add Competition'}
                             </span>
                           </Button>
-                        </>
+                        </div>
                       }
                     />
                   ) : activeNationTab === NationTabKey.CITIES ? (
@@ -1068,16 +1122,25 @@ export default function LncSortitoutsiExplorer() {
                       }}
                       onDelete={handleDeleteDirect}
                       emptyText="No cities found"
+                      serverPagination={serverPagination}
                       extraRight={
-                        <>
-                          <Input
-                            prefix={<SearchOutlined className="text-gray-400" />}
-                            placeholder="Filter cities..."
-                            value={tableFilter}
-                            onChange={(e) => setTableFilter(e.target.value)}
-                            allowClear
-                            className="w-48 sm:w-64"
-                          />
+                        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                          <Space.Compact className="w-48 sm:w-64">
+                            <Input
+                              placeholder="Search cities..."
+                              value={searchInput}
+                              onChange={(e) => setSearchInput(e.target.value)}
+                              onPressEnter={handleSearchSubmit}
+                              allowClear
+                            />
+                            <Button
+                              type="primary"
+                              icon={<SearchOutlined />}
+                              onClick={handleSearchSubmit}
+                              title="Search"
+                              className="shrink-0 bg-blue-600"
+                            />
+                          </Space.Compact>
                           <Button
                             type="primary"
                             icon={<PlusOutlined />}
@@ -1093,7 +1156,7 @@ export default function LncSortitoutsiExplorer() {
                               {currentNationTabObj?.addLabel || 'Add City'}
                             </span>
                           </Button>
-                        </>
+                        </div>
                       }
                     />
                   ) : (
@@ -1101,6 +1164,7 @@ export default function LncSortitoutsiExplorer() {
                       items={filteredDetailRecords}
                       type={currentRecordType}
                       loading={nationTabLoading}
+                      serverPagination={serverPagination}
                       onNavigate={pushStep}
                       onEdit={(rec) => {
                         setEditingRecord(rec);
@@ -1178,12 +1242,7 @@ export default function LncSortitoutsiExplorer() {
                           </h2>
                           {currentStep.id && (
                             <Tag color="cyan" className="m-0 font-bold text-xs">
-                              ID: {currentStep.id}
-                            </Tag>
-                          )}
-                          {compInfo?.three_letter_name && (
-                            <Tag color="purple" className="m-0 font-bold text-xs">
-                              {compInfo.three_letter_name}
+                              {currentStep.id}
                             </Tag>
                           )}
                           {compInfo?.categories && (
@@ -1376,16 +1435,25 @@ export default function LncSortitoutsiExplorer() {
                   }}
                   onDelete={handleDeleteDirect}
                   emptyText="No competitions found"
+                  serverPagination={serverPagination}
                   extraRight={
-                    <>
-                      <Input
-                        prefix={<SearchOutlined className="text-gray-400" />}
-                        placeholder="Filter competitions..."
-                        value={tableFilter}
-                        onChange={(e) => setTableFilter(e.target.value)}
-                        allowClear
-                        className="w-48 sm:w-64"
-                      />
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                      <Space.Compact className="w-48 sm:w-64">
+                        <Input
+                          placeholder="Search competitions..."
+                          value={searchInput}
+                          onChange={(e) => setSearchInput(e.target.value)}
+                          onPressEnter={handleSearchSubmit}
+                          allowClear
+                        />
+                        <Button
+                          type="primary"
+                          icon={<SearchOutlined />}
+                          onClick={handleSearchSubmit}
+                          title="Search"
+                          className="shrink-0 bg-blue-600"
+                        />
+                      </Space.Compact>
                       <Button
                         type="primary"
                         icon={<PlusOutlined />}
@@ -1399,7 +1467,7 @@ export default function LncSortitoutsiExplorer() {
                       >
                         <span className="hidden sm:inline">Add Competition</span>
                       </Button>
-                    </>
+                    </div>
                   }
                 />
               ) : currentStep.level === 'CITIES' ? (
@@ -1414,16 +1482,25 @@ export default function LncSortitoutsiExplorer() {
                   }}
                   onDelete={handleDeleteDirect}
                   emptyText="No cities found"
+                  serverPagination={serverPagination}
                   extraRight={
-                    <>
-                      <Input
-                        prefix={<SearchOutlined className="text-gray-400" />}
-                        placeholder="Filter cities..."
-                        value={tableFilter}
-                        onChange={(e) => setTableFilter(e.target.value)}
-                        allowClear
-                        className="w-48 sm:w-64"
-                      />
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                      <Space.Compact className="w-48 sm:w-64">
+                        <Input
+                          placeholder="Search cities..."
+                          value={searchInput}
+                          onChange={(e) => setSearchInput(e.target.value)}
+                          onPressEnter={handleSearchSubmit}
+                          allowClear
+                        />
+                        <Button
+                          type="primary"
+                          icon={<SearchOutlined />}
+                          onClick={handleSearchSubmit}
+                          title="Search"
+                          className="shrink-0 bg-blue-600"
+                        />
+                      </Space.Compact>
                       <Button
                         type="primary"
                         icon={<PlusOutlined />}
@@ -1437,7 +1514,7 @@ export default function LncSortitoutsiExplorer() {
                       >
                         <span className="hidden sm:inline">Add City</span>
                       </Button>
-                    </>
+                    </div>
                   }
                 />
               ) : (
@@ -1445,6 +1522,7 @@ export default function LncSortitoutsiExplorer() {
                   items={filteredDetailRecords}
                   type={currentRecordType}
                   loading={loading}
+                  serverPagination={serverPagination}
                   onNavigate={pushStep}
                   onEdit={(rec) => {
                     setEditingRecord(rec);

@@ -12,6 +12,7 @@ import {
   Award,
   Person,
   Stage,
+  Region,
 } from './entities';
 import { LncModule } from './lnc/lnc.module';
 import { HierarchyModule } from './hierarchy/hierarchy.module';
@@ -47,6 +48,7 @@ dotenv.config();
         Award,
         Person,
         Stage,
+        Region,
       ],
       synchronize: false, // We created schema and seeded directly
       logging: false,

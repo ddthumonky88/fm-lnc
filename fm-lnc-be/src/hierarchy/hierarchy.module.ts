@@ -10,6 +10,7 @@ import {
   Award,
   Person,
   Stage,
+  Region,
 } from '../entities';
 import { HierarchyService } from './hierarchy.service';
 import { HierarchyController } from './hierarchy.controller';
@@ -26,6 +27,7 @@ import { HierarchyController } from './hierarchy.controller';
       Award,
       Person,
       Stage,
+      Region,
     ]),
   ],
   providers: [HierarchyService],

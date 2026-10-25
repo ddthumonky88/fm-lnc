@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Breadcrumb, Tag, Badge, Input, Button, message, Spin, Tabs, Space, Tooltip } from 'antd';
 import {
@@ -11,12 +11,13 @@ import {
   ArrowLeftOutlined,
   TrophyOutlined,
   CopyOutlined,
+  CheckOutlined,
+  BranchesOutlined,
 } from '@ant-design/icons';
 import {
   fetchCompetitionInfo,
   fetchClubsInComp,
   fetchAwardsInComp,
-  fetchSubCompetitions,
   fetchIndependentClubs,
   fetchNationHub,
   getNationLogoUrl,
@@ -27,7 +28,8 @@ import {
   AwardItem,
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
-import { CompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
+import SubCompetitionsModal from '../../../components/SubCompetitionsModal';
+import { CompIcon, DomesticCompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { formatCategoryCode, getCategoryTagColor } from '../../../components/EntityCard';
@@ -48,24 +50,63 @@ export default function CompetitionDetailPage() {
   } = useApp();
 
   const rawId = decodeURIComponent(String(params?.id || ''));
-  const isVirtualExtinct = rawId.toLowerCase() === 'extinct' || rawId === '[EXTINCT]';
-  const isVirtualOther = rawId.toLowerCase() === 'other' || rawId === '[OTHER]';
+  const isVirtualExtinct =
+    rawId.toLowerCase() === 'extinct' || rawId === '[EXTINCT]' || rawId.startsWith('ext-');
+  const isVirtualOther =
+    rawId.toLowerCase() === 'other' || rawId === '[OTHER]' || rawId.startsWith('oth-');
   const isVirtual = isVirtualExtinct || isVirtualOther;
-  const nationIdParam = searchParams.get('nationId') || undefined;
-  const compId = isVirtual ? undefined : rawId;
+  const extractedNationId =
+    isVirtual && (rawId.startsWith('oth-') || rawId.startsWith('ext-'))
+      ? rawId.split('-')[1]
+      : undefined;
+  const nationIdParam = searchParams.get('nationId') || extractedNationId || undefined;
+  const compId = rawId;
 
   const [compInfo, setCompInfo] = useState<
     (CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }) | null
   >(null);
-  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS' | 'SUB_COMPS'>('CLUBS');
+  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS'>('CLUBS');
   const [clubs, setClubs] = useState<ClubItem[]>([]);
   const [awards, setAwards] = useState<AwardItem[]>([]);
-  const [subComps, setSubComps] = useState<CompetitionItem[]>([]);
+  const [isSubCompsModalOpen, setIsSubCompsModalOpen] = useState(false);
   const [tableFilter, setTableFilter] = useState('');
+  const [debouncedKeyword, setDebouncedKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [tabLoading, setTabLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
-  // Load Competition info and records
-  const loadCompData = useCallback(async () => {
+  // Debounce search filter
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedKeyword(tableFilter.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [tableFilter]);
+
+  // Reset to page 1 whenever search keyword changes
+  const prevKeywordRef = useRef(debouncedKeyword);
+  useEffect(() => {
+    if (prevKeywordRef.current !== debouncedKeyword) {
+      prevKeywordRef.current = debouncedKeyword;
+      setCurrentPage(1);
+    }
+  }, [debouncedKeyword]);
+
+  const handleCopyId = (e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
+    if (compId) {
+      navigator.clipboard.writeText(String(compId));
+      setCopiedId(true);
+      message.success(`Copied ID: ${compId}`);
+      setTimeout(() => setCopiedId(false), 2000);
+    }
+  };
+
+  // Load Competition info (headers, breadcrumbs, logos)
+  const loadCompInfo = useCallback(async () => {
     setLoading(true);
     try {
       if (isVirtual) {
@@ -76,10 +117,7 @@ export default function CompetitionDetailPage() {
           return;
         }
 
-        const [hub, clubsData] = await Promise.all([
-          fetchNationHub(targetNationId).catch(() => null),
-          fetchIndependentClubs(targetNationId, isVirtualExtinct).catch(() => []),
-        ]);
+        const hub = await fetchNationHub(targetNationId).catch(() => null);
 
         const nation = hub?.nation;
         const confedId = nation?.confederation_id;
@@ -87,9 +125,13 @@ export default function CompetitionDetailPage() {
         const nationName = nation?.long_name || 'Nation';
         const nationCode = nation?.three_letter_name;
 
+        const virtualTag = rawId.startsWith('oth-') || rawId.startsWith('ext-')
+          ? rawId
+          : isVirtualExtinct
+            ? `ext-${targetNationId}`
+            : `oth-${targetNationId}`;
         const virtualTitle = isVirtualExtinct ? '[EXTINCT] Extinct Clubs' : '[OTHER] Other Clubs';
         const virtualShort = isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs';
-        const virtualTag = isVirtualExtinct ? '[EXTINCT]' : '[OTHER]';
 
         setCompInfo({
           id: virtualTag,
@@ -101,7 +143,7 @@ export default function CompetitionDetailPage() {
           nation_three_letter: nationCode,
           confed_id: confedId,
           categories: 'Other',
-          clubsCount: clubsData.length,
+          clubsCount: isVirtualExtinct ? hub?.counts?.extinctClubs || 0 : hub?.counts?.independentClubs || 0,
           awardsCount: 0,
           childrenCount: 0,
         } as any);
@@ -137,20 +179,11 @@ export default function CompetitionDetailPage() {
           alt: nationName,
           isFlag: true,
         });
-
-        setClubs(clubsData);
-        setAwards([]);
-        setSubComps([]);
         return;
       }
 
       if (!compId) return;
-      const [info, clubsData, awardsData, subCompsData] = await Promise.all([
-        fetchCompetitionInfo(compId).catch(() => null),
-        fetchClubsInComp(compId).catch(() => []),
-        fetchAwardsInComp(compId).catch(() => []),
-        fetchSubCompetitions(compId).catch(() => []),
-      ]);
+      const info = await fetchCompetitionInfo(compId).catch(() => null);
 
       if (info) {
         setCompInfo(info);
@@ -219,9 +252,6 @@ export default function CompetitionDetailPage() {
           setHeaderLogo(null);
         }
       }
-      setClubs(clubsData);
-      setAwards(awardsData);
-      setSubComps(subCompsData);
     } catch (err: any) {
       console.error(err);
       message.error(err.message || 'Failed to load competition details');
@@ -240,22 +270,117 @@ export default function CompetitionDetailPage() {
     setHeaderLogo,
   ]);
 
+  // Load tab records with BE pagination & keyword search
+  const loadTabData = useCallback(
+    async (tab: 'CLUBS' | 'AWARDS', page: number, size: number, keyword: string) => {
+      setTabLoading(true);
+      try {
+        if (tab === 'CLUBS') {
+          if (isVirtual) {
+            const targetNationId = nationIdParam;
+            if (!targetNationId) return;
+            const res = await fetchIndependentClubs(targetNationId, {
+              page: page - 1,
+              size,
+              keyword,
+              extinct: isVirtualExtinct,
+            });
+            const list = Array.isArray(res) ? res : (res as any)?.content || [];
+            const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
+            setClubs(list);
+            setTotalRecords(total);
+            setCompInfo((prev) => {
+              if (!prev) return prev;
+              if (!keyword) {
+                return { ...prev, clubsCount: total };
+              }
+              return prev;
+            });
+          } else if (compId) {
+            const res = await fetchClubsInComp(compId, {
+              page: page - 1,
+              size,
+              keyword,
+            });
+            const list = Array.isArray(res) ? res : (res as any)?.content || [];
+            const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
+            setClubs(list);
+            setTotalRecords(total);
+            setCompInfo((prev) => {
+              if (!prev) return prev;
+              if (!keyword) {
+                return { ...prev, clubsCount: total };
+              }
+              return prev;
+            });
+          }
+        } else if (tab === 'AWARDS' && !isVirtual && compId) {
+          const res = await fetchAwardsInComp(compId, {
+            page: page - 1,
+            size,
+            keyword,
+          });
+          const list = Array.isArray(res) ? res : (res as any)?.content || [];
+          const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
+          setAwards(list);
+          setTotalRecords(total);
+          setCompInfo((prev) => {
+            if (!prev) return prev;
+            if (!keyword) {
+              return { ...prev, awardsCount: total };
+            }
+            return prev;
+          });
+        }
+      } catch (err: any) {
+        console.error('Failed to load tab data', err);
+        message.error(err.message || 'Failed to load list data');
+      } finally {
+        setTabLoading(false);
+      }
+    },
+    [compId, isVirtual, isVirtualExtinct, nationIdParam],
+  );
+
   useEffect(() => {
-    loadCompData();
+    loadCompInfo();
     return () => {
       setBreadcrumbs([]);
       setBackHref(null);
       setHeaderLogo(null);
       setHeaderId(undefined);
     };
-  }, [loadCompData, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
+  }, [loadCompInfo, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
+
+  useEffect(() => {
+    loadTabData(activeTab, currentPage, pageSize, debouncedKeyword);
+  }, [loadTabData, activeTab, currentPage, pageSize, debouncedKeyword, refreshSignal]);
+
+  const handlePageChange = (newPage: number, newPageSize?: number) => {
+    if (newPageSize && newPageSize !== pageSize) {
+      setPageSize(newPageSize);
+    }
+    setCurrentPage(newPage);
+  };
+
+  const handleTabChange = (key: string) => {
+    const nextTab = key as 'CLUBS' | 'AWARDS';
+    setActiveTab(nextTab);
+    setTableFilter('');
+    setDebouncedKeyword('');
+    setCurrentPage(1);
+  };
 
   const handleDeleteClub = async (id: string) => {
     try {
       await deleteRecord(RecordType.CLUB, id);
       message.success('Club deleted');
-      setClubs((prev) => prev.filter((c) => c.id !== id));
-      loadCompData();
+      loadTabData('CLUBS', currentPage, pageSize, debouncedKeyword);
+      if (compId) {
+        fetchCompetitionInfo(compId, true).then((info) => {
+          if (info) setCompInfo(info);
+        });
+      }
     } catch (err: any) {
       message.error(err.message || 'Delete failed');
     }
@@ -265,39 +390,24 @@ export default function CompetitionDetailPage() {
     try {
       await deleteRecord(RecordType.AWARD, id);
       message.success('Award deleted');
-      setAwards((prev) => prev.filter((a) => a.id !== id));
-      loadCompData();
+      loadTabData('AWARDS', currentPage, pageSize, debouncedKeyword);
+      if (compId) {
+        fetchCompetitionInfo(compId, true).then((info) => {
+          if (info) setCompInfo(info);
+        });
+      }
     } catch (err: any) {
       message.error(err.message || 'Delete failed');
     }
   };
 
-  const handleDeleteComp = async (id: string) => {
-    try {
-      await deleteRecord(RecordType.COMPETITION, id);
-      message.success('Competition deleted');
-      setSubComps((prev) => prev.filter((c) => c.id !== id));
-      loadCompData();
-    } catch (err: any) {
-      message.error(err.message || 'Delete failed');
-    }
-  };
+  const clubsBadgeCount = debouncedKeyword
+    ? (activeTab === 'CLUBS' ? totalRecords : (compInfo?.clubsCount ?? 0))
+    : (compInfo?.clubsCount ?? totalRecords);
 
-  // Client search filter
-  const filteredClubs = useMemo(() => {
-    if (!tableFilter.trim()) return clubs;
-    return clubs.filter((c) => matchRecordSearch(c, tableFilter));
-  }, [clubs, tableFilter]);
-
-  const filteredAwards = useMemo(() => {
-    if (!tableFilter.trim()) return awards;
-    return awards.filter((a) => matchRecordSearch(a, tableFilter));
-  }, [awards, tableFilter]);
-
-  const filteredSubComps = useMemo(() => {
-    if (!tableFilter.trim()) return subComps;
-    return subComps.filter((c) => matchRecordSearch(c, tableFilter));
-  }, [subComps, tableFilter]);
+  const awardsBadgeCount = debouncedKeyword
+    ? (activeTab === 'AWARDS' ? totalRecords : (compInfo?.awardsCount ?? 0))
+    : (compInfo?.awardsCount ?? totalRecords);
 
   const tabItems = useMemo(() => {
     const list: any[] = [
@@ -310,7 +420,7 @@ export default function CompetitionDetailPage() {
               Clubs
             </span>
             <Badge
-              count={clubs.length}
+              count={clubsBadgeCount}
               overflowCount={99999}
               style={{ backgroundColor: activeTab === 'CLUBS' ? '#1d70b8' : '#94a3b8' }}
             />
@@ -320,7 +430,7 @@ export default function CompetitionDetailPage() {
     ];
 
     if (!isVirtual) {
-      if (awards.length > 0) {
+      if ((compInfo?.awardsCount ?? 0) > 0 || activeTab === 'AWARDS') {
         list.push({
           key: 'AWARDS',
           label: (
@@ -330,28 +440,9 @@ export default function CompetitionDetailPage() {
                 Awards
               </span>
               <Badge
-                count={awards.length}
+                count={awardsBadgeCount}
                 overflowCount={99999}
                 style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
-              />
-            </Space>
-          ),
-        });
-      }
-
-      if (subComps.length > 0 || (compInfo?.childrenCount && compInfo.childrenCount > 0)) {
-        list.push({
-          key: 'SUB_COMPS',
-          label: (
-            <Space size={4} title="Sub-Competitions">
-              <CompIcon size={18} className="text-amber-500" />
-              <span className={`hidden sm:inline ${activeTab === 'SUB_COMPS' ? 'font-bold' : ''}`}>
-                Sub-Competitions
-              </span>
-              <Badge
-                count={subComps.length}
-                overflowCount={99999}
-                style={{ backgroundColor: activeTab === 'SUB_COMPS' ? '#f59e0b' : '#94a3b8' }}
               />
             </Space>
           ),
@@ -360,7 +451,7 @@ export default function CompetitionDetailPage() {
     }
 
     return list;
-  }, [clubs.length, awards.length, subComps.length, compInfo?.childrenCount, activeTab, isVirtual]);
+  }, [clubsBadgeCount, awardsBadgeCount, activeTab, isVirtual, compInfo?.awardsCount]);
 
   const compTitle =
     compInfo?.short_name ||
@@ -379,105 +470,91 @@ export default function CompetitionDetailPage() {
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-2xs">
-          {/* Header & Competition Title Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              {nationId && getNationLogoUrl(nationId, nationCode) ? (
-                <img
-                  src={getNationLogoUrl(nationId, nationCode)}
-                  alt={nationName || 'Nation'}
-                  className="w-8 h-5.5 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : confedId && getConfederationLogoUrl(confedId) ? (
-                <img
-                  src={getConfederationLogoUrl(confedId)}
-                  alt="Confederation"
-                  className="w-8 h-8 object-contain rounded bg-white shadow-2xs border border-slate-200 shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : isVirtual ? (
-                <ClubIcon
-                  size={24}
-                  className={isVirtualExtinct ? 'text-red-500' : 'text-blue-500'}
-                />
-              ) : (
-                <CompIcon size={24} className="text-amber-500" />
-              )}
-              <div>
-                {/* Top: Tag ID (cho phép copy) + tags */}
-                <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                  <Tooltip title={isVirtual ? undefined : 'Click to copy ID'}>
-                    <Tag
-                      color={isVirtual ? (isVirtualExtinct ? 'volcano' : 'geekblue') : 'cyan'}
-                      className={`m-0 font-mono font-bold text-xs inline-flex items-center gap-1.5 ${
-                        !isVirtual ? 'cursor-pointer hover:opacity-80' : ''
-                      }`}
-                      onClick={() => {
-                        if (!isVirtual) {
-                          navigator.clipboard.writeText(String(compId));
-                          message.success(`Copied ID: ${compId}`);
-                        }
-                      }}
-                    >
-                      {!isVirtual && <CopyOutlined className="text-[11px]" />}
-                      <span>
-                        {isVirtual ? (isVirtualExtinct ? '[EXTINCT]' : '[OTHER]') : `ID: ${compId}`}
-                      </span>
-                    </Tag>
-                  </Tooltip>
-                  {compInfo?.three_letter_name && (
-                    <Tag color="purple" className="m-0 font-mono font-bold text-xs">
-                      {compInfo.three_letter_name}
-                    </Tag>
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <Tooltip
+                title={
+                  isVirtual
+                    ? isVirtualExtinct
+                      ? 'Extinct Clubs'
+                      : 'Independent Clubs'
+                    : 'Competition'
+                }
+                placement="bottom"
+              >
+                <div
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 cursor-default p-0 shadow-2xs border ${
+                    isVirtual
+                      ? isVirtualExtinct
+                        ? 'bg-orange-50/90 border-orange-300 text-orange-600'
+                        : 'bg-blue-50/90 border-blue-300 text-blue-600'
+                      : 'bg-amber-50/90 border-amber-300 text-amber-600'
+                  }`}
+                >
+                  {isVirtual ? (
+                    <ClubIcon
+                      size={18}
+                      className={isVirtualExtinct ? 'text-orange-500' : 'text-blue-500'}
+                    />
+                  ) : (
+                    <DomesticCompIcon size={18} className="text-amber-600" />
                   )}
-                  {compInfo?.categories && (
-                    <Tooltip title={compInfo.categories} trigger="hover" destroyTooltipOnHide>
-                      <Tag
-                        color={getCategoryTagColor(compInfo.categories)}
-                        className="m-0 text-xs font-semibold font-mono"
+                </div>
+              </Tooltip>
+
+              <div className="min-w-0 flex-1 flex flex-col justify-center">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {isVirtual ? (
+                    <Tag
+                      color={isVirtualExtinct ? 'volcano' : 'geekblue'}
+                      className="m-0 font-mono font-bold text-xs"
+                    >
+                      {isVirtualExtinct ? '[EXTINCT]' : '[OTHER]'}
+                    </Tag>
+                  ) : compId ? (
+                    <Tooltip title="Click to copy ID" placement="bottom">
+                      <button
+                        type="button"
+                        onClick={handleCopyId}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 border border-sky-200 font-mono text-xs font-bold transition-all cursor-pointer shadow-2xs select-none"
                       >
-                        {formatCategoryCode(compInfo.categories)}
-                      </Tag>
+                        <span>{compId}</span>
+                        {copiedId ? (
+                          <CheckOutlined className="text-emerald-600 text-xs" />
+                        ) : (
+                          <CopyOutlined className="text-sky-500 text-xs" />
+                        )}
+                      </button>
                     </Tooltip>
-                  )}
-                  {compInfo?.parent_id && (
-                    <Tag
-                      color="orange"
-                      className="m-0 font-bold text-xs cursor-pointer hover:opacity-80"
-                      onClick={() =>
-                        router.push(
-                          `/comp/${compInfo.parent_id}${nationId ? `?nationId=${nationId}` : ''}`,
-                        )
-                      }
-                    >
-                      Parent: {compInfo.parent_name || compInfo.parent_id}
-                    </Tag>
-                  )}
+                  ) : null}
+
                   {compInfo?.childrenCount !== undefined && compInfo.childrenCount > 0 && (
-                    <Tag color="gold" className="m-0 font-bold text-xs">
-                      {compInfo.childrenCount} Sub-Competitions
-                    </Tag>
+                    <button
+                      type="button"
+                      onClick={() => setIsSubCompsModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 text-xs font-medium transition-all cursor-pointer shadow-2xs select-none"
+                      title="Click to view Sub-Competitions"
+                    >
+                      <BranchesOutlined className="text-slate-600 text-xs" />
+                    </button>
                   )}
                 </div>
 
-                {/* Bottom: Tên (thường là short name) */}
-                <h2 className="text-base sm:text-lg font-bold text-slate-800 m-0 leading-snug">
-                  {compTitle}
-                </h2>
-                {isVirtual ? (
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    {isVirtualExtinct
-                      ? 'List of extinct clubs in this nation'
-                      : 'List of independent clubs (not assigned to a specific competition)'}
+                <div className="mt-1 min-w-0">
+                  <div
+                    className="font-bold text-xs sm:text-[13px] text-slate-900 uppercase tracking-wide line-clamp-2 break-words block leading-snug"
+                    title={compTitle}
+                  >
+                    <span>{compTitle}</span>
                   </div>
-                ) : compInfo?.long_name && compInfo.long_name !== compTitle ? (
-                  <div className="text-xs text-slate-500 mt-0.5">{compInfo.long_name}</div>
-                ) : null}
+                  {isVirtual && (
+                    <div className="text-xs text-slate-500 mt-0.5 font-normal normal-case">
+                      {isVirtualExtinct
+                        ? 'List of extinct clubs in this nation'
+                        : 'List of independent clubs (not assigned to a specific competition)'}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -485,46 +562,24 @@ export default function CompetitionDetailPage() {
           {/* AntD Tabs */}
           <Tabs
             activeKey={activeTab}
-            onChange={(key) => {
-              setActiveTab(key as any);
-              setTableFilter('');
-            }}
+            onChange={(key) => handleTabChange(key)}
             items={tabItems}
             className="mb-3"
           />
 
           {/* Sub Toolbar: Count, Filter, Add */}
           <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
-            <div className="text-xs text-gray-500">
-              Total:{' '}
-              <strong className="text-gray-800">
-                {activeTab === 'CLUBS'
-                  ? filteredClubs.length
-                  : activeTab === 'AWARDS'
-                    ? filteredAwards.length
-                    : filteredSubComps.length}
-              </strong>{' '}
-              {activeTab === 'CLUBS'
-                ? 'clubs'
-                : activeTab === 'AWARDS'
-                  ? 'awards'
-                  : 'sub-competitions'}
-            </div>
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <Input
                 prefix={<SearchOutlined className="text-gray-400" />}
-                placeholder={
-                  activeTab === 'CLUBS'
-                    ? 'Filter clubs...'
-                    : activeTab === 'AWARDS'
-                      ? 'Filter awards...'
-                      : 'Filter sub-competitions...'
-                }
+                placeholder={activeTab === 'CLUBS' ? 'Filter clubs...' : 'Filter awards...'}
                 value={tableFilter}
                 onChange={(e) => setTableFilter(e.target.value)}
+                onPressEnter={() => setDebouncedKeyword(tableFilter.trim())}
                 allowClear
                 className="flex-1 sm:w-60"
               />
+
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
@@ -536,32 +591,15 @@ export default function CompetitionDetailPage() {
                       nationId,
                       isVirtual ? undefined : compId,
                     );
-                  } else if (activeTab === 'AWARDS') {
-                    openRecordModal(RecordType.AWARD, null, nationId, compId);
                   } else {
-                    openRecordModal(
-                      RecordType.COMPETITION,
-                      { parent_id: compId, nation_id: nationId, confed_id: confedId },
-                      nationId,
-                      compId,
-                    );
+                    openRecordModal(RecordType.AWARD, null, nationId, compId);
                   }
                 }}
                 className="bg-blue-600 shrink-0"
-                title={
-                  activeTab === 'CLUBS'
-                    ? 'Add Club'
-                    : activeTab === 'AWARDS'
-                      ? 'Add Award'
-                      : 'Add Sub-Competition'
-                }
+                title={activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
               >
                 <span className="hidden sm:inline">
-                  {activeTab === 'CLUBS'
-                    ? 'Add Club'
-                    : activeTab === 'AWARDS'
-                      ? 'Add Award'
-                      : 'Add Sub-Competition'}
+                  {activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
                 </span>
               </Button>
             </div>
@@ -570,10 +608,17 @@ export default function CompetitionDetailPage() {
           {/* Main List */}
           {activeTab === 'CLUBS' ? (
             <CardGrid
-              items={filteredClubs}
+              key="comp-clubs"
+              items={clubs}
               type={EntityType.CLUB}
               columns={4}
-              loading={loading}
+              loading={tabLoading}
+              serverPagination={{
+                current: currentPage,
+                pageSize,
+                total: totalRecords,
+                onChange: handlePageChange,
+              }}
               onEdit={(rec) =>
                 openRecordModal(RecordType.CLUB, rec, nationId, isVirtual ? undefined : compId)
               }
@@ -587,31 +632,43 @@ export default function CompetitionDetailPage() {
               }
               defaultPageSize={20}
             />
-          ) : activeTab === 'AWARDS' ? (
+          ) : (
             <CardGrid
-              items={filteredAwards}
+              key="comp-awards"
+              items={awards}
               type={EntityType.AWARD}
               columns={4}
-              loading={loading}
+              loading={tabLoading}
+              serverPagination={{
+                current: currentPage,
+                pageSize,
+                total: totalRecords,
+                onChange: handlePageChange,
+              }}
               onEdit={(rec) => openRecordModal(RecordType.AWARD, rec, nationId, compId)}
               onDelete={(rec) => handleDeleteAward(String(rec.id))}
               emptyText="No awards found in this competition"
               defaultPageSize={20}
             />
-          ) : (
-            <CardGrid
-              items={filteredSubComps}
-              type={EntityType.COMPETITION}
-              columns={4}
-              loading={loading}
-              onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec, nationId)}
-              onDelete={(rec) => handleDeleteComp(String(rec.id))}
-              emptyText="No sub-competitions found"
-              defaultPageSize={20}
-            />
           )}
         </div>
       )}
+
+      {/* Sub-Competitions Modal */}
+      <SubCompetitionsModal
+        isOpen={isSubCompsModalOpen}
+        onClose={() => setIsSubCompsModalOpen(false)}
+        parentComp={compInfo}
+        onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec, nationId, compId)}
+        onDelete={() => {
+          loadCompInfo();
+          loadTabData(activeTab, currentPage, pageSize, debouncedKeyword);
+        }}
+        onRefreshParent={() => {
+          loadCompInfo();
+          loadTabData(activeTab, currentPage, pageSize, debouncedKeyword);
+        }}
+      />
     </div>
   );
 }

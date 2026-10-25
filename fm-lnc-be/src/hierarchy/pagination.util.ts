@@ -31,7 +31,7 @@ function getPropertyValue(obj: any, property: string): any {
   }
 
   // Name property aliases
-  if (property === 'long_name' || property === 'name_lg') return obj.name_lg ?? obj.long_name ?? obj.name;
+  if (property === 'long_name' || property === 'name_lg' || property === 'name') return obj.name_lg ?? obj.long_name ?? obj.name;
   if (property === 'short_name' || property === 'name_sh') return obj.name_sh ?? obj.short_name;
   if (property === 'three_letter_name' || property === 'name_3l') return obj.name_3l ?? obj.three_letter_name;
   if (property === 'six_letter_name' || property === 'name_6l') return obj.name_6l ?? obj.six_letter_name;

@@ -147,7 +147,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                      ID: {c.id}
+                      {c.id}
                     </span>
                   </div>
                 ))}
@@ -179,7 +179,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
-                      ID: {comp.id}
+                      {comp.id}
                     </span>
                   </div>
                 ))}
@@ -222,7 +222,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
-                      ID: {n.id}
+                      {n.id}
                     </span>
                   </div>
                 ))}
@@ -253,7 +253,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                      ID: {s.id}
+                      {s.id}
                     </span>
                   </div>
                 ))}
@@ -284,7 +284,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                      ID: {ci.id}
+                      {ci.id}
                     </span>
                   </div>
                 ))}
@@ -319,7 +319,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
-                      ID: {a.id}
+                      {a.id}
                     </span>
                   </div>
                 ))}
@@ -352,7 +352,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-                      ID: {p.id}
+                      {p.id}
                     </span>
                   </div>
                 ))}
@@ -381,7 +381,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       <div className="text-[11px] text-gray-500">Tournament Stage Name</div>
                     </div>
                     <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded">
-                      ID: {st.id}
+                      {st.id}
                     </span>
                   </div>
                 ))}

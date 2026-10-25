@@ -242,7 +242,7 @@ export default function PlayersPage() {
                 >
                   <div className="flex items-center justify-between pb-1.5 border-b border-gray-100">
                     <Tag color="blue" className="font-mono font-bold text-[10px] sm:text-xs m-0">
-                      ID: {p.id}
+                      {p.id}
                     </Tag>
                     <div className="flex items-center gap-1">
                       <Button

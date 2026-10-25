@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Modal, Tag, Button, Tooltip, Input, Checkbox, Select, message } from 'antd';
+import { Modal, Tag, Button, Tooltip, Input, Checkbox, Select, App, Popconfirm } from 'antd';
 import {
   CopyOutlined,
   CheckOutlined,
   EditOutlined,
+  DeleteOutlined,
   SaveOutlined,
   EnvironmentOutlined,
   UserOutlined,
@@ -25,7 +26,7 @@ import {
   CityIcon,
   AwardIcon,
 } from './EntityIcons';
-import { getNationLogoUrl, createRecord, updateRecord } from '../services/api';
+import { getNationLogoUrl, createRecord, updateRecord, deleteRecord } from '../services/api';
 import { useApp } from '../context/AppContext';
 
 export interface RecordDetailModalProps {
@@ -35,6 +36,7 @@ export interface RecordDetailModalProps {
   type: EntityType | RecordType | string;
   initialMode?: 'view' | 'edit' | 'create';
   onEdit?: (record?: any) => void;
+  onDelete?: (record: any) => void;
   onSuccess?: () => void;
   defaultNationId?: string | number;
   defaultCompId?: string | number;
@@ -95,12 +97,14 @@ export default function RecordDetailModal({
   type,
   initialMode = 'view',
   onEdit,
+  onDelete,
   onSuccess,
   defaultNationId,
   defaultCompId,
   defaultParentId,
 }: RecordDetailModalProps) {
   const { triggerRefresh } = useApp();
+  const { message } = App.useApp();
 
   const isCreate = !data || initialMode === 'create';
   const [mode, setMode] = useState<'view' | 'edit' | 'create'>(
@@ -109,6 +113,7 @@ export default function RecordDetailModal({
   const [copied, setCopied] = useState(false);
   const [currentData, setCurrentData] = useState<any>(data || {});
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
@@ -236,7 +241,7 @@ export default function RecordDetailModal({
     if (currentData.id !== undefined && currentData.id !== null) {
       navigator.clipboard.writeText(String(currentData.id));
       setCopied(true);
-      message.success(`Copied ID: ${currentData.id}`);
+      message.success(`Copied ${currentData.id}`);
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -261,7 +266,7 @@ export default function RecordDetailModal({
     const inactive = field ? isFieldInactive(field) : false;
     return `${
       inactive ? 'text-red-600 font-normal' : 'text-slate-400 font-semibold'
-    } text-xs shrink-0 select-none ${extraClass}`;
+    } text-xs shrink-0 select-none break-words leading-tight ${extraClass}`;
   };
 
   const getValueClass = (field?: string | string[], defaultClass: string = 'text-slate-800') => {
@@ -289,7 +294,11 @@ export default function RecordDetailModal({
   const isStage = type === 'stage' || type === EntityType.STAGE || type === RecordType.STAGE;
   const isAward = type === 'award' || type === EntityType.AWARD || type === RecordType.AWARD;
   const isVirtual = Boolean(
-    currentData.is_virtual || currentData.id === '[EXTINCT]' || currentData.id === '[OTHER]',
+    currentData.is_virtual ||
+      currentData.id === '[EXTINCT]' ||
+      currentData.id === '[OTHER]' ||
+      String(currentData.id).startsWith('oth-') ||
+      String(currentData.id).startsWith('ext-'),
   );
 
   // International Competition & Confederation resolving
@@ -317,14 +326,17 @@ export default function RecordDetailModal({
     rawCat ||
     'International';
 
-  const canEdit = !isVirtual && !isConfed;
+  const canEdit = !isVirtual && !isConfed && !isNation;
+  const canDelete = !isVirtual && !isConfed && !isNation;
 
   const title = isPlayer
     ? `${currentData.first_name || ''} ${currentData.second_name || ''}`.trim() ||
       currentData.common_name ||
       'Unnamed Player'
     : isVirtual
-      ? currentData.virtual_type === 'EXTINCT' || currentData.id === '[EXTINCT]'
+      ? currentData.virtual_type === 'EXTINCT' ||
+        currentData.id === '[EXTINCT]' ||
+        String(currentData.id).startsWith('ext-')
         ? 'Extinct Clubs'
         : 'Other Clubs'
       : currentData.short_name || currentData.long_name || currentData.name || 'Unnamed';
@@ -478,6 +490,27 @@ export default function RecordDetailModal({
     }
   };
 
+  const handleDeleteRecord = async () => {
+    setIsDeleting(true);
+    try {
+      if (onDelete) {
+        await onDelete(currentData);
+      } else {
+        const recType = getNormalizedRecordType();
+        await deleteRecord(recType, String(currentData.id));
+      }
+      message.success('Record deleted successfully!');
+      triggerRefresh();
+      onSuccess?.();
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      message.error(err.message || 'Failed to delete record');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Modal
       open={isOpen}
@@ -518,7 +551,7 @@ export default function RecordDetailModal({
                     onClick={handleCopyId}
                     className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 border border-sky-200 font-mono text-xs font-bold transition-all cursor-pointer shadow-2xs select-none"
                   >
-                    <span>ID: {currentData.id}</span>
+                    <span>{currentData.id}</span>
                     {copied ? (
                       <CheckOutlined className="text-emerald-600 text-xs" />
                     ) : (
@@ -574,6 +607,26 @@ export default function RecordDetailModal({
             >
               <span>Close</span>
             </Button>
+            {canDelete && (
+              <Popconfirm
+                title="Delete Record"
+                description={`Are you sure you want to delete "${title}"?`}
+                onConfirm={handleDeleteRecord}
+                okText="Delete"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true, loading: isDeleting }}
+              >
+                <Button
+                  key="delete"
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={isDeleting}
+                  className="font-medium px-4 h-9 rounded-lg flex items-center justify-center gap-1.5"
+                >
+                  <span>Delete</span>
+                </Button>
+              </Popconfirm>
+            )}
             {canEdit && (
               <Button
                 key="edit"
@@ -642,7 +695,7 @@ export default function RecordDetailModal({
               {/* Names Block */}
               {isPlayer ? (
                 <>
-                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass('first_name', 'pt-0.5')}>FN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass('first_name')} line-clamp-3 break-words text-left`}
@@ -651,7 +704,7 @@ export default function RecordDetailModal({
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass('second_name', 'pt-0.5')}>SN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass('second_name')} line-clamp-3 break-words text-left`}
@@ -661,7 +714,7 @@ export default function RecordDetailModal({
                   </div>
 
                   {currentData.common_name && (
-                    <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                       <span className={getLabelClass('common_name', 'pt-0.5')}>CN:</span>
                       <span
                         className={`font-bold text-xs sm:text-[13px] ${getValueClass('common_name', 'text-purple-700')} italic line-clamp-3 break-words text-left`}
@@ -672,7 +725,7 @@ export default function RecordDetailModal({
                   )}
                 </>
               ) : isCity || isStadium || isStage ? (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['name', 'long_name'], 'pt-0.5')}>Name:</span>
                   <span
                     className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name', 'long_name'])} line-clamp-3 break-words text-left`}
@@ -691,7 +744,7 @@ export default function RecordDetailModal({
               ) : (
                 <>
                   {/* LN */}
-                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['long_name', 'name'], 'pt-0.5')}>LN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass(['long_name', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
@@ -715,7 +768,7 @@ export default function RecordDetailModal({
                   </div>
 
                   {/* SN */}
-                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass('short_name', 'pt-0.5')}>SN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass('short_name')} line-clamp-3 break-words text-left`}
@@ -733,7 +786,7 @@ export default function RecordDetailModal({
                   </div>
 
                   {/* 3N */}
-                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                     <span
                       className={getLabelClass(['three_letter_name', 'three_letter'], 'pt-0.5')}
                     >
@@ -752,7 +805,7 @@ export default function RecordDetailModal({
                   {(type === 'club' ||
                     type === EntityType.CLUB ||
                     currentData.six_letter_name !== undefined) && (
-                    <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                       <span className={getLabelClass(['six_letter_name', 'six_letter'], 'pt-0.5')}>
                         6N:
                       </span>
@@ -768,7 +821,7 @@ export default function RecordDetailModal({
 
               {/* Confederation (for International Competition) */}
               {isInternationalComp && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span className={getLabelClass(['confed_id', 'confederation_id'], 'pt-0.5')}>
                     Confed:
                   </span>
@@ -782,7 +835,7 @@ export default function RecordDetailModal({
 
               {/* Associated Nation */}
               {!isNation && !isInternationalComp && nationId && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
                     Nation:
                   </span>
@@ -808,7 +861,7 @@ export default function RecordDetailModal({
 
               {/* Region (City) */}
               {isCity && currentData.categories && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['categories', 'category', 'region'], 'pt-0.5')}>
                     Region:
                   </span>
@@ -829,7 +882,7 @@ export default function RecordDetailModal({
 
               {/* Assigned Competition / League for Club */}
               {isClub && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['comp_id', 'competition_id'], 'pt-0.5')}>
                     Comp:
                   </span>
@@ -863,7 +916,7 @@ export default function RecordDetailModal({
 
               {/* Type (Stadium) */}
               {isStadium && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('type', 'pt-0.5')}>Type:</span>
                   <div className="flex items-center gap-1.5 text-left">
                     <Tag
@@ -878,7 +931,7 @@ export default function RecordDetailModal({
 
               {/* Parent Competition (for Competitions) */}
               {isComp && (currentData.parent_id || isFieldInactive(['parent_id', 'parent'])) && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['parent_id', 'parent'], 'pt-0.5')}>
                     Parent Comp:
                   </span>
@@ -888,7 +941,7 @@ export default function RecordDetailModal({
                     {currentData.parent_long_name ||
                       currentData.parent_name ||
                       currentData.parent?.long_name ||
-                      (currentData.parent_id ? `ID: ${currentData.parent_id}` : '-')}
+                      (currentData.parent_id ? `${currentData.parent_id}` : '-')}
                   </span>
                 </div>
               )}
@@ -897,7 +950,7 @@ export default function RecordDetailModal({
               {isComp &&
                 currentData.childrenCount !== undefined &&
                 currentData.childrenCount > 0 && (
-                  <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['sub_competitions', 'children'], 'pt-0.5')}>
                       Sub-Comps:
                     </span>
@@ -909,7 +962,7 @@ export default function RecordDetailModal({
 
               {/* Total Competitions for Nation */}
               {currentData.totalComps !== undefined && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('competitions', 'pt-0.5')}>Competitions:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-amber-700 text-left">
                     {currentData.totalComps}
@@ -919,7 +972,7 @@ export default function RecordDetailModal({
 
               {/* Clubs Count - Hidden for International Competitions */}
               {!isInternationalComp && currentData.clubsCount !== undefined && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-blue-700 text-left">
                     {currentData.clubsCount}
@@ -929,7 +982,7 @@ export default function RecordDetailModal({
 
               {/* Awards Count */}
               {currentData.awardsCount !== undefined && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('awards', 'pt-0.5')}>Awards:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-amber-700 text-left">
                     {currentData.awardsCount}
@@ -939,7 +992,7 @@ export default function RecordDetailModal({
 
               {/* Total Nations */}
               {currentData.totalNations !== undefined && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('nations', 'pt-0.5')}>Nations:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-cyan-700 text-left">
                     {currentData.totalNations}
@@ -949,7 +1002,7 @@ export default function RecordDetailModal({
 
               {/* Type / Categories (Non-City) */}
               {!isCity && (currentData.type || currentData.categories) && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span className={getLabelClass(['type', 'categories', 'category'], 'pt-0.5')}>
                     Type:
                   </span>
@@ -967,7 +1020,7 @@ export default function RecordDetailModal({
 
               {/* BG Color Row */}
               {bgInfo && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span
                     className={getLabelClass(['bg_color', 'background_color'], 'pt-0.5')}
                     title="Background Color"
@@ -992,7 +1045,7 @@ export default function RecordDetailModal({
 
               {/* FG Color Row */}
               {fgInfo && (
-                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[84px_1fr] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span
                     className={getLabelClass(['fg_color', 'foreground_color'], 'pt-0.5')}
                     title="Foreground Color"
@@ -1058,14 +1111,14 @@ export default function RecordDetailModal({
             {/* FM Unique ID */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                FM Unique ID <span className="text-red-500">*</span>
+                UID <span className="text-red-500">*</span>
               </label>
               <Input
                 type="text"
                 disabled={mode === 'edit'}
                 value={formData.id}
                 onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                placeholder="e.g. 102422"
+                placeholder="ID"
                 className="font-mono rounded-lg"
                 prefix={mode === 'edit' ? <LockOutlined className="text-slate-400" /> : undefined}
                 required
@@ -1078,24 +1131,24 @@ export default function RecordDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className={getFormLabelClass('first_name')}>
-                      First Name (FN) <span className="text-red-500">*</span>
+                      First Name <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={formData.first_name}
                       onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                      placeholder="e.g. Cristiano"
-                      className="rounded-lg"
+                      placeholder="Enter first name..."
+                      className="rounded-lg"  
                       required
                     />
                   </div>
                   <div>
                     <label className={getFormLabelClass('second_name')}>
-                      Second Name (SN) <span className="text-red-500">*</span>
+                      Second Name <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={formData.second_name}
                       onChange={(e) => setFormData({ ...formData, second_name: e.target.value })}
-                      placeholder="e.g. Ronaldo"
+                      placeholder="Enter second name..."
                       className="rounded-lg"
                       required
                     />
@@ -1103,12 +1156,12 @@ export default function RecordDetailModal({
                 </div>
                 <div>
                   <label className={getFormLabelClass('common_name')}>
-                    Common Name (CN / Nickname)
+                    Common Name
                   </label>
                   <Input
                     value={formData.common_name}
                     onChange={(e) => setFormData({ ...formData, common_name: e.target.value })}
-                    placeholder="e.g. Ronaldo / Kaka"
+                    placeholder="Enter common name..."
                     className="rounded-lg"
                   />
                 </div>
@@ -1125,7 +1178,7 @@ export default function RecordDetailModal({
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value, long_name: e.target.value })
                     }
-                    placeholder="e.g. Wembley Stadium / London"
+                    placeholder="Enter name..."
                     className="rounded-lg"
                     required
                   />
@@ -1153,12 +1206,12 @@ export default function RecordDetailModal({
               <div className="space-y-3">
                 <div>
                   <label className={getFormLabelClass(['long_name', 'name'])}>
-                    Long Name (LN) <span className="text-red-500">*</span>
+                    Long name<span className="text-red-500">*</span>
                   </label>
                   <Input
                     value={formData.long_name}
                     onChange={(e) => setFormData({ ...formData, long_name: e.target.value })}
-                    placeholder="e.g. Manchester United"
+                    placeholder="Enter long name..."
                     className="rounded-lg"
                     required
                   />
@@ -1166,17 +1219,17 @@ export default function RecordDetailModal({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={getFormLabelClass('short_name')}>Short Name (SN)</label>
+                    <label className={getFormLabelClass('short_name')}>Short name</label>
                     <Input
                       value={formData.short_name}
                       onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
-                      placeholder="e.g. Man Utd"
+                      placeholder="Enter short name..."
                       className="rounded-lg"
                     />
                   </div>
                   <div>
                     <label className={getFormLabelClass(['three_letter_name', 'three_letter'])}>
-                      3-Letter Code (3N)
+                      3-Letter name
                     </label>
                     <Input
                       value={formData.three_letter_name}
@@ -1186,7 +1239,7 @@ export default function RecordDetailModal({
                           three_letter_name: e.target.value.toUpperCase(),
                         })
                       }
-                      placeholder="e.g. MUN"
+                      placeholder="Enter 3-letter name..."
                       maxLength={3}
                       className="font-mono uppercase rounded-lg"
                     />
@@ -1196,14 +1249,14 @@ export default function RecordDetailModal({
                 {(isClub || type === 'club' || type === EntityType.CLUB) && (
                   <div>
                     <label className={getFormLabelClass(['six_letter_name', 'six_letter'])}>
-                      6-Letter Code (6N)
+                      6-Letter name
                     </label>
                     <Input
                       value={formData.six_letter_name}
                       onChange={(e) =>
                         setFormData({ ...formData, six_letter_name: e.target.value })
                       }
-                      placeholder="e.g. MANUTD"
+                      placeholder="Enter 6-letter name..."
                       maxLength={6}
                       className="font-mono rounded-lg"
                     />
@@ -1216,30 +1269,29 @@ export default function RecordDetailModal({
             {isComp && (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-3.5 space-y-3">
                 <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <BgColorsOutlined className="text-amber-500" /> Competition Colors (RGB Format: R
-                  G B)
+                  <BgColorsOutlined className="text-amber-500" /> Color
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className={getFormLabelClass(['bg_color', 'background_color'])}>
-                      Background Color (BG)
+                      Background Color
                     </label>
                     <Input
                       value={formData.bg_color}
                       onChange={(e) => setFormData({ ...formData, bg_color: e.target.value })}
-                      placeholder="e.g. 0 51 102"
+                      placeholder="R G B"
                       className="font-mono text-xs rounded-lg"
                     />
                   </div>
                   <div>
                     <label className={getFormLabelClass(['fg_color', 'foreground_color'])}>
-                      Foreground Color (FG)
+                      Foreground Color
                     </label>
                     <Input
                       value={formData.fg_color}
                       onChange={(e) => setFormData({ ...formData, fg_color: e.target.value })}
-                      placeholder="e.g. 255 255 255"
+                      placeholder="R G B"
                       className="font-mono text-xs rounded-lg"
                     />
                   </div>
@@ -1274,7 +1326,7 @@ export default function RecordDetailModal({
                   onChange={(e) =>
                     setFormData({ ...formData, type: e.target.value, categories: e.target.value })
                   }
-                  placeholder="e.g. League (1), Cup, Youth, UEFA"
+                  placeholder="Enter type/category..."
                   className="rounded-lg"
                 />
               </div>
@@ -1284,18 +1336,14 @@ export default function RecordDetailModal({
             {isComp && (
               <div>
                 <label className={getFormLabelClass(['parent_id', 'parent'])}>
-                  Parent Competition ID (COMP_PARENT_ID)
+                  Parent Comp
                 </label>
                 <Input
                   value={formData.parent_id || ''}
                   onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
-                  placeholder="e.g. 1301416 (Leave blank if none)"
+                  placeholder="Enter parent comp ID..."
                   className="font-mono text-xs rounded-lg"
                 />
-                <span className="text-[11px] text-slate-400 mt-0.5 block">
-                  Assign this competition as a sub-stage or sub-competition of another parent
-                  competition.
-                </span>
               </div>
             )}
 
@@ -1306,9 +1354,7 @@ export default function RecordDetailModal({
                   checked={formData.is_disabled}
                   onChange={(e) => setFormData({ ...formData, is_disabled: e.target.checked })}
                 >
-                  <span className="text-xs text-red-600 font-medium">
-                    Disable in .lnc (Comment out)
-                  </span>
+                  <span className="text-xs text-red-600 font-medium">is disabled</span>
                 </Checkbox>
               )}
               {isClub && (
@@ -1316,7 +1362,7 @@ export default function RecordDetailModal({
                   checked={formData.is_extinct}
                   onChange={(e) => setFormData({ ...formData, is_extinct: e.target.checked })}
                 >
-                  <span className="text-xs text-slate-700 font-medium">Extinct Club</span>
+                  <span className="text-xs text-slate-700 font-medium">is extinct</span>
                 </Checkbox>
               )}
             </div>
@@ -1328,7 +1374,7 @@ export default function RecordDetailModal({
                 rows={2}
                 value={formData.note}
                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                placeholder="Optional notes or details..."
+                placeholder="Enter note..."
                 className="text-xs rounded-lg"
               />
             </div>

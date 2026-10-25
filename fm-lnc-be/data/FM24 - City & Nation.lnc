@@ -3215,28 +3215,28 @@
 "CITY_NAME_CHANGE"		2000269191	"Mochudi"						""
 
 
-# CITY > [BRA] BRAZIL > Acre / AC
+# CITY > [BRA] BRAZIL > [AC] Acre
 #====================================================================================
 "CITY_NAME_CHANGE"		301000		"Rio Branco (AC)"					""
 
 
-# CITY > [BRA] BRAZIL > Alagoas / AL
+# CITY > [BRA] BRAZIL > [AL] Alagoas
 #====================================================================================
 "CITY_NAME_CHANGE"		104983		"Arapiraca (AL)"					""
 "CITY_NAME_CHANGE"		107178		"Maceió (AL)"						""
 
 
-# CITY > [BRA] BRAZIL > Amapá / AP
+# CITY > [BRA] BRAZIL > [AP] Amapá
 #====================================================================================
 "CITY_NAME_CHANGE"		104989		"Macapá (AP)"						""
 
 
-# CITY > [BRA] BRAZIL > Amazonas / AM
+# CITY > [BRA] BRAZIL > [AM] Amazonas
 #====================================================================================
 "CITY_NAME_CHANGE"		301002		"Manaus (AM)"						""
 
 
-# CITY > [BRA] BRAZIL > Bahia / BA
+# CITY > [BRA] BRAZIL > [BA] Bahia
 #====================================================================================
 "CITY_NAME_CHANGE"		102502		"Salvador (BA)"						""
 "CITY_NAME_CHANGE"		301003		"Alagoinhas (BA)"					""
@@ -3251,7 +3251,7 @@
 "CITY_NAME_CHANGE"		318841		"Lauro de Freitas (BA)"					""
 
 
-# CITY > [BRA] BRAZIL > Ceará / CE
+# CITY > [BRA] BRAZIL > [CE] Ceará
 #====================================================================================
 "CITY_NAME_CHANGE"		107174		"Fortaleza (CE)"					""
 "CITY_NAME_CHANGE"		301012		"Juazeiro do Norte (CE)"				""
@@ -3260,12 +3260,12 @@
 "CITY_NAME_CHANGE"		2108029		"Maracanaú (CE)"					""
 
 
-# CITY > [BRA] BRAZIL > Distrito Federal / DF
+# CITY > [BRA] BRAZIL > [DF] Distrito Federal
 #====================================================================================
 "CITY_NAME_CHANGE"		121264		"Brasília (DF)"						""
 
 
-# CITY > [BRA] BRAZIL > Espírito Santo / ES
+# CITY > [BRA] BRAZIL > [ES] Espírito Santo
 #====================================================================================
 "CITY_NAME_CHANGE"		102511		"Vitória (ES)"						""
 "CITY_NAME_CHANGE"		301014		"Linhares (ES)"						""
@@ -3276,7 +3276,7 @@
 "CITY_NAME_CHANGE"		321243		"Cariacica (ES)"					""
 
 
-# CITY > [BRA] BRAZIL > Goiás / GO
+# CITY > [BRA] BRAZIL > [GO] Goiás
 #====================================================================================
 "CITY_NAME_CHANGE"		102509		"Goiânia (GO)"						""
 "CITY_NAME_CHANGE"		301016		"Anápolis (GO)"						""
@@ -3286,7 +3286,7 @@
 "CITY_NAME_CHANGE"		19009625	"Aparecida de Goiânia (GO)"				""
 
 
-# CITY > [BRA] BRAZIL > Maranhão / MA
+# CITY > [BRA] BRAZIL > [MA] Maranhão
 #====================================================================================
 "CITY_NAME_CHANGE"		107371		"São Luís (MA)"						""
 "CITY_NAME_CHANGE"		301069		"Imperatriz (MA)"					""
@@ -3297,7 +3297,7 @@
 "CITY_NAME_CHANGE"		19140940	"Paço do Lumiar (MA)"					""
 
 
-# CITY > [BRA] BRAZIL > Mato Grosso / MT
+# CITY > [BRA] BRAZIL > [MT] Mato Grosso
 #====================================================================================
 "CITY_NAME_CHANGE"		301071		"Sinop (MT)"						""
 "CITY_NAME_CHANGE"		301072		"Rondonópolis (MT)"					""
@@ -3305,13 +3305,13 @@
 "CITY_NAME_CHANGE"		2108551		"Várzea Grande (MT)"					""
 
 
-# CITY > [BRA] BRAZIL > Mato Grosso do Sul / MS
+# CITY > [BRA] BRAZIL > [MS] Mato Grosso do Sul
 #====================================================================================
 "CITY_NAME_CHANGE"		107172		"Campo Grande (MS)"					""
 "CITY_NAME_CHANGE"		301073		"Dourados (MS)"						""
 
 
-# CITY > [BRA] BRAZIL > Minas Gerais / MG
+# CITY > [BRA] BRAZIL > [MG] Minas Gerais
 #====================================================================================
 "CITY_NAME_CHANGE"		102499		"Belo Horizonte (MG)"					""
 "CITY_NAME_CHANGE"		301025		"Poços de Caldas (MG)"					""
@@ -3335,7 +3335,7 @@
 "CITY_NAME_CHANGE"		8833405		"Contagem (MG)"						""
 
 
-# CITY > [BRA] BRAZIL > Paraná / PR
+# CITY > [BRA] BRAZIL > [PR] Paraná
 #====================================================================================
 "CITY_NAME_CHANGE"		102504		"Curitiba (PR)"						""
 "CITY_NAME_CHANGE"		107177		"Londrina (PR)"						""
@@ -3353,14 +3353,14 @@
 "CITY_NAME_CHANGE"		19137405	"Colombo (PR)"						""
 
 
-# CITY > [BRA] BRAZIL > Paraíba / PB
+# CITY > [BRA] BRAZIL > [PB] Paraíba
 #====================================================================================
 "CITY_NAME_CHANGE"		301085		"João Pessoa (PB)"					""
 "CITY_NAME_CHANGE"		301086		"Campina Grande (PB)"					""
 "CITY_NAME_CHANGE"		313164		"Santa Rita (PB)"					""
 
 
-# CITY > [BRA] BRAZIL > Pará / PA
+# CITY > [BRA] BRAZIL > [PA] Pará
 #====================================================================================
 "CITY_NAME_CHANGE"		102506		"Belém (PA)"						""
 "CITY_NAME_CHANGE"		301084		"Castanhal (PA)"					""
@@ -3375,7 +3375,7 @@
 "CITY_NAME_CHANGE"		19316670	"Tailândia (PA)"					""
 
 
-# CITY > [BRA] BRAZIL > Pernambuco / PE
+# CITY > [BRA] BRAZIL > [PE] Pernambuco
 #====================================================================================
 "CITY_NAME_CHANGE"		102500		"Recife (PE)"						""
 "CITY_NAME_CHANGE"		301041		"Caruaru (PE)"						""
@@ -3389,20 +3389,20 @@
 "CITY_NAME_CHANGE"		8832299		"Camaragibe (PE)"					""
 
 
-# CITY > [BRA] BRAZIL > Piauí / PI
+# CITY > [BRA] BRAZIL > [PI] Piauí
 #====================================================================================
 "CITY_NAME_CHANGE"		301045		"Teresina (PI)"						""
 "CITY_NAME_CHANGE"		313171		"Parnaíba (PI)"						""
 
 
-# CITY > [BRA] BRAZIL > Rio Grande do Norte / RN
+# CITY > [BRA] BRAZIL > [RN] Rio Grande do Norte
 #====================================================================================
 "CITY_NAME_CHANGE"		107180		"Natal (RN)"						""
 "CITY_NAME_CHANGE"		301048		"Mossoró (RN)"						""
 "CITY_NAME_CHANGE"		310906		"Parnamirim (RN)"					""
 
 
-# CITY > [BRA] BRAZIL > Rio Grande do Sul / RS
+# CITY > [BRA] BRAZIL > [RS] Rio Grande do Sul
 #====================================================================================
 "CITY_NAME_CHANGE"		102501		"Porto Alegre (RS)"					""
 "CITY_NAME_CHANGE"		102553		"Caxias do Sul (RS)"					""
@@ -3425,7 +3425,7 @@
 "CITY_NAME_CHANGE"		8833399		"Cachoeirinha (RS)"					""
 
 
-# CITY > [BRA] BRAZIL > Rio de Janeiro / RJ
+# CITY > [BRA] BRAZIL > [RJ] Rio de Janeiro
 #====================================================================================
 "CITY_NAME_CHANGE"		102498		"Rio de Janeiro (RJ)"					""
 "CITY_NAME_CHANGE"		102519		"Volta Redonda (RJ)"					""
@@ -3452,17 +3452,17 @@
 "CITY_NAME_CHANGE"		19169870	"Itaboraí (RJ)"						""
 
 
-# CITY > [BRA] BRAZIL > Rondônia / RO
+# CITY > [BRA] BRAZIL > [RO] Rondônia
 #====================================================================================
 "CITY_NAME_CHANGE"		301060		"Porto Velho (RO)"					""
 
 
-# CITY > [BRA] BRAZIL > Roraima / RR
+# CITY > [BRA] BRAZIL > [RR] Roraima
 #====================================================================================
 "CITY_NAME_CHANGE"		301063		"Boa Vista (RR)"					""
 
 
-# CITY > [BRA] BRAZIL > Santa Catarina / SC
+# CITY > [BRA] BRAZIL > [SC] Santa Catarina
 #====================================================================================
 "CITY_NAME_CHANGE"		102529		"Criciúma (SC)"						""
 "CITY_NAME_CHANGE"		107173		"Florianópolis (SC)"					""
@@ -3476,13 +3476,13 @@
 "CITY_NAME_CHANGE"		19041349	"Balneário Camboriú (SC)"				""
 
 
-# CITY > [BRA] BRAZIL > Sergipe / SE
+# CITY > [BRA] BRAZIL > [SE] Sergipe
 #====================================================================================
 "CITY_NAME_CHANGE"		102522		"Aracaju (SE)"						""
 "CITY_NAME_CHANGE"		19144918	"Nossa Senhora do Socorro (SE)"				""
 
 
-# CITY > [BRA] BRAZIL > São Paulo / SP
+# CITY > [BRA] BRAZIL > [SP] São Paulo
 #====================================================================================
 "CITY_NAME_CHANGE"		102507		"Campinas (SP)"						""
 "CITY_NAME_CHANGE"		102508		"Santos (SP)"						""
@@ -3551,7 +3551,7 @@
 "CITY_NAME_CHANGE"		19264232	"Itapevi (SP)"						""
 
 
-# CITY > [BRA] BRAZIL > Tocantins / TO
+# CITY > [BRA] BRAZIL > [TO] Tocantins
 #====================================================================================
 "CITY_NAME_CHANGE"		301039		"Palmas (TO)"						""
 "CITY_NAME_CHANGE"		313182		"Araguaína (TO)"					""
@@ -4253,7 +4253,7 @@
 "CITY_NAME_CHANGE"		85139617	"Kouoptamo"						""
 
 
-# CITY > [CAN] CANADA > Alberta / AB
+# CITY > [CAN] CANADA > [AB] Alberta
 #====================================================================================
 "CITY_NAME_CHANGE"		133915		"Edmonton (AB)"						""
 "CITY_NAME_CHANGE"		978106		"Calgary (AB)"						""
@@ -4270,7 +4270,7 @@
 "CITY_NAME_CHANGE"		72007278	"Banff (AB)"						""
 
 
-# CITY > [CAN] CANADA > British Columbia / BC
+# CITY > [CAN] CANADA > [BC] British Columbia
 #====================================================================================
 "CITY_NAME_CHANGE"		982693		"Burnaby (BC)"						""
 "CITY_NAME_CHANGE"		982694		"North Vancouver (BC)"					""
@@ -4278,13 +4278,13 @@
 "CITY_NAME_CHANGE"		982986		"Victoria (BC)"						""
 "CITY_NAME_CHANGE"		4400015		"Vancouver (BC)"					""
 "CITY_NAME_CHANGE"		20502647	"Port Moody (BC)"					""
-"CITY_NAME_CHANGE"		72007239	"Abbotsford (BC)"					""
 "CITY_NAME_CHANGE"		72007206	"Surrey (BC)"						""
 "CITY_NAME_CHANGE"		72007222	"Coquitlam (BC)"					""
 "CITY_NAME_CHANGE"		72007224	"Saanich (BC)"						""
 "CITY_NAME_CHANGE"		72007225	"Kelowna (BC)"						""
 "CITY_NAME_CHANGE"		72007226	"Kamloops (BC)"						""
 "CITY_NAME_CHANGE"		72007232	"Langley (BC)"						""
+"CITY_NAME_CHANGE"		72007239	"Abbotsford (BC)"					""
 "CITY_NAME_CHANGE"		72007239	"Nanaimo (BC)"						""
 "CITY_NAME_CHANGE"		72007248	"Prince George (BC)"					""
 "CITY_NAME_CHANGE"		72007249	"Chilliwack (BC)"					""
@@ -4295,31 +4295,31 @@
 "CITY_NAME_CHANGE"		2000085424	"Squamish (BC)"						""
 
 
-# CITY > [CAN] CANADA > Manitoba / MB
+# CITY > [CAN] CANADA > [MB] Manitoba
 #====================================================================================
 "CITY_NAME_CHANGE"		982690		"Winnipeg (MB)"						""
 
 
-# CITY > [CAN] CANADA > New Brunswick / NB
+# CITY > [CAN] CANADA > [NB] New Brunswick
 #====================================================================================
 "CITY_NAME_CHANGE"		72007251	"Saint John (NB)"					""
 "CITY_NAME_CHANGE"		72007253	"Moncton (NB)"						""
 "CITY_NAME_CHANGE"		72007265	"Fredericton (NB)"					""
 
 
-# CITY > [CAN] CANADA > Newfoundland and Labrador / NL
+# CITY > [CAN] CANADA > [NL] Newfoundland and Labrador
 #====================================================================================
 "CITY_NAME_CHANGE"		72007229	"St John's (NL)"					""
 "CITY_NAME_CHANGE"		72007277	"Labrador City (NL)"					""
 
 
-# CITY > [CAN] CANADA > Nova Scotia / NS
+# CITY > [CAN] CANADA > [NS] Nova Scotia
 #====================================================================================
 "CITY_NAME_CHANGE"		5605145		"Halifax (NS)"						""
 "CITY_NAME_CHANGE"		72007228	"Cape Breton (NS)"					""
 
 
-# CITY > [CAN] CANADA > Ontario / ON
+# CITY > [CAN] CANADA > [ON] Ontario
 #====================================================================================
 "CITY_NAME_CHANGE"		103111		"Ottawa (ON)"						""
 "CITY_NAME_CHANGE"		145755		"London (ON)"						""
@@ -4371,7 +4371,7 @@
 "CITY_NAME_CHANGE"		2000259385	"Leamington (ON)"					""
 
 
-# CITY > [CAN] CANADA > Quebec / QC
+# CITY > [CAN] CANADA > [QC] Quebec
 #====================================================================================
 "CITY_NAME_CHANGE"		103112		"Montreal (QC)"						""
 "CITY_NAME_CHANGE"		982691		"Laval (QC)"						""
@@ -4399,14 +4399,14 @@
 "CITY_NAME_CHANGE"		2000047047	"Saint-Mathias-sur-Richelieu (QC)"			""
 
 
-# CITY > [CAN] CANADA > Saskatchewan / SK
+# CITY > [CAN] CANADA > [SK] Saskatchewan
 #====================================================================================
 "CITY_NAME_CHANGE"		72007002	"Rosetown (SK)"						""
 "CITY_NAME_CHANGE"		72007209	"Saskatoon (SK)"					""
 "CITY_NAME_CHANGE"		72007210	"Regina (SK)"						""
 
 
-# CITY > [CAN] CANADA > Yukon / YT
+# CITY > [CAN] CANADA > [YT] Yukon
 #====================================================================================
 "CITY_NAME_CHANGE"		20500297	"Whitehorse (YT)"					""
 
@@ -4681,20 +4681,29 @@
 "CITY_NAME_CHANGE"		128055		"Guangzhou"						""
 "CITY_NAME_CHANGE"		134862		"Shaoguan"						""
 "CITY_NAME_CHANGE"		136606		"Huizhou"						""
+"CITY_NAME_CHANGE"		1016656		"Wuhua"							""
+"CITY_NAME_CHANGE"		1016709		"Enping"						""
+"CITY_NAME_CHANGE"		1016777		"Xingning"						""
 "CITY_NAME_CHANGE"		1023865		"Heyuan"						""
 "CITY_NAME_CHANGE"		1023866		"Shanwei"						""
 "CITY_NAME_CHANGE"		1023867		"Yangjiang"						""
 "CITY_NAME_CHANGE"		1023868		"Maoming"						""
-"CITY_NAME_CHANGE"		1023871		"Jieyang"						""
 "CITY_NAME_CHANGE"		1023869		"Qingyuan"						""
+"CITY_NAME_CHANGE"		1023870		"Chaozhou"						""
+"CITY_NAME_CHANGE"		1023871		"Jieyang"						""
 "CITY_NAME_CHANGE"		1023872		"Yunfu"							""
 "CITY_NAME_CHANGE"		5620124		"Dongguan"						""
 "CITY_NAME_CHANGE"		5620127		"Foshan"						""
 "CITY_NAME_CHANGE"		5620131		"Shantou"						""
+"CITY_NAME_CHANGE"		5620156		"Zhongshan"						""
+"CITY_NAME_CHANGE"		5620158		"Zhuhai"						""
 "CITY_NAME_CHANGE"		5620163		"Jiangmen"						""
 "CITY_NAME_CHANGE"		5622937		"Zhaoqing"						""
 "CITY_NAME_CHANGE"		5627734		"Meizhou"						""
 "CITY_NAME_CHANGE"		5627740		"Zhanjiang"						""
+"CITY_NAME_CHANGE"		5632380		"Shunde"						""
+"CITY_NAME_CHANGE"		23064444	"Lufeng"						""
+"CITY_NAME_CHANGE"		23424350	"Yangchun"						""
 
 
 # CITY > [CHN] CHINA PR > Guangxi Zhuang Autonomous Region
@@ -4877,15 +4886,52 @@
 #====================================================================================
 "CITY_NAME_CHANGE"		128048		"Jinan"							""
 "CITY_NAME_CHANGE"		128050		"Qingdao"						""
+"CITY_NAME_CHANGE"		131214		"Weihai"						""
 "CITY_NAME_CHANGE"		1016664		"Rizhao"						""
+"CITY_NAME_CHANGE"		1016670		"Pingdu"						""
+"CITY_NAME_CHANGE"		1016687		"Rushan"						""
+"CITY_NAME_CHANGE"		1016688		"Laiyang"						""
+"CITY_NAME_CHANGE"		1016698		"Dongying"						""
+"CITY_NAME_CHANGE"		1016705		"Yanzhou"						""
+"CITY_NAME_CHANGE"		1016717		"Gaomi"							""
 "CITY_NAME_CHANGE"		1016727		"Liaocheng"						""
+"CITY_NAME_CHANGE"		1016732		"Zhangqiu"						""
+"CITY_NAME_CHANGE"		1016733		"Tancheng"						""
 "CITY_NAME_CHANGE"		1016737		"Zaozhuang"						""
+"CITY_NAME_CHANGE"		1016741		"Laizhou"						""
+"CITY_NAME_CHANGE"		1016745		"Weishan"						""
+"CITY_NAME_CHANGE"		1016756		"Pekan Bangar"						""
+"CITY_NAME_CHANGE"		1016770		"Leling"						""
+"CITY_NAME_CHANGE"		1016771		"Penglai"						""
+"CITY_NAME_CHANGE"		1016772		"Zhucheng"						""
+"CITY_NAME_CHANGE"		1016779		"Longkou"						""
 "CITY_NAME_CHANGE"		1016780		"Binzhou"						""
+"CITY_NAME_CHANGE"		1023828		"Laiwu"							""
+"CITY_NAME_CHANGE"		1023829		"Jimo"							""
+"CITY_NAME_CHANGE"		1023830		"Jiaonan"						""
+"CITY_NAME_CHANGE"		1023831		"Laixi"							""
+"CITY_NAME_CHANGE"		1023832		"Tengzhou"						""
+"CITY_NAME_CHANGE"		1023833		"Anqiu"							""
+"CITY_NAME_CHANGE"		1023834		"Changyi"						""
+"CITY_NAME_CHANGE"		1023835		"Qingzhou"						""
+"CITY_NAME_CHANGE"		1023836		"Shouguang"						""
+"CITY_NAME_CHANGE"		1023837		"Qixia"							""
 "CITY_NAME_CHANGE"		1023838		"Haiyang"						""
+"CITY_NAME_CHANGE"		1023839		"Zhaoyuan"						""
+"CITY_NAME_CHANGE"		1023840		"Rongcheng"						""
+"CITY_NAME_CHANGE"		1023841		"Wendeng"						""
+"CITY_NAME_CHANGE"		1023842		"Zoucheng"						""
+"CITY_NAME_CHANGE"		1023843		"Xintai"						""
+"CITY_NAME_CHANGE"		1023844		"Feicheng"						""
+"CITY_NAME_CHANGE"		1023845		"Yucheng"						""
+"CITY_NAME_CHANGE"		1023846		"Linqing"						""
+"CITY_NAME_CHANGE"		5620137		"Jiaozhou"						""
 "CITY_NAME_CHANGE"		5622755		"Zibo"							""
+"CITY_NAME_CHANGE"		5625259		"Qufu"							""
 "CITY_NAME_CHANGE"		5625260		"Jining (Shandong)"					""
 "CITY_NAME_CHANGE"		5627428		"Tai'an (Shandong)"					""
 "CITY_NAME_CHANGE"		5627781		"Yantai"						""
+"CITY_NAME_CHANGE"		5627783		"Linyi"							""
 "CITY_NAME_CHANGE"		5627784		"Weifang"						""
 "CITY_NAME_CHANGE"		5628895		"Dezhou"						""
 "CITY_NAME_CHANGE"		5630021		"Heze"							""
@@ -4967,7 +5013,7 @@
 # CITY > [TPE] CHINESE TAIPEI > Changhua County
 #====================================================================================
 "CITY_NAME_CHANGE"		23026775	"Changhua"						""
-#"CITY_NAME_CHANGE"		2000341180	"Yuanlin"						""	# [NEW]
+#"CITY_NAME_CHANGE"		2000341180	"Yuanlin"						""  # [NEW]
 
 
 # CITY > [TPE] CHINESE TAIPEI > Chiayi County
@@ -4995,7 +5041,7 @@
 # CITY > [TPE] CHINESE TAIPEI > Miaoli County
 #====================================================================================
 "CITY_NAME_CHANGE"		23026779	"Miaoli"						""
-#"CITY_NAME_CHANGE"		2000341181	"Toufen"						""	# [NEW]
+#"CITY_NAME_CHANGE"		2000341181	"Toufen"						""  # [NEW]
 
 
 # CITY > [TPE] CHINESE TAIPEI > Nantou County
@@ -5079,12 +5125,12 @@
 "CITY_NAME_CHANGE"		23163278	"Lienchiang"						""
 
 
-# CITY > [COL] COLOMBIA > Amazonas / AM
+# CITY > [COL] COLOMBIA > [AM] Amazonas
 #====================================================================================
 "CITY_NAME_CHANGE"		76017463	"Leticia (AM)"						""
 
 
-# CITY > [COL] COLOMBIA > Antioquia / AN
+# CITY > [COL] COLOMBIA > [AN] Antioquia
 #====================================================================================
 "CITY_NAME_CHANGE"		303779		"Envigado (AN)"						""
 "CITY_NAME_CHANGE"		303782		"Medellín (AN)"						""
@@ -5124,12 +5170,12 @@
 #"CITY_NAME_CHANGE"		2000341184	"Amalfi (AN)"						""  # [NEW]
 
 
-# CITY > [COL] COLOMBIA > Arauca / AR
+# CITY > [COL] COLOMBIA > [AR] Arauca
 #====================================================================================
 "CITY_NAME_CHANGE"		76003610	"Arauca (AR)"						""
 
 
-# CITY > [COL] COLOMBIA > Atlántico / AT
+# CITY > [COL] COLOMBIA > [AT] Atlántico
 #====================================================================================
 "CITY_NAME_CHANGE"		303775		"Barranquilla (AT)"					""
 "CITY_NAME_CHANGE"		8825449		"Soledad (AT)"						""
@@ -5147,7 +5193,7 @@
 "CITY_NAME_CHANGE"		2000257656	"Suan de la Trinidad (AT)"				""
 
 
-# CITY > [COL] COLOMBIA > Bolívar / BL
+# CITY > [COL] COLOMBIA > [BL] Bolívar
 #====================================================================================
 "CITY_NAME_CHANGE"		303778		"Cartagena (BL)"					""
 "CITY_NAME_CHANGE"		8832575		"Soplaviento (BL)"					""
@@ -5169,7 +5215,7 @@
 "CITY_NAME_CHANGE"		2000257679	"Talaigua Nuevo (BL)"					""
 
 
-# CITY > [COL] COLOMBIA > Boyacá / BY
+# CITY > [COL] COLOMBIA > [BY] Boyacá
 #====================================================================================
 "CITY_NAME_CHANGE"		5261736		"Tunja (BY)"						""
 "CITY_NAME_CHANGE"		8825436		"Ciénega (BY)"						""
@@ -5182,7 +5228,7 @@
 "CITY_NAME_CHANGE"		2000087278	"Tuta (BY)"						""
 
 
-# CITY > [COL] COLOMBIA > Caldas / CL
+# CITY > [COL] COLOMBIA > [CL] Caldas
 #====================================================================================
 "CITY_NAME_CHANGE"		303781		"Manizales (CL)"					""
 "CITY_NAME_CHANGE"		8829659		"Villamaría (CL)"					""
@@ -5193,20 +5239,20 @@
 "CITY_NAME_CHANGE"		2000256780	"La Dorada (CL)"					""
 
 
-# CITY > [COL] COLOMBIA > Caquetá / CQ
+# CITY > [COL] COLOMBIA > [CQ] Caquetá
 #====================================================================================
 "CITY_NAME_CHANGE"		8832593		"San Juan De El Doncello (CQ)"				""
 "CITY_NAME_CHANGE"		76006522	"Florencia (CQ)"					""
 
 
-# CITY > [COL] COLOMBIA > Casanare / CS
+# CITY > [COL] COLOMBIA > [CS] Casanare
 #====================================================================================
 "CITY_NAME_CHANGE"		5262018		"Yopal (CS)"						""
 "CITY_NAME_CHANGE"		76041927	"Villanueva (CS)"					""
 "CITY_NAME_CHANGE"		2000117605	"Paz de Ariporo (CS)"					""
 
 
-# CITY > [COL] COLOMBIA > Cauca / CA
+# CITY > [COL] COLOMBIA > [CA] Cauca
 #====================================================================================
 "CITY_NAME_CHANGE"		5261243		"Popayán (CA)"						""
 "CITY_NAME_CHANGE"		8826397		"Puerto Tejada (CA)"					""
@@ -5223,7 +5269,7 @@
 "CITY_NAME_CHANGE"		2000268150	"Timbío (CA)"						""
 
 
-# CITY > [COL] COLOMBIA > Cesar / CE
+# CITY > [COL] COLOMBIA > [CE] Cesar
 #====================================================================================
 "CITY_NAME_CHANGE"		8829221		"Valledupar (CE)"					""
 "CITY_NAME_CHANGE"		8829305		"Agustín Codazzi (CE)"					""
@@ -5238,7 +5284,7 @@
 "CITY_NAME_CHANGE"		2000257849	"Curumaní (CE)"						""
 
 
-# CITY > [COL] COLOMBIA > Chocó / CH
+# CITY > [COL] COLOMBIA > [CH] Chocó
 #====================================================================================
 "CITY_NAME_CHANGE"		8826568		"Quibdó (CH)"						""
 "CITY_NAME_CHANGE"		8827144		"Bajo Baudó (CH)"					""
@@ -5257,7 +5303,7 @@
 "CITY_NAME_CHANGE"		2000254986	"Tadó (CH)"						""
 
 
-# CITY > [COL] COLOMBIA > Cundinamarca / CU
+# CITY > [COL] COLOMBIA > [CU] Cundinamarca
 #====================================================================================
 "CITY_NAME_CHANGE"		5260946		"Girardot (CU)"						""
 "CITY_NAME_CHANGE"		5261246		"Chía (CU)"						""
@@ -5278,7 +5324,7 @@
 #"CITY_NAME_CHANGE"		2000341186	"Cáqueza (CU)"						""  # [NEW]
 
 
-# CITY > [COL] COLOMBIA > Córdoba / CO
+# CITY > [COL] COLOMBIA > [CO] Córdoba
 #====================================================================================
 "CITY_NAME_CHANGE"		5262011		"Cereté (CO)"						""
 "CITY_NAME_CHANGE"		8832625		"Montería (CO)"						""
@@ -5291,17 +5337,17 @@
 "CITY_NAME_CHANGE"		2000255120	"Cotorra (CO)"						""
 
 
-# CITY > [COL] COLOMBIA > Distrito Capital
+# CITY > [COL] COLOMBIA > [DC] Distrito Capital
 #====================================================================================
 "CITY_NAME_CHANGE"		102990		"Bogotá"						""
 
 
-# CITY > [COL] COLOMBIA > Guaviare / GV
+# CITY > [COL] COLOMBIA > [GV] Guaviare
 #====================================================================================
 "CITY_NAME_CHANGE"		76040915	"San José del Guaviare (GV)"				""
 
 
-# CITY > [COL] COLOMBIA > Huila / HU
+# CITY > [COL] COLOMBIA > [HU] Huila
 #====================================================================================
 "CITY_NAME_CHANGE"		303783		"Neiva (HU)"						""
 "CITY_NAME_CHANGE"		8829303		"Pitalito (HU)"						""
@@ -5309,7 +5355,7 @@
 "CITY_NAME_CHANGE"		2000255006	"Garzón (HU)"						""
 
 
-# CITY > [COL] COLOMBIA > La Guajira / LG
+# CITY > [COL] COLOMBIA > [LG] La Guajira
 #====================================================================================
 "CITY_NAME_CHANGE"		8832604		"Camarones (LG)"					""
 "CITY_NAME_CHANGE"		8832617		"Maicao (LG)"						""
@@ -5323,7 +5369,7 @@
 "CITY_NAME_CHANGE"		2000256639	"Manaure (LG)"						""
 
 
-# CITY > [COL] COLOMBIA > Magdalena / MA
+# CITY > [COL] COLOMBIA > [MA] Magdalena
 #====================================================================================
 "CITY_NAME_CHANGE"		303786		"Santa Marta (MA)"					""
 "CITY_NAME_CHANGE"		8832632		"Fundación (MA)"					""
@@ -5332,7 +5378,7 @@
 "CITY_NAME_CHANGE"		2000257677	"Aracataca (MA)"					""
 
 
-# CITY > [COL] COLOMBIA > Meta / ME
+# CITY > [COL] COLOMBIA > [ME] Meta
 #====================================================================================
 "CITY_NAME_CHANGE"		5260945		"Villavicencio (ME)"					""
 "CITY_NAME_CHANGE"		76002474	"San Martin (ME)"					""
@@ -5341,7 +5387,7 @@
 "CITY_NAME_CHANGE"		2000257424	"San Martín (ME)"					""
 
 
-# CITY > [COL] COLOMBIA > Nariño / NA
+# CITY > [COL] COLOMBIA > [NA] Nariño
 #====================================================================================
 "CITY_NAME_CHANGE"		303784		"Pasto (NA)"						""
 "CITY_NAME_CHANGE"		8825884		"San Andrés de Tumaco (NA)"				""
@@ -5356,7 +5402,7 @@
 "CITY_NAME_CHANGE"		76017944	"El Charco (NA)"					""
 
 
-# CITY > [COL] COLOMBIA > Norte de Santander / NS
+# CITY > [COL] COLOMBIA > [NS] Norte de Santander
 #====================================================================================
 "CITY_NAME_CHANGE"		5260941		"Cúcuta (NS)"						""
 "CITY_NAME_CHANGE"		8832592		"Pamplona (NS)"						""
@@ -5368,7 +5414,7 @@
 "CITY_NAME_CHANGE"		2000132272	"Los Patios (NS)"					""
 
 
-# CITY > [COL] COLOMBIA > Putumayo / PU
+# CITY > [COL] COLOMBIA > [PU] Putumayo
 #====================================================================================
 "CITY_NAME_CHANGE"		8832614		"Mocoa (PU)"						""
 "CITY_NAME_CHANGE"		76003481	"Puerto Leguízamo (PU)"					""
@@ -5377,7 +5423,7 @@
 #"CITY_NAME_CHANGE"		2000341188	"Orito (PU)"						""  # [NEW]
 
 
-# CITY > [COL] COLOMBIA > Quindío / QD
+# CITY > [COL] COLOMBIA > [QD] Quindío
 #====================================================================================
 "CITY_NAME_CHANGE"		303774		"Armenia (QD)"						""
 "CITY_NAME_CHANGE"		8832578		"La Tebaida (QD)"					""
@@ -5385,7 +5431,7 @@
 "CITY_NAME_CHANGE"		2000254988	"Montenegro (QD)"					""
 
 
-# CITY > [COL] COLOMBIA > Risaralda / RI
+# CITY > [COL] COLOMBIA > [RI] Risaralda
 #====================================================================================
 "CITY_NAME_CHANGE"		303785		"Pereira (RI)"						""
 "CITY_NAME_CHANGE"		8832599		"Belén de Umbría (RI)"					""
@@ -5395,13 +5441,13 @@
 "CITY_NAME_CHANGE"		76019354	"Dosquebradas (RI)"					""
 
 
-# CITY > [COL] COLOMBIA > San Andrés, Providencia y Santa Catalina / SAP
+# CITY > [COL] COLOMBIA > [SAP] San Andrés, Providencia y Santa Catalina
 #====================================================================================
 "CITY_NAME_CHANGE"		8832582		"San Andrés Islas (SAP)"				""
 "CITY_NAME_CHANGE"		8832608		"Santa Catalina (SAP)"					""
 
 
-# CITY > [COL] COLOMBIA > Santander / ST
+# CITY > [COL] COLOMBIA > [ST] Santander
 #====================================================================================
 "CITY_NAME_CHANGE"		303776		"Bucaramanga (ST)"					""
 "CITY_NAME_CHANGE"		5261614		"Barrancabermeja (ST)"					""
@@ -5419,7 +5465,7 @@
 "CITY_NAME_CHANGE"		2000254995	"Puerto Wilches (ST)"					""
 
 
-# CITY > [COL] COLOMBIA > Surce / SU
+# CITY > [COL] COLOMBIA > [SU] Sucre
 #====================================================================================
 "CITY_NAME_CHANGE"		5262020		"Sincelejo (SU)"					""
 "CITY_NAME_CHANGE"		76018066	"Sampués (SU)"						""
@@ -5431,7 +5477,7 @@
 "CITY_NAME_CHANGE"		2000255121	"Corozal (SU)"						""
 
 
-# CITY > [COL] COLOMBIA > Tolima / TO
+# CITY > [COL] COLOMBIA > [TO] Tolima
 #====================================================================================
 "CITY_NAME_CHANGE"		303780		"Ibagué (TO)"						""
 "CITY_NAME_CHANGE"		8832581		"El Espinal (TO)"					""
@@ -5441,7 +5487,7 @@
 "CITY_NAME_CHANGE"		2000255004	"Cajamarca (TO)"					""
 
 
-# CITY > [COL] COLOMBIA > Valle del Cauca / VC
+# CITY > [COL] COLOMBIA > [VC] Valle del Cauca
 #====================================================================================
 "CITY_NAME_CHANGE"		303777		"Cali (VC)"						""
 "CITY_NAME_CHANGE"		303787		"Tuluá (VC)"						""
@@ -5475,12 +5521,12 @@
 "CITY_NAME_CHANGE"		2000255620	"Ginebra (VC)"						""
 
 
-# CITY > [COL] COLOMBIA > Vaupés / VA
+# CITY > [COL] COLOMBIA > [VA] Vaupés
 #====================================================================================
 "CITY_NAME_CHANGE"		8832621		"Mitú (VA)"						""
 
 
-# CITY > [COL] COLOMBIA > Vichada / VD
+# CITY > [COL] COLOMBIA > [VD] Vichada
 #====================================================================================
 "CITY_NAME_CHANGE"		76007043	"Puerto Carreño (VD)"					""
 
@@ -6388,38 +6434,38 @@
 "CITY_NAME_CHANGE"		2000084286	"Neiba"							""
 
 
-# CITY > [ECU] ECUADOR > Azuay / AZ
+# CITY > [ECU] ECUADOR > [AZ] Azuay
 #====================================================================================
 "CITY_NAME_CHANGE"		8825372		"Cuenca (AZ)"						""
 "CITY_NAME_CHANGE"		86030094	"Gualaceo (AZ)"						""
 
 
-# CITY > [ECU] ECUADOR > Bolívar / BO
+# CITY > [ECU] ECUADOR > [BO] Bolívar
 #====================================================================================
 "CITY_NAME_CHANGE"		80006828	"Guaranda (BO)"						""
 
 
-# CITY > [ECU] ECUADOR > Cañar / CA
+# CITY > [ECU] ECUADOR > [CA] Cañar
 #====================================================================================
 "CITY_NAME_CHANGE"		80000516	"Azogues (CA)"						""
 "CITY_NAME_CHANGE"		80000639	"Cañar (CA)"						""
 "CITY_NAME_CHANGE"		2000017832	"La Troncal (CA)"					""
 
 
-# CITY > [ECU] ECUADOR > Carchi / CI
+# CITY > [ECU] ECUADOR > [CI] Carchi
 #====================================================================================
 "CITY_NAME_CHANGE"		80006816	"Tulcán (CI)"						""
 "CITY_NAME_CHANGE"		86013924	"San Gabriel (CI)"					""
 
 
-# CITY > [ECU] ECUADOR > Chimborazo / CH
+# CITY > [ECU] ECUADOR > [CH] Chimborazo
 #====================================================================================
 "CITY_NAME_CHANGE"		131113		"Riobamba (CH)"						""
 "CITY_NAME_CHANGE"		86012561	"Alausí (CH)"						""
 "CITY_NAME_CHANGE"		86036661	"Guano (CH)"						""
 
 
-# CITY > [ECU] ECUADOR > Cotopaxi / CO
+# CITY > [ECU] ECUADOR > [CO] Cotopaxi
 #====================================================================================
 "CITY_NAME_CHANGE"		8827768		"Saquisilí (CO)"					""
 "CITY_NAME_CHANGE"		80006817	"Latacunga (CO)"					""
@@ -6427,7 +6473,7 @@
 "CITY_NAME_CHANGE"		2000017837	"La Maná (CO)"						""
 
 
-# CITY > [ECU] ECUADOR > El Oro / EO
+# CITY > [ECU] ECUADOR > [EO] El Oro
 #====================================================================================
 "CITY_NAME_CHANGE"		5270465		"Machala (EO)"						""
 "CITY_NAME_CHANGE"		80006830	"Piñas (EO)"						""
@@ -6437,7 +6483,7 @@
 "CITY_NAME_CHANGE"		2000108891	"Arenillas (EO)"					""
 
 
-# CITY > [ECU] ECUADOR > Esmeraldas / ES
+# CITY > [ECU] ECUADOR > [ES] Esmeraldas
 #====================================================================================
 "CITY_NAME_CHANGE"		5270467		"Esmeraldas (ES)"					""
 "CITY_NAME_CHANGE"		8825837		"San Lorenzo (ES)"					""
@@ -6448,7 +6494,7 @@
 "CITY_NAME_CHANGE"		86034560	"Rioverde (ES)"						""
 
 
-# CITY > [ECU] ECUADOR > Guayas / GU
+# CITY > [ECU] ECUADOR > [GU] Guayas
 #====================================================================================
 "CITY_NAME_CHANGE"		102994		"Guayaquil (GU)"					""
 "CITY_NAME_CHANGE"		8825835		"Milagro (GU)"						""
@@ -6464,19 +6510,19 @@
 "CITY_NAME_CHANGE"		2000017836	"Naranjito (GU)"					""
 
 
-# CITY > [ECU] ECUADOR > Imbabura / IM
+# CITY > [ECU] ECUADOR > [IM] Imbabura
 #====================================================================================
 "CITY_NAME_CHANGE"		131107		"Ibarra (IM)"						""
 "CITY_NAME_CHANGE"		8830034		"Otavalo (IM)"						""
 "CITY_NAME_CHANGE"		86013923	"Atuntaqui (IM)"					""
 
 
-# CITY > [ECU] ECUADOR > Loja / LO
+# CITY > [ECU] ECUADOR > [LO] Loja
 #====================================================================================
 "CITY_NAME_CHANGE"		8830038		"Loja (LO)"						""
 
 
-# CITY > [ECU] ECUADOR > Los Ríos / LR
+# CITY > [ECU] ECUADOR > [LR] Los Ríos
 #====================================================================================
 "CITY_NAME_CHANGE"		8825842		"Ventanas (LR)"						""
 "CITY_NAME_CHANGE"		8827770		"Vinces (LR)"						""
@@ -6488,7 +6534,7 @@
 "CITY_NAME_CHANGE"		86038922	"Montalvo (LR)"						""
 
 
-# CITY > [ECU] ECUADOR > Manabí / MA
+# CITY > [ECU] ECUADOR > [MA] Manabí
 #====================================================================================
 "CITY_NAME_CHANGE"		109186		"Portoviejo (MA)"					""
 "CITY_NAME_CHANGE"		5270171		"Manta (MA)"						""
@@ -6502,28 +6548,28 @@
 "CITY_NAME_CHANGE"		2000017831	"Jipijapa (MA)"						""
 
 
-# CITY > [ECU] ECUADOR > Morona Santiago / MS
+# CITY > [ECU] ECUADOR > [MS] Morona Santiago
 #====================================================================================
 "CITY_NAME_CHANGE"		80006823	"Macas (MS)"						""
 
 
-# CITY > [ECU] ECUADOR > Napo / NA
+# CITY > [ECU] ECUADOR > [NA] Napo
 #====================================================================================
 "CITY_NAME_CHANGE"		80006821	"Tena (NA)"						""
 
 
-# CITY > [ECU] ECUADOR > Orellana / OR
+# CITY > [ECU] ECUADOR > [OR] Orellana
 #====================================================================================
 "CITY_NAME_CHANGE"		80006820	"Puerto F. de Orellana - El Coca (OR)"			""
 "CITY_NAME_CHANGE"		2000017828	"La Joya de los Sachas (OR)"				""
 
 
-# CITY > [ECU] ECUADOR > Pastaza / PA
+# CITY > [ECU] ECUADOR > [PA] Pastaza
 #====================================================================================
 "CITY_NAME_CHANGE"		80006822	"Puyo (PA)"						""
 
 
-# CITY > [ECU] ECUADOR > Pichincha / PI
+# CITY > [ECU] ECUADOR > [PI] Pichincha
 #====================================================================================
 "CITY_NAME_CHANGE"		102992		"Quito (PI)"						""
 "CITY_NAME_CHANGE"		8830022		"Sangolquí (PI)"					""
@@ -6537,26 +6583,26 @@
 "CITY_NAME_CHANGE"		2000101116	"San Antonio de Pichincha (PI)"				""
 
 
-# CITY > [ECU] ECUADOR > Santa Elena / SE
+# CITY > [ECU] ECUADOR > [SE] Santa Elena
 #====================================================================================
 "CITY_NAME_CHANGE"		8830063		"La Libertad (SE)"					""
 "CITY_NAME_CHANGE"		80006815	"Santa Elena (SE)"					""
 "CITY_NAME_CHANGE"		80006832	"Salinas (SE)"						""
 
 
-# CITY > [ECU] ECUADOR > Santo Domingo de los Tsáchilas / SD
+# CITY > [ECU] ECUADOR > [SD] Santo Domingo de los Tsáchilas
 #====================================================================================
 "CITY_NAME_CHANGE"		8830025		"Santo Domingo (SD)"					""
 "CITY_NAME_CHANGE"		2000017834	"La Concordia (SD)"					""
 
 
-# CITY > [ECU] ECUADOR > Sucumbíos / SU
+# CITY > [ECU] ECUADOR > [SU] Sucumbíos
 #====================================================================================
 "CITY_NAME_CHANGE"		80006819	"Nueva Loja - Lago Agrio (SU)"				""
 "CITY_NAME_CHANGE"		86036669	"Shushufindi (SU)"					""
 
 
-# CITY > [ECU] ECUADOR > Tungurahua / TU
+# CITY > [ECU] ECUADOR > [TU] Tungurahua
 #====================================================================================
 "CITY_NAME_CHANGE"		131110		"Ambato (TU)"						""
 "CITY_NAME_CHANGE"		8830043		"Píllaro (TU)"						""
@@ -6564,7 +6610,7 @@
 "CITY_NAME_CHANGE"		2000076821	"Izamba (TU)"						""
 
 
-# CITY > [ECU] ECUADOR > Zamora Chinchipe / ZC
+# CITY > [ECU] ECUADOR > [ZC] Zamora Chinchipe
 #====================================================================================
 "CITY_NAME_CHANGE"		80006824	"Zamora (ZC)"						""
 "CITY_NAME_CHANGE"		86034562	"Yantzaza (ZC)"						""
@@ -9282,18 +9328,36 @@
 "CITY_NAME_CHANGE"		2000324610	"Pondicherry"						""
 
 
+# CITY > [IDN] INDONESIA > Aceh
+#====================================================================================
+"CITY_NAME_CHANGE"		135514		"Banda Aceh"						""
+"CITY_NAME_CHANGE"		41002092	"Sigli"							""
+"CITY_NAME_CHANGE"		41002099	"Lhokseumawe"						""
+"CITY_NAME_CHANGE"		41021699	"Blangkejeren"						""
+"CITY_NAME_CHANGE"		41046962	"Idi Rayeuk"						""
+"CITY_NAME_CHANGE"		41046983	"Meureudu"						""
+"CITY_NAME_CHANGE"		5385753		"Kab. Biruen"						""
+"CITY_NAME_CHANGE"		5385754		"Langsa"						""
+
+
 # CITY > [IDN] INDONESIA > Bali
 #====================================================================================
 "CITY_NAME_CHANGE"		135530		"Denpasar"						""
+"CITY_NAME_CHANGE"		5385756		"Gianyar"						""
+"CITY_NAME_CHANGE"		7742350		"Kuta"							""
+"CITY_NAME_CHANGE"		7742852		"Singaraja"						""
 "CITY_NAME_CHANGE"		7749314		"Karangasem"						""
 "CITY_NAME_CHANGE"		7749333		"Buleleng"						""
+"CITY_NAME_CHANGE"		7749337		"Tabanan"						""
 "CITY_NAME_CHANGE"		41046978	"Kab. Badung"						""
 "CITY_NAME_CHANGE"		2000159015	"Kab. Bangli"						""
+"CITY_NAME_CHANGE"		2000315813	"Kuta Utara"						""
 
 
 # CITY > [IDN] INDONESIA > Banten
 #====================================================================================
 "CITY_NAME_CHANGE"		135520		"Tangerang"						""
+"CITY_NAME_CHANGE"		5385755		"Serang"						""
 "CITY_NAME_CHANGE"		7742858		"Cilegon"						""
 "CITY_NAME_CHANGE"		41002116	"Rangkas Bitung"					""
 "CITY_NAME_CHANGE"		2000341178	"Tangerang Selatan"					""  # [NEW]
@@ -9304,14 +9368,31 @@
 "CITY_NAME_CHANGE"		7741539		"Bengkulu"						""
 
 
+# CITY > [IDN] INDONESIA > DI Yogyakarta
+#====================================================================================
+"CITY_NAME_CHANGE"		135502		"Yogyakarta"						""
+"CITY_NAME_CHANGE"		7742498		"Kab. Gunung Kidul"					""
+"CITY_NAME_CHANGE"		7742689		"Kab. Kulonprogo"					""
+"CITY_NAME_CHANGE"		41002106	"Wonosari"						""
+
+
 # CITY > [IDN] INDONESIA > DKI Jakarta
 #====================================================================================
 "CITY_NAME_CHANGE"		103198		"Jakarta"						""
 
 
+# CITY > [IDN] INDONESIA > Gorontalo
+#====================================================================================
+"CITY_NAME_CHANGE"		7742345		"Kota Tengah"						""
+"CITY_NAME_CHANGE"		7744989		"Gorontalo"						""
+
+
 # CITY > [IDN] INDONESIA > Jambi
 #====================================================================================
+"CITY_NAME_CHANGE"		5385750		"Batanghari"						""
 "CITY_NAME_CHANGE"		7749299		"Jambi"							""
+"CITY_NAME_CHANGE"		41046948	"Bangko"						""
+"CITY_NAME_CHANGE"		41046970	"Pasar Muaro Bungo"					""
 "CITY_NAME_CHANGE"		2000318696	"Merangin"						""
 
 
@@ -9320,43 +9401,117 @@
 "CITY_NAME_CHANGE"		116142		"Bandung"						""
 "CITY_NAME_CHANGE"		5385748		"Cimahi"						""
 "CITY_NAME_CHANGE"		5622739		"Bogor"							""
+"CITY_NAME_CHANGE"		7740990		"Cianjur"						""
 "CITY_NAME_CHANGE"		7741441		"Sukabumi"						""
 "CITY_NAME_CHANGE"		7741456		"Cirebon"						""
 "CITY_NAME_CHANGE"		7742130		"Depok"							""
 "CITY_NAME_CHANGE"		7742381		"Bekasi"						""
+"CITY_NAME_CHANGE"		7742601		"Garut"							""
+"CITY_NAME_CHANGE"		7743087		"Sumedang"						""
+"CITY_NAME_CHANGE"		7743088		"Majalaya"						""
+"CITY_NAME_CHANGE"		7743089		"Pengalengan"						""
+"CITY_NAME_CHANGE"		7743092		"Tasikmalaya"						""
+"CITY_NAME_CHANGE"		7743822		"Purwakarta"						""
+"CITY_NAME_CHANGE"		7747058		"Kuningan"						""
+"CITY_NAME_CHANGE"		7749325		"Ciamis"						""
+"CITY_NAME_CHANGE"		7749339		"Pandeglang"						""
+"CITY_NAME_CHANGE"		41002077	"Karawang"						""
+"CITY_NAME_CHANGE"		41002113	"Indramayu"						""
+"CITY_NAME_CHANGE"		41064167	"Cibinong"						""
+"CITY_NAME_CHANGE"		2000315907	"Pangandaran"						""
+"CITY_NAME_CHANGE"		2000315908	"Banjar"						""
 
 
 # CITY > [IDN] INDONESIA > Jawa Tengah
 #====================================================================================
 "CITY_NAME_CHANGE"		135499		"Semarang"						""
+"CITY_NAME_CHANGE"		5622737		"Jepara"						""
 "CITY_NAME_CHANGE"		5622870		"Surakarta"						""
+"CITY_NAME_CHANGE"		7740980		"Magelang"						""
+"CITY_NAME_CHANGE"		7741320		"Rembang"						""
+"CITY_NAME_CHANGE"		7741339		"Pati"							""
+"CITY_NAME_CHANGE"		7742304		"Boyolali"						""
+"CITY_NAME_CHANGE"		7742453		"Purwodadi"						""
+"CITY_NAME_CHANGE"		7742459		"Salatiga"						""
+"CITY_NAME_CHANGE"		7742466		"Klaten"						""
+"CITY_NAME_CHANGE"		7742501		"Kendal"						""
+"CITY_NAME_CHANGE"		7742659		"Wonogiri"						""
+"CITY_NAME_CHANGE"		7742707		"Sragen"						""
+"CITY_NAME_CHANGE"		7742851		"Slawi"							""
+"CITY_NAME_CHANGE"		7743283		"Kebumen"						""
+"CITY_NAME_CHANGE"		7743420		"Cilacap"						""
+"CITY_NAME_CHANGE"		7747060		"Batang"						""
+"CITY_NAME_CHANGE"		7749305		"Kudus"							""
+"CITY_NAME_CHANGE"		7749331		"Brebes"						""
+"CITY_NAME_CHANGE"		7749338		"Sukoharjo"						""
+"CITY_NAME_CHANGE"		41000347	"Tegal"							""
+"CITY_NAME_CHANGE"		41002075	"Karanganyar"						""
+"CITY_NAME_CHANGE"		41024316	"Purbalingga"						""
+"CITY_NAME_CHANGE"		41024322	"Temanggung"						""
+"CITY_NAME_CHANGE"		41024324	"Pekalongan"						""
+"CITY_NAME_CHANGE"		41046955	"Purwokerto"						""
 "CITY_NAME_CHANGE"		2000158707	"Pemalang"						""
 "CITY_NAME_CHANGE"		2000159023	"Purworejo"						""
 "CITY_NAME_CHANGE"		2000159104	"Kab. Banjarnegara"					""
 "CITY_NAME_CHANGE"		2000159107	"Demak"							""
+"CITY_NAME_CHANGE"		2000315909	"Grobogan"						""
 "CITY_NAME_CHANGE"		2000318829	"Wonosobo"						""
+"CITY_NAME_CHANGE"		2000318838	"Tegowanu"						""
 #"CITY_NAME_CHANGE"		2000341177	"Blora"							""  # [NEW]
 
 
 # CITY > [IDN] INDONESIA > Jawa Timur
 #====================================================================================
 "CITY_NAME_CHANGE"		116143		"Surabaya"						""
+"CITY_NAME_CHANGE"		135508		"Gresik"						""
 "CITY_NAME_CHANGE"		135525		"Malang"						""
+"CITY_NAME_CHANGE"		5385752		"Banyuwangi"						""
 "CITY_NAME_CHANGE"		7740000		"Kediri"						""
+"CITY_NAME_CHANGE"		7740004		"Sidoarjo"						""
 "CITY_NAME_CHANGE"		7741337		"Kab. Jember"						""
+"CITY_NAME_CHANGE"		7741973		"Lamongan"						""
+"CITY_NAME_CHANGE"		7742292		"Tulungagung"						""
+"CITY_NAME_CHANGE"		7742454		"Blitar"						""
+"CITY_NAME_CHANGE"		7742521		"Sampang"						""
+"CITY_NAME_CHANGE"		7742631		"Madiun"						""
+"CITY_NAME_CHANGE"		7742800		"Pasuruan"						""
+"CITY_NAME_CHANGE"		7742980		"Tunggulrejo"						""
+"CITY_NAME_CHANGE"		7743159		"Mojokerto"						""
+"CITY_NAME_CHANGE"		7743516		"Tuban"							""
+"CITY_NAME_CHANGE"		7743756		"Bojonegoro"						""
+"CITY_NAME_CHANGE"		7746726		"Situbondo"						""
+"CITY_NAME_CHANGE"		7749308		"Probolinggo"						""
+"CITY_NAME_CHANGE"		41000346	"Banyumas"						""
+"CITY_NAME_CHANGE"		41009460	"Ponorogo"						""
+"CITY_NAME_CHANGE"		41039034	"Nganjuk"						""
+"CITY_NAME_CHANGE"		41039375	"Bangkalan"						""
+"CITY_NAME_CHANGE"		41046939	"Ngawi"							""
+"CITY_NAME_CHANGE"		41049388	"Sumenep"						""
+"CITY_NAME_CHANGE"		41053386	"Pamekasan"						""
+"CITY_NAME_CHANGE"		41053388	"Lumajang"						""
+"CITY_NAME_CHANGE"		2000004208	"Jombang"						""
 "CITY_NAME_CHANGE"		2000158865	"Kab. Trenggalek"					""
+"CITY_NAME_CHANGE"		2000318895	"Magetan"						""
+"CITY_NAME_CHANGE"		2000318896	"Pacitan"						""
 "CITY_NAME_CHANGE"		2000319040	"Bondowoso"						""
 
 
 # CITY > [IDN] INDONESIA > Kalimantan Barat
 #====================================================================================
 "CITY_NAME_CHANGE"		41002083	"Pontianak"						""
+"CITY_NAME_CHANGE"		41002103	"Sampit"						""
+"CITY_NAME_CHANGE"		41002118	"Mempawah"						""
 
 
 # CITY > [IDN] INDONESIA > Kalimantan Selatan
 #====================================================================================
 "CITY_NAME_CHANGE"		135533		"Banjarmasin"						""
+"CITY_NAME_CHANGE"		7742386		"Binuang"						""
+"CITY_NAME_CHANGE"		7742974		"Amuntai"						""
 "CITY_NAME_CHANGE"		7743341		"Kab. Tabalong"						""
+"CITY_NAME_CHANGE"		41002101	"Marabahan"						""
+"CITY_NAME_CHANGE"		41041568	"Martapura"						""
+"CITY_NAME_CHANGE"		41046967	"Pulau Laut (Kotabaru)"					""
 "CITY_NAME_CHANGE"		2000319041	"Banjarbaru"						""
 
 
@@ -9368,86 +9523,127 @@
 # CITY > [IDN] INDONESIA > Kalimantan Timur
 #====================================================================================
 "CITY_NAME_CHANGE"		135484		"Samarinda"						""
+"CITY_NAME_CHANGE"		135487		"Bontang"						""
+"CITY_NAME_CHANGE"		5385757		"Sendawar"						""
 "CITY_NAME_CHANGE"		5385760		"Balikpapan"						""
+"CITY_NAME_CHANGE"		7744991		"Tenggarong"						""
+"CITY_NAME_CHANGE"		41009463	"Penajam"						""
+"CITY_NAME_CHANGE"		41035813	"Tenggarong Seberang"					""
 "CITY_NAME_CHANGE"		41039301	"Kab. Paser"						""
 "CITY_NAME_CHANGE"		2000319043	"Kab. Kutai Kartanegara"				""
+
+
+# CITY > [IDN] INDONESIA > Kalimantan Utara
+#====================================================================================
+"CITY_NAME_CHANGE"		41000345	"Tarakan"						""
+
+
+# CITY > [IDN] INDONESIA > Kepulauan Bangka Belitung
+#====================================================================================
+"CITY_NAME_CHANGE"		7742413		"Pangkal Pinang"					""
+"CITY_NAME_CHANGE"		41021348	"Sungailiat"						""
 
 
 # CITY > [IDN] INDONESIA > Kepulauan Riau
 #====================================================================================
 "CITY_NAME_CHANGE"		41002090	"Batam"							""
+"CITY_NAME_CHANGE"		2000318693	"Tanjung Pinang"					""
 
 
 # CITY > [IDN] INDONESIA > Lampung
 #====================================================================================
 "CITY_NAME_CHANGE"		135505		"Bandar Lampung"					""
+"CITY_NAME_CHANGE"		41002111	"Kotabumi"						""
 
 
 # CITY > [IDN] INDONESIA > Maluku
 #====================================================================================
 "CITY_NAME_CHANGE"		7742403		"Ambon"							""
+"CITY_NAME_CHANGE"		7742747		"Salahutu"						""
+"CITY_NAME_CHANGE"		41002061	"Tual"							""
 "CITY_NAME_CHANGE"		2000159108	"Kab. Buru Selatan"					""
+"CITY_NAME_CHANGE"		2000315922	"Masohi"						""
 
 
 # CITY > [IDN] INDONESIA > Maluku Utara
 #====================================================================================
+"CITY_NAME_CHANGE"		5385759		"Ternate"						""
 "CITY_NAME_CHANGE"		7749328		"Kab. Halmahera Barat"					""
 "CITY_NAME_CHANGE"		2000315921	"Kab. Halmahera Utara"					""
-
-
-# CITY > [IDN] INDONESIA > Nanggroe Aceh Darussalam
-#====================================================================================
-"CITY_NAME_CHANGE"		5385753		"Kab. Biruen"						""
 
 
 # CITY > [IDN] INDONESIA > Nusa Tenggara Barat
 #====================================================================================
 "CITY_NAME_CHANGE"		7742318		"Mataram"						""
+"CITY_NAME_CHANGE"		2000159018	"Bima"							""
 
 
 # CITY > [IDN] INDONESIA > Nusa Tenggara Timur
 #====================================================================================
 "CITY_NAME_CHANGE"		7749311		"Kab. Ngada"						""
+"CITY_NAME_CHANGE"		41002065	"Waingapu"						""
 "CITY_NAME_CHANGE"		2000158706	"Kab. Alor"						""
 "CITY_NAME_CHANGE"		2000158864	"Kupang"						""
+"CITY_NAME_CHANGE"		2000316280	"Waikabubak"						""
 
 
 # CITY > [IDN] INDONESIA > Papua
 #====================================================================================
 "CITY_NAME_CHANGE"		135517		"Jayapura"						""
+"CITY_NAME_CHANGE"		7742787		"Wamena"						""
+"CITY_NAME_CHANGE"		7746272		"Merauke"						""
 "CITY_NAME_CHANGE"		7749335		"Kab. Puncak Jaya"					""
 "CITY_NAME_CHANGE"		7749336		"Kab. Biak Numfor"					""
+"CITY_NAME_CHANGE"		41006200	"Nabire"						""
+"CITY_NAME_CHANGE"		41019346	"Sentani"						""
 "CITY_NAME_CHANGE"		41020672	"Kab. Asmat"						""
+"CITY_NAME_CHANGE"		41020674	"Serui"							""
+"CITY_NAME_CHANGE"		41020675	"Timika"						""
+"CITY_NAME_CHANGE"		41020676	"Oksibil"						""
+"CITY_NAME_CHANGE"		41036057	"Oudate"						""
 "CITY_NAME_CHANGE"		41046959	"Kab. Tolikara"						""
+"CITY_NAME_CHANGE"		41046960	"Karubaga"						""
 "CITY_NAME_CHANGE"		41046975	"Kab. Mimika"						""
 "CITY_NAME_CHANGE"		41064168	"Kab. Waropen"						""
 "CITY_NAME_CHANGE"		2000159020	"Kab. Puncak"						""
+"CITY_NAME_CHANGE"		2000159109	"Sarmi"							""
+"CITY_NAME_CHANGE"		2000159110	"Abepura"						""
 "CITY_NAME_CHANGE"		2000159111	"Kab. Yahukimo"						""
+"CITY_NAME_CHANGE"		2000316281	"Kepulauan Yapen"					""
 
 
 # CITY > [IDN] INDONESIA > Papua Barat
 #====================================================================================
 "CITY_NAME_CHANGE"		5385758		"Kab. Manokwari"					""
 "CITY_NAME_CHANGE"		5385761		"Sorong"						""
+"CITY_NAME_CHANGE"		7749334		"Fakfak"						""
 "CITY_NAME_CHANGE"		41020666	"Kab. Maybrat"						""
 "CITY_NAME_CHANGE"		41020667	"Kab. Raja Ampat"					""
 "CITY_NAME_CHANGE"		41020668	"Kab. Sorong Selatan"					""
 "CITY_NAME_CHANGE"		41020669	"Kab. Tambrauw"						""
+"CITY_NAME_CHANGE"		41020670	"Bintuni"						""
 "CITY_NAME_CHANGE"		41020671	"Kab. Teluk Wondama"					""
+"CITY_NAME_CHANGE"		41036069	"Kaimana"						""
 
 
 # CITY > [IDN] INDONESIA > Riau
 #====================================================================================
 "CITY_NAME_CHANGE"		5622730		"Pekanbaru"						""
-"CITY_NAME_CHANGE"		7742345		"Kota Tengah"						""
+"CITY_NAME_CHANGE"		7748392		"Dumai"							""
 "CITY_NAME_CHANGE"		7749329		"Kab. Indragiri Hilir"					""
 "CITY_NAME_CHANGE"		7749330		"Kab. Indragiri Hulu"					""
+"CITY_NAME_CHANGE"		41002070	"Tembilahan"						""
+"CITY_NAME_CHANGE"		41002085	"Rengat"						""
 "CITY_NAME_CHANGE"		41009462	"Kab. Kuantan Singingi"					""
+"CITY_NAME_CHANGE"		41009517	"Bengkalis"						""
 "CITY_NAME_CHANGE"		41009518	"Kab. Kampar"						""
+"CITY_NAME_CHANGE"		41046950	"Siak"							""
+"CITY_NAME_CHANGE"		2000060687	"Bangkinang"						""
 
 
 # CITY > [IDN] INDONESIA > Sulawesi Barat
 #====================================================================================
+"CITY_NAME_CHANGE"		7749326		"Mamasa"						""
 "CITY_NAME_CHANGE"		2000316282	"Kab. Mamuju"						""
 "CITY_NAME_CHANGE"		2000316284	"Kab. Polewali Mandar"					""
 
@@ -9455,10 +9651,13 @@
 # CITY > [IDN] INDONESIA > Sulawesi Selatan
 #====================================================================================
 "CITY_NAME_CHANGE"		135496		"Makassar"						""
+"CITY_NAME_CHANGE"		7742723		"Masamba"						""
 "CITY_NAME_CHANGE"		7743344		"Kab. Pinrang"						""
 "CITY_NAME_CHANGE"		7744711		"Kab. Maros"						""
+"CITY_NAME_CHANGE"		7746548		"Palopo"						""
 "CITY_NAME_CHANGE"		7749320		"Parepare"						""
 "CITY_NAME_CHANGE"		7749327		"Kab. Bone"						""
+"CITY_NAME_CHANGE"		7749332		"Pallangga"						""
 "CITY_NAME_CHANGE"		41002079	"Kab. Sinjai"						""
 "CITY_NAME_CHANGE"		2000158705	"Kab. Takalar"						""
 "CITY_NAME_CHANGE"		2000316286	"Kab. Bantaeng"						""
@@ -9470,6 +9669,8 @@
 
 # CITY > [IDN] INDONESIA > Sulawesi Tengah
 #====================================================================================
+"CITY_NAME_CHANGE"		7742451		"Parigi"						""
+"CITY_NAME_CHANGE"		7743889		"Palu"							""
 "CITY_NAME_CHANGE"		7749324		"Kab. Donggala"						""
 "CITY_NAME_CHANGE"		41024318	"Kab. Buol"						""
 
@@ -9477,18 +9678,26 @@
 # CITY > [IDN] INDONESIA > Sulawesi Tenggara
 #====================================================================================
 "CITY_NAME_CHANGE"		41009461	"Kab. Buton"						""
+"CITY_NAME_CHANGE"		41046964	"Kendari"						""
 
 
 # CITY > [IDN] INDONESIA > Sulawesi Utara
 #====================================================================================
 "CITY_NAME_CHANGE"		135511		"Manado"						""
+"CITY_NAME_CHANGE"		7742716		"Tondano"						""
 "CITY_NAME_CHANGE"		7744985		"Kab. Bolaang Mongondow"				""
+"CITY_NAME_CHANGE"		41009459	"Kotamobagu"						""
+"CITY_NAME_CHANGE"		41019350	"Tomohon"						""
 
 
 # CITY > [IDN] INDONESIA > Sumatera Barat
 #====================================================================================
 "CITY_NAME_CHANGE"		135490		"Padang"						""
 "CITY_NAME_CHANGE"		41002096	"Bukittinggi"						""
+"CITY_NAME_CHANGE"		41021697	"Sijunjung"						""
+"CITY_NAME_CHANGE"		41046969	"Padang Panjang"					""
+"CITY_NAME_CHANGE"		41047221	"Painan"						""
+"CITY_NAME_CHANGE"		41064169	"Solok"							""
 "CITY_NAME_CHANGE"		2000316620	"Kab. Padang Pariaman"					""
 "CITY_NAME_CHANGE"		2000316623	"Batusangkar"						""
 "CITY_NAME_CHANGE"		2000316624	"Kab. Agam"						""
@@ -9498,24 +9707,25 @@
 #====================================================================================
 "CITY_NAME_CHANGE"		5385751		"Palembang"						""
 "CITY_NAME_CHANGE"		7747062		"Plaju"							""
+"CITY_NAME_CHANGE"		41002088	"Sekayu"						""
 "CITY_NAME_CHANGE"		2000159106	"Kab. Ogan Komering Ulu Timur"				""
 
 
 # CITY > [IDN] INDONESIA > Sumatera Utara
 #====================================================================================
 "CITY_NAME_CHANGE"		135493		"Medan"							""
+"CITY_NAME_CHANGE"		5622733		"Lubuk Pakam"						""
+"CITY_NAME_CHANGE"		7741324		"Langkat"						""
+"CITY_NAME_CHANGE"		7743671		"Binjai"						""
 "CITY_NAME_CHANGE"		7745080		"Pematangsiantar"					""
+"CITY_NAME_CHANGE"		7748204		"Asahan"						""
+"CITY_NAME_CHANGE"		7749293		"Padang Sidempuan"					""
+"CITY_NAME_CHANGE"		41009458	"Sibolga"						""
+"CITY_NAME_CHANGE"		41047219	"Sidikalang"						""
+"CITY_NAME_CHANGE"		41047223	"Tanjungbalai"						""
 "CITY_NAME_CHANGE"		2000158992	"Kab. Deli Serdang"					""
 "CITY_NAME_CHANGE"		2000316625	"Kab. Serdang Bedagai"					""
 "CITY_NAME_CHANGE"		2000316626	"Kab. Tapanuli Utara"					""
-
-
-# CITY > [IDN] INDONESIA > DI Yogyakarta
-#====================================================================================
-"CITY_NAME_CHANGE"		135502		"Yogyakarta"						""
-"CITY_NAME_CHANGE"		7742498		"Kab. Gunung Kidul"					""
-"CITY_NAME_CHANGE"		7742689		"Kab. Kulonprogo"					""
-"CITY_NAME_CHANGE"		41002106	"Wonosari"						""
 
 
 # CITY > [IRN] IRAN > Alborz Province
@@ -16233,14 +16443,14 @@
 "CITY_NAME_CHANGE"		5280349		"Campo Grande"						""
 
 
-# CITY > [PAR] PARAGUAY > Alto Paraguay / AP
+# CITY > [PAR] PARAGUAY > [AP] Alto Paraguay
 #====================================================================================
 "CITY_NAME_CHANGE"		79032891	"Fuerte Olimpo (AP)"					""
 "CITY_NAME_CHANGE"		2000001041	"Bahía Negra (AP)"					""
 "CITY_NAME_CHANGE"		2000111045	"Puerto Esperanza (AP)"					""
 
 
-# CITY > [PAR] PARAGUAY > Alto Paraná / AN
+# CITY > [PAR] PARAGUAY > [AN] Alto Paraná
 #====================================================================================
 "CITY_NAME_CHANGE"		5280177		"Ciudad del Este (AN)"					""
 "CITY_NAME_CHANGE"		8827274		"Presidente Franco (AN)"				""
@@ -16252,20 +16462,20 @@
 "CITY_NAME_CHANGE"		2000154614	"Santa Rita (AN)"					""
 
 
-# CITY > [PAR] PARAGUAY > Amambay / AM
+# CITY > [PAR] PARAGUAY > [AM] Amambay
 #====================================================================================
 "CITY_NAME_CHANGE"		5280328		"Pedro Juan Caballero (AM)"				""
 "CITY_NAME_CHANGE"		2000006264	"Bella Vista Norte (AM)"				""
 
 
-# CITY > [PAR] PARAGUAY > Boquerón / BQ
+# CITY > [PAR] PARAGUAY > [BQ] Boquerón
 #====================================================================================
 "CITY_NAME_CHANGE"		79032888	"Filadelfia (BQ)"					""
 "CITY_NAME_CHANGE"		2000001042	"Mariscal Estigarribia (BQ)"				""
 "CITY_NAME_CHANGE"		2000111036	"Loma Plata (BQ)"					""
 
 
-# CITY > [PAR] PARAGUAY > Caaguazú / CG
+# CITY > [PAR] PARAGUAY > [CG] Caaguazú
 #====================================================================================
 "CITY_NAME_CHANGE"		2116095		"San José de los Arroyos (CG)"				""
 "CITY_NAME_CHANGE"		14005655	"Juan Eulogio Estigarribia (CG)"			""
@@ -16277,14 +16487,14 @@
 "CITY_NAME_CHANGE"		2000111042	"Nueva Toledo (CG)"					""
 
 
-# CITY > [PAR] PARAGUAY > Caazapá / CZ
+# CITY > [PAR] PARAGUAY > [CZ] Caazapá
 #====================================================================================
 "CITY_NAME_CHANGE"		79000007	"Caazapá (CZ)"						""
 "CITY_NAME_CHANGE"		79030576	"San Juan Nepomuceno (CZ)"				""
 "CITY_NAME_CHANGE"		2000111060	"Yuty (CZ)"						""
 
 
-# CITY > [PAR] PARAGUAY > Canindeyú / CY
+# CITY > [PAR] PARAGUAY > [CY] Canindeyú
 #====================================================================================
 "CITY_NAME_CHANGE"		19000399	"Curuguaty (CY)"					""
 "CITY_NAME_CHANGE"		79029141	"Salto del Guairá (CY)"					""
@@ -16294,7 +16504,7 @@
 "CITY_NAME_CHANGE"		2000017279	"Maracaná (CY)"						""
 
 
-# CITY > [PAR] PARAGUAY > Central / CE
+# CITY > [PAR] PARAGUAY > [CE] Central
 #====================================================================================
 "CITY_NAME_CHANGE"		2115614		"Ypacaraí (CE)"						""
 "CITY_NAME_CHANGE"		5280179		"Luque (CE)"						""
@@ -16317,7 +16527,7 @@
 "CITY_NAME_CHANGE"		79030615	"Guarambaré (CE)"					""
 
 
-# CITY > [PAR] PARAGUAY > Concepción / CO
+# CITY > [PAR] PARAGUAY > [CO] Concepción
 #====================================================================================
 "CITY_NAME_CHANGE"		8825841		"Concepción (CO)"					""
 "CITY_NAME_CHANGE"		79013894	"Belén (CO)"						""
@@ -16326,7 +16536,7 @@
 "CITY_NAME_CHANGE"		2000006242	"Loreto (CO)"						""
 
 
-# CITY > [PAR] PARAGUAY > Cordillera / CR
+# CITY > [PAR] PARAGUAY > [CR] Cordillera
 #====================================================================================
 "CITY_NAME_CHANGE"		2200005		"Juan de Mena (CR)"					""
 "CITY_NAME_CHANGE"		14008255	"Itacurubí de la Cordillera (CR)"			""
@@ -16345,7 +16555,7 @@
 "CITY_NAME_CHANGE"		2000111050	"Santa Elena (CR)"					""
 
 
-# CITY > [PAR] PARAGUAY > Guairá / GU
+# CITY > [PAR] PARAGUAY > [GU] Guairá
 #====================================================================================
 "CITY_NAME_CHANGE"		71088667	"Borja (GU)"						""
 "CITY_NAME_CHANGE"		79000008	"Villarrica (GU)"					""
@@ -16356,7 +16566,7 @@
 "CITY_NAME_CHANGE"		2000021709	"Félix Pérez Cardozo (GU)"				""
 
 
-# CITY > [PAR] PARAGUAY > Itapúa / IT
+# CITY > [PAR] PARAGUAY > [IT] Itapúa
 #====================================================================================
 "CITY_NAME_CHANGE"		5280208		"Encarnación (IT)"					""
 "CITY_NAME_CHANGE"		19140412	"San Juan del Paraná (IT)"				""
@@ -16370,7 +16580,7 @@
 "CITY_NAME_CHANGE"		2000110306	"Tomás Romero Pereira (IT)"				""
 
 
-# CITY > [PAR] PARAGUAY > Misiones / MI
+# CITY > [PAR] PARAGUAY > [MI] Misiones
 #====================================================================================
 "CITY_NAME_CHANGE"		79002066	"Ayolas (MI)"						""
 "CITY_NAME_CHANGE"		79012548	"San Juan Bautista (MI)"				""
@@ -16378,13 +16588,13 @@
 "CITY_NAME_CHANGE"		2000006682	"San Miguel (MI)"					""
 
 
-# CITY > [PAR] PARAGUAY > Ñeembucú / NE
+# CITY > [PAR] PARAGUAY > [NE] Ñeembucú
 #====================================================================================
 "CITY_NAME_CHANGE"		14005656	"Cerrito (NE)"						""
 "CITY_NAME_CHANGE"		79002067	"Pilar (NE)"						""
 
 
-# CITY > [PAR] PARAGUAY > Paraguarí / PA
+# CITY > [PAR] PARAGUAY > [PA] Paraguarí
 #====================================================================================
 "CITY_NAME_CHANGE"		8829677		"Carapeguá (PA)"					""
 "CITY_NAME_CHANGE"		8832728		"Paraguarí (PA)"					""
@@ -16397,14 +16607,14 @@
 "CITY_NAME_CHANGE"		2000104680	"Ybytymí (PA)"						""
 
 
-# CITY > [PAR] PARAGUAY > Presidente Hayes / PH
+# CITY > [PAR] PARAGUAY > [PH] Presidente Hayes
 #====================================================================================
 "CITY_NAME_CHANGE"		79003706	"Villa Hayes (PH)"					""
 "CITY_NAME_CHANGE"		79011208	"Benjamín Aceval (PH)"					""
 "CITY_NAME_CHANGE"		2000001044	"Nanawa (PH)"						""
 
 
-# CITY > [PAR] PARAGUAY > San Pedro / SP
+# CITY > [PAR] PARAGUAY > [SP] San Pedro
 #====================================================================================
 "CITY_NAME_CHANGE"		79002069	"Choré (SP)"						""
 "CITY_NAME_CHANGE"		79012075	"San Estanislao (SP)"					""
@@ -21819,112 +22029,350 @@
 "CITY_NAME_CHANGE"		102998		"Montevideo"						""
 
 
-# CITY > [USA] USA > California / CA
+# CITY > [USA] USA > [AK] Alaska
+#====================================================================================
+"CITY_NAME_CHANGE"		981418		"Anchorage (AK)"					""
+"CITY_NAME_CHANGE"		20016505	"Juneau (AK)"						""
+
+
+# CITY > [USA] USA > [AL] Alabama
+#====================================================================================
+"CITY_NAME_CHANGE"		981504		"Huntsville (AL)"					""
+"CITY_NAME_CHANGE"		72020597	"Montgomery (AL)"					""
+
+
+# CITY > [USA] USA > [AR] Arkansas
+#====================================================================================
+"CITY_NAME_CHANGE"		981472		"Little Rock (AR)"					""
+"CITY_NAME_CHANGE"		20016517	"North Little Rock (AR)"				""
+
+
+# CITY > [USA] USA > [AZ] Arizona
+#====================================================================================
+"CITY_NAME_CHANGE"		978660		"Phoenix (AZ)"						""
+
+
+# CITY > [USA] USA > [CA] California
 #====================================================================================
 "CITY_NAME_CHANGE"		656		"Pasadena (CA)"						""
 "CITY_NAME_CHANGE"		103114		"Los Angeles (CA)"					""
 "CITY_NAME_CHANGE"		157335		"Santa Clara (CA)"					""
+"CITY_NAME_CHANGE"		978624		"Sacramento (CA)"					""
 "CITY_NAME_CHANGE"		4400007		"San Francisco (CA)"					""
+"CITY_NAME_CHANGE"		20016391	"Concord (CA)"						""
 "CITY_NAME_CHANGE"		20016396	"Inglewood (CA)"					""
 "CITY_NAME_CHANGE"		20018109	"East Los Angeles (CA)"					""
 "CITY_NAME_CHANGE"		20018129	"South San Francisco (CA)"				""
+"CITY_NAME_CHANGE"		72023728	"Richmond (CA)"						""
 "CITY_NAME_CHANGE"		72038337	"Stanford (CA)"						""
 
 
-# CITY > [USA] USA > Colorado / CO
+# CITY > [USA] USA > [CO] Colorado
 #====================================================================================
+"CITY_NAME_CHANGE"		653		"Denver (CO)"						""
 "CITY_NAME_CHANGE"		981425		"Colorado Springs (CO)"					""
 
 
-# CITY > [USA] USA > D.C.
+# CITY > [USA] USA > [CT] Connecticut
+#====================================================================================
+"CITY_NAME_CHANGE"		981442		"Hartford (CT)"						""
+"CITY_NAME_CHANGE"		981452		"Bridgeport (CT)"					""
+"CITY_NAME_CHANGE"		20018166	"West Hartford (CT)"					""
+"CITY_NAME_CHANGE"		20018168	"East Hartford (CT)"					""
+
+
+# CITY > [USA] USA > [DC] District of Columbia
 #====================================================================================
 "CITY_NAME_CHANGE"		686		"Washington (DC)"					""
 
 
-# CITY > [USA] USA > Florida / FL
+# CITY > [USA] USA > [DE] Delaware
 #====================================================================================
+"CITY_NAME_CHANGE"		687		"Wilmington (DE)"					""
+"CITY_NAME_CHANGE"		20016539	"Dover (DE)"						""
+"CITY_NAME_CHANGE"		20018169	"Newark (DE)"						""
+
+
+# CITY > [USA] USA > [FL] Florida
+#====================================================================================
+"CITY_NAME_CHANGE"		697		"Jacksonville (FL)"					""
 "CITY_NAME_CHANGE"		702		"Orlando (FL)"						""
 "CITY_NAME_CHANGE"		108956		"Miami (FL)"						""
 "CITY_NAME_CHANGE"		108970		"Miami Beach (FL)"					""
+"CITY_NAME_CHANGE"		981421		"Tallahassee (FL)"					""
+"CITY_NAME_CHANGE"		2000010218	"Olympia Heights (FL)"					""
 "CITY_NAME_CHANGE"		20016542	"Miami Gardens (FL)"					""
 "CITY_NAME_CHANGE"		20018194	"North Miami (FL)"					""
 "CITY_NAME_CHANGE"		20018201	"Tamiami (FL)"						""
+"CITY_NAME_CHANGE"		20018202	"Port Charlotte (FL)"					""
 
 
-# CITY > [USA] USA > Georgia / GA
+# CITY > [USA] USA > [GA] Georgia
 #====================================================================================
 "CITY_NAME_CHANGE"		689		"Atlanta (GA)"						""
+"CITY_NAME_CHANGE"		981440		"Columbus (GA)"						""
+"CITY_NAME_CHANGE"		981476		"Augusta (GA)"						""
+"CITY_NAME_CHANGE"		20016547	"Albany (GA)"						""
 
 
-# CITY > [USA] USA > Illinois / IL
+# CITY > [USA] USA > [HI] Hawaii
+#====================================================================================
+"CITY_NAME_CHANGE"		981419		"Honolulu (HI)"						""
+
+
+# CITY > [USA] USA > [IA] Iowa
+#====================================================================================
+"CITY_NAME_CHANGE"		981455		"Des Moines (IA)"					""
+"CITY_NAME_CHANGE"		20016595	"West Des Moines (IA)"					""
+
+
+# CITY > [USA] USA > [ID] Idaho
+#====================================================================================
+"CITY_NAME_CHANGE"		72020596	"Boise (ID)"						""
+
+
+# CITY > [USA] USA > [IL] Illinois
 #====================================================================================
 "CITY_NAME_CHANGE"		666		"Chicago (IL)"						""
+"CITY_NAME_CHANGE"		981655		"Springfield (IL)"					""
+"CITY_NAME_CHANGE"		72025975	"Charleston (IL)"					""
 
 
-# CITY > [USA] USA > Kansas / KS
+# CITY > [USA] USA > [IN] Indiana
 #====================================================================================
+"CITY_NAME_CHANGE"		108965		"Indianapolis (IN)"					""
+
+
+# CITY > [USA] USA > [KS] Kansas
+#====================================================================================
+"CITY_NAME_CHANGE"		981466		"Wichita (KS)"						""
+"CITY_NAME_CHANGE"		981473		"Topeka (KS)"						""
 "CITY_NAME_CHANGE"		20016596	"Kansas City (KS)"					""
 
 
-# CITY > [USA] USA > Massachusetts / MA
+# CITY > [USA] USA > [KY] Kentucky
+#====================================================================================
+"CITY_NAME_CHANGE"		981405		"Louisville (KY)"					""
+"CITY_NAME_CHANGE"		981410		"Frankfort (KY)"					""
+
+
+# CITY > [USA] USA > [LA] Louisiana
+#====================================================================================
+"CITY_NAME_CHANGE"		703		"New Orleans (LA)"					""
+"CITY_NAME_CHANGE"		72006043	"Baton Rouge (LA)"					""
+
+
+# CITY > [USA] USA > [MA] Massachusetts
 #====================================================================================
 "CITY_NAME_CHANGE"		648		"Foxborough (MA)"					""
 "CITY_NAME_CHANGE"		138386		"Boston (MA)"						""
+"CITY_NAME_CHANGE"		2000073269	"Manchester (MA)"					""
+"CITY_NAME_CHANGE"		20016629	"Springfield (MA)"					""
+"CITY_NAME_CHANGE"		72022137	"North Andover (MA)"					""
 
 
-# CITY > [USA] USA > Michigan / MI
+# CITY > [USA] USA > [MD] Maryland
 #====================================================================================
+"CITY_NAME_CHANGE"		664		"Baltimore (MD)"					""
+"CITY_NAME_CHANGE"		981579		"Annapolis (MD)"					""
+"CITY_NAME_CHANGE"		72022119	"Columbia (MD)"						""
+
+
+# CITY > [USA] USA > [ME] Maine
+#====================================================================================
+"CITY_NAME_CHANGE"		981836		"Portland (ME)"						""
+
+
+# CITY > [USA] USA > [MI] Michigan
+#====================================================================================
+"CITY_NAME_CHANGE"		856809		"Detroit (MI)"						""
+"CITY_NAME_CHANGE"		981485		"Lansing (MI)"						""
 "CITY_NAME_CHANGE"		72006024	"Pontiac (MI)"						""
 
 
-# CITY > [USA] USA > Missouri / MO
+# CITY > [USA] USA > [MN] Minnesota
+#====================================================================================
+"CITY_NAME_CHANGE"		981406		"Saint Paul (MN)"					""
+"CITY_NAME_CHANGE"		981408		"Minneapolis (MN)"					""
+
+
+# CITY > [USA] USA > [MO] Missouri
 #====================================================================================
 "CITY_NAME_CHANGE"		655		"Kansas City (MO)"					""
 "CITY_NAME_CHANGE"		856810		"St. Louis (MO)"					""
+"CITY_NAME_CHANGE"		981427		"Springfield (MO)"					""
+"CITY_NAME_CHANGE"		20018219	"Columbia (MO)"						""
 
 
-# CITY > [USA] USA > New Jersey / NJ
+# CITY > [USA] USA > [MS] Mississippi
+#====================================================================================
+"CITY_NAME_CHANGE"		981694		"Jackson (MS)"						""
+
+
+# CITY > [USA] USA > [MT] Montana
+#====================================================================================
+"CITY_NAME_CHANGE"		981534		"Billings (MT)"						""
+"CITY_NAME_CHANGE"		981535		"Helena (MT)"						""
+
+
+# CITY > [USA] USA > [NC] North Carolina
+#====================================================================================
+"CITY_NAME_CHANGE"		677		"Charlotte (NC)"					""
+"CITY_NAME_CHANGE"		704		"Raleigh (NC)"						""
+"CITY_NAME_CHANGE"		981416		"Kannapolis (NC)"					""
+"CITY_NAME_CHANGE"		981501		"Winston-Salem (NC)"					""
+"CITY_NAME_CHANGE"		20016768	"Wilmington (NC)"					""
+"CITY_NAME_CHANGE"		20018265	"Jacksonville (NC)"					""
+"CITY_NAME_CHANGE"		20018267	"Concord (NC)"						""
+
+
+# CITY > [USA] USA > [ND] North Dakota
+#====================================================================================
+"CITY_NAME_CHANGE"		20018270	"Fargo (ND)"						""
+"CITY_NAME_CHANGE"		20018271	"Bismarck (ND)"						""
+
+
+# CITY > [USA] USA > [NE] Nebraska
+#====================================================================================
+"CITY_NAME_CHANGE"		981490		"Omaha (NE)"						""
+"CITY_NAME_CHANGE"		72020588	"Lincoln (NE)"						""
+
+
+# CITY > [USA] USA > [NH] New Hampshire
+#====================================================================================
+"CITY_NAME_CHANGE"		981441		"Manchester (NH)"					""
+"CITY_NAME_CHANGE"		20018235	"Concord (NH)"						""
+"CITY_NAME_CHANGE"		72006989	"Dover (NH)"						""
+
+
+# CITY > [USA] USA > [NJ] New Jersey
 #====================================================================================
 "CITY_NAME_CHANGE"		649		"East Rutherford (NJ)"					""
+"CITY_NAME_CHANGE"		665		"Newark (NJ)"						""
+"CITY_NAME_CHANGE"		1301190		"Trenton (NJ)"						""
+"CITY_NAME_CHANGE"		2000059882	"Jackson Township (NJ)"					""
+"CITY_NAME_CHANGE"		72022133	"Madison (NJ)"						""
 
 
-# CITY > [USA] USA > New York / NY
+# CITY > [USA] USA > [NM] New Mexico
 #====================================================================================
-"CITY_NAME_CHANGE"		978084		"New York (NY)"						""
+"CITY_NAME_CHANGE"		108977		"Albuquerque (NM)"					""
+"CITY_NAME_CHANGE"		20018253	"Santa Fe (NM)"						""
+
+
+# CITY > [USA] USA > [NV] Nevada
+#====================================================================================
+"CITY_NAME_CHANGE"		981403		"Las Vegas (NV)"					""
+"CITY_NAME_CHANGE"		981477		"Carson City (NV)"					""
+"CITY_NAME_CHANGE"		72020593	"North Las Vegas (NV)"					""
+
+
+# CITY > [USA] USA > [NY] New York
+#====================================================================================
+"CITY_NAME_CHANGE"		978084		"New York City (NY)"					""
 "CITY_NAME_CHANGE"		981429		"Brooklyn (NY)"						""
+"CITY_NAME_CHANGE"		981453		"Albany (NY)"						""
 "CITY_NAME_CHANGE"		72025973	"Long Island (NY)"					""
 
 
-# CITY > [USA] USA > North Carolina / NC
+# CITY > [USA] USA > [OH] Ohio
 #====================================================================================
-"CITY_NAME_CHANGE"		677		"Charlotte (NC)"					""
+"CITY_NAME_CHANGE"		652		"Columbus (OH)"						""
+"CITY_NAME_CHANGE"		20018276	"Springfield (OH)"					""
 
 
-# CITY > [USA] USA > Oregon / OR
+# CITY > [USA] USA > [OK] Oklahoma
 #====================================================================================
+"CITY_NAME_CHANGE"		981486		"Oklahoma City (OK)"					""
+
+
+# CITY > [USA] USA > [OR] Oregon
+#====================================================================================
+"CITY_NAME_CHANGE"		676		"Salem (OR)"						""
+"CITY_NAME_CHANGE"		976184		"Portland (OR)"						""
+"CITY_NAME_CHANGE"		20018287	"Springfield (OR)"					""
 "CITY_NAME_CHANGE"		72000964	"Eugene (OR)"						""
+"CITY_NAME_CHANGE"		72000980	"Albany (OR)"						""
 
 
-# CITY > [USA] USA > Pennsylvania / PA
+# CITY > [USA] USA > [PA] Pennsylvania
 #====================================================================================
 "CITY_NAME_CHANGE"		681		"Philadelphia (PA)"					""
+"CITY_NAME_CHANGE"		982231		"Harrisburg (PA)"					""
 
 
-# CITY > [USA] USA > Texas / TX
+# CITY > [USA] USA > [RI] Rhode Island
+#====================================================================================
+"CITY_NAME_CHANGE"		981444		"Providence (RI)"					""
+
+
+# CITY > [USA] USA > [SC] South Carolina
+#====================================================================================
+"CITY_NAME_CHANGE"		692		"Charleston (SC)"					""
+"CITY_NAME_CHANGE"		981417		"Columbia (SC)"						""
+"CITY_NAME_CHANGE"		20018293	"North Charleston (SC)"					""
+
+
+# CITY > [USA] USA > [SD] South Dakota
+#====================================================================================
+"CITY_NAME_CHANGE"		20018296	"Sioux Falls (SD)"					""
+"CITY_NAME_CHANGE"		72018967	"Pierre (SD)"						""
+
+
+# CITY > [USA] USA > [TN] Tennessee
+#====================================================================================
+"CITY_NAME_CHANGE"		981432		"Nashville (TN)"					""
+"CITY_NAME_CHANGE"		20018301	"Jackson (TN)"						""
+
+
+# CITY > [USA] USA > [TX] Texas
 #====================================================================================
 "CITY_NAME_CHANGE"		654		"Dallas (TX)"						""
 "CITY_NAME_CHANGE"		679		"Houston (TX)"						""
+"CITY_NAME_CHANGE"		981431		"Austin (TX)"						""
+"CITY_NAME_CHANGE"		20018312	"Wichita Falls (TX)"					""
 "CITY_NAME_CHANGE"		72020585	"Arlington (TX)"					""
 
 
-# CITY > [USA] USA > Utah / UT
+# CITY > [USA] USA > [UT] Utah
 #====================================================================================
 "CITY_NAME_CHANGE"		979462		"Salt Lake City (UT)"					""
 
 
-# CITY > [USA] USA > Washington / WA
+# CITY > [USA] USA > [VA] Virginia
+#====================================================================================
+"CITY_NAME_CHANGE"		667		"Virginia Beach (VA)"					""
+"CITY_NAME_CHANGE"		705		"Richmond (VA)"						""
+"CITY_NAME_CHANGE"		982465		"Springfield (VA)"					""
+"CITY_NAME_CHANGE"		72025997	"Charlottesville (VA)"					""
+
+
+# CITY > [USA] USA > [VT] Vermont
+#====================================================================================
+"CITY_NAME_CHANGE"		20018347	"Burlington (VT)"					""
+"CITY_NAME_CHANGE"		20018348	"South Burlington (VT)"					""
+
+
+# CITY > [USA] USA > [WA] Washington
 #====================================================================================
 "CITY_NAME_CHANGE"		976608		"Seattle (WA)"						""
+"CITY_NAME_CHANGE"		2000262064	"Olympia (WA)"						""
+
+
+# CITY > [USA] USA > [WI] Wisconsin
+#====================================================================================
+"CITY_NAME_CHANGE"		699		"Milwaukee (WI)"					""
+"CITY_NAME_CHANGE"		982482		"Madison (WI)"						""
+
+
+# CITY > [USA] USA > [WV] West Virginia
+#====================================================================================
+"CITY_NAME_CHANGE"		72002809	"Charleston (WV)"					""
+
+
+# CITY > [USA] USA > [WY] Wyoming
+#====================================================================================
+"CITY_NAME_CHANGE"		981491		"Cheyenne (WY)"						""
 
 
 # CITY > [VIR] US VIRGIN ISLANDS
@@ -21983,17 +22431,17 @@
 "CITY_NAME_CHANGE"		2000023725	"Epi"							""
 
 
-# CITY > [VEN] VENEZUELA > Distrito Capital
+# CITY > [VEN] VENEZUELA > [DC] Distrito Capital
 #====================================================================================
 "CITY_NAME_CHANGE"		103000		"Caracas"						""
 
 
-# CITY > [VEN] VENEZUELA > Amazonas / AM
+# CITY > [VEN] VENEZUELA > [AM] Amazonas
 #====================================================================================
 "CITY_NAME_CHANGE"		86016639	"Puerto Ayacucho (AM)"					""
 
 
-# CITY > [VEN] VENEZUELA > Anzoátegui / AN
+# CITY > [VEN] VENEZUELA > [AN] Anzoátegui
 #====================================================================================
 "CITY_NAME_CHANGE"		211721		"Cantaura (AN)"						""
 "CITY_NAME_CHANGE"		8825690		"El Tigre (AN)"						""
@@ -22003,14 +22451,14 @@
 "CITY_NAME_CHANGE"		86075473	"Lechería (AN)"						""
 
 
-# CITY > [VEN] VENEZUELA > Apure / AP
+# CITY > [VEN] VENEZUELA > [AP] Apure
 #====================================================================================
 "CITY_NAME_CHANGE"		86037310	"Guasdualito (AP)"					""
 "CITY_NAME_CHANGE"		2000016758	"San Fernando de Apure (AP)"				""
 "CITY_NAME_CHANGE"		2000087848	"El Nula (AP)"						""
 
 
-# CITY > [VEN] VENEZUELA > Aragua / AR
+# CITY > [VEN] VENEZUELA > [AR] Aragua
 #====================================================================================
 "CITY_NAME_CHANGE"		8825692		"Maracay (AR)"						""
 "CITY_NAME_CHANGE"		86037320	"Villa de Cura (AR)"					""
@@ -22020,13 +22468,13 @@
 "CITY_NAME_CHANGE"		2000017821	"El Limón (AR)"						""
 
 
-# CITY > [VEN] VENEZUELA > Barinas / BA
+# CITY > [VEN] VENEZUELA > [BA] Barinas
 #====================================================================================
 "CITY_NAME_CHANGE"		8829661		"Barinas (BA)"						""
 "CITY_NAME_CHANGE"		86011794	"Socopó (BA)"						""
 
 
-# CITY > [VEN] VENEZUELA > Bolívar / BO
+# CITY > [VEN] VENEZUELA > [BO] Bolívar
 #====================================================================================
 "CITY_NAME_CHANGE"		109196		"El Callao (BO)"					""
 "CITY_NAME_CHANGE"		109198		"Ciudad Guayana (BO)"					""
@@ -22037,7 +22485,7 @@
 "CITY_NAME_CHANGE"		86008537	"Upata (BO)"						""
 
 
-# CITY > [VEN] VENEZUELA > Carabobo / CA
+# CITY > [VEN] VENEZUELA > [CA] Carabobo
 #====================================================================================
 "CITY_NAME_CHANGE"		5300228		"Valencia (CA)"						""
 "CITY_NAME_CHANGE"		86007365	"Guacara (CA)"						""
@@ -22050,25 +22498,25 @@
 "CITY_NAME_CHANGE"		2000088101	"Güigüe (CA)"						""
 
 
-# CITY > [VEN] VENEZUELA > Cojedes / CO
+# CITY > [VEN] VENEZUELA > [CO] Cojedes
 #====================================================================================
 "CITY_NAME_CHANGE"		2000087883	"San Carlos (CO)"					""
 
 
-# CITY > [VEN] VENEZUELA > Delta Amacuro / DA
+# CITY > [VEN] VENEZUELA > [DA] Delta Amacuro
 #====================================================================================
 "CITY_NAME_CHANGE"		86008536	"Tucupita (DA)"						""
 "CITY_NAME_CHANGE"		2000017819	"Pedernales (DA)"					""
 
 
-# CITY > [VEN] VENEZUELA > Falcón / FA
+# CITY > [VEN] VENEZUELA > [FA] Falcón
 #====================================================================================
 "CITY_NAME_CHANGE"		86008973	"Coro (FA)"						""
 "CITY_NAME_CHANGE"		86034051	"El Cardón (FA)"					""
 "CITY_NAME_CHANGE"		86034573	"Punto Fijo (FA)"					""
 
 
-# CITY > [VEN] VENEZUELA > Guárico / GU
+# CITY > [VEN] VENEZUELA > [GU] Guárico
 #====================================================================================
 "CITY_NAME_CHANGE"		86011793	"San Juan de los Morros (GU)"				""
 "CITY_NAME_CHANGE"		86029613	"Calabozo (GU)"						""
@@ -22077,13 +22525,13 @@
 "CITY_NAME_CHANGE"		2000017825	"Zaraza (GU)"						""
 
 
-# CITY > [VEN] VENEZUELA > La Guaira / LG
+# CITY > [VEN] VENEZUELA > [LG] La Guaira
 #====================================================================================
 "CITY_NAME_CHANGE"		8826565		"La Guaira (LG)"					""
 "CITY_NAME_CHANGE"		86037313	"Maiquetía (LG)"					""
 
 
-# CITY > [VEN] VENEZUELA > Lara / LA
+# CITY > [VEN] VENEZUELA > [LA] Lara
 #====================================================================================
 "CITY_NAME_CHANGE"		5300234		"Barquisimeto (LA)"					""
 "CITY_NAME_CHANGE"		8826567		"La Miel (LA)"						""
@@ -22091,14 +22539,14 @@
 "CITY_NAME_CHANGE"		2000087468	"Cabudare (LA)"						""
 
 
-# CITY > [VEN] VENEZUELA > Mérida / ME
+# CITY > [VEN] VENEZUELA > [ME] Mérida
 #====================================================================================
 "CITY_NAME_CHANGE"		109194		"Mérida (ME)"						""
 "CITY_NAME_CHANGE"		5300363		"El Vigía (ME)"						""
 "CITY_NAME_CHANGE"		86011795	"Tovar (ME)"						""
 
 
-# CITY > [VEN] VENEZUELA > Miranda / MI
+# CITY > [VEN] VENEZUELA > [MI] Miranda
 #====================================================================================
 "CITY_NAME_CHANGE"		86005850	"Los Teques (MI)"					""
 "CITY_NAME_CHANGE"		86006434	"Ocumare del Tuy (MI)"					""
@@ -22110,18 +22558,18 @@
 "CITY_NAME_CHANGE"		2000017827	"Charallave (MI)"					""
 
 
-# CITY > [VEN] VENEZUELA > Monagas / MO
+# CITY > [VEN] VENEZUELA > [MO] Monagas
 #====================================================================================
 "CITY_NAME_CHANGE"		5300225		"Maturín (MO)"						""
 
 
-# CITY > [VEN] VENEZUELA > Nueva Esparta / NE
+# CITY > [VEN] VENEZUELA > [NE] Nueva Esparta
 #====================================================================================
 "CITY_NAME_CHANGE"		86034053	"Pampatar (NE)"						""
 "CITY_NAME_CHANGE"		2000016753	"Porlamar (NE)"						""
 
 
-# CITY > [VEN] VENEZUELA > Portuguesa / PO
+# CITY > [VEN] VENEZUELA > [PO] Portuguesa
 #====================================================================================
 "CITY_NAME_CHANGE"		8825689		"Villa Bruzual (PO)"					""
 "CITY_NAME_CHANGE"		8825691		"Acarigua (PO)"						""
@@ -22130,14 +22578,14 @@
 "CITY_NAME_CHANGE"		2000283627	"Guanarito (PO)"					""
 
 
-# CITY > [VEN] VENEZUELA > Sucre / SU
+# CITY > [VEN] VENEZUELA > [SU] Sucre
 #====================================================================================
 "CITY_NAME_CHANGE"		8826623		"Cumaná (SU)"						""
 "CITY_NAME_CHANGE"		75049534	"Carúpano (SU)"						""
 "CITY_NAME_CHANGE"		86009482	"Güiria (SU)"						""
 
 
-# CITY > [VEN] VENEZUELA > Táchira / TA
+# CITY > [VEN] VENEZUELA > [TA] Táchira
 #====================================================================================
 "CITY_NAME_CHANGE"		308170		"San Cristóbal (TA)"					""
 "CITY_NAME_CHANGE"		8826608		"San Antonio del Táchira (TA)"				""
@@ -22150,13 +22598,13 @@
 "CITY_NAME_CHANGE"		2000087463	"Santa Ana de Táchira (TA)"				""
 
 
-# CITY > [VEN] VENEZUELA > Trujillo / TR
+# CITY > [VEN] VENEZUELA > [TR] Trujillo
 #====================================================================================
 "CITY_NAME_CHANGE"		5300086		"Valera (TR)"						""
 "CITY_NAME_CHANGE"		86075474	"Monay (TR)"						""
 
 
-# CITY > [VEN] VENEZUELA > Yaracuy / YA
+# CITY > [VEN] VENEZUELA > [YA] Yaracuy
 #====================================================================================
 "CITY_NAME_CHANGE"		8829674		"San Felipe (YA)"					""
 "CITY_NAME_CHANGE"		86008971	"Aroa (YA)"						""
@@ -22165,7 +22613,7 @@
 "CITY_NAME_CHANGE"		2000088099	"Yaritagua (YA)"					""
 
 
-# CITY > [VEN] VENEZUELA > Zulia / ZU
+# CITY > [VEN] VENEZUELA > [ZU] Zulia
 #====================================================================================
 "CITY_NAME_CHANGE"		308172		"Maracaibo (ZU)"					""
 "CITY_NAME_CHANGE"		8826606		"Santa Bárbara (ZU)"					""

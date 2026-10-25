@@ -5,15 +5,25 @@ import { Badge, Empty, Select } from 'antd';
 import { FilterOutlined } from '@ant-design/icons';
 import CardGrid from './CardGrid';
 import { CityIcon } from './EntityIcons';
+import { RegionItem } from '../services/api';
 
 interface CityGroupViewProps {
   items: any[];
   loading?: boolean;
+  regions?: RegionItem[];
+  selectedRegion?: number | string;
+  onSelectRegion?: (regionId: number | string) => void;
   onNavigate?: (step: any) => void;
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
   emptyText?: string;
   extraRight?: React.ReactNode;
+  serverPagination?: {
+    current: number;
+    pageSize: number;
+    total: number;
+    onChange: (page: number, pageSize: number) => void;
+  };
 }
 
 export interface CityCategoryGroup {
@@ -26,11 +36,15 @@ export interface CityCategoryGroup {
 export default function CityGroupView({
   items,
   loading,
+  regions,
+  selectedRegion,
+  onSelectRegion,
   onNavigate,
   onEdit,
   onDelete,
   emptyText = 'No cities found',
   extraRight,
+  serverPagination,
 }: CityGroupViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
@@ -109,7 +123,7 @@ export default function CityGroupView({
       groups: resultGroups,
       categoryList: resultGroups.map((g) => ({
         value: g.key,
-        label: `${g.label} (${g.items.length})`,
+        label: g.label,
       })),
     };
   }, [items]);
@@ -153,14 +167,30 @@ export default function CityGroupView({
     });
   }, [items]);
 
-  if (loading) {
-    return (
-      <div className="text-center py-16 text-sm text-gray-500 flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <span>Loading cities...</span>
-      </div>
-    );
-  }
+  const regionOptions = useMemo(() => {
+    if (regions && regions.length > 0) {
+      return [
+        {
+          value: 'all',
+          label: 'All Regions',
+        },
+        ...regions.map((r) => ({
+          value: r.id,
+          label:
+            r.citiesCount !== undefined && r.citiesCount > 0
+              ? `${r.name} (${r.citiesCount})`
+              : r.name,
+        })),
+      ];
+    }
+    return [
+      {
+        value: 'all',
+        label: 'All Regions',
+      },
+      ...categoryList,
+    ];
+  }, [regions, categoryList]);
 
   // Calculate effective selected category so it safely falls back to 'all' if filtered out
   const effectiveCategory =
@@ -170,25 +200,36 @@ export default function CityGroupView({
         ? selectedCategory
         : 'all';
 
+  if (loading) {
+    return (
+      <div className="text-center py-16 text-sm text-gray-500 flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <span>Loading cities...</span>
+      </div>
+    );
+  }
+
   const renderToolbar = () => (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
       <div className="flex items-center gap-2.5 flex-wrap">
         <Select
           showSearch
-          value={effectiveCategory}
-          onChange={(val) => setSelectedCategory(val || 'all')}
-          options={[
-            {
-              value: 'all',
-              label: `All Regions (${items.length})`,
-            },
-            ...categoryList,
-          ]}
+          value={onSelectRegion ? (selectedRegion ?? 'all') : effectiveCategory}
+          onChange={(val) => {
+            if (onSelectRegion) {
+              onSelectRegion(val || 'all');
+            } else {
+              setSelectedCategory(String(val || 'all'));
+            }
+          }}
+          options={regionOptions}
           filterOption={(input, option) =>
             (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
           }
           className="w-56 text-xs"
-          suffixIcon={<FilterOutlined className="text-gray-400" />}
+          popupClassName="text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1"
+          dropdownStyle={{ fontSize: '12px' }}
+          suffixIcon={<FilterOutlined className="text-gray-400 text-xs" />}
         />
       </div>
 
@@ -217,8 +258,21 @@ export default function CityGroupView({
       {/* Category / Region Filter Toolbar with Select */}
       {renderToolbar()}
 
-      {/* Render Single Region Selected */}
-      {effectiveCategory !== 'all' && activeGroup ? (
+      {/* Render Cities Grid */}
+      {onSelectRegion ? (
+        <CardGrid
+          key={String(selectedRegion || 'all')}
+          items={items}
+          type="city"
+          cardSize="small"
+          onNavigate={onNavigate}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyText={emptyText}
+          defaultPageSize={20}
+          serverPagination={serverPagination}
+        />
+      ) : effectiveCategory !== 'all' && activeGroup ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-2.5 border-b border-gray-200">
             <div className="flex items-center gap-2">
@@ -248,8 +302,10 @@ export default function CityGroupView({
           </div>
 
           <CardGrid
+            key={selectedCategory}
             items={activeGroup.items}
             type="city"
+            cardSize="small"
             onNavigate={onNavigate}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -260,13 +316,16 @@ export default function CityGroupView({
       ) : (
         /* All Regions: do not group, render single unified grid sorted by region */
         <CardGrid
+          key="all"
           items={sortedAllItems}
           type="city"
+          cardSize="small"
           onNavigate={onNavigate}
           onEdit={onEdit}
           onDelete={onDelete}
           emptyText={emptyText}
           defaultPageSize={20}
+          serverPagination={serverPagination}
         />
       )}
     </div>

@@ -25,6 +25,8 @@ export class PageableQueryDto {
     example: ['name,asc'],
   })
   sort?: string | string[];
+
+  keyword?: string;
 }
 
 /**
@@ -72,16 +74,34 @@ export class PaginationQueryDto extends SearchFilterDto {
   sort?: string | string[];
 }
 
-export class NationListFilterDto extends SearchFilterDto {
+export class NationSearchQueryDto extends PageableQueryDto {
   @ApiPropertyOptional({
-    description: 'Lọc theo ID liên đoàn châu lục',
+    description: 'Lọc theo ID liên đoàn châu lục (có thể null)',
     type: String,
     required: false,
   })
   confedId?: string;
 }
 
-export class CompetitionListFilterDto extends SearchFilterDto {
+export class IntCompetitionSearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID liên đoàn châu lục (có thể null)',
+    type: String,
+    required: false,
+  })
+  confedId?: string;
+}
+
+export class DomesticCompetitionSearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID quốc gia (có thể null)',
+    type: String,
+    required: false,
+  })
+  nationId?: string;
+}
+
+export class CompetitionListFilterDto extends PageableQueryDto {
   @ApiPropertyOptional({
     description: 'Lọc theo ID liên đoàn châu lục',
     type: String,
@@ -102,9 +122,30 @@ export class CompetitionListFilterDto extends SearchFilterDto {
     required: false,
   })
   isInternational?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Lọc theo loại giải đấu (league, cup, youth)',
+    type: String,
+    required: false,
+  })
+  category?: string;
+
+  @ApiPropertyOptional({
+    description: 'Chỉ lấy giải đấu cấp cao nhất (parent_id IS NULL)',
+    type: Boolean,
+    required: false,
+  })
+  topLevelOnly?: boolean;
 }
 
-export class IndependentClubFilterDto extends SearchFilterDto {
+export class IndependentClubSearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID quốc gia (có thể null)',
+    type: String,
+    required: false,
+  })
+  nationId?: string;
+
   @ApiPropertyOptional({
     description: 'Lọc CLB đã giải thể (true/false)',
     type: String,
@@ -113,11 +154,87 @@ export class IndependentClubFilterDto extends SearchFilterDto {
   extinct?: string | boolean;
 }
 
-export class CityFilterDto extends SearchFilterDto {
+export class CitySearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID quốc gia (có thể null)',
+    type: String,
+    required: false,
+  })
+  nationId?: string;
+
   @ApiPropertyOptional({
     description: 'Lọc theo phân loại vùng miền/category',
     type: String,
     required: false,
   })
   category?: string;
+
+  @ApiPropertyOptional({
+    description: 'Lọc theo Region ID',
+    type: Number,
+    required: false,
+  })
+  regionId?: number;
 }
+
+export class NationScopedSearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID quốc gia (có thể null)',
+    type: String,
+    required: false,
+  })
+  nationId?: string;
+}
+
+export class CompScopedSearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID giải đấu (có thể null)',
+    type: String,
+    required: false,
+  })
+  compId?: string;
+}
+
+export class ClubSearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID quốc gia (có thể null)',
+    type: String,
+    required: false,
+  })
+  nationId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Lọc theo ID giải đấu (có thể null, hoặc "oth-{nationId}" cho other clubs, "ext-{nationId}" cho extinct clubs)',
+    type: String,
+    required: false,
+  })
+  compId?: string;
+}
+
+export class AwardSearchQueryDto extends PageableQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID quốc gia (có thể null)',
+    type: String,
+    required: false,
+  })
+  nationId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Lọc theo ID giải đấu (có thể null)',
+    type: String,
+    required: false,
+  })
+  compId?: string;
+}
+
+// Backward compatibility aliases
+export { NationSearchQueryDto as NationListFilterDto };
+export { IntCompetitionSearchQueryDto as IntCompetitionFilterDto };
+export { DomesticCompetitionSearchQueryDto as DomesticCompetitionFilterDto };
+export { IndependentClubSearchQueryDto as IndependentClubFilterDto };
+export { CitySearchQueryDto as CityFilterDto };
+export { NationScopedSearchQueryDto as NationScopedFilterDto };
+export { CompScopedSearchQueryDto as CompScopedFilterDto };
+export { ClubSearchQueryDto as ClubSearchFilterDto };
+export { AwardSearchQueryDto as AwardFilterDto };

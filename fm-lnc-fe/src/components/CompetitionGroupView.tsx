@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Badge, Empty, Select } from 'antd';
 import { StarOutlined, GlobalOutlined, AppstoreOutlined, FilterOutlined } from '@ant-design/icons';
 import CardGrid from './CardGrid';
-import SubCompetitionsDrawer from './SubCompetitionsDrawer';
+import SubCompetitionsModal from './SubCompetitionsModal';
 import { CompIcon, AwardIcon } from './EntityIcons';
 
 export type CompetitionGroupKey = 'all' | 'league' | 'cup' | 'youth' | 'other';
@@ -14,7 +14,13 @@ export function getCompetitionGroup(target?: any): CompetitionCategory {
   if (!target) return 'other';
   const item = typeof target === 'object' ? target : { type: target, categories: target };
   const id = String(item?.id || '');
-  if (id === '[OTHER]' || id === '[EXTINCT]' || item?.is_virtual) {
+  if (
+    id === '[OTHER]' ||
+    id === '[EXTINCT]' ||
+    id.startsWith('oth-') ||
+    id.startsWith('ext-') ||
+    item?.is_virtual
+  ) {
     return 'other';
   }
   const cat = String(item?.type || item?.categories || item?.category || '')
@@ -51,8 +57,14 @@ function getLeagueTier(categoryStr: string): number {
 
 function getOtherWeight(item: any): number {
   const id = String(item?.id || '');
-  if (id === '[EXTINCT]' || item?.virtual_type === 'EXTINCT') return 3;
-  if (id === '[OTHER]' || item?.virtual_type === 'OTHER' || item?.is_virtual) return 2;
+  if (id === '[EXTINCT]' || id.startsWith('ext-') || item?.virtual_type === 'EXTINCT') return 3;
+  if (
+    id === '[OTHER]' ||
+    id.startsWith('oth-') ||
+    item?.virtual_type === 'OTHER' ||
+    item?.is_virtual
+  )
+    return 2;
   return 1;
 }
 
@@ -116,6 +128,12 @@ interface CompetitionGroupViewProps {
   onDelete?: (record: any) => void;
   emptyText?: string;
   extraRight?: React.ReactNode;
+  serverPagination?: {
+    current: number;
+    pageSize: number;
+    total: number;
+    onChange: (page: number, pageSize: number) => void;
+  };
 }
 
 export default function CompetitionGroupView({
@@ -126,28 +144,23 @@ export default function CompetitionGroupView({
   onDelete,
   emptyText = 'No competitions found',
   extraRight,
+  serverPagination,
 }: CompetitionGroupViewProps) {
   const [selectedGroup, setSelectedGroup] = useState<CompetitionGroupKey>('all');
-  const [drawerParent, setDrawerParent] = useState<any | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [modalParent, setModalParent] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Visible items: parent/top-level competitions (sub-competitions are organized inside parent drawer)
-  // Hide independent clubs containers ([OTHER], [EXTINCT]) if they have 0 clubs
+  // Visible items: parent/top-level competitions (sub-competitions are organized inside parent modal)
   const visibleItems = useMemo(() => {
     return items.filter((item) => {
       if (item.parent_id) return false;
-      const isOther = item.id === '[OTHER]' || item.virtual_type === 'OTHER';
-      const isExtinct = item.id === '[EXTINCT]' || item.virtual_type === 'EXTINCT';
-      if ((isOther || isExtinct) && (item.clubsCount || item.totalChildren || 0) === 0) {
-        return false;
-      }
       return true;
     });
   }, [items]);
 
   const handleViewChildren = (comp: any) => {
-    setDrawerParent(comp);
-    setIsDrawerOpen(true);
+    setModalParent(comp);
+    setIsModalOpen(true);
   };
 
   const sortedAllItems = useMemo(() => {
@@ -220,15 +233,10 @@ export default function CompetitionGroupView({
       {
         value: 'all',
         label: (
-          <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-1.5">
-              <AppstoreOutlined className="text-blue-500" />
-              <span>All Categories</span>
-            </span>
-            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-blue-50 text-blue-600 font-bold">
-              {visibleItems.length}
-            </span>
-          </div>
+          <span className="flex items-center gap-1.5 text-xs">
+            <AppstoreOutlined className="text-blue-500" />
+            <span>All Categories</span>
+          </span>
         ),
       },
       ...groupConfigs
@@ -236,19 +244,14 @@ export default function CompetitionGroupView({
         .map((g) => ({
           value: g.key,
           label: (
-            <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-1.5">
-                {g.icon}
-                <span>{g.label}</span>
-              </span>
-              <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-gray-100 text-gray-600 font-bold">
-                {g.items.length}
-              </span>
-            </div>
+            <span className="flex items-center gap-1.5 text-xs">
+              {g.icon}
+              <span>{g.label}</span>
+            </span>
           ),
         })),
     ];
-  }, [visibleItems.length, groupConfigs]);
+  }, [groupConfigs]);
 
   if (loading) {
     return (
@@ -266,8 +269,10 @@ export default function CompetitionGroupView({
           value={selectedGroup}
           onChange={(val) => setSelectedGroup(val as CompetitionGroupKey)}
           options={selectOptions}
-          className="w-52 text-xs"
-          suffixIcon={<FilterOutlined className="text-gray-400" />}
+          className="w-48 text-xs"
+          popupClassName="text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1"
+          dropdownStyle={{ fontSize: '12px' }}
+          suffixIcon={<FilterOutlined className="text-gray-400 text-xs" />}
         />
       </div>
 
@@ -296,6 +301,7 @@ export default function CompetitionGroupView({
       {/* Render Sections */}
       {selectedGroup === 'all' ? (
         <CardGrid
+          key="all"
           items={sortedAllItems}
           type="competition"
           onNavigate={onNavigate}
@@ -304,6 +310,7 @@ export default function CompetitionGroupView({
           onViewChildren={handleViewChildren}
           emptyText={emptyText}
           defaultPageSize={20}
+          serverPagination={serverPagination}
         />
       ) : (
         <div>
@@ -341,6 +348,7 @@ export default function CompetitionGroupView({
                 </div>
 
                 <CardGrid
+                  key={selectedGroup}
                   items={activeItems}
                   type="competition"
                   onNavigate={onNavigate}
@@ -355,11 +363,10 @@ export default function CompetitionGroupView({
         </div>
       )}
 
-      {/* Sub-Competitions Drawer */}
-      <SubCompetitionsDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        parentComp={drawerParent}
+      <SubCompetitionsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        parentComp={modalParent}
         allCompetitions={items}
         onEdit={onEdit}
         onDelete={onDelete}

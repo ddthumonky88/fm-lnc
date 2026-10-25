@@ -204,6 +204,7 @@ export function mapCity(city: any) {
     id: String(city.id),
     name: city.name,
     region: city.region ?? city.categories ?? null,
+    region_id: city.region_id ?? null,
     categories: city.region ?? city.categories ?? null,
     is_disabled: !!city.is_disabled,
     inactive_fields: city.is_disabled ? 'name' : null,
