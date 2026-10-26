@@ -1,7 +1,7 @@
 # FM LNC Manager & Explorer
 
 > **Công cụ quản lý, khám phá và việt hóa dữ liệu file `.lnc` (Licence/Language & Name Changes) cho Football Manager 2024.**  
-> Cho phép xem phân cấp đa tầng, tìm kiếm toàn văn, chỉnh sửa trực quan (CRUD) và xuất nhập dữ liệu 2 chiều cho Quốc gia, Câu lạc bộ, Giải đấu, Sân vận động, Thành phố, Giải thưởng, Nhân sự và Giai đoạn giải đấu.
+> Cho phép xem phân cấp đa tầng, tìm kiếm toàn văn, chỉnh sửa trực quan (CRUD) và xuất nhập dữ liệu 2 chiều cho Liên đoàn châu lục, Quốc gia, Giải đấu, Câu lạc bộ, Khu vực, Thành phố, Sân vận động, Giải thưởng, Nhân sự và Giai đoạn giải đấu.
 
 ---
 
@@ -21,33 +21,31 @@
    - [4.3. Kiểm tra kiểm thử Production](#43-kiểm-tra-kiểm-thử-production)
 5. [🗄️ Thiết kế Cơ sở Dữ liệu (Database Design Specification)](#️-thiết-kế-cơ-sở-dữ-liệu-database-design-specification)
    - [5.1. Sơ đồ Quan hệ Thực thể (ERD Diagram)](#51-sơ-đồ-quan-hệ-thực-thể-erd-diagram)
-   - [5.2. Đặc tả chi tiết 9 Bảng CSDL](#52-đặc-tả-chi-tiết-9-bảng-csdl)
+   - [5.2. Đặc tả chi tiết 10 Bảng CSDL](#52-đặc-tả-chi-tiết-10-bảng-csdl)
    - [5.3. Quy tắc nghiệp vụ & Chuẩn String ID](#53-quy-tắc-nghiệp-vụ--chuẩn-string-id)
-   - [5.4. Cơ chế vô hiệu hóa trường (`inactive_fields`)](#54-cơ-chế-vô-hiệu-hóa-trường-inactive_fields)
+   - [5.4. Cơ chế vô hiệu hóa trường (`is_disabled` & `inactive_fields`)](#54-cơ-chế-vô-hiệu-hóa-trường-is_disabled--inactive_fields)
    - [5.5. Bảng ánh xạ giữa CSDL và Command `.lnc`](#55-bảng-ánh-xạ-giữa-csdl-và-command-lnc)
    - [5.6. Chiến lược Đánh chỉ mục (Indexing Strategy)](#56-chiến-lược-đánh-chỉ-mục-indexing-strategy)
    - [5.7. Full Script DDL Tạo Bảng PostgreSQL](#57-full-script-ddl-tạo-bảng-postgresql)
 6. [📡 Tài liệu Danh sách API (RESTful API Reference)](#-tài-liệu-danh-sách-api-restful-api-reference)
-   - [6.1. Quy tắc chung & Cấu trúc Phân cấp](#61-quy-tắc-chung--cấu-trúc-phân-cấp)
-   - [6.2. Health Check API](#62-health-check-api)
-   - [6.3. Hierarchy API (Cây phân cấp)](#63-hierarchy-api-cây-phân-cấp)
-   - [6.4. Records API (CRUD & Chi tiết thực thể)](#64-records-api-crud--chi-tiết-thực-thể)
-   - [6.5. Search API (Tìm kiếm toàn văn)](#65-search-api-tìm-kiếm-toàn-văn)
-   - [6.6. LNC File API (Export & Import)](#66-lnc-file-api-export--import)
-   - [6.7. Logos & Graphics API](#67-logos--graphics-api)
-   - [6.8. Swagger & OpenAPI Documentation](#68-swagger--openapi-documentation)
+   - [6.1. Quy ước chung & Envelope phản hồi](#61-quy-ước-chung--envelope-phản-hồi)
+   - [6.2. Hierarchy API (Truy vấn & Phân cấp dữ liệu)](#62-hierarchy-api-truy-vấn--phân-cấp-dữ-liệu)
+   - [6.3. Records API (Generic CRUD & Chi tiết thực thể)](#63-records-api-generic-crud--chi-tiết-thực-thể)
+   - [6.4. Search API (Tìm kiếm toàn văn đa bảng)](#64-search-api-tìm-kiếm-toàn-văn-đa-bảng)
+   - [6.5. LNC File & Sync API (Export, Import & Upload)](#65-lnc-file--sync-api-export-import--upload)
+   - [6.6. Logos, Graphics & Swagger Documentation](#66-logos-graphics--swagger-documentation)
 7. [📁 GitHub Repository & Thông tin](#-github-repository--thông-tin)
 
 ---
 
 ## 📸 Tổng quan & Công nghệ
 
-- **Frontend**: Next.js 14 (App Router) + Ant Design + Tailwind CSS + Lucide Icons
-- **Backend**: NestJS 10 + TypeORM
-- **Database**: PostgreSQL (>= 14) — Chuẩn định danh `VARCHAR(64)` String ID
-- **API Documentation**: Swagger UI / OpenAPI 3.0
+- **Frontend**: Next.js 14 (App Router) + Ant Design (v5) + Tailwind CSS + Lucide Icons
+- **Backend**: NestJS 10 + TypeORM (PostgreSQL Driver)
+- **Database**: PostgreSQL (>= 14) — Chuẩn định danh khóa `VARCHAR(64)` String ID
+- **API Documentation**: Swagger UI / OpenAPI 3.0 tích hợp sẵn tại `/docs`
 - **Data Source**: Tệp tin `.lnc` (Language / Name Change) từ Football Manager 2024
-- **Logo/Graphics**: Phục vụ logo và cờ chính thức từ tệp đồ họa Football Manager 2024
+- **Logos & Graphics**: Hỗ trợ phục vụ logo từ local game assets & cờ quốc gia từ FIFA CDN
 
 ---
 
@@ -57,34 +55,42 @@
 
 ```
 fm-lnc/
-├── fm-lnc-be/              # NestJS REST API Server
+├── fm-lnc-be/                    # NestJS REST API Server
 │   ├── src/
-│   │   ├── config/         # Cấu hình đường dẫn local (app-config.json)
-│   │   ├── database/       # Startup migrations & ánh xạ quan hệ cha/con
-│   │   ├── entities/       # TypeORM entities (Nation, Club, Competition, ...)
-│   │   ├── hierarchy/      # API truy vấn cấu trúc phân cấp đa tầng
-│   │   ├── lnc/            # Parser & export tệp .lnc
-│   │   ├── logos/          # Serve logo/cờ từ filesystem Football Manager
-│   │   ├── records/        # Generic CRUD records & /info endpoints
-│   │   └── search/         # Tìm kiếm toàn văn 8 bảng thực thể
+│   │   ├── common/               # Response envelope interceptor, Exception filters, Mappers
+│   │   ├── config/               # API cấu hình đường dẫn local & quét thư mục (app-config.json)
+│   │   ├── database/             # Startup migrations & ánh xạ quan hệ parent_id
+│   │   ├── entities/             # 10 TypeORM entities (Confederation, Nation, Competition, Club, Region, City, Stadium, Award, Person, Stage)
+│   │   ├── hierarchy/            # API truy vấn cây phân cấp (Confederation -> Nation -> Comp -> Club...)
+│   │   ├── lnc/                  # Parser, import, upload & export tệp .lnc
+│   │   ├── logos/                # Phục vụ logo Confederation, Nation, Competition, Club từ local
+│   │   ├── records/              # Generic CRUD records & /info endpoints cho mọi thực thể
+│   │   └── search/               # Tìm kiếm toàn văn trên 8 bảng thực thể
 │   ├── scripts/
-│   │   ├── seed_lnc.py     # Script nạp dữ liệu từ file .lnc vào PostgreSQL
-│   │   ├── export_db.js    # Script trích xuất DB ra tệp SQL dump
-│   │   └── update_club_comps.js
-│   ├── Dockerfile          # Dockerfile multi-stage production
+│   │   ├── seed_lnc.py           # Script Python nạp dữ liệu từ file .lnc vào PostgreSQL
+│   │   ├── seed.js               # Runner nạp seed nhanh qua npm run seed
+│   │   ├── create_regions_table.js # Script khởi tạo & nạp bảng regions từ dữ liệu thành phố
+│   │   ├── migrate_stadium_type.js # Script phân loại sân vận động và sân tập (training pitch)
+│   │   ├── update_db_schema_step3.js # Script đồng bộ schema mới (type, is_disabled, regions)
+│   │   ├── export_db.js          # Script trích xuất DB ra tệp SQL dump
+│   │   └── db_dump_full.sql      # Tệp SQL dump mẫu đầy đủ
+│   ├── Dockerfile                # Dockerfile multi-stage production
 │   └── package.json
-├── fm-lnc-fe/              # Next.js 14 Web Application
+├── fm-lnc-fe/                    # Next.js 14 Web Application
 │   ├── src/app/
-│   │   ├── page.tsx        # Dashboard điều hướng phân cấp (Châu lục, Giải quốc tế, Hub)
-│   │   ├── comp/           # Giao diện quản lý Giải đấu & Danh sách CLB
-│   │   ├── nation/         # Giao diện Hub Quốc gia & các danh mục trực thuộc
-│   │   └── confederation/  # Giao diện Liên đoàn châu lục
-│   ├── src/components/     # UI Components (Header, Sidebar, EntityCard, Modals, Drawers)
-│   ├── src/services/api.ts # API client kết nối Backend Cloud & Local
+│   │   ├── page.tsx              # Dashboard tổng quan: Châu lục, Giải quốc tế & Điều hướng
+│   │   ├── confederation/[id]/   # Chi tiết Liên đoàn châu lục & danh sách quốc gia trực thuộc
+│   │   ├── nation/[id]/          # Giao diện Hub Quốc gia: Giải đấu, CLB, Sân vận động, Thành phố, Khu vực, Giải thưởng
+│   │   ├── comp/[id]/            # Giao diện chi tiết Giải đấu: Giải con & Danh sách CLB
+│   │   ├── players/              # Danh sách & tìm kiếm Cầu thủ, Huấn luyện viên, Nhân sự
+│   │   ├── stages/               # Danh sách & tìm kiếm Giai đoạn / Vòng đấu
+│   │   └── layout.tsx            # Root layout bọc AppLayout & Ant Design ConfigProvider
+│   ├── src/components/           # UI Components (AppHeader, AppSidebar, EntityCard, CardGrid, Modals, Drawers)
+│   ├── src/services/api.ts       # API client kết nối Cloud / Local, cache layer & normalizers
 │   └── package.json
-├── render.yaml             # Cấu hình Blueprint tự động triển khai Render.com
-├── AGENTS.md               # Quy định làm việc dành cho AI / Agent
-└── README.md               # Tài liệu tổng hợp toàn diện dự án
+├── render.yaml                   # Cấu hình Blueprint tự động triển khai Render.com
+├── AGENTS.md                     # Quy định làm việc dành cho AI / Agent
+└── README.md                     # Tài liệu tổng hợp toàn diện dự án
 ```
 
 ### 2.2. Luồng phân cấp dữ liệu (Hierarchy Flow)
@@ -103,10 +109,11 @@ Hệ thống được thiết kế theo cấu trúc tổ chức thực tế củ
             │        ├──> [Sub-Competitions] (Giải con / vòng bảng: parent_id = comp_id)
             │        ├──> [Clubs] (CLB trực thuộc giải đấu)
             │        └──> [Awards] (Giải thưởng trực thuộc giải đấu)
-            ├──> [Independent Clubs] (CLB tự do, phong trào không gắn giải cố định: comp_id = NULL)
-            ├──> [Extinct Clubs] (CLB đã giải thể: is_extinct = true)
-            ├──> [Stadiums] (Sân vận động thuộc quốc gia)
-            ├──> [Cities] (Thành phố thuộc quốc gia)
+            ├──> [Independent Clubs] (CLB tự do: comp_id = oth-{nationId})
+            ├──> [Extinct Clubs] (CLB đã giải thể: comp_id = ext-{nationId})
+            ├──> [Regions] (Khu vực / Phân vùng thuộc quốc gia)
+            │        └──> [Cities] (Thành phố thuộc khu vực / quốc gia)
+            ├──> [Stadiums] (Sân vận động & Sân tập thuộc quốc gia)
             └──> [Independent Awards] (Giải thưởng độc lập cấp quốc gia)
 
 [Global Directory] (Danh mục thực thể dùng chung toàn cầu)
@@ -121,8 +128,8 @@ Hệ thống được thiết kế theo cấu trúc tổ chức thực tế củ
 ### Yêu cầu môi trường
 - **Node.js**: >= 20.x
 - **PostgreSQL**: >= 14.x
-- **Python**: >= 3.9 (để chạy script nạp dữ liệu ban đầu)
-- **Football Manager 2024**: (Tùy chọn, để phục vụ ảnh logo và đọc file `.lnc` local)
+- **Python**: >= 3.9 (để chạy script nạp dữ liệu ban đầu từ file `.lnc`)
+- **Football Manager 2024**: *(Tùy chọn, để phục vụ ảnh logo và đọc file `.lnc` local)*
 
 ---
 
@@ -134,7 +141,7 @@ Hệ thống được thiết kế theo cấu trúc tổ chức thực tế củ
    npm install
    ```
 
-2. Tạo tệp `.env` trong `fm-lnc-be/`:
+2. Tạo tệp `.env` trong thư mục `fm-lnc-be/`:
    ```env
    PORT=3001
    HOST=0.0.0.0
@@ -143,10 +150,10 @@ Hệ thống được thiết kế theo cấu trúc tổ chức thực tế củ
    DB_USERNAME=postgres
    DB_PASSWORD=your_password
    DB_NAME=fm_lnc_db
-   LNC_FILES_DIR=../../
+   LNC_FILES_DIR=./data
    ```
 
-3. Cấu hình đường dẫn dữ liệu Football Manager local trong `fm-lnc-be/app-config.json`:
+3. Cấu hình đường dẫn dữ liệu Football Manager local trong `fm-lnc-be/app-config.json` (tùy chỉnh phù hợp với máy của bạn):
    ```json
    {
      "lncDir": "D:\\Games\\FM24_2026\\FootballManager24\\data\\database\\db\\2430\\lnc\\all",
@@ -236,7 +243,8 @@ curl https://fm-lnc-backend.onrender.com/health
 ```
 Kết quả trả về: `{"status":"ok","timestamp":"..."}`.
 
-> 💡 **Lưu ý triển khai Cloud:** Tính năng duyệt logo đồ họa và import/export tệp `.lnc` trực tiếp từ ổ cứng yêu cầu môi trường local có cài đặt game FM2024. Trên Cloud Render, backend hoạt động độc lập phục vụ toàn bộ dữ liệu từ PostgreSQL.
+> [!NOTE]
+> **Lưu ý triển khai Cloud:** Tính năng duyệt logo đồ họa từ ổ đĩa máy tính yêu cầu môi trường local có cài đặt game FM2024. Trên Cloud Render, backend hoạt động độc lập phục vụ toàn bộ dữ liệu từ PostgreSQL. Frontend tự động sử dụng cờ quốc gia từ FIFA CDN nếu không có backend local.
 
 ---
 
@@ -244,7 +252,7 @@ Kết quả trả về: `{"status":"ok","timestamp":"..."}`.
 
 - **Hệ quản trị CSDL:** PostgreSQL (>= 14)
 - **Framework ORM:** TypeORM (NestJS)
-- **Quy ước khóa chính/ngoại:** Chuỗi ký tự (`VARCHAR(64)` / `string`) cho toàn bộ Primary Key và Foreign Key.
+- **Quy ước khóa chính/ngoại:** Chuỗi ký tự (`VARCHAR(64)` / `string`) cho toàn bộ Primary Key và Foreign Key của các thực thể game FM, riêng bảng phụ trợ `regions` sử dụng `SERIAL` ID tự tăng.
 
 ---
 
@@ -257,10 +265,13 @@ erDiagram
     
     NATIONS ||--o{ COMPETITIONS : "organizes domestic comps"
     NATIONS ||--o{ CLUBS : "registers domestic clubs"
+    NATIONS ||--o{ REGIONS : "contains regions"
     NATIONS ||--o{ CITIES : "contains cities"
     NATIONS ||--o{ STADIUMS : "locates stadiums"
     NATIONS ||--o{ AWARDS : "hosts national awards"
     
+    REGIONS ||--o{ CITIES : "contains cities in region"
+
     COMPETITIONS ||--o{ CLUBS : "contains participating clubs"
     COMPETITIONS ||--o{ AWARDS : "awards competition trophies"
     COMPETITIONS ||--o{ COMPETITIONS : "has sub-competitions (parent_id)"
@@ -289,8 +300,7 @@ erDiagram
         varchar confed_id FK
         varchar nation_id FK
         varchar parent_id FK
-        varchar categories
-        boolean is_international
+        varchar type
         text note
         text inactive_fields
     }
@@ -308,19 +318,28 @@ erDiagram
         boolean is_extinct
     }
 
+    REGIONS {
+        serial id PK
+        varchar name
+        varchar nation_id FK
+        timestamp created_at
+    }
+
     CITIES {
         varchar id PK
         varchar name
         varchar nation_id FK
         varchar region
-        text inactive_fields
+        integer region_id FK
+        boolean is_disabled
     }
 
     STADIUMS {
         varchar id PK
         varchar name
         varchar nation_id FK
-        text inactive_fields
+        varchar type
+        boolean is_disabled
     }
 
     AWARDS {
@@ -347,7 +366,7 @@ erDiagram
 
 ---
 
-### 5.2. Đặc tả chi tiết 9 Bảng CSDL
+### 5.2. Đặc tả chi tiết 10 Bảng CSDL
 
 #### 1. Bảng `confederations` (Châu lục / Liên đoàn)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
@@ -376,9 +395,8 @@ erDiagram
 | `bg_color` | `VARCHAR(100)` | | Yes | Mã màu nền RGB (e.g. `59 89 152`) |
 | `confed_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `confederations.id` (nếu là giải quốc tế) |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` (nếu là giải quốc nội) |
-| `parent_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu giải đấu cấp cha (nếu là giải đấu con/vòng bảng) |
-| `categories` | `VARCHAR(255)` | | Yes | Phân cấp giải: `First Tier`, `Domestic Cup`, `Super Cup`, v.v. |
-| `is_international` | `BOOLEAN` | | No | Đánh dấu giải quốc tế (`true`) hoặc giải quốc nội (`false`) |
+| `parent_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu giải đấu cấp cha (nếu là giải đấu con / vòng bảng) |
+| `type` | `VARCHAR(255)` | | Yes | Phân loại giải đấu: `First Tier`, `Domestic Cup`, `Super Cup`, v.v. (trước là `categories`) |
 | `note` | `TEXT` | | Yes | Ghi chú nội bộ |
 | `inactive_fields` | `TEXT` | | Yes | Các trường bị comment out khi xuất `.lnc` |
 
@@ -394,26 +412,38 @@ erDiagram
 | `comp_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `competitions.id` (NULL nếu là CLB độc lập) |
 | `note` | `TEXT` | | Yes | Ghi chú CLB |
 | `inactive_fields` | `TEXT` | | Yes | Các trường bị comment out khi xuất `.lnc` |
-| `is_extinct` | `BOOLEAN` | | No | Đánh dấu CLB đã giải thể (`true`) |
+| `is_extinct` | `BOOLEAN` | | No | Đánh dấu CLB đã giải thể (`true`), mặc định: `false` |
 
-#### 5. Bảng `cities` (Thành phố)
+#### 5. Bảng `regions` (Khu vực / Phân vùng thuộc quốc gia)
+| Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
+| :--- | :--- | :---: | :---: | :--- |
+| `id` | `SERIAL` | **PK** | No | Khóa chính tự tăng |
+| `name` | `VARCHAR(255)` | | No | Tên khu vực / bang / miền (e.g. `North East`, `Miền Bắc`) |
+| `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` (ON DELETE CASCADE) |
+| `created_at` | `TIMESTAMP` | | Yes | Thời gian khởi tạo, mặc định `CURRENT_TIMESTAMP` |
+
+> *Ràng buộc:* `UNIQUE (nation_id, name)` đảm bảo tên khu vực không trùng lặp trong cùng một quốc gia.
+
+#### 6. Bảng `cities` (Thành phố)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Thành phố |
 | `name` | `VARCHAR(255)` | | No | Tên thành phố (e.g. `Hà Nội`, `London`) |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` |
-| `region` | `VARCHAR(255)` | | Yes | Phân vùng miền / bang / khu vực |
-| `inactive_fields` | `TEXT` | | Yes | Danh sách trường comment out |
+| `region` | `VARCHAR(255)` | | Yes | Tên vùng / khu vực dạng text thô |
+| `region_id` | `INTEGER` | **FK** | Yes | Tham chiếu tới bảng `regions.id` (ON DELETE SET NULL) |
+| `is_disabled` | `BOOLEAN` | | No | Đánh dấu tắt đồng bộ/comment lệnh trong file `.lnc` |
 
-#### 6. Bảng `stadiums` (Sân vận động)
+#### 7. Bảng `stadiums` (Sân vận động)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Sân vận động |
 | `name` | `VARCHAR(255)` | | No | Tên sân vận động (e.g. `Sân vận động Quốc gia Mỹ Đình`) |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` |
-| `inactive_fields` | `TEXT` | | Yes | Danh sách trường comment out |
+| `type` | `VARCHAR(50)` | | Yes | Loại sân: `'stadium'` (sân thi đấu) hoặc `'training pitch'` (sân tập) |
+| `is_disabled` | `BOOLEAN` | | No | Đánh dấu tắt đồng bộ/comment lệnh trong file `.lnc` |
 
-#### 7. Bảng `awards` (Danh hiệu & Giải thưởng)
+#### 8. Bảng `awards` (Danh hiệu & Giải thưởng)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Giải thưởng |
@@ -423,7 +453,7 @@ erDiagram
 | `comp_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `competitions.id` (nếu gắn giải đấu) |
 | `inactive_fields` | `TEXT` | | Yes | Danh sách trường comment out |
 
-#### 8. Bảng `people` (Cầu thủ & Ban huấn luyện)
+#### 9. Bảng `people` (Cầu thủ & Ban huấn luyện)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Nhân vật |
@@ -431,7 +461,7 @@ erDiagram
 | `common_name` | `VARCHAR(255)` | | No | Tên thường gọi / Biệt danh (e.g. `Pelé`, `Kaka`) |
 | `second_name` | `VARCHAR(255)` | | No | Họ / Tên sau (Surname) |
 
-#### 9. Bảng `stages` (Giai đoạn & Vòng đấu)
+#### 10. Bảng `stages` (Giai đoạn & Vòng đấu)
 | Tên cột | Kiểu dữ liệu | Khóa | Nullable | Ý nghĩa & Ghi chú |
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `VARCHAR(64)` | **PK** | No | Unique Game ID của Vòng đấu |
@@ -445,8 +475,10 @@ erDiagram
 
 ---
 
-### 5.4. Cơ chế vô hiệu hóa trường (`inactive_fields`)
-Người dùng có thể tạm ngưng đồng bộ một trường dữ liệu (ví dụ: giữ nguyên màu sắc mặc định của game, chỉ đổi tên). Khi xuất file `.lnc`, backend tự động thêm ký tự comment `#` ở đầu các dòng lệnh tương ứng với trường có tên trong `inactive_fields`.
+### 5.4. Cơ chế vô hiệu hóa trường (`is_disabled` & `inactive_fields`)
+Người dùng có thể tạm ngưng đồng bộ một trường dữ liệu (ví dụ: giữ nguyên màu sắc mặc định của game, chỉ đổi tên, hoặc tắt hẳn một tên thành phố/sân vận động):
+- Đối với `cities` và `stadiums`: Trường boolean `is_disabled = true` sẽ khiến dòng lệnh tương ứng được chú thích dấu `#` ở đầu khi xuất file `.lnc`.
+- Đối với `nations`, `competitions`, `clubs`, `awards`: Cột `inactive_fields` chứa chuỗi danh sách các trường phân tách bởi dấu phẩy (e.g. `parent_id,fg_color`). Khi xuất file `.lnc`, backend tự động thêm `#` ở đầu các dòng lệnh liên quan.
 
 ---
 
@@ -482,7 +514,6 @@ CREATE INDEX IF NOT EXISTS idx_nations_confed ON nations(confed_id);
 CREATE INDEX IF NOT EXISTS idx_comps_confed ON competitions(confed_id);
 CREATE INDEX IF NOT EXISTS idx_comps_nation ON competitions(nation_id);
 CREATE INDEX IF NOT EXISTS idx_comps_parent ON competitions(parent_id);
-CREATE INDEX IF NOT EXISTS idx_comps_is_inter ON competitions(is_international);
 
 -- 2. Phân nhóm Câu lạc bộ
 CREATE INDEX IF NOT EXISTS idx_clubs_comp ON clubs(comp_id);
@@ -490,8 +521,11 @@ CREATE INDEX IF NOT EXISTS idx_clubs_nation ON clubs(nation_id);
 CREATE INDEX IF NOT EXISTS idx_clubs_is_extinct ON clubs(is_extinct);
 
 -- 3. Thực thể trực thuộc Quốc gia
+CREATE INDEX IF NOT EXISTS idx_regions_nation ON regions(nation_id);
 CREATE INDEX IF NOT EXISTS idx_cities_nation ON cities(nation_id);
+CREATE INDEX IF NOT EXISTS idx_cities_region_id ON cities(region_id);
 CREATE INDEX IF NOT EXISTS idx_stadiums_nation ON stadiums(nation_id);
+CREATE INDEX IF NOT EXISTS idx_stadiums_type ON stadiums(type);
 CREATE INDEX IF NOT EXISTS idx_awards_nation ON awards(nation_id);
 CREATE INDEX IF NOT EXISTS idx_awards_comp ON awards(comp_id);
 
@@ -507,14 +541,16 @@ CREATE INDEX IF NOT EXISTS idx_people_second_name ON people(second_name);
 
 ```sql
 -- ====================================================================
--- FM .LNC MANAGER - POSTGRESQL FULL SCHEMA DDL (STRING ID VERSION)
+-- FM .LNC MANAGER - POSTGRESQL FULL SCHEMA DDL (10 TABLES)
 -- ====================================================================
 
+-- 1. Liên đoàn Châu lục
 CREATE TABLE IF NOT EXISTS confederations (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL
 );
 
+-- 2. Quốc gia
 CREATE TABLE IF NOT EXISTS nations (
     id VARCHAR(64) PRIMARY KEY,
     name_lg VARCHAR(255) NOT NULL,
@@ -524,6 +560,7 @@ CREATE TABLE IF NOT EXISTS nations (
     inactive_fields TEXT
 );
 
+-- 3. Giải đấu
 CREATE TABLE IF NOT EXISTS competitions (
     id VARCHAR(64) PRIMARY KEY,
     name_lg VARCHAR(255) NOT NULL,
@@ -534,12 +571,12 @@ CREATE TABLE IF NOT EXISTS competitions (
     confed_id VARCHAR(64) REFERENCES confederations(id) ON DELETE SET NULL,
     nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
     parent_id VARCHAR(64) REFERENCES competitions(id) ON DELETE SET NULL,
-    categories VARCHAR(255),
-    is_international BOOLEAN DEFAULT FALSE,
+    type VARCHAR(255),
     note TEXT,
     inactive_fields TEXT
 );
 
+-- 4. Câu lạc bộ
 CREATE TABLE IF NOT EXISTS clubs (
     id VARCHAR(64) PRIMARY KEY,
     name_lg VARCHAR(255) NOT NULL,
@@ -553,21 +590,35 @@ CREATE TABLE IF NOT EXISTS clubs (
     is_extinct BOOLEAN DEFAULT FALSE
 );
 
+-- 5. Khu vực / Phân vùng
+CREATE TABLE IF NOT EXISTS regions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_nation_region UNIQUE (nation_id, name)
+);
+
+-- 6. Thành phố
 CREATE TABLE IF NOT EXISTS cities (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
     region VARCHAR(255),
-    inactive_fields TEXT
+    region_id INTEGER REFERENCES regions(id) ON DELETE SET NULL,
+    is_disabled BOOLEAN DEFAULT FALSE
 );
 
+-- 7. Sân vận động
 CREATE TABLE IF NOT EXISTS stadiums (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE SET NULL,
-    inactive_fields TEXT
+    type VARCHAR(50) DEFAULT 'stadium',
+    is_disabled BOOLEAN DEFAULT FALSE
 );
 
+-- 8. Giải thưởng & Danh hiệu
 CREATE TABLE IF NOT EXISTS awards (
     id VARCHAR(64) PRIMARY KEY,
     name_lg VARCHAR(255) NOT NULL,
@@ -577,6 +628,7 @@ CREATE TABLE IF NOT EXISTS awards (
     inactive_fields TEXT
 );
 
+-- 9. Nhân vật / Cầu thủ
 CREATE TABLE IF NOT EXISTS people (
     id VARCHAR(64) PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
@@ -584,6 +636,7 @@ CREATE TABLE IF NOT EXISTS people (
     second_name VARCHAR(255) NOT NULL
 );
 
+-- 10. Giai đoạn / Vòng đấu
 CREATE TABLE IF NOT EXISTS stages (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL
@@ -596,11 +649,12 @@ CREATE TABLE IF NOT EXISTS stages (
 
 - **Base URL mặc định (Local)**: `http://localhost:3001`
 - **Base URL (Production)**: `https://fm-lnc-backend.onrender.com`
-- **Swagger Documentation**: `http://localhost:3001/docs`
+- **Health Check**: `GET /health` hoặc `GET /api/health` trả về `{"status":"ok","timestamp":"..."}`
+- **Swagger Documentation UI**: `http://localhost:3001/docs` (JSON Spec: `/docs-json`)
 
 ---
 
-### 6.1. Quy tắc chung & Cấu trúc Phân cấp
+### 6.1. Quy ước chung & Envelope phản hồi
 
 1. Toàn bộ API tuân theo chuẩn RESTful JSON. Mọi Game ID (`id`, `confed_id`, `nation_id`, `comp_id`,...) đều có kiểu dữ liệu là chuỗi (`string`).
 2. **Cấu trúc Envelope phản hồi chuẩn (Standard Response Envelope):**
@@ -616,263 +670,123 @@ CREATE TABLE IF NOT EXISTS stages (
      "correlationId": "f7a3b1c2-..."
    }
    ```
-3. **Chuẩn hóa đối tượng quan hệ lồng nhau (Nested Relations):**
-   - `nation`: `{ id, name_lg, name_sh, name_3l }`
-   - `confed`: `{ id, name }`
-   - `comp`: `{ id, name_lg, name_sh, name_3l }`
-   - `parent`: `{ id, name_lg, name_sh, name_3l }`
-4. **Đối tượng thống kê (`stats`):** Gom toàn bộ các trường số lượng thực thể con, loại bỏ tiền tố `"total-"` (e.g. `nations`, `intComps`, `comps`, `clubs`, `stadiums`, `cities`, `awards`, `children`).
-5. **Form chuẩn cho các API Tìm kiếm & Phân trang phân cấp (Hierarchy Search API Contract):**
+3. **Form chuẩn cho các API Tìm kiếm & Phân trang phân cấp (Hierarchy Search Contract):**
    - **Phương thức**: `POST`
-   - **URL Query Parameters** (phân trang, sắp xếp & phạm vi lọc):
+   - **URL Query Parameters**:
      - `page`: số trang (0-indexed, mặc định: `0`)
      - `size`: số lượng bản ghi trên một trang (mặc định: `10`, `20` hoặc `100`)
-     - `sort`: sắp xếp theo trường và chiều, ví dụ: `name,asc`, `name,desc`, `id,asc`
-     - Phạm vi bộ lọc theo URL Query: `confedId`, `nationId`, `compId`, `regionId`, `category`
+     - `sort`: sắp xếp theo trường và chiều (ví dụ: `name,asc`, `name,desc`)
+     - Bộ lọc phạm vi: `confedId`, `nationId`, `compId`, `regionId`, `category`
    - **Request Body (JSON)**:
      ```json
      {
        "keyword": "từ khóa tìm kiếm"
      }
      ```
-   - **Cấu trúc Phản hồi**: Trả về envelope bọc cấu trúc phân trang `PageData<T>`:
-     ```json
-     {
-       "content": [ ... ],
-       "page": 0,
-       "size": 10,
-       "totalElements": 24,
-       "totalPages": 3,
-       "hasPrevious": false,
-       "hasNext": true,
-       "first": true,
-       "last": false
-     }
-     ```
-6. **Quy chuẩn Gộp chung API Tìm kiếm Câu lạc bộ (`/api/hierarchy/club/search`):**
-   - Toàn bộ các thao tác tìm kiếm CLB (theo giải đấu, CLB tự do, CLB giải thể, hoặc toàn bộ CLB quốc gia) đã được gộp về duy nhất endpoint:  
-     `POST /api/hierarchy/club/search?nationId=xxx&compId=yyyy&page=0&size=10&sort=name%2Casc`
-   - Cơ chế **Fake Competitions** được tự động khởi tạo khi xem giải đấu quốc nội:
-     - **CLB tự do (Other Clubs)**: `compId = oth-{nationId}` *(ví dụ: `oth-145` cho Việt Nam, `oth-765` cho Anh)*
-     - **CLB đã giải thể (Extinct Clubs)**: `compId = ext-{nationId}` *(ví dụ: `ext-145` cho Việt Nam, `ext-765` cho Anh)*
-     - **CLB theo giải đấu cụ thể**: `compId = {compId}` *(ví dụ: `compId = 14` cho Sky Bet League Two)*
-     - **Toàn bộ CLB trong một quốc gia**: `nationId = {nationId}` *(không truyền `compId`)*
-   - Khi gọi `POST /api/hierarchy/domestic-competitions/search?nationId={id}`, hệ thống luôn sinh ra 2 thực thể ảo `oth-{id}` và `ext-{id}` xếp ở đầu danh sách kèm theo số lượng `clubsCount`, đồng thời hỗ trợ xem chi tiết qua `GET /api/hierarchy/competitions/:id/info`.
+   - **Phản hồi**: Envelope bọc cấu trúc phân trang chuẩn `PageData<T>` (`content`, `page`, `size`, `totalElements`, `totalPages`, `hasNext`, ...).
 
 ---
 
-### 6.2. Health Check API
-
-#### `GET /health` hoặc `GET /api/health`
-Kiểm tra tình trạng hoạt động của NestJS Backend Server.
-- **Method**: `GET`
-- **Phản hồi (`200 OK`)**:
-  ```json
-  {
-    "status": "ok",
-    "timestamp": "2026-10-24T15:00:00.000Z"
-  }
-  ```
-
----
-
-### 6.3. Hierarchy API (Cây phân cấp)
+### 6.2. Hierarchy API (Truy vấn & Phân cấp dữ liệu)
 
 Prefix: `/api/hierarchy`
 
-#### 1. Confederations (Châu lục / Liên đoàn)
+#### 1. Liên đoàn Châu lục & Quốc gia
 - **`GET /api/hierarchy/list-confederations`**
-  - Trả về danh sách tất cả các liên đoàn châu lục (7 confederations) kèm số lượng quốc gia (`totalNations`) và giải đấu quốc tế (`totalIntComps`).
-- **`GET /api/hierarchy/continents/:id/info`** *(hoặc `/confederations/:id/info`)*
-  - Thông tin chi tiết một liên đoàn kèm bộ đếm tổng thể (`totalNations`, `totalIntComps`, `totalComps`, `totalClubs`, `totalStadiums`, `totalCities`, `totalAwards`).
-
-#### 2. Nations (Quốc gia)
-- **`POST /api/hierarchy/nations/search?confedId={confedId}&page=0&size=20&sort=name%2Casc`**
-  - Tìm kiếm và phân trang quốc gia (lọc theo châu lục qua `confedId`, hoặc toàn bộ nếu `confedId` rỗng).
-  - Request Body: `{"keyword": ""}`.
-- **`GET /api/hierarchy/nations/:id/info`**
-  - Chi tiết quốc gia kèm đối tượng liên đoàn cha và thống kê chi tiết (`domesticComps`, `parentComps`, `independentClubs`, `extinctClubs`, `allClubs`, `stadiums`, `cities`, `awards`).
+  - Trả về danh sách 7 liên đoàn châu lục kèm số lượng quốc gia (`nations`) và giải quốc tế (`intComps`).
+- **`POST /api/hierarchy/nations/search?confedId={id}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm & phân trang quốc gia (lọc theo châu lục qua `confedId` hoặc toàn bộ).
 - **`GET /api/hierarchy/nations/:id/hub`**
-  - Tổng quan giao diện Hub của một quốc gia.
+  - Lấy tổng quan Nation Hub và bộ đếm các danh mục trực thuộc quốc gia.
 
-#### 3. Competitions (Giải đấu)
-- **`POST /api/hierarchy/int-competitions/search?confedId={confedId}&page=0&size=20&sort=name%2Casc`**
-  - Tìm kiếm giải đấu quốc tế cấp cha (`parent_id IS NULL`) của liên đoàn (e.g. Champions League, Euro, World Cup, AFC Champions League).
-  - Request Body: `{"keyword": ""}`.
-- **`POST /api/hierarchy/domestic-competitions/search?nationId={nationId}&page=0&size=20&sort=name%2Casc`**
-  - Danh sách giải đấu quốc nội cấp cha (`parent_id IS NULL`) của quốc gia.
-  - Tự động bổ sung 2 giải đấu ảo `oth-{nationId}` (Other Clubs) và `ext-{nationId}` (Extinct Clubs) kèm bộ đếm số CLB.
-  - Request Body: `{"keyword": ""}`.
-- **`GET /api/hierarchy/competitions/:id/sub-competitions`**
-  - Danh sách giải đấu con / phân hạng trực thuộc giải đấu cha `{id}` (`parent_id = :id`).
-- **`GET /api/hierarchy/competitions/:id/info`**
-  - Thông tin chi tiết giải đấu, màu sắc RGB, số lượng CLB (`clubsCount`), giải thưởng (`awardsCount`), giải đấu con (`childrenCount`), thông tin giải cha và quốc gia liên kết.
-  - Hỗ trợ đầy đủ cho cả giải đấu thông thường và fake competitions (`oth-{nationId}`, `ext-{nationId}`).
+#### 2. Giải đấu (Competitions)
+- **`POST /api/hierarchy/int-competitions/search?confedId={id}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm giải đấu quốc tế cấp cha (`parent_id IS NULL`) của châu lục/toàn cầu.
+- **`POST /api/hierarchy/domestic-competitions/search?nationId={id}&page=0&size=20&sort=name%2Casc`**
+  - Danh sách giải quốc nội cấp cha của quốc gia. Tự động sinh 2 giải ảo `oth-{id}` (Other Clubs) và `ext-{id}` (Extinct Clubs) kèm số lượng CLB tương ứng.
+- **`POST /api/hierarchy/competitions/:id/sub-competitions?page=0&size=20&sort=name%2Casc`**
+  - Danh sách giải đấu con / vòng loại / phân hạng trực thuộc giải cha `{id}` (`parent_id = :id`).
 
-#### 4. Clubs (Câu lạc bộ - API Hợp nhất)
+#### 3. Câu lạc bộ (Club Search Hợp nhất)
 - **`POST /api/hierarchy/club/search?nationId={nationId}&compId={compId}&page=0&size=10&sort=name%2Casc`**
-  - **API duy nhất cho toàn bộ nhu cầu tìm kiếm và xem danh sách CLB**:
-    - **CLB tự do (Other Clubs)**: truyền `compId=oth-{nationId}` (ví dụ: `oth-145`).
-    - **CLB đã giải thể (Extinct Clubs)**: truyền `compId=ext-{nationId}` (ví dụ: `ext-145`).
-    - **CLB trong một giải đấu**: truyền `compId={compId}` (ví dụ: `compId=14`).
-    - **Tất cả CLB thuộc quốc gia**: truyền `nationId={nationId}` (không truyền `compId`).
-  - Request Body: `{"keyword": ""}`.
-- **`GET /api/hierarchy/clubs/:id/info`**
-  - Thông tin chi tiết CLB kèm quốc gia (`nation`), giải đấu trực thuộc (`competition`) và giải đấu cha.
+  - **Endpoint duy nhất cho toàn bộ thao tác tìm kiếm & phân trang CLB**:
+    - **CLB tự do (Other Clubs)**: `compId=oth-{nationId}` *(vd: `oth-145` cho Việt Nam)*
+    - **CLB đã giải thể (Extinct Clubs)**: `compId=ext-{nationId}` *(vd: `ext-145` cho Việt Nam)*
+    - **CLB theo giải đấu cụ thể**: `compId={compId}` *(vd: `compId=14`)*
+    - **Tất cả CLB thuộc quốc gia**: `nationId={nationId}` *(bỏ trống `compId`)*
 
-#### 5. Sân vận động, Thành phố, Khu vực & Giải thưởng
-- **`POST /api/hierarchy/stadiums/search?nationId={nationId}&page=0&size=20&sort=name%2Casc`**
-  - Tìm kiếm và phân trang sân vận động theo quốc gia (Request Body: `{"keyword": ""}`).
-- **`POST /api/hierarchy/cities/search?nationId={nationId}&regionId={regionId}&category={category}&page=0&size=20&sort=name%2Casc`**
-  - Tìm kiếm và phân trang thành phố theo quốc gia và phân loại vùng miền / region (Request Body: `{"keyword": ""}`).
+#### 4. Khu vực, Thành phố, Sân vận động, Giải thưởng & Danh mục chung
 - **`POST /api/hierarchy/regions/search?nationId={nationId}&page=0&size=100&sort=name%2Casc`**
   - Danh sách khu vực (regions) trong một quốc gia kèm số lượng thành phố tương ứng.
+- **`POST /api/hierarchy/cities/search?nationId={nationId}&regionId={regionId}&category={cat}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm thành phố theo quốc gia và lọc theo phân vùng khu vực.
+- **`POST /api/hierarchy/stadiums/search?nationId={nationId}&page=0&size=20&sort=name%2Casc`**
+  - Tìm kiếm sân vận động và sân tập theo quốc gia.
 - **`POST /api/hierarchy/awards/search?nationId={nationId}&compId={compId}&page=0&size=20&sort=name%2Casc`**
-  - Tìm kiếm giải thưởng theo quốc gia hoặc theo giải đấu (Request Body: `{"keyword": ""}`).
-- **`GET /api/hierarchy/cities/:id/info`** & **`GET /api/hierarchy/stadiums/:id/info`** & **`GET /api/hierarchy/awards/:id/info`**
-  - Thông tin chi tiết kèm các liên kết quan hệ cho thành phố, sân vận động, và giải thưởng.
-- **`GET /api/hierarchy/players`**
-  - Danh sách cầu thủ, HLV, nhân sự (Query param: `q`).
-- **`GET /api/hierarchy/stages`**
-  - Danh sách tên các giai đoạn / vòng thi đấu (Query param: `q`).
+  - Tìm kiếm giải thưởng theo quốc gia hoặc theo giải đấu.
+- **`POST /api/hierarchy/players`** & **`POST /api/hierarchy/stages`**
+  - Danh sách danh mục toàn cầu: Nhân sự/cầu thủ (`players`) và Vòng đấu/giai đoạn (`stages`).
 
 ---
 
-### 6.4. Records API (CRUD & Chi tiết thực thể)
+### 6.3. Records API (Generic CRUD & Chi tiết thực thể)
 
 Prefix: `/api/records`  
-Hỗ trợ các loại thực thể (`:type`): `confederation`, `nation`, `competition`, `club`, `stadium`, `city`, `award`, `person`, `stage`.
+Hỗ trợ đồng nhất cho tất cả các loại thực thể (`:type`): `confederation`, `nation`, `competition`, `club`, `region`, `city`, `stadium`, `award`, `person`, `stage`.
 
-#### 1. Chi tiết thực thể đầy đủ quan hệ
+#### 1. Chi tiết thực thể đầy đủ quan hệ (Full Entity Info)
 - **`GET /api/records/:type/:id/info`**
-  - Trả về đối tượng info chi tiết kèm thực thể cha/con và bộ đếm thống kê tương ứng.
+  - Trả về đối tượng thực thể hoàn chỉnh kèm quan hệ cha/con, quốc gia, liên đoàn và số liệu thống kê.  
+  *(Hệ thống cũng hỗ trợ tương thích các alias URL dạng `/api/hierarchy/:type/:id/info`).*
 
-#### 2. Chi tiết bản ghi cơ bản (Raw Record)
-- **`GET /api/records/:type/:id`**
-  - Lấy dữ liệu phẳng từ bảng cơ sở dữ liệu.
-
-#### 3. Tạo mới bản ghi
-- **`POST /api/records/:type`**
-  - Body mẫu (JSON):
-    ```json
-    {
-      "id": "990001",
-      "long_name": "Hanoi Police FC",
-      "short_name": "CAHN",
-      "three_letter_name": "CAH",
-      "nation_id": "560",
-      "comp_id": "1301389"
-    }
-    ```
-  - *(Trường `id` là bắt buộc).*
-
-#### 4. Cập nhật bản ghi
-- **`PUT /api/records/:type/:id`**
-  - Body mẫu (JSON):
-    ```json
-    {
-      "long_name": "Manchester United Football Club",
-      "short_name": "Man Utd",
-      "note": "Updated via LNC Manager"
-    }
-    ```
-
-#### 5. Xóa bản ghi
-- **`DELETE /api/records/:type/:id`**
-  - Xóa bản ghi khỏi cơ sở dữ liệu.
+#### 2. Thao tác CRUD chuẩn hóa
+| Endpoint | Method | Chức năng | Ghi chú Body / Params |
+| :--- | :---: | :--- | :--- |
+| `/api/records/:type/:id` | `GET` | Lấy dữ liệu bản ghi thô | Trả về dữ liệu phẳng từ bảng CSDL |
+| `/api/records/:type` | `POST` | Tạo mới bản ghi | Yêu cầu trường `id` khóa chính |
+| `/api/records/:type/:id` | `PUT` | Cập nhật thông tin bản ghi | Tự động chuẩn hóa các alias trường dữ liệu |
+| `/api/records/:type/:id` | `DELETE` | Xóa bản ghi khỏi CSDL | Ràng buộc khóa ngoại `ON DELETE SET NULL` / `CASCADE` |
 
 ---
 
-### 6.5. Search API (Tìm kiếm toàn văn)
+### 6.4. Search API (Tìm kiếm toàn văn đa bảng)
 
-#### `POST /api/search`
-Tìm kiếm toàn văn đồng thời trên 8 bảng dữ liệu: Clubs, Competitions, Nations, Stadiums, Cities, Awards, Players, Stages. Hỗ trợ tìm kiếm theo chuỗi ký tự (case-insensitive) hoặc chính xác theo số ID.
-
-- **Request Body (JSON)**:
-  ```json
-  {
-    "keyword": "Liverpool",
-    "limit": 20
-  }
-  ```
-- **Phản hồi mẫu (`200 OK`)**:
-  ```json
-  {
-    "status": 200,
-    "success": true,
-    "message": "Search completed",
-    "data": {
-      "clubs": [
-        {
-          "id": "676",
-          "name_lg": "Liverpool Football Club",
-          "name_sh": "Liverpool",
-          "name_6l": "Liverpool",
-          "name_3l": "LIV",
-          "nation": { "id": "11", "name_lg": "England", "name_sh": "England", "name_3l": "ENG" }
-        }
-      ],
-      "competitions": [],
-      "nations": [],
-      "stadiums": [],
-      "cities": [],
-      "awards": [],
-      "players": [],
-      "stages": []
-    },
-    "error": null,
-    "timestamp": 1729792000000,
-    "path": "/api/search",
-    "correlationId": "8c2d1e0f-..."
-  }
-  ```
+- **`POST /api/search`**
+  - Tìm kiếm toàn văn tức thì đồng thời trên 8 bảng dữ liệu: Clubs, Competitions, Nations, Stadiums, Cities, Awards, Players, Stages. Hỗ trợ tìm kiếm theo chuỗi ký tự (case-insensitive) hoặc chính xác theo số ID.
+  - Body mẫu: `{"keyword": "Liverpool", "limit": 20}`.
 
 ---
 
-### 6.6. LNC File API (Export & Import)
+### 6.5. LNC File & Sync API (Export, Import & Upload)
 
-Prefix: `/api/lnc`
+Prefix: `/api/lnc` (hoặc alias `/api/fm`)
 
-#### 1. Export file `.lnc` chuẩn Football Manager
-- **`GET /api/lnc/export`**
-  - Đọc toàn bộ cơ sở dữ liệu và tổng hợp thành nội dung tệp `.lnc` hợp lệ của Football Manager 2024.
-  - Query param: `download=true` để kích hoạt tải file trực tiếp về trình duyệt (`FM24_Merged_Names.lnc`).
-
-#### 2. Import file `.lnc` vào PostgreSQL
-- **`POST /api/lnc/import`**
-  - Đọc các tệp `.lnc` từ thư mục local trên máy chủ và cập nhật vào PostgreSQL.
-  - Request Body (tùy chọn):
-    ```json
-    {
-      "dir": "D:/Games/FM24_2026/FootballManager24/data/database/db/2430/lnc/all"
-    }
-    ```
-
-#### 3. Thống kê số lượng bản ghi DB
-- **`GET /api/lnc/status`**
-  - Trả về số lượng bản ghi hiện có của 9 bảng dữ liệu trong PostgreSQL.
+- **`GET /api/lnc/export`**: Đọc toàn bộ CSDL và tổng hợp thành tệp `.lnc` hợp lệ của Football Manager 2024 (truyền `?download=true` để tải tệp về).
+- **`POST /api/lnc/import`**: Nạp lại các tệp `.lnc` từ thư mục lưu trữ của server vào CSDL.
+- **`POST /api/lnc/upload`**: Tải trực tiếp mảng file `.lnc` từ giao diện web lên server và tự động nạp vào database.
+- **`GET /api/lnc/status`**: Thống kê số lượng bản ghi hiện có của các bảng dữ liệu trong PostgreSQL.
 
 ---
 
-### 6.7. Logos & Graphics API
+### 6.6. Logos, Graphics & Swagger Documentation
 
-Prefix: `/api/logos`  
-Serve tệp hình ảnh logo định dạng `.png` trực tiếp từ bộ cài game Football Manager local (kèm header cache trình duyệt 7 ngày).
-
-- **`GET /api/logos/confederation/:id`**: Trả về ảnh logo của Confederation.
-- **`GET /api/logos/nation/:id?code=VIE`**: Trả về ảnh cờ/logo của Nation.
-
----
-
-### 6.8. Swagger & OpenAPI Documentation
-
-Hệ thống cung cấp Swagger UI trực quan để tra cứu và thử nghiệm trực tiếp các API trên trình duyệt:
-- **Swagger Documentation UI**: `http://localhost:3001/docs` hoặc `http://localhost:3001/api/docs`
-- **OpenAPI JSON Spec**: `http://localhost:3001/docs-json`
+- **Logos Local API (`/api/logos`)**:
+  - `GET /api/logos/confederation/:id`
+  - `GET /api/logos/nation/:id?code=VIE`
+  - `GET /api/logos/competition/:id`
+  - `GET /api/logos/club/:id`
+  - Tự động phục vụ ảnh PNG từ thư mục cài game local kèm header cache 7 ngày.
+- **FIFA Flags CDN**:
+  - Tự động hiển thị cờ quốc gia chuẩn FIFA: `https://api.fifa.com/api/v3/picture/flags-sq-2/{code}` *(e.g. `VIE`, `ENG`, `FRA`)*.
+- **Swagger Documentation UI**:
+  - Giao diện trực quan để thử nghiệm API: `http://localhost:3001/docs`
+  - OpenAPI 3.0 Spec JSON: `http://localhost:3001/docs-json`
+- **Local App Paths Config (`/api/config`)**:
+  - Phục vụ modal cài đặt đường dẫn cục bộ khi chạy offline (`GET /api/config`, `PUT /api/config`, `POST /api/config/test`, `POST /api/config/sync`).
 
 ---
 
 ## 📁 GitHub Repository & Thông tin
 
 - **GitHub Repository**: [https://github.com/ddthumonky88/fm-lnc](https://github.com/ddthumonky88/fm-lnc)
-- **Quy định Commit & Push**: Tuân thủ hướng dẫn trong [`AGENTS.md`](./AGENTS.md).
+- **Quy định Commit & Push**: Tuân thủ hướng dẫn trong [`AGENTS.md`](./AGENTS.md) (Không tự ý commit/push nếu không có yêu cầu từ người dùng).

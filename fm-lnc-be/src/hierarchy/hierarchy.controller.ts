@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Param, Query, Body, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiOkResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { HierarchyService } from './hierarchy.service';
 import {
   PageableQueryDto,
@@ -7,13 +7,10 @@ import {
   NationSearchQueryDto,
   IntCompetitionSearchQueryDto,
   DomesticCompetitionSearchQueryDto,
-  IndependentClubSearchQueryDto,
   CitySearchQueryDto,
   NationScopedSearchQueryDto,
-  CompScopedSearchQueryDto,
   ClubSearchQueryDto,
   AwardSearchQueryDto,
-  CompetitionListFilterDto,
 } from './dto/pagination.dto';
 
 @ApiTags('Hierarchy')
@@ -43,12 +40,6 @@ export class HierarchyController {
     return this.hierarchyService.getListConfederations(query);
   }
 
-  @ApiExcludeEndpoint()
-  @Post('continents')
-  getContinents(@Query() query?: PageableQueryDto, @Body() body?: SearchFilterDto) {
-    return this.hierarchyService.getContinents({ ...query, ...body });
-  }
-
   @ApiOperation({ summary: 'Tìm kiếm quốc gia có phân trang và lọc theo liên đoàn' })
   @ApiBody({ type: SearchFilterDto, required: false })
   @Post('nations/search')
@@ -60,16 +51,6 @@ export class HierarchyController {
     return this.hierarchyService.getAllNations(filter);
   }
 
-  @ApiExcludeEndpoint()
-  @Post('continents/:id/nations')
-  getNations(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getAllNations({ confedId: id, ...query, ...body });
-  }
-
   @ApiOperation({ summary: 'Tìm kiếm giải đấu quốc tế có phân trang và lọc theo liên đoàn' })
   @ApiBody({ type: SearchFilterDto, required: false })
   @Post('int-competitions/search')
@@ -79,16 +60,6 @@ export class HierarchyController {
   ) {
     const filter = { ...query, ...body };
     return this.hierarchyService.getIntCompetitions(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('continents/:id/international-competitions')
-  getIntCompetitions(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getIntCompetitions({ confedId: id, ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy hub đầy đủ của một Nation (clubs, competitions, cities...)' })
@@ -135,16 +106,6 @@ export class HierarchyController {
     return this.hierarchyService.getDomesticCompetitions(filter);
   }
 
-  @ApiExcludeEndpoint()
-  @Post('nations/:id/competitions')
-  getDomesticCompetitions(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getDomesticCompetitions(id, { ...query, ...body });
-  }
-
   @ApiOperation({
     summary:
       'Tìm kiếm CLB có phân trang theo quốc gia hoặc giải đấu (với Other Clubs: compId = oth-{nationId}, Extinct Clubs: compId = ext-{nationId})',
@@ -159,57 +120,6 @@ export class HierarchyController {
     return this.hierarchyService.searchClubs(filter);
   }
 
-  @ApiExcludeEndpoint()
-  @Post('clubs/search')
-  searchClubs(
-    @Query() query?: ClubSearchQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    const filter = { ...query, ...body };
-    return this.hierarchyService.searchClubs(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('independent-clubs/search')
-  searchIndependentClubs(
-    @Query() query?: IndependentClubSearchQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    const filter = { ...query, ...body };
-    return this.hierarchyService.getIndependentClubs(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('nations/:id/independent-clubs')
-  getIndependentClubs(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: IndependentClubSearchQueryDto,
-  ) {
-    const filter = { ...query, ...body };
-    return this.hierarchyService.getIndependentClubs(id, filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('all-clubs/search')
-  searchAllClubs(
-    @Query() query?: NationScopedSearchQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    const filter = { ...query, ...body };
-    return this.hierarchyService.getAllClubsInNation(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('nations/:id/all-clubs')
-  getAllClubs(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getAllClubsInNation(id, { ...query, ...body });
-  }
-
   @ApiOperation({ summary: 'Tìm kiếm sân vận động có phân trang và lọc theo quốc gia' })
   @ApiBody({ type: SearchFilterDto, required: false })
   @Post('stadiums/search')
@@ -219,16 +129,6 @@ export class HierarchyController {
   ) {
     const filter = { ...query, ...body };
     return this.hierarchyService.getStadiums(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('nations/:id/stadiums')
-  getStadiums(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getStadiums(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Tìm kiếm thành phố có phân trang và lọc theo quốc gia' })
@@ -242,16 +142,6 @@ export class HierarchyController {
     return this.hierarchyService.getCities(filter);
   }
 
-  @ApiExcludeEndpoint()
-  @Post('nations/:id/cities')
-  getCities(
-    @Param('id') id: string,
-    @Query() query?: CitySearchQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getCities(id, { ...query, ...body });
-  }
-
   @ApiOperation({ summary: 'Tìm kiếm khu vực (regions) có phân trang và lọc theo quốc gia' })
   @ApiBody({ type: SearchFilterDto, required: false })
   @Post('regions/search')
@@ -261,36 +151,6 @@ export class HierarchyController {
   ) {
     const filter = { ...query, ...body };
     return this.hierarchyService.getRegionsByNation(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('nations/:id/regions')
-  getRegions(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getRegionsByNation(id, { ...query, ...body });
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('competition-clubs/search')
-  searchCompetitionClubs(
-    @Query() query?: CompScopedSearchQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    const filter = { ...query, ...body };
-    return this.hierarchyService.getClubsInCompetition(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('competitions/:id/clubs')
-  getClubsInComp(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getClubsInCompetition(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Tìm kiếm giải thưởng theo quốc gia hoặc giải đấu' })
@@ -305,38 +165,6 @@ export class HierarchyController {
       return this.hierarchyService.getAwardsByCompetition(filter);
     }
     return this.hierarchyService.getAwardsByNation(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @ApiOperation({ summary: 'Tìm kiếm giải thưởng thuộc một giải đấu' })
-  @ApiBody({ type: SearchFilterDto, required: false })
-  @Post('competition-awards/search')
-  searchCompetitionAwards(
-    @Query() query?: CompScopedSearchQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    const filter = { ...query, ...body };
-    return this.hierarchyService.getAwardsByCompetition(filter);
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('nations/:id/awards')
-  getAwards(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getAwardsByNation(id, { ...query, ...body });
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('competitions/:id/awards')
-  getAwardsInComp(
-    @Param('id') id: string,
-    @Query() query?: PageableQueryDto,
-    @Body() body?: SearchFilterDto,
-  ) {
-    return this.hierarchyService.getAwardsByCompetition(id, { ...query, ...body });
   }
 
   @ApiOperation({ summary: 'Lấy thông tin chi tiết một Confederation (Châu lục)' })
@@ -360,32 +188,6 @@ export class HierarchyController {
   })
   @Get('continents/:id/info')
   getContinentInfo(@Param('id') id: string) {
-    return this.hierarchyService.getContinentInfo(id);
-  }
-
-  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Confederation (Châu lục) - alias' })
-  @ApiParam({ name: 'id', description: 'Confederation ID' })
-  @ApiOkResponse({
-    description: 'Thông tin chi tiết liên đoàn kèm thống kê (alias)',
-    schema: {
-      type: 'object',
-      example: {
-        id: '1',
-        name: 'Europe (UEFA)',
-        stats: {
-          nations: 55,
-          intComps: 12,
-          comps: 420,
-          clubs: 6500,
-          stadiums: 980,
-          cities: 620,
-          awards: 180,
-        },
-      },
-    },
-  })
-  @Get('confederations/:id/info')
-  getConfederationInfo(@Param('id') id: string) {
     return this.hierarchyService.getContinentInfo(id);
   }
 
@@ -611,28 +413,5 @@ export class HierarchyController {
   @Post('awards')
   getAllAwards(@Query() query?: PageableQueryDto, @Body() body?: SearchFilterDto) {
     return this.hierarchyService.getAllAwards({ ...query, ...body });
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('nations')
-  getAllNations(@Query() query?: PageableQueryDto, @Body() body?: NationSearchQueryDto) {
-    return this.hierarchyService.getAllNations({ ...query, ...body });
-  }
-
-  @ApiExcludeEndpoint()
-  @Post('competitions')
-  getAllCompetitions(
-    @Query() query?: PageableQueryDto,
-    @Body() body?: CompetitionListFilterDto,
-  ) {
-    const filter = { ...query, ...body };
-    const isInt =
-      filter.isInternational !== undefined
-        ? String(filter.isInternational) === 'true'
-        : undefined;
-    return this.hierarchyService.getAllCompetitions({
-      ...filter,
-      isInternational: isInt,
-    });
   }
 }

@@ -683,11 +683,10 @@ export async function fetchAllCompetitions(
     undefined,
     20,
   );
-  return cachedPost<PaginatedList<CompetitionItem>>(
-    `${getApiBase()}/hierarchy/competitions`,
-    filter,
-    refresh,
-  );
+  if ((filter as any).nationId) {
+    return fetchDomesticCompetitions((filter as any).nationId, filter, refresh);
+  }
+  return fetchIntCompetitions((filter as any).confedId, filter, refresh);
 }
 
 export async function fetchNationsByContinent(
