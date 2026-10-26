@@ -170,7 +170,7 @@ export default function NationDetailPage() {
 
       setHeaderTitle(nationTitle);
       setHeaderId(hub.nation?.id);
-      setBackHref(confedId ? `/confederation/${confedId}` : '/');
+      setBackHref(confedId ? `/confed/${confedId}` : '/');
       setBreadcrumbs([
         {
           title: 'HOME',
@@ -180,7 +180,7 @@ export default function NationDetailPage() {
           ? [
               {
                 title: confedName,
-                href: `/confederation/${confedId}`,
+                href: `/confed/${confedId}`,
               },
             ]
           : []),

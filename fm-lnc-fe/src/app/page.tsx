@@ -445,7 +445,7 @@ export default function LncSortitoutsiExplorer() {
               </div>
               <button
                 type="button"
-                onClick={() => router.push(`/confederation/${record.id}`)}
+                onClick={() => router.push(`/confed/${record.id}`)}
                 className="font-bold text-sm text-[#1d70b8] hover:underline text-left hover:text-blue-700 transition cursor-pointer"
               >
                 {name}
@@ -466,7 +466,7 @@ export default function LncSortitoutsiExplorer() {
                 <Button
                   type="text"
                   size="small"
-                  onClick={() => router.push(`/confederation/${record.id}`)}
+                  onClick={() => router.push(`/confed/${record.id}`)}
                   className="h-7 px-2.5 inline-flex items-center gap-1.5 rounded-md hover:bg-sky-50 text-sky-700 font-medium border border-sky-100"
                 >
                   <GlobalOutlined className="text-sky-600 text-sm" />
@@ -490,7 +490,7 @@ export default function LncSortitoutsiExplorer() {
                 <Button
                   type="text"
                   size="small"
-                  onClick={() => router.push(`/confederation/${record.id}?tab=int`)}
+                  onClick={() => router.push(`/confed/${record.id}?tab=int`)}
                   className="h-7 px-2.5 inline-flex items-center gap-1.5 rounded-md hover:bg-purple-50 text-purple-700 font-medium border border-purple-100"
                 >
                   <IntCompIcon size={14} className="text-purple-600" />
@@ -695,7 +695,7 @@ export default function LncSortitoutsiExplorer() {
               {filteredContinents.map((c) => (
                 <div
                   key={c.id}
-                  onClick={() => router.push(`/confederation/${c.id}`)}
+                  onClick={() => router.push(`/confed/${c.id}`)}
                   className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2 sm:p-3 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-1.5"
                 >
                   <div>

@@ -160,7 +160,7 @@ export default function CompetitionDetailPage() {
         if (confedId) {
           crumbs.push({
             title: confedName,
-            href: `/confederation/${confedId}`,
+            href: `/confed/${confedId}`,
           });
         }
         crumbs.push({
@@ -206,7 +206,7 @@ export default function CompetitionDetailPage() {
         if (confedId) {
           crumbs.push({
             title: confedName,
-            href: `/confederation/${confedId}`,
+            href: `/confed/${confedId}`,
           });
         }
         if (nationId) {
@@ -232,7 +232,7 @@ export default function CompetitionDetailPage() {
             : nationId
               ? `/nation/${nationId}`
               : confedId
-                ? `/confederation/${confedId}`
+                ? `/confed/${confedId}`
                 : '/',
         );
 
