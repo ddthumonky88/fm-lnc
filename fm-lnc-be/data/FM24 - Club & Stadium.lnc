@@ -13792,7 +13792,7 @@
 "CLUB_NAME_CHANGE"		168		"KAA Gent"						""
 "CLUB_SHORT_NAME_CHANGE"	168		"KAA Gent"						""
 "CLUB_6LETTER_NAME_CHANGE"	168		"Gent"							""
-#"CLUB_3LETTER_NAME_CHANGE"	168		"GENT"							""
+"CLUB_3LETTER_NAME_CHANGE"	168		"GNT"							""
 
 "CLUB_NAME_CHANGE"		184		"Cercle Brugge KSV"					""
 "CLUB_SHORT_NAME_CHANGE"	184		"Cercle Brugge"						""
@@ -13802,12 +13802,12 @@
 "CLUB_NAME_CHANGE"		186		"Club Brugge KV"					""
 "CLUB_SHORT_NAME_CHANGE"	186		"Club Brugge"						""
 "CLUB_6LETTER_NAME_CHANGE"	186		"Brugge"						""
-#"CLUB_3LETTER_NAME_CHANGE"	186		"CLUB"							""
+"CLUB_3LETTER_NAME_CHANGE"	186		"CLU"							""
 
 "CLUB_NAME_CHANGE"		194		"KAS Eupen"						""
 "CLUB_SHORT_NAME_CHANGE"	194		"Eupen"							""
 "CLUB_6LETTER_NAME_CHANGE"	194		"Eupen"							""
-#"CLUB_3LETTER_NAME_CHANGE"	194		"KASE"							""
+"CLUB_3LETTER_NAME_CHANGE"	194		"EUP"							""
 
 "CLUB_NAME_CHANGE"		231		"KV Kortrijk"						""
 "CLUB_SHORT_NAME_CHANGE"	231		"Kortrijk"						""
@@ -13822,12 +13822,12 @@
 "CLUB_NAME_CHANGE"		250		"Royal Standard de Liège"				""
 "CLUB_SHORT_NAME_CHANGE"	250		"Standard Liège"					""
 #"CLUB_6LETTER_NAME_CHANGE"	250		"Standard"						""
-#"CLUB_3LETTER_NAME_CHANGE"	250		"RSCL"							""
+"CLUB_3LETTER_NAME_CHANGE"	250		"STA"							""
 
 "CLUB_NAME_CHANGE"		256		"RSC Anderlecht"					""
 "CLUB_SHORT_NAME_CHANGE"	256		"Anderlecht"						""
 #"CLUB_6LETTER_NAME_CHANGE"	256		"Anderlecht"						""
-#"CLUB_3LETTER_NAME_CHANGE"	256		"RSCA"							""
+"CLUB_3LETTER_NAME_CHANGE"	256		"AND"							""
 
 "CLUB_NAME_CHANGE"		257		"RWDM Brussels"						""
 "CLUB_SHORT_NAME_CHANGE"	257		"RWDM Brussels"						""
@@ -13837,22 +13837,22 @@
 "CLUB_NAME_CHANGE"		258		"KRC Genk"						""
 "CLUB_SHORT_NAME_CHANGE"	258		"KRC Genk"						""
 "CLUB_6LETTER_NAME_CHANGE"	258		"Genk"							""
-#"CLUB_3LETTER_NAME_CHANGE"	258		"GENK"							""
+"CLUB_3LETTER_NAME_CHANGE"	258		"GNK"							""
 
 "CLUB_NAME_CHANGE"		262		"Royal Antwerp FC"					""
 "CLUB_SHORT_NAME_CHANGE"	262		"Antwerp"						""
 #"CLUB_6LETTER_NAME_CHANGE"	262		"Antwerp"						""
-#"CLUB_3LETTER_NAME_CHANGE"	262		"RAFC"							""
+#"CLUB_3LETTER_NAME_CHANGE"	262		"ANT"							""
 
 "CLUB_NAME_CHANGE"		263		"Royal Charleroi SC"					""
 "CLUB_SHORT_NAME_CHANGE"	263		"Charleroi"						""
 #"CLUB_6LETTER_NAME_CHANGE"	263		"Charleroi"						""
-#"CLUB_3LETTER_NAME_CHANGE"	263		"RCSC"							""
+"CLUB_3LETTER_NAME_CHANGE"	263		"CHA"							""
 
 "CLUB_NAME_CHANGE"		278		"Sint-Truidense VV"					""
 "CLUB_SHORT_NAME_CHANGE"	278		"Sint-Truiden"						""
 "CLUB_6LETTER_NAME_CHANGE"	278		"STVV"							""
-#"CLUB_3LETTER_NAME_CHANGE"	278		"STVV"							""
+"CLUB_3LETTER_NAME_CHANGE"	278		"STV"							""
 
 "CLUB_NAME_CHANGE"		280		"Oud-Heverlee Leuven"					""
 "CLUB_SHORT_NAME_CHANGE"	280		"OH Leuven"						""
@@ -13861,13 +13861,13 @@
 
 "CLUB_NAME_CHANGE"		288		"Royale Union Saint-Gilloise"				""
 "CLUB_SHORT_NAME_CHANGE"	288		"Union SG"						""
-"CLUB_6LETTER_NAME_CHANGE"	288		"RUSG"							""
-#"CLUB_3LETTER_NAME_CHANGE"	288		"RUSG"							""
+"CLUB_6LETTER_NAME_CHANGE"	288		"USG"							""
+"CLUB_3LETTER_NAME_CHANGE"	288		"USG"							""
 
 "CLUB_NAME_CHANGE"		289		"KVC Westerlo"						""
 "CLUB_SHORT_NAME_CHANGE"	289		"Westerlo"						""
 #"CLUB_6LETTER_NAME_CHANGE"	289		"Westerlo"						""
-#"CLUB_3LETTER_NAME_CHANGE"	289		"KVCW"							""
+"CLUB_3LETTER_NAME_CHANGE"	289		"WES"							""
 
 
 # CLUB > UEFA > [BEL] BELGIUM > [2] Challenger Pro League (23/24)
@@ -13880,7 +13880,7 @@
 "CLUB_NAME_CHANGE"		216		"RFC Seraing"						""
 "CLUB_SHORT_NAME_CHANGE"	216		"Seraing"						""
 #"CLUB_6LETTER_NAME_CHANGE"	216		"Seraing"						""
-#"CLUB_3LETTER_NAME_CHANGE"	216		"RFCS"							""
+"CLUB_3LETTER_NAME_CHANGE"	216		"SER"							""
 
 "CLUB_NAME_CHANGE"		228		"KMSK Deinze"						""
 "CLUB_SHORT_NAME_CHANGE"	228		"KMSK Deinze"						""
@@ -13899,8 +13899,8 @@
 
 "CLUB_NAME_CHANGE"		254		"RFC Liège"						""
 "CLUB_SHORT_NAME_CHANGE"	254		"RFC Liège"						""
-"CLUB_6LETTER_NAME_CHANGE"	254		"RFCL"							""
-#"CLUB_3LETTER_NAME_CHANGE"	254		"RFCL"							""
+"CLUB_6LETTER_NAME_CHANGE"	254		"Liège"							""
+"CLUB_3LETTER_NAME_CHANGE"	254		"LIE"							""
 
 "CLUB_NAME_CHANGE"		298		"K. Beerschot VA"					""
 "CLUB_SHORT_NAME_CHANGE"	298		"Beerschot"						""
@@ -13914,8 +13914,7 @@
 
 "CLUB_NAME_CHANGE"		527945		"Royal Francs Borains"					""
 "CLUB_SHORT_NAME_CHANGE"	527945		"Francs Borains"					""
-"CLUB_6LETTER_NAME_CHANGE"	527945		"RFB"							""
-"CLUB_3LETTER_NAME_CHANGE"	527945		"RFB"							""
+"CLUB_3LETTER_NAME_CHANGE"	527945		"FRB"							""
 
 "CLUB_NAME_CHANGE"		539089		"SK Beveren"						""
 "CLUB_SHORT_NAME_CHANGE"	539089		"SK Beveren"						""
@@ -13930,22 +13929,22 @@
 "CLUB_NAME_CHANGE"		18008817	"K. Lierse SK"						""
 "CLUB_SHORT_NAME_CHANGE"	18008817	"Lierse SK"						""
 "CLUB_6LETTER_NAME_CHANGE"	18008817	"Lierse"						""
-#"CLUB_3LETTER_NAME_CHANGE"	18008817	"LIER"							""
+"CLUB_3LETTER_NAME_CHANGE"	18008817	"LSK"							""
 
 "CLUB_NAME_CHANGE"		2000022413	"Club NXT"						""  # BAC x [BEL] Club Brugge
 "CLUB_SHORT_NAME_CHANGE"	2000022413	"Club NXT"						""  # BAC x [BEL] Club Brugge
-"CLUB_6LETTER_NAME_CHANGE"	2000022413	"NXT"							""  # BAC x [BEL] Club Brugge
-"CLUB_3LETTER_NAME_CHANGE"	2000022413	"NXT"							""  # BAC x [BEL] Club Brugge
+#"CLUB_6LETTER_NAME_CHANGE"	2000022413	"Club NXT"						""  # BAC x [BEL] Club Brugge
+#"CLUB_3LETTER_NAME_CHANGE"	2000022413	"NXT"							""  # BAC x [BEL] Club Brugge
 
 "CLUB_NAME_CHANGE"		2000173149	"Jong KRC Genk"						""  # BAC x [BEL] KRC Genk
 "CLUB_SHORT_NAME_CHANGE"	2000173149	"Jong KRC Genk"						""  # BAC x [BEL] KRC Genk
 #"CLUB_6LETTER_NAME_CHANGE"	2000173149	"Jong Genk"						""  # BAC x [BEL] KRC Genk
-#"CLUB_3LETTER_NAME_CHANGE"	2000173149	"JGNK"							""  # BAC x [BEL] KRC Genk
+#"CLUB_3LETTER_NAME_CHANGE"	2000173149	"GNK.B"							""  # BAC x [BEL] KRC Genk
 
 "CLUB_NAME_CHANGE"		2000173150	"RSCA Futures"						""  # BAC x [BEL] Anderlecht
 "CLUB_SHORT_NAME_CHANGE"	2000173150	"RSCA Futures"						""  # BAC x [BEL] Anderlecht
 #"CLUB_6LETTER_NAME_CHANGE"	2000173150	"RSCA Futures"						""  # BAC x [BEL] Anderlecht
-#"CLUB_3LETTER_NAME_CHANGE"	2000173150	"RSCA2"							""  # BAC x [BEL] Anderlecht
+#"CLUB_3LETTER_NAME_CHANGE"	2000173150	"AND.B"							""  # BAC x [BEL] Anderlecht
 
 "CLUB_NAME_CHANGE"		2000173154	"SL16 FC"						""  # BAC x [BEL] Standard Liège
 "CLUB_SHORT_NAME_CHANGE"	2000173154	"SL16 FC"						""  # BAC x [BEL] Standard Liège
@@ -13957,8 +13956,8 @@
 #==============================================================================
 "CLUB_NAME_CHANGE"		169		"RAAL La Louvière"					""
 "CLUB_SHORT_NAME_CHANGE"	169		"RAAL La Louvière"					""
-"CLUB_6LETTER_NAME_CHANGE"	169		"RAAL"							""
-#"CLUB_3LETTER_NAME_CHANGE"	169		"RAAL"							""
+#"CLUB_6LETTER_NAME_CHANGE"	169		"La Louvière"						""
+"CLUB_3LETTER_NAME_CHANGE"	169		"LAL"							""
 
 "CLUB_NAME_CHANGE"		188		"KFC Dessel Sport"					""
 "CLUB_SHORT_NAME_CHANGE"	188		"Dessel"						""
@@ -13982,8 +13981,9 @@
 "CLUB_6LETTER_NAME_CHANGE"	282		"Tienen"						""
 
 "CLUB_NAME_CHANGE"		292		"Royal Excelsior Virton"				""
-"CLUB_SHORT_NAME_CHANGE"	292		"Virton"						""
-"CLUB_6LETTER_NAME_CHANGE"	292		"Virton"						""
+"CLUB_SHORT_NAME_CHANGE"	292		"Excelsior"						""
+#"CLUB_6LETTER_NAME_CHANGE"	292		"Excelsior"						""
+"CLUB_3LETTER_NAME_CHANGE"	292		"EXC"							""
 
 "CLUB_NAME_CHANGE"		536240		"Royal Olympic Club Charleroi"				""
 "CLUB_SHORT_NAME_CHANGE"	536240		"Olympic Charleroi"					""
@@ -13992,6 +13992,8 @@
 
 "CLUB_NAME_CHANGE"		536364		"KSC Lokeren"						""
 "CLUB_SHORT_NAME_CHANGE"	536364		"Lokeren"						""
+#"CLUB_6LETTER_NAME_CHANGE"	536364		"Lokeren"						""
+"CLUB_3LETTER_NAME_CHANGE"	536364		"LOK"							""
 
 "CLUB_NAME_CHANGE"		539814		"Royal Knokke FC"					""
 "CLUB_SHORT_NAME_CHANGE"	539814		"Knokke"						""
@@ -14019,7 +14021,7 @@
 "CLUB_NAME_CHANGE"		2000181439	"Jong KAA Gent"						""  # BAC x [BEL] KAA Gent
 "CLUB_SHORT_NAME_CHANGE"	2000181439	"Jong KAA Gent"						""  # BAC x [BEL] KAA Gent
 #"CLUB_6LETTER_NAME_CHANGE"	2000181439	"Jong Gent"						""  # BAC x [BEL] KAA Gent
-#"CLUB_3LETTER_NAME_CHANGE"	2000181439	"JGNT"							""  # BAC x [BEL] KAA Gent
+#"CLUB_3LETTER_NAME_CHANGE"	2000181439	"GNT.B"							""  # BAC x [BEL] KAA Gent
 
 "CLUB_NAME_CHANGE"		2000181440	"Zébra Élites Charleroi"				""  # BAC x [BEL] Charleroi
 "CLUB_SHORT_NAME_CHANGE"	2000181440	"Zébra Élites"						""  # BAC x [BEL] Charleroi
@@ -14066,6 +14068,8 @@
 
 "CLUB_NAME_CHANGE"		234		"K. Sporting Hasselt"					""
 "CLUB_SHORT_NAME_CHANGE"	234		"Sporting Hasselt"					""
+#"CLUB_6LETTER_NAME_CHANGE"	234		"Hasselt"						""
+"CLUB_3LETTER_NAME_CHANGE"	234		"SPH"							""
 
 "CLUB_NAME_CHANGE"		239		"K. Lyra-Lierse Berlaar"				""
 "CLUB_SHORT_NAME_CHANGE"	239		"Lyra-Lierse"						""
@@ -14236,7 +14240,7 @@
 "CLUB_NAME_CHANGE"		2000181448	"Jong Essevee"						""  # BAC x [BEL] Zulte Waregem
 "CLUB_SHORT_NAME_CHANGE"	2000181448	"Jong Essevee"						""  # BAC x [BEL] Zulte Waregem
 "CLUB_6LETTER_NAME_CHANGE"	2000181448	"ZWA.B"							""  # BAC x [BEL] Zulte Waregem
-#"CLUB_3LETTER_NAME_CHANGE"	2000181448	"ZWA.B"							""  # BAC x [BEL] Zulte WaregemF
+#"CLUB_3LETTER_NAME_CHANGE"	2000181448	"ZWA.B"							""  # BAC x [BEL] Zulte Waregem
 
 "CLUB_NAME_CHANGE"		2000181450	"RFC Seraing B"						""  # BAC x [BEL] Seraing
 "CLUB_SHORT_NAME_CHANGE"	2000181450	"Seraing B"						""  # BAC x [BEL] Seraing
