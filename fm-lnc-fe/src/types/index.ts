@@ -6,6 +6,7 @@ export enum RecordType {
   AWARD = 'award',
   PLAYER = 'player',
   STAGE = 'stage',
+  REGION = 'region',
 }
 
 export type RecordTypeValue = RecordType | `${RecordType}`;
@@ -20,6 +21,7 @@ export enum EntityType {
   AWARD = 'award',
   PLAYER = 'player',
   STAGE = 'stage',
+  REGION = 'region',
 }
 
 export type EntityTypeValue = EntityType | `${EntityType}`;
@@ -48,6 +50,7 @@ export enum NationTabKey {
   STADIUMS = 'stadiums',
   CITIES = 'cities',
   AWARDS = 'awards',
+  REGIONS = 'regions',
 }
 
 export type NationTabKeyValue = NationTabKey | `${NationTabKey}`;

@@ -57,13 +57,20 @@ export class LncService {
 
     // 2. CITIES
     const cities = await this.cityRepo.find({
-      relations: ['nation'],
+      relations: ['nation', 'regionEntity'],
       order: { id: 'ASC' },
     });
     for (const c of cities) {
       const code = c.nation?.name_3l || 'UNK';
       const nat = c.nation?.name_sh || 'Unknown';
-      const cat = c.region ? ` > ${c.region}` : '';
+      let cat = '';
+      if (c.regionEntity) {
+        cat = c.regionEntity.code
+          ? ` > [${c.regionEntity.code}] ${c.regionEntity.name}`
+          : ` > ${c.regionEntity.name}`;
+      } else if (c.region) {
+        cat = ` > ${c.region}`;
+      }
       const pfx = c.is_disabled ? '#' : '';
       out += `# CITY > [${code}] ${nat}${cat}\n${hr}`;
       out += `${pfx}"CITY_NAME_CHANGE"\t\t${c.id}\t\t"${c.name}"\t\t\t\t""\n\n`;
@@ -170,6 +177,11 @@ export class LncService {
       const pfx6 = isInactive('six_letter_name') || isInactive('name_6l') ? '#' : '';
       const pfx3 = isInactive('three_letter_name') || isInactive('name_3l') ? '#' : '';
 
+      if (cl.parent_id && cl.affiliate_type) {
+        const isAffInactive = isInactive('affiliate') || isInactive('affiliate_club') || isInactive('parent_id');
+        const pfxAff = isAffInactive ? '#' : '';
+        out += `${pfxAff}"CLUB_AFFILIATED_CLUB"\t\t${cl.id}\t"${cl.affiliate_type}-${cl.parent_id}"\t\t\t\t\t\t""\n`;
+      }
       out += `${pfxLong}"CLUB_NAME_CHANGE"\t\t${cl.id}\t"${cl.name_lg}"\t\t\t\t\t\t""${noteStr}\n`;
       out += `${pfxShort}"CLUB_SHORT_NAME_CHANGE"\t${cl.id}\t"${cl.name_sh}"\t\t\t\t\t\t""${noteStr}\n`;
       if (cl.name_6l) {

@@ -291,6 +291,17 @@ export class HierarchyController {
     return this.hierarchyService.getClubInfo(id);
   }
 
+  @ApiOperation({ summary: 'Lấy danh sách các câu lạc bộ con (affiliate clubs) của một đội 1' })
+  @ApiParam({ name: 'id', description: 'ID của câu lạc bộ đội 1' })
+  @ApiOkResponse({
+    description: 'Danh sách các đội con / đội trẻ / đội dự bị liên kết kèm loại đội con',
+  })
+  @Get('clubs/:id/affiliates')
+  getClubAffiliates(@Param('id') id: string) {
+    return this.hierarchyService.getClubAffiliates(id);
+  }
+
+
   @ApiOperation({ summary: 'Lấy thông tin chi tiết một City' })
   @ApiParam({ name: 'id', description: 'City ID' })
   @ApiOkResponse({

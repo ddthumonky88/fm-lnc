@@ -331,7 +331,14 @@ export interface ClubItem {
   three_letter_name?: string;
   nation_id?: string;
   comp_id?: string;
+  parent_id?: string | null;
+  affiliate_type?: string | null;
+  parent?: any;
+  parent_club?: any;
+  affiliatesCount?: number;
+  affiliates?: ClubItem[];
   note?: string;
+  inactive_fields?: string;
   is_extinct?: boolean;
   nation?: NationItem;
   comp?: CompetitionItem;
@@ -365,6 +372,8 @@ export interface CityItem {
   country_id?: string;
   region?: string;
   region_id?: number;
+  region_code?: string | null;
+  region_name?: string | null;
   categories?: string;
   is_disabled?: boolean;
   isDisabled?: boolean;
@@ -406,6 +415,7 @@ export interface NationHubData {
     stadiums: number;
     cities: number;
     awards: number;
+    regions?: number;
   };
 }
 
@@ -1057,6 +1067,16 @@ export async function fetchAllRegionsByNation(
   const target = nationId && String(nationId).toLowerCase() !== 'all' ? String(nationId) : 'all';
   return cachedFetch<RegionItem[]>(
     `${getApiBase()}/hierarchy/nations/${target}/regions`,
+    forceRefresh,
+  );
+}
+
+export async function fetchClubAffiliates(
+  clubId: string,
+  forceRefresh = false,
+): Promise<ClubItem[]> {
+  return cachedFetch<ClubItem[]>(
+    `${getApiBase()}/hierarchy/clubs/${clubId}/affiliates`,
     forceRefresh,
   );
 }

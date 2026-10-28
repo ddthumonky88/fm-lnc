@@ -178,8 +178,8 @@ export default function CityGroupView({
           value: r.id,
           label:
             r.citiesCount !== undefined && r.citiesCount > 0
-              ? `${r.name} (${r.citiesCount})`
-              : r.name,
+              ? `${r.code ? `[${r.code}] ` : ''}${r.name} (${r.citiesCount})`
+              : `${r.code ? `[${r.code}] ` : ''}${r.name}`,
         })),
       ];
     }

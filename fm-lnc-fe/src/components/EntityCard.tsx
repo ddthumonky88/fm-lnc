@@ -843,6 +843,56 @@ export default function EntityCard({
                     </span>
                   ),
                 });
+
+                if (data.affiliate_type || data.parent_id) {
+                  const pName =
+                    data.parent_club?.short_name ||
+                    data.parent_club?.name_lg ||
+                    data.parent?.short_name ||
+                    data.parent?.name_lg ||
+                    data.parent_id;
+                  fields.push({
+                    label: 'Affiliate:',
+                    value: (
+                      <span
+                        className="text-[11px] truncate block text-sky-700 font-semibold"
+                        title={`Parent: ${pName} (${data.parent_id})`}
+                      >
+                        {data.affiliate_type ? `[${data.affiliate_type}] ` : ''}
+                        {pName || '-'}
+                      </span>
+                    ),
+                    align: 'start',
+                    isInactive: isInactive('affiliate') || isInactive('parent_id'),
+                  });
+                }
+
+                if (data.affiliatesCount && data.affiliatesCount > 0) {
+                  fields.push({
+                    label: 'Teams:',
+                    value: `${data.affiliatesCount} affiliates`,
+                    align: 'start',
+                  });
+                }
+              } else if (entityTypeStr === 'region') {
+                fields.push({
+                  label: 'Name:',
+                  value: data.name || title,
+                  align: 'start',
+                  lineClamp: 2,
+                });
+                if (data.code) {
+                  fields.push({
+                    label: 'Code:',
+                    value: data.code,
+                  });
+                }
+                if (data.citiesCount !== undefined) {
+                  fields.push({
+                    label: 'Cities:',
+                    value: `${data.citiesCount} cities`,
+                  });
+                }
               } else if (entityTypeStr === 'stage') {
                 fields.push({
                   label: 'Name:',

@@ -53,6 +53,15 @@ function normalizeInputData(data: any): any {
   if (d.parent && typeof d.parent === 'object' && d.parent.id) {
     d.parent_id = d.parent.id;
   }
+  if (d.parent_club && typeof d.parent_club === 'object' && d.parent_club.id) {
+    d.parent_id = d.parent_club.id;
+  }
+  if (d.region_id !== undefined) {
+    d.region_id = d.region_id && String(d.region_id) !== 'all' ? Number(d.region_id) : null;
+  }
+  if (d.affiliate_type !== undefined) {
+    d.affiliate_type = d.affiliate_type ? String(d.affiliate_type).trim().toUpperCase() : null;
+  }
 
   if (d.nation_id !== undefined) d.nation_id = d.nation_id ? String(d.nation_id) : null;
   if (d.confed_id !== undefined) d.confed_id = d.confed_id ? String(d.confed_id) : null;
@@ -150,6 +159,12 @@ export class RecordsService {
       delete data.note;
       if (!data.type) data.type = 'stadium';
     }
+    if (type === RecordType.CITY && data.region_id) {
+      const reg = await this.regionRepo.findOne({ where: { id: data.region_id } });
+      if (reg) {
+        data.region = reg.name;
+      }
+    }
 
     const existing = data.id ? await repo.findOne({ where: { id: data.id } as any }) : null;
     if (existing) {
@@ -169,6 +184,16 @@ export class RecordsService {
     }
     if (type === RecordType.STADIUM) {
       delete data.note;
+    }
+    if (type === RecordType.CITY && data.region_id !== undefined) {
+      if (data.region_id) {
+        const reg = await this.regionRepo.findOne({ where: { id: data.region_id } });
+        if (reg) {
+          data.region = reg.name;
+        }
+      } else {
+        data.region = null;
+      }
     }
 
     const updated = repo.merge(existing, data);

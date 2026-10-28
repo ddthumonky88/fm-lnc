@@ -156,6 +156,7 @@ export class HierarchyService {
       stadiums,
       cities,
       awards,
+      regions,
     ] = await Promise.all([
       this.compRepo
         .createQueryBuilder('c')
@@ -167,6 +168,7 @@ export class HierarchyService {
       this.stadiumRepo.count({ where: { nation_id: String(nationId) } }),
       this.cityRepo.count({ where: { nation_id: String(nationId) } }),
       this.awardRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
+      this.regionRepo.count({ where: { nation_id: String(nationId) } }),
     ]);
 
     const countsRaw = await this.clubRepo.query(
@@ -190,6 +192,7 @@ export class HierarchyService {
         stadiums,
         cities,
         awards,
+        regions: regions || 0,
       },
       counts: {
         domesticComps: domesticComps + extraComps,
@@ -198,6 +201,7 @@ export class HierarchyService {
         stadiums,
         cities,
         awards,
+        regions: regions || 0,
       },
     };
   }
@@ -367,7 +371,8 @@ export class HierarchyService {
     const qb = this.clubRepo
       .createQueryBuilder('club')
       .leftJoinAndSelect('club.competition', 'competition')
-      .leftJoinAndSelect('club.nation', 'nation');
+      .leftJoinAndSelect('club.nation', 'nation')
+      .leftJoinAndSelect('club.parent', 'parent');
 
     const nationId =
       filter?.nationId !== undefined &&
@@ -469,7 +474,8 @@ export class HierarchyService {
 
     const qb = this.cityRepo
       .createQueryBuilder('city')
-      .leftJoinAndSelect('city.nation', 'nation');
+      .leftJoinAndSelect('city.nation', 'nation')
+      .leftJoinAndSelect('city.regionEntity', 'regionEntity');
 
     if (nationId && String(nationId).toLowerCase() !== 'all') {
       qb.where('city.nation_id = :nationId', { nationId: String(nationId) });
@@ -1007,20 +1013,41 @@ export class HierarchyService {
     const strId = String(clubId);
     const club = await this.clubRepo.findOne({
       where: { id: strId },
-      relations: ['nation', 'competition', 'competition.parent'],
+      relations: ['nation', 'competition', 'competition.parent', 'parent'],
     });
     if (!club) {
       throw new NotFoundException(`Club with ID ${clubId} not found`);
     }
 
-    return mapClub(club);
+    const affiliates = await this.clubRepo.find({
+      where: { parent_id: strId },
+      relations: ['competition', 'nation'],
+      order: { id: 'ASC' },
+    });
+
+    const mapped = mapClub(club);
+    return {
+      ...mapped,
+      affiliates: affiliates.map(mapClub),
+      affiliatesCount: affiliates.length,
+    };
+  }
+
+  async getClubAffiliates(clubId: string) {
+    const strId = String(clubId);
+    const affiliates = await this.clubRepo.find({
+      where: { parent_id: strId },
+      relations: ['nation', 'competition', 'parent'],
+      order: { id: 'ASC' },
+    });
+    return affiliates.map(mapClub);
   }
 
   async getCityInfo(cityId: string) {
     const strId = String(cityId);
     const city = await this.cityRepo.findOne({
       where: { id: strId },
-      relations: ['nation'],
+      relations: ['nation', 'regionEntity'],
     });
     if (!city) {
       throw new NotFoundException(`City with ID ${cityId} not found`);

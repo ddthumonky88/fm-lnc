@@ -26,7 +26,7 @@ import {
   CityIcon,
   AwardIcon,
 } from './EntityIcons';
-import { getNationLogoUrl, createRecord, updateRecord, deleteRecord } from '../services/api';
+import { getNationLogoUrl, createRecord, updateRecord, deleteRecord, fetchAllRegionsByNation, RegionItem } from '../services/api';
 import { useApp } from '../context/AppContext';
 
 export interface RecordDetailModalProps {
@@ -104,6 +104,20 @@ export default function RecordDetailModal({
   defaultParentId,
 }: RecordDetailModalProps) {
   const { triggerRefresh } = useApp();
+
+  // Determine Type Flags
+  const isPlayer = type === 'player' || type === EntityType.PLAYER || type === RecordType.PLAYER;
+  const isCity = type === 'city' || type === EntityType.CITY || type === RecordType.CITY;
+  const isStadium =
+    type === 'stadium' || type === EntityType.STADIUM || type === RecordType.STADIUM;
+  const isComp =
+    type === 'competition' || type === EntityType.COMPETITION || type === RecordType.COMPETITION;
+  const isClub = type === 'club' || type === EntityType.CLUB || type === RecordType.CLUB;
+  const isNation = type === 'nation' || type === EntityType.NATION;
+  const isConfed = type === 'confederation' || type === EntityType.CONFEDERATION;
+  const isStage = type === 'stage' || type === EntityType.STAGE || type === RecordType.STAGE;
+  const isAward = type === 'award' || type === EntityType.AWARD || type === RecordType.AWARD;
+  const isRegion = type === 'region' || (type as any) === EntityType.REGION || (type as any) === RecordType.REGION;
   const { message } = App.useApp();
 
   const isCreate = !data || initialMode === 'create';
@@ -138,7 +152,22 @@ export default function RecordDetailModal({
     nation_id: defaultNationId ? String(defaultNationId) : null,
     comp_id: defaultCompId ? String(defaultCompId) : null,
     parent_id: defaultParentId ? String(defaultParentId) : '',
+    affiliate_type: '',
+    region_id: null,
+    code: '',
   });
+
+  const [cityRegions, setCityRegions] = useState<RegionItem[]>([]);
+  useEffect(() => {
+    if (isOpen && isCity) {
+      const effNatId = formData.nation_id || currentData.nation_id || defaultNationId;
+      if (effNatId) {
+        fetchAllRegionsByNation(String(effNatId))
+          .then((regs) => setCityRegions(regs || []))
+          .catch(() => setCityRegions([]));
+      }
+    }
+  }, [isOpen, isCity, formData.nation_id, currentData.nation_id, defaultNationId]);
 
   // Dynamic Scroll Detection (khi có scroll và khi không có scroll)
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -224,6 +253,9 @@ export default function RecordDetailModal({
           : defaultParentId
             ? String(defaultParentId)
             : '',
+        affiliate_type: activeData.affiliate_type || '',
+        region_id: activeData.region_id !== undefined && activeData.region_id !== null ? Number(activeData.region_id) : null,
+        code: activeData.code || '',
       });
     }
   }, [isOpen, data, initialMode, isCreate, defaultNationId, defaultCompId, defaultParentId]);
@@ -281,18 +313,7 @@ export default function RecordDetailModal({
     } ${extraClass}`;
   };
 
-  // Determine Type Flags
-  const isPlayer = type === 'player' || type === EntityType.PLAYER || type === RecordType.PLAYER;
-  const isCity = type === 'city' || type === EntityType.CITY || type === RecordType.CITY;
-  const isStadium =
-    type === 'stadium' || type === EntityType.STADIUM || type === RecordType.STADIUM;
-  const isComp =
-    type === 'competition' || type === EntityType.COMPETITION || type === RecordType.COMPETITION;
-  const isClub = type === 'club' || type === EntityType.CLUB || type === RecordType.CLUB;
-  const isNation = type === 'nation' || type === EntityType.NATION;
-  const isConfed = type === 'confederation' || type === EntityType.CONFEDERATION;
-  const isStage = type === 'stage' || type === EntityType.STAGE || type === RecordType.STAGE;
-  const isAward = type === 'award' || type === EntityType.AWARD || type === RecordType.AWARD;
+// Type flags moved to top
   const isVirtual = Boolean(
     currentData.is_virtual ||
       currentData.id === '[EXTINCT]' ||
@@ -457,6 +478,21 @@ export default function RecordDetailModal({
         payload.bg_color = payload.bg_color?.trim() || null;
         payload.parent_id = formData.parent_id?.trim() ? String(formData.parent_id).trim() : null;
         payload.type = (formData.type || formData.categories || '').trim() || null;
+      }
+
+      if (isClub) {
+        payload.parent_id = formData.parent_id?.trim() ? String(formData.parent_id).trim() : null;
+        payload.affiliate_type = formData.affiliate_type?.trim() ? String(formData.affiliate_type).trim().toUpperCase() : null;
+      }
+
+      if (isCity) {
+        payload.region_id = formData.region_id && String(formData.region_id) !== 'all' ? Number(formData.region_id) : null;
+      }
+
+      if (isRegion) {
+        payload.name = formData.name || formData.long_name;
+        payload.code = formData.code?.trim() || null;
+        payload.nation_id = formData.nation_id || null;
       }
 
       if (isCity || isStadium) {
@@ -914,6 +950,66 @@ export default function RecordDetailModal({
                 </div>
               )}
 
+              {/* Club Affiliate Info (Đội 1 & Loại đội con) */}
+              {isClub && (currentData.parent_id || currentData.affiliate_type) && (
+                <>
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['parent_id', 'parent', 'parent_club'], 'pt-0.5')}>
+                      Parent Club:
+                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-xs sm:text-[13px] text-slate-800">
+                        {currentData.parent_club?.name_lg ||
+                          currentData.parent_club?.short_name ||
+                          currentData.parent?.name_lg ||
+                          currentData.parent?.short_name ||
+                          `Club #${currentData.parent_id}`}
+                      </span>
+                      {currentData.parent_id && (
+                        <span className="text-[11px] font-mono text-slate-400">
+                          (ID: {currentData.parent_id})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {currentData.affiliate_type && (
+                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                      <span className={getLabelClass(['affiliate_type', 'type'], 'pt-0.5')}>
+                        Affiliate Type:
+                      </span>
+                      <div>
+                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                          {currentData.affiliate_type}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* First Team Affiliates list */}
+              {isClub && currentData.affiliates && currentData.affiliates.length > 0 && (
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <span className={getLabelClass(['affiliates'], 'pt-0.5')}>
+                    Affiliates ({currentData.affiliates.length}):
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {currentData.affiliates.map((aff: any) => (
+                      <span
+                        key={aff.id}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200"
+                      >
+                        {aff.affiliate_type && (
+                          <span className="font-bold text-sky-600">[{aff.affiliate_type}]</span>
+                        )}
+                        <span>{aff.short_name || aff.name_sh || aff.long_name || aff.name_lg}</span>
+                        <span className="text-[10px] font-mono text-slate-400">({aff.id})</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Type (Stadium) */}
               {isStadium && (
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
@@ -1342,6 +1438,102 @@ export default function RecordDetailModal({
                   value={formData.parent_id || ''}
                   onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
                   placeholder="Enter parent comp ID..."
+                  className="font-mono text-xs rounded-lg"
+                />
+              </div>
+            )}
+
+            {/* Club Affiliate Info (ID Đội 1 & Loại đội con) */}
+            {isClub && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-sky-50/50 rounded-xl border border-sky-100">
+                <div>
+                  <label className={getFormLabelClass(['parent_id', 'parent', 'parent_club'])}>
+                    Parent Club ID (ID Đội 1)
+                  </label>
+                  <Input
+                    value={formData.parent_id || ''}
+                    onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
+                    placeholder="e.g. 1300491"
+                    className="font-mono text-xs rounded-lg"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    ID của đội 1 (để trống nếu là đội 1 độc lập)
+                  </span>
+                </div>
+                <div>
+                  <label className={getFormLabelClass(['affiliate_type', 'type'])}>
+                    Affiliate Type (Loại đội con)
+                  </label>
+                  <Select
+                    value={formData.affiliate_type || undefined}
+                    onChange={(val) => setFormData({ ...formData, affiliate_type: val })}
+                    placeholder="Chọn loại đội con..."
+                    allowClear
+                    showSearch
+                    className="w-full text-xs"
+                    options={[
+                      { value: '2T', label: '2T - 2nd Team (Đội 2)' },
+                      { value: 'BT', label: 'BT - B Team (Đội B)' },
+                      { value: 'BAC', label: 'BAC - B Academy (Học viện B)' },
+                      { value: 'U19', label: 'U19 - Under 19' },
+                      { value: 'U21', label: 'U21 - Under 21' },
+                      { value: 'U18', label: 'U18 - Under 18' },
+                      { value: '2AC', label: '2AC - 2nd Academy' },
+                      { value: 'RES', label: 'RES - Reserves (Dự bị)' },
+                      { value: 'CAC', label: 'CAC - C Academy' },
+                      { value: '3T', label: '3T - 3rd Team (Đội 3)' },
+                      { value: 'CT', label: 'CT - C Team (Đội C)' },
+                      { value: '3AC', label: '3AC - 3rd Academy' },
+                      { value: 'AKA', label: 'AKA - Akademie' },
+                    ]}
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    Loại đội liên kết (e.g. 2T, BT, BAC, U19)
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* City Region Selector */}
+            {isCity && (
+              <div>
+                <label className={getFormLabelClass(['region', 'region_id', 'categories'])}>
+                  Region (Khu vực / Tỉnh / Bang)
+                </label>
+                <Select
+                  value={formData.region_id || undefined}
+                  onChange={(val) => {
+                    const selected = cityRegions.find((r) => r.id === val);
+                    setFormData({
+                      ...formData,
+                      region_id: val || null,
+                      region: selected ? selected.name : '',
+                      categories: selected ? (selected.code ? `[${selected.code}] ${selected.name}` : selected.name) : '',
+                    });
+                  }}
+                  placeholder="Chọn khu vực..."
+                  allowClear
+                  showSearch
+                  className="w-full text-xs"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={cityRegions.map((r) => ({
+                    value: r.id,
+                    label: r.code ? `[${r.code}] ${r.name}` : r.name,
+                  }))}
+                />
+              </div>
+            )}
+
+            {/* Region Code for Region */}
+            {isRegion && (
+              <div>
+                <label className={getFormLabelClass('code')}>Region Code</label>
+                <Input
+                  value={formData.code || ''}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  placeholder="e.g. ALG-05, USA-OH"
                   className="font-mono text-xs rounded-lg"
                 />
               </div>

@@ -313,6 +313,8 @@ erDiagram
         varchar name_3l
         varchar nation_id FK
         varchar comp_id FK
+        varchar parent_id FK
+        varchar affiliate_type
         text note
         text inactive_fields
         boolean is_extinct
@@ -321,6 +323,7 @@ erDiagram
     REGIONS {
         serial id PK
         varchar name
+        varchar code
         varchar nation_id FK
         timestamp created_at
     }
@@ -410,6 +413,8 @@ erDiagram
 | `name_3l` | `VARCHAR(50)` | | Yes | Mã 3 ký tự (e.g. `ARS`) |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` |
 | `comp_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `competitions.id` (NULL nếu là CLB độc lập) |
+| `parent_id` | `VARCHAR(64)` | **FK** | Yes | ID của CLB đội 1 (câu lạc bộ mẹ / First team ID) |
+| `affiliate_type` | `VARCHAR(64)` | | Yes | Loại đội con liên kết (`2T`, `BT`, `BAC`, `U19`, `U21`, `U18`, `RES`, v.v.) |
 | `note` | `TEXT` | | Yes | Ghi chú CLB |
 | `inactive_fields` | `TEXT` | | Yes | Các trường bị comment out khi xuất `.lnc` |
 | `is_extinct` | `BOOLEAN` | | No | Đánh dấu CLB đã giải thể (`true`), mặc định: `false` |
@@ -419,6 +424,7 @@ erDiagram
 | :--- | :--- | :---: | :---: | :--- |
 | `id` | `SERIAL` | **PK** | No | Khóa chính tự tăng |
 | `name` | `VARCHAR(255)` | | No | Tên khu vực / bang / miền (e.g. `North East`, `Miền Bắc`) |
+| `code` | `VARCHAR(64)` | | Yes | Mã phân vùng khu vực (e.g. `ALG-05`, `USA-OH`, `IDN-AC`) |
 | `nation_id` | `VARCHAR(64)` | **FK** | Yes | Tham chiếu `nations.id` (ON DELETE CASCADE) |
 | `created_at` | `TIMESTAMP` | | Yes | Thời gian khởi tạo, mặc định `CURRENT_TIMESTAMP` |
 
@@ -497,6 +503,7 @@ Người dùng có thể tạm ngưng đồng bộ một trường dữ liệu (
 | `clubs` | `name_sh` | `"CLUB_SHORT_NAME_CHANGE"` | `"CLUB_SHORT_NAME_CHANGE" <id> "<name_sh>" ""` |
 | `clubs` | `name_6l` | `"CLUB_6LETTER_NAME_CHANGE"` | `"CLUB_6LETTER_NAME_CHANGE" <id> "<name_6l>" ""` |
 | `clubs` | `name_3l` | `"CLUB_3LETTER_NAME_CHANGE"` | `"CLUB_3LETTER_NAME_CHANGE" <id> "<name_3l>" ""` |
+| `clubs` | `parent_id`, `affiliate_type` | `"CLUB_AFFILIATED_CLUB"` | `"CLUB_AFFILIATED_CLUB" <child_id> "<affiliate_type>-<parent_id>" ""` |
 | `cities` | `name` | `"CITY_NAME_CHANGE"` | `"CITY_NAME_CHANGE" <id> "<name>" ""` |
 | `stadiums` | `name` | `"STADIUM_NAME_CHANGE"` | `"STADIUM_NAME_CHANGE" <id> "<name>" ""` |
 | `awards` | `name_lg` | `"AWARD_LONG_NAME_CHANGE"` | `"AWARD_LONG_NAME_CHANGE" <id> "<name_lg>" ""` |

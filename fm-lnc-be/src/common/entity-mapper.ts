@@ -17,6 +17,13 @@ export interface NestedComp {
   name_3l: string | null;
 }
 
+export interface NestedClub {
+  id: string;
+  name_lg: string | null;
+  name_sh: string | null;
+  name_3l: string | null;
+}
+
 export interface NestedParent {
   id: string;
   name_lg: string | null;
@@ -55,6 +62,18 @@ export function mapCompRef(comp: any): NestedComp | null {
     name_lg: comp.name_lg ?? comp.long_name ?? comp.name ?? null,
     name_sh: comp.name_sh ?? comp.short_name ?? null,
     name_3l: comp.name_3l ?? comp.three_letter_name ?? null,
+  };
+}
+
+export function mapClubRef(club: any): NestedClub | null {
+  if (!club) return null;
+  const id = club.id !== undefined && club.id !== null ? String(club.id) : null;
+  if (!id) return null;
+  return {
+    id,
+    name_lg: club.name_lg ?? club.long_name ?? club.name ?? null,
+    name_sh: club.name_sh ?? club.short_name ?? null,
+    name_3l: club.name_3l ?? club.three_letter_name ?? null,
   };
 }
 
@@ -172,6 +191,17 @@ export function mapClub(club: any) {
       }
     : null;
 
+  const parentClub = club.parent
+    ? mapClubRef(club.parent)
+    : club.parent_id
+    ? {
+        id: String(club.parent_id),
+        name_lg: club.parent_name_lg || club.parent_long_name || null,
+        name_sh: club.parent_name_sh || club.parent_short_name || null,
+        name_3l: club.parent_name_3l || club.parent_three_letter || null,
+      }
+    : null;
+
   return {
     id: String(club.id),
     name_lg: club.long_name ?? club.name_lg ?? null,
@@ -181,9 +211,18 @@ export function mapClub(club: any) {
     note: club.note ?? null,
     inactive_fields: club.inactive_fields ?? null,
     is_extinct: !!club.is_extinct,
+    parent_id: club.parent_id ? String(club.parent_id) : null,
+    affiliate_type: club.affiliate_type ?? null,
+    parent: parentClub || (club.competition?.parent ? mapParentRef(club.competition.parent) : null),
+    parent_club: parentClub,
     nation,
     comp,
-    ...(club.competition?.parent ? { parent: mapParentRef(club.competition.parent) } : {}),
+    ...(club.affiliates_count !== undefined
+      ? { affiliatesCount: club.affiliates_count }
+      : club.affiliatesCount !== undefined
+      ? { affiliatesCount: club.affiliatesCount }
+      : {}),
+    ...(club.affiliates ? { affiliates: club.affiliates.map((a: any) => mapClub(a)) } : {}),
   };
 }
 
@@ -200,12 +239,22 @@ export function mapCity(city: any) {
       }
     : null;
 
+  const regEntity = city.regionEntity;
+  const regCode = regEntity?.code ?? null;
+  const regName = regEntity?.name ?? null;
+  let formattedRegion = city.region ?? city.categories ?? null;
+  if (regName) {
+    formattedRegion = regCode ? `[${regCode}] ${regName}` : regName;
+  }
+
   return {
     id: String(city.id),
     name: city.name,
-    region: city.region ?? city.categories ?? null,
-    region_id: city.region_id ?? null,
-    categories: city.region ?? city.categories ?? null,
+    region: formattedRegion,
+    region_id: city.region_id ?? regEntity?.id ?? null,
+    region_code: regCode,
+    region_name: regName || city.region || null,
+    categories: formattedRegion,
     is_disabled: !!city.is_disabled,
     inactive_fields: city.is_disabled ? 'name' : null,
     nation,
@@ -266,5 +315,17 @@ export function mapAward(award: any) {
     name_3l: award.three_letter_name ?? award.name_3l ?? null,
     nation,
     comp,
+  };
+}
+
+export function mapRegion(region: any) {
+  if (!region) return null;
+  return {
+    id: region.id,
+    name: region.name,
+    code: region.code || null,
+    nation_id: region.nation_id ? String(region.nation_id) : null,
+    nation: region.nation ? mapNationRef(region.nation) : null,
+    citiesCount: region.citiesCount ?? (region.cities ? region.cities.length : undefined),
   };
 }

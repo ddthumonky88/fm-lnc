@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Nation } from './nation.entity';
 import { Competition } from './competition.entity';
 
@@ -25,6 +25,12 @@ export class Club {
   @Column({ type: 'varchar', length: 64, nullable: true })
   comp_id: string;
 
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  parent_id: string;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  affiliate_type: string;
+
   @Column({ type: 'text', nullable: true })
   note: string;
 
@@ -41,4 +47,11 @@ export class Club {
   @ManyToOne(() => Competition, (comp) => comp.clubs, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'comp_id' })
   competition: Competition;
+
+  @ManyToOne(() => Club, (club) => club.affiliates, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'parent_id' })
+  parent: Club;
+
+  @OneToMany(() => Club, (club) => club.parent)
+  affiliates: Club[];
 }

@@ -236,6 +236,46 @@ export class LncParserService {
         );
       }
 
+      // 2.1 Upsert regions & link cities
+      const regionMap = new Map<string, { natId: number; regCode: string | null; regName: string }>();
+      for (const [idStr, cdata] of Object.entries(cities)) {
+        let natId = null;
+        if (cdata.natCode && codeToNationId[cdata.natCode]) {
+          natId = codeToNationId[cdata.natCode];
+        } else if (cdata.natName && nameToNationId[cdata.natName.toUpperCase()]) {
+          natId = nameToNationId[cdata.natName.toUpperCase()];
+        }
+        if (natId && cdata.cat) {
+          const rm = cdata.cat.match(/^\[([^\]]+)\]\s*(.*)$/);
+          const regCode = rm ? rm[1].trim() : null;
+          const regName = rm ? rm[2].trim() : cdata.cat.trim();
+          if (regName) {
+            const key = `${natId}:::${regName.toLowerCase()}`;
+            if (!regionMap.has(key)) {
+              regionMap.set(key, { natId, regCode, regName });
+            } else if (regCode && !regionMap.get(key)!.regCode) {
+              regionMap.get(key)!.regCode = regCode;
+            }
+          }
+        }
+      }
+
+      for (const r of regionMap.values()) {
+        await queryRunner.query(
+          `INSERT INTO regions (name, code, nation_id)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (nation_id, name)
+           DO UPDATE SET code = COALESCE(EXCLUDED.code, regions.code)`,
+          [r.regName, r.regCode, String(r.natId)],
+        );
+      }
+
+      const dbRegs = await queryRunner.query('SELECT id, name, nation_id FROM regions');
+      const regDbMap = new Map<string, number>();
+      for (const r of dbRegs) {
+        regDbMap.set(`${r.nation_id}:::${r.name.toLowerCase()}`, r.id);
+      }
+
       for (const [idStr, cdata] of Object.entries(cities)) {
         const id = parseInt(idStr, 10);
         let natId = null;
@@ -245,19 +285,24 @@ export class LncParserService {
           natId = nameToNationId[cdata.natName.toUpperCase()];
         }
 
-        const inactStr = cdata.inactive_fields && cdata.inactive_fields.size > 0
-          ? Array.from(cdata.inactive_fields).sort().join(',')
-          : null;
+        let regName = cdata.cat ? cdata.cat.trim() : null;
+        let regId = null;
+        if (natId && cdata.cat) {
+          const rm = cdata.cat.match(/^\[([^\]]+)\]\s*(.*)$/);
+          regName = rm ? rm[2].trim() : cdata.cat.trim();
+          regId = regDbMap.get(`${natId}:::${regName.toLowerCase()}`) || null;
+        }
 
         await queryRunner.query(
-          `INSERT INTO cities (id, name, nation_id, region, is_disabled)
-           VALUES ($1, $2, $3, $4, $5)
+          `INSERT INTO cities (id, name, nation_id, region, region_id, is_disabled)
+           VALUES ($1, $2, $3, $4, $5, $6)
            ON CONFLICT (id) DO UPDATE SET
              name = EXCLUDED.name,
              nation_id = EXCLUDED.nation_id,
              region = EXCLUDED.region,
+             region_id = EXCLUDED.region_id,
              is_disabled = EXCLUDED.is_disabled`,
-          [id, cdata.name, natId, cdata.cat, !!cdata.is_disabled],
+          [id, cdata.name, natId, regName, regId, !!cdata.is_disabled],
         );
       }
 
@@ -524,6 +569,20 @@ export class LncParserService {
           const cmd = m[1];
           const id = parseInt(m[2], 10);
           const val = m[3].trim();
+          if (cmd === 'CLUB_AFFILIATED_CLUB') {
+            const affM = val.match(/^([A-Za-z0-9]+)-(\d+)/);
+            if (affM) {
+              if (!clubs[id]) {
+                clubs[id] = { nat_code: curClubNatCode, comp_cat: curClubCompCat, note, inactive_fields: new Set() };
+              }
+              if (!clubs[id].inactive_fields) clubs[id].inactive_fields = new Set();
+              clubs[id].affiliate_type = affM[1].trim();
+              clubs[id].parent_id = parseInt(affM[2], 10);
+              if (isCommented) clubs[id].inactive_fields.add('affiliate');
+              else clubs[id].inactive_fields.delete('affiliate');
+            }
+            continue;
+          }
           if (cmd.startsWith('CLUB_')) {
             if (!clubs[id]) {
               clubs[id] = { nat_code: curClubNatCode, comp_cat: curClubCompCat, note, inactive_fields: new Set() };
@@ -587,8 +646,8 @@ export class LncParserService {
           Boolean(lName?.toLowerCase().includes('extinct'));
 
         await queryRunner.query(
-          `INSERT INTO clubs (id, name_lg, name_sh, name_6l, name_3l, nation_id, comp_id, note, inactive_fields, is_extinct)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          `INSERT INTO clubs (id, name_lg, name_sh, name_6l, name_3l, nation_id, comp_id, note, inactive_fields, is_extinct, parent_id, affiliate_type)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
            ON CONFLICT (id) DO UPDATE SET
              name_lg = EXCLUDED.name_lg,
              name_sh = EXCLUDED.name_sh,
@@ -598,8 +657,10 @@ export class LncParserService {
              comp_id = EXCLUDED.comp_id,
              note = EXCLUDED.note,
              inactive_fields = EXCLUDED.inactive_fields,
-             is_extinct = EXCLUDED.is_extinct`,
-          [id, lName, sName, cdata.six_letter_name || null, cdata.three_letter_name || null, natId, compId, cdata.note || null, inactStr, isExtinct],
+             is_extinct = EXCLUDED.is_extinct,
+             parent_id = EXCLUDED.parent_id,
+             affiliate_type = EXCLUDED.affiliate_type`,
+          [id, lName, sName, cdata.six_letter_name || null, cdata.three_letter_name || null, natId, compId, cdata.note || null, inactStr, isExtinct, cdata.parent_id ? String(cdata.parent_id) : null, cdata.affiliate_type || null],
         );
       }
 
