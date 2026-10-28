@@ -142,6 +142,46 @@ export class HierarchyController {
     return this.hierarchyService.getCities(filter);
   }
 
+  @ApiOperation({ summary: 'Lấy tất cả khu vực (regions) theo quốc gia' })
+  @ApiParam({ name: 'nationId', description: 'ID quốc gia (hoặc "all" để lấy tất cả)' })
+  @ApiOkResponse({
+    description: 'Danh sách các khu vực (regions) thuộc quốc gia kèm id, name, code',
+    schema: {
+      type: 'array',
+      example: [
+        { id: 328, name: 'Batna', code: 'ALG-05', nation_id: '5', citiesCount: 2 },
+        { id: 187, name: 'Djelfa', code: 'ALG-17', nation_id: '5', citiesCount: 1 },
+      ],
+    },
+  })
+  @Get('nations/:nationId/regions')
+  getRegionsByNationParam(
+    @Param('nationId') nationId: string,
+    @Query() query?: any,
+  ) {
+    return this.hierarchyService.getRegionsByNation({ ...query, nationId });
+  }
+
+  @ApiOperation({ summary: 'Lấy tất cả khu vực (regions) (hỗ trợ lọc nationId / nation_id / keyword)' })
+  @ApiOkResponse({
+    description: 'Danh sách các khu vực (regions)',
+    schema: {
+      type: 'array',
+      example: [
+        { id: 328, name: 'Batna', code: 'ALG-05', nation_id: '5', citiesCount: 2 },
+      ],
+    },
+  })
+  @Get('regions')
+  getRegions(
+    @Query('nationId') nationId?: string,
+    @Query('nation_id') nationIdSnake?: string,
+    @Query() query?: any,
+  ) {
+    const targetNationId = nationId || nationIdSnake || query?.nationId || query?.nation_id;
+    return this.hierarchyService.getRegionsByNation({ ...query, nationId: targetNationId });
+  }
+
   @ApiOperation({ summary: 'Tìm kiếm khu vực (regions) có phân trang và lọc theo quốc gia' })
   @ApiBody({ type: SearchFilterDto, required: false })
   @Post('regions/search')
@@ -312,6 +352,27 @@ export class HierarchyController {
   @Get('stadiums/:id/info')
   getStadiumInfo(@Param('id') id: string) {
     return this.hierarchyService.getStadiumInfo(id);
+  }
+
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Region' })
+  @ApiParam({ name: 'id', description: 'Region ID' })
+  @ApiOkResponse({
+    description: 'Thông tin chi tiết khu vực kèm mã và số lượng thành phố',
+    schema: {
+      type: 'object',
+      example: {
+        id: 328,
+        name: 'Batna',
+        code: 'ALG-05',
+        nation_id: '5',
+        citiesCount: 2,
+        nation: { id: '5', long_name: 'Algeria', short_name: 'Algeria', three_letter_name: 'ALG' },
+      },
+    },
+  })
+  @Get('regions/:id/info')
+  getRegionInfo(@Param('id') id: string) {
+    return this.hierarchyService.getRegionInfo(id);
   }
 
   @ApiOperation({ summary: 'Lấy thông tin chi tiết một Competition' })

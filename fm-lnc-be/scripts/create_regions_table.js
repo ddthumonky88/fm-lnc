@@ -37,13 +37,18 @@ async function main() {
       CREATE TABLE IF NOT EXISTS regions (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
+        code VARCHAR(64),
         nation_id VARCHAR(64) REFERENCES nations(id) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT uq_nation_region UNIQUE (nation_id, name)
       );
     `);
     await client.query(`
+      ALTER TABLE regions ADD COLUMN IF NOT EXISTS code VARCHAR(64);
+    `);
+    await client.query(`
       CREATE INDEX IF NOT EXISTS idx_regions_nation_id ON regions(nation_id);
+      CREATE INDEX IF NOT EXISTS idx_regions_code ON regions(code);
     `);
     console.log('Table regions created or already exists.');
 

@@ -10,6 +10,7 @@ import {
   Award,
   Person,
   Stage,
+  Region,
 } from '../entities';
 
 function normalizeInputData(data: any): any {
@@ -71,6 +72,7 @@ export enum RecordType {
   PERSON = 'person',
   PLAYER = 'player',
   STAGE = 'stage',
+  REGION = 'region',
 }
 
 @Injectable()
@@ -84,6 +86,7 @@ export class RecordsService {
     @InjectRepository(Award) private awardRepo: Repository<Award>,
     @InjectRepository(Person) private personRepo: Repository<Person>,
     @InjectRepository(Stage) private stageRepo: Repository<Stage>,
+    @InjectRepository(Region) private regionRepo: Repository<Region>,
   ) {}
 
   private getRepository(type: RecordType | string): Repository<any> {
@@ -114,6 +117,10 @@ export class RecordsService {
       case RecordType.STAGE:
       case 'stage':
         return this.stageRepo;
+      case RecordType.REGION:
+      case 'region':
+      case 'regions':
+        return this.regionRepo;
       default:
         throw new BadRequestException(`Unknown record type: ${type}`);
     }
@@ -121,7 +128,8 @@ export class RecordsService {
 
   async getRecord(type: RecordType, id: string) {
     const repo = this.getRepository(type);
-    const item = await repo.findOne({ where: { id: String(id) } });
+    const isRegion = type === RecordType.REGION || (type as string) === 'region' || (type as string) === 'regions';
+    const item = await repo.findOne({ where: (isRegion ? { id: Number(id) } : { id: String(id) }) as any });
     if (!item) {
       throw new NotFoundException(`${type} with ID ${id} not found`);
     }
@@ -131,16 +139,19 @@ export class RecordsService {
   async createRecord(type: RecordType, data: any) {
     const repo = this.getRepository(type);
     data = normalizeInputData(data);
-    if (!data.id) {
+    const isRegion = type === RecordType.REGION || (type as string) === 'region' || (type as string) === 'regions';
+    if (!data.id && !isRegion) {
       throw new BadRequestException('FM ID is required');
     }
-    data.id = String(data.id);
+    if (data.id) {
+      data.id = isRegion ? Number(data.id) : String(data.id);
+    }
     if (type === RecordType.STADIUM) {
       delete data.note;
       if (!data.type) data.type = 'stadium';
     }
 
-    const existing = await repo.findOne({ where: { id: data.id } });
+    const existing = data.id ? await repo.findOne({ where: { id: data.id } as any }) : null;
     if (existing) {
       throw new BadRequestException(`${type} with ID ${data.id} already exists`);
     }
@@ -150,7 +161,8 @@ export class RecordsService {
   async updateRecord(type: RecordType, id: string, data: any) {
     const repo = this.getRepository(type);
     data = normalizeInputData(data);
-    const strId = String(id);
+    const isRegion = type === RecordType.REGION || (type as string) === 'region' || (type as string) === 'regions';
+    const strId = (isRegion ? Number(id) : String(id)) as any;
     const existing = await repo.findOne({ where: { id: strId } });
     if (!existing) {
       throw new NotFoundException(`${type} with ID ${id} not found`);
@@ -165,7 +177,8 @@ export class RecordsService {
 
   async deleteRecord(type: RecordType, id: string) {
     const repo = this.getRepository(type);
-    const result = await repo.delete(String(id));
+    const isRegion = type === RecordType.REGION || (type as string) === 'region' || (type as string) === 'regions';
+    const result = await repo.delete((isRegion ? Number(id) : String(id)) as any);
     if (result.affected === 0) {
       throw new NotFoundException(`${type} with ID ${id} not found`);
     }

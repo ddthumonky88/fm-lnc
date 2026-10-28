@@ -28,6 +28,14 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
               ALTER TABLE "stadiums" ADD COLUMN "type" VARCHAR(50) DEFAULT 'stadium';
           END IF;
 
+          -- Ensure code column exists on regions
+          IF NOT EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_schema = 'public' AND table_name = 'regions' AND column_name = 'code'
+          ) THEN
+              ALTER TABLE "regions" ADD COLUMN "code" VARCHAR(64);
+          END IF;
+
           -- 2. Drop existing foreign key constraints so column types can be altered safely
           FOR r IN (
               SELECT tc.table_name, tc.constraint_name
@@ -119,6 +127,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
 
           -- 5. Indexes
           CREATE INDEX IF NOT EXISTS "idx_competitions_parent_id" ON "competitions"("parent_id");
+          CREATE INDEX IF NOT EXISTS "idx_regions_code" ON "regions"("code");
       END $$;
     `);
     logger.log('Schema DDL verified: parent_id column and VARCHAR(64) types are up to date.');

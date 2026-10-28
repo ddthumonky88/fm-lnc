@@ -11,6 +11,9 @@ export class Region {
   name: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
+  code: string;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
   nation_id: string;
 
   @ManyToOne(() => Nation, (nation) => nation.regions, { onDelete: 'CASCADE' })

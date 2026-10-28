@@ -521,7 +521,10 @@ export class HierarchyService {
     const searchKey = (filter?.keyword || '').trim();
     if (searchKey) {
       const term = `%${searchKey.toLowerCase()}%`;
-      qb.andWhere('LOWER(region.name) LIKE :term', { term });
+      qb.andWhere(
+        '(LOWER(region.name) LIKE :term OR LOWER(COALESCE(region.code, \'\')) LIKE :term)',
+        { term },
+      );
     }
 
     const regions = await qb.orderBy('region.name', 'ASC').getMany();
@@ -547,6 +550,7 @@ export class HierarchyService {
     return regions.map((r) => ({
       id: r.id,
       name: r.name,
+      code: r.code || null,
       nation_id: r.nation_id,
       citiesCount: countMap.get(r.id) || 0,
     }));
@@ -1051,6 +1055,36 @@ export class HierarchyService {
     return mapStadium(stadium);
   }
 
+  async getRegionInfo(id: number | string) {
+    const region = await this.regionRepo.findOne({
+      where: { id: Number(id) },
+      relations: ['nation'],
+    });
+    if (!region) {
+      throw new NotFoundException(`Region with ID ${id} not found`);
+    }
+
+    const citiesCount = await this.cityRepo.count({
+      where: { region_id: Number(id) },
+    });
+
+    return {
+      id: region.id,
+      name: region.name,
+      code: region.code || null,
+      nation_id: region.nation_id,
+      nation: region.nation
+        ? {
+            id: region.nation.id,
+            long_name: region.nation.name_lg,
+            short_name: region.nation.name_sh,
+            three_letter_name: region.nation.name_3l,
+          }
+        : null,
+      citiesCount,
+    };
+  }
+
   async getEntityInfo(type: string, id: string) {
     switch (type.toLowerCase()) {
       case 'confederation':
@@ -1078,6 +1112,9 @@ export class HierarchyService {
       case 'stadium':
       case 'stadiums':
         return this.getStadiumInfo(id);
+      case 'region':
+      case 'regions':
+        return this.getRegionInfo(id);
       default:
         throw new BadRequestException(`Info not supported for entity type: ${type}`);
     }

@@ -9,6 +9,7 @@ import {
   Award,
   Person,
   Stage,
+  Region,
 } from '../entities';
 import { RecordsService } from './records.service';
 import { RecordsController } from './records.controller';
@@ -26,6 +27,7 @@ import { HierarchyModule } from '../hierarchy/hierarchy.module';
       Award,
       Person,
       Stage,
+      Region,
     ]),
   ],
   providers: [RecordsService],

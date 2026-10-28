@@ -354,6 +354,7 @@ export interface RegionItem {
   id: number;
   name: string;
   nation_id: string;
+  code?: string;
   citiesCount?: number;
 }
 
@@ -1046,6 +1047,17 @@ export async function fetchRegions(
     `${getApiBase()}/hierarchy/regions/search`,
     filter,
     refresh,
+  );
+}
+
+export async function fetchAllRegionsByNation(
+  nationId: string,
+  forceRefresh = false,
+): Promise<RegionItem[]> {
+  const target = nationId && String(nationId).toLowerCase() !== 'all' ? String(nationId) : 'all';
+  return cachedFetch<RegionItem[]>(
+    `${getApiBase()}/hierarchy/nations/${target}/regions`,
+    forceRefresh,
   );
 }
 
