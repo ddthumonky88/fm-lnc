@@ -6752,22 +6752,27 @@
 #"COMP_PARENT_ID"		130185		 15054404						""
 "COMP_LONG_NAME_CHANGE" 	130185	 	"NPL NSW"			 			""
 "COMP_SHORT_NAME_CHANGE" 	130185	 	"NPL NSW"	 					""
+"COMP_3LETTER_NAME_CHANGE" 	130185	 	"NPL NSW"	 					""
 
 #"COMP_PARENT_ID"		130188		 15054404						""
 "COMP_LONG_NAME_CHANGE" 	130188	 	"NPL Victoria" 						""
 "COMP_SHORT_NAME_CHANGE" 	130188	 	"NPL Victoria"	 					""
+"COMP_3LETTER_NAME_CHANGE" 	130188		"NPL VIC"						""
 
 #"COMP_PARENT_ID"		130189		 15054404						""
 "COMP_LONG_NAME_CHANGE" 	130189	 	"New Balance NPL Western Australia"			""
 "COMP_SHORT_NAME_CHANGE" 	130189	 	"NPL Western Australia"	 				""
+"COMP_3LETTER_NAME_CHANGE" 	130189		"NPL WA"						""
 
 #"COMP_PARENT_ID"		432083		 15054404						""
 "COMP_LONG_NAME_CHANGE" 	432083	 	"NPL Capital Football" 					""
 "COMP_SHORT_NAME_CHANGE" 	432083	 	"NPL ACT"	 					""
+"COMP_3LETTER_NAME_CHANGE" 	432083		"NPL ACT"						""
 
 #"COMP_PARENT_ID"		15007722	 15054404						""
 "COMP_LONG_NAME_CHANGE" 	15007722 	"NPL Northern NSW" 					""
 "COMP_SHORT_NAME_CHANGE" 	15007722 	"NPL Northern NSW" 					""
+"COMP_3LETTER_NAME_CHANGE" 	15007722 	"NPL NN"						""
 
 #"COMP_PARENT_ID"		15038565	 15054404						""
 "COMP_LONG_NAME_CHANGE" 	15038565 	"NPL Tasmania"	 					""
@@ -6776,10 +6781,12 @@
 #"COMP_PARENT_ID"		15041771	 15054404						""
 "COMP_LONG_NAME_CHANGE" 	15041771 	"NPL Queensland" 					""
 "COMP_SHORT_NAME_CHANGE" 	15041771 	"NPL Queensland" 					""
+"COMP_3LETTER_NAME_CHANGE" 	15041771 	"NPL QLD"						""
 
 #"COMP_PARENT_ID"		15045003	 15054404						""
 "COMP_LONG_NAME_CHANGE" 	15045003 	"RAA NPL South Australia" 				""
 "COMP_SHORT_NAME_CHANGE" 	15045003 	"NPL South Australia" 					""
+"COMP_3LETTER_NAME_CHANGE" 	15045003 	"NPL SA"						""
 
 
 # COMP > AFC > [AUS] AUSTRALIA > League (3)
@@ -6928,14 +6935,14 @@
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	5630275 	"Brunei Super League" 					""
 "COMP_SHORT_NAME_CHANGE" 	5630275 	"Brunei Super League" 					""
-"COMP_3LETTER_NAME_CHANGE" 	5630275		"BSL"							""
+"COMP_3LETTER_NAME_CHANGE" 	5630275		"BRU-SL"						""
 
 
 # COMP > AFC > [BRU] BRUNEI DS > League (2)
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	23086526 	"Brunei Premier League" 				""
 "COMP_SHORT_NAME_CHANGE" 	23086526 	"Brunei Premier League" 				""
-"COMP_3LETTER_NAME_CHANGE" 	23086526	"BPL"							""
+"COMP_3LETTER_NAME_CHANGE" 	23086526	"BRU-PL"						""
 
 
 # COMP > AFC > [BRU] BRUNEI DS > Cup
@@ -7033,25 +7040,25 @@
 "COMP_COLOUR_CHANGE" 		1002872	 	 0 255 255 255 154 30 35				""
 "COMP_LONG_NAME_CHANGE" 	1002872		"China League Two North Group" 				""
 "COMP_SHORT_NAME_CHANGE" 	1002872		"China League Two North Group"				""
-"COMP_3LETTER_NAME_CHANGE"	1002872		"C2/N"							""
+"COMP_3LETTER_NAME_CHANGE"	1002872		"C2 North"						""
 
 #"COMP_PARENT_ID"		1002873		 130932							""
 "COMP_COLOUR_CHANGE" 		1002873 	 0 255 255 255 154 30 35				""
 "COMP_LONG_NAME_CHANGE" 	1002873		"China League Two South Group"				""
 "COMP_SHORT_NAME_CHANGE" 	1002873		"China League Two South Group"				""
-"COMP_3LETTER_NAME_CHANGE"	1002873		"C2/S"							""
+"COMP_3LETTER_NAME_CHANGE"	1002873		"C2 South"						""
 
 #"COMP_PARENT_ID"		23356307	 130932							""
 "COMP_COLOUR_CHANGE" 		23356307 	 0 255 255 255 154 30 35				""
 "COMP_LONG_NAME_CHANGE" 	23356307 	"China League Two East Group"				""
 "COMP_SHORT_NAME_CHANGE" 	23356307 	"China League Two East Group"				""
-"COMP_3LETTER_NAME_CHANGE"	23356307 	"C2/E"							""
+"COMP_3LETTER_NAME_CHANGE"	23356307 	"C2 East"						""
 
 #"COMP_PARENT_ID"		23356308	 130932							""
 "COMP_COLOUR_CHANGE" 		23356308 	 0 255 255 255 154 30 35				""
 "COMP_LONG_NAME_CHANGE" 	23356308 	"China League Two West Group"				""
 "COMP_SHORT_NAME_CHANGE" 	23356308 	"China League Two West Group"				""
-"COMP_3LETTER_NAME_CHANGE"	23356308 	"C2/W"							""
+"COMP_3LETTER_NAME_CHANGE"	23356308 	"C2 West"						""
 
 
 # COMP > AFC > [CHN] CHINA PR > League (4)
@@ -7323,7 +7330,7 @@
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	100000023 	"Hero ISL Cup" 						""
 "COMP_SHORT_NAME_CHANGE" 	100000023 	"ISL Cup" 						""
-"COMP_3LETTER_NAME_CHANGE" 	100000023 	"ISL"		 					""
+"COMP_3LETTER_NAME_CHANGE" 	100000023 	"ISL"	 						""
 
 "COMP_LONG_NAME_CHANGE" 	7640059 	"IndianOil Durand Cup" 					""
 "COMP_SHORT_NAME_CHANGE" 	7640059 	"Durand Cup" 						""

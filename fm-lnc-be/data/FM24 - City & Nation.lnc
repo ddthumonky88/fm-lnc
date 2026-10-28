@@ -1020,6 +1020,7 @@
 "NATION_3LETTER_NAME_CHANGE"	82082540	"ANT"					8
 
 
+
 # CITY > [AFG] AFGHANISTAN
 #====================================================================================
 "CITY_NAME_CHANGE"		145508		"Kabul"							""
@@ -1111,172 +1112,172 @@
 "CITY_NAME_CHANGE"		2000322849	"Lekaj"							""
 
 
-# CITY > [ALG] ALGERIA > Alger
+# CITY > [ALG] ALGERIA > [ALG-16] Alger
 #====================================================================================
 "CITY_NAME_CHANGE"		103002		"Alger"							""
 
 
-# CITY > [ALG] ALGERIA > Annaba
+# CITY > [ALG] ALGERIA > [ALG-23] Annaba
 #====================================================================================
 "CITY_NAME_CHANGE"		105322		"Annaba"						""
 
 
-# CITY > [ALG] ALGERIA > Batna
+# CITY > [ALG] ALGERIA > [ALG-05] Batna
 #====================================================================================
 "CITY_NAME_CHANGE"		105316		"Batna"							""
 "CITY_NAME_CHANGE"		12004694	"Barika"						""
 
 
-# CITY > [ALG] ALGERIA > Béchar
+# CITY > [ALG] ALGERIA > [ALG-08] Béchar
 #====================================================================================
 "CITY_NAME_CHANGE"		8628568		"Béchar"						""
 
 
-# CITY > [ALG] ALGERIA > Béjaïa
+# CITY > [ALG] ALGERIA > [ALG-06] Béjaïa
 #====================================================================================
 "CITY_NAME_CHANGE"		5360125		"Béjaïa"						""
 
 
-# CITY > [ALG] ALGERIA > Biskra
+# CITY > [ALG] ALGERIA > [ALG-07] Biskra
 #====================================================================================
 "CITY_NAME_CHANGE"		7601652		"Biskra"						""
 
 
-# CITY > [ALG] ALGERIA > Blida
+# CITY > [ALG] ALGERIA > [ALG-09] Blida
 #====================================================================================
 "CITY_NAME_CHANGE"		5360128		"Blida"							""
 
 
-# CITY > [ALG] ALGERIA > Bordj Bou Arréridj
+# CITY > [ALG] ALGERIA > [ALG-34] Bordj Bou Arréridj
 #====================================================================================
 "CITY_NAME_CHANGE"		5360155		"Bordj Bou Arréridj"					""
 
 
-# CITY > [ALG] ALGERIA > Boumerdès
+# CITY > [ALG] ALGERIA > [ALG-35] Boumerdès
 #====================================================================================
 "CITY_NAME_CHANGE"		8625424		"Boumerdès"						""
 
 
-# CITY > [ALG] ALGERIA > Chlef
+# CITY > [ALG] ALGERIA > [ALG-02] Chlef
 #====================================================================================
 "CITY_NAME_CHANGE"		7600577		"Chlef"							""
 
 
-# CITY > [ALG] ALGERIA > Constantine
+# CITY > [ALG] ALGERIA > [ALG-25] Constantine
 #====================================================================================
 "CITY_NAME_CHANGE"		105317		"Constantine"						""
 "CITY_NAME_CHANGE"		8628598		"El Khroub"						""
 
 
-# CITY > [ALG] ALGERIA > Djelfa
+# CITY > [ALG] ALGERIA > [ALG-17] Djelfa
 #====================================================================================
 "CITY_NAME_CHANGE"		8626395		"Djelfa"						""
 
 
-# CITY > [ALG] ALGERIA > El Oued
+# CITY > [ALG] ALGERIA > [ALG-39] El Oued
 #====================================================================================
 "CITY_NAME_CHANGE"		12004691	"El Oued"						""
 
 
-# CITY > [ALG] ALGERIA > Guelma
+# CITY > [ALG] ALGERIA > [ALG-24] Guelma
 #====================================================================================
 "CITY_NAME_CHANGE"		8625427		"Guelma"						""
 
 
-# CITY > [ALG] ALGERIA > Jijel
+# CITY > [ALG] ALGERIA > [ALG-18] Jijel
 #====================================================================================
 "CITY_NAME_CHANGE"		8630042		"Jijel"							""
 
 
-# CITY > [ALG] ALGERIA > Khenchela
+# CITY > [ALG] ALGERIA > [ALG-40] Khenchela
 #====================================================================================
 "CITY_NAME_CHANGE"		8628277		"Khenchela"						""
 
 
-# CITY > [ALG] ALGERIA > Laghouat
+# CITY > [ALG] ALGERIA > [ALG-03] Laghouat
 #====================================================================================
 "CITY_NAME_CHANGE"		8627775		"Laghouat"						""
 
 
-# CITY > [ALG] ALGERIA > M'sila
+# CITY > [ALG] ALGERIA > [ALG-28] M'sila
 #====================================================================================
 "CITY_NAME_CHANGE"		8625457		"M'sila"						""
 "CITY_NAME_CHANGE"		8628600		"Bou Saâda"						""
 
 
-# CITY > [ALG] ALGERIA > Médéa
+# CITY > [ALG] ALGERIA > [ALG-26] Médéa
 #====================================================================================
 "CITY_NAME_CHANGE"		8625833		"Médéa"							""
 
 
-# CITY > [ALG] ALGERIA > Mostaganem
+# CITY > [ALG] ALGERIA > [ALG-27] Mostaganem
 #====================================================================================
 "CITY_NAME_CHANGE"		5360126		"Mostaganem"						""
 
 
-# CITY > [ALG] ALGERIA > Oran
+# CITY > [ALG] ALGERIA > [ALG-31] Oran
 #====================================================================================
 "CITY_NAME_CHANGE"		105315		"Oran"							""
 "CITY_NAME_CHANGE"		12041507	"Sidi Chahmi"						""
 
 
-# CITY > [ALG] ALGERIA > Ouargla
+# CITY > [ALG] ALGERIA > [ALG-30] Ouargla
 #====================================================================================
 "CITY_NAME_CHANGE"		5360127		"Ouargla"						""
 
 
-# CITY > [ALG] ALGERIA > Oum El Bouaghi
+# CITY > [ALG] ALGERIA > [ALG-04] Oum El Bouaghi
 #====================================================================================
 "CITY_NAME_CHANGE"		8625467		"Aïn Beïda"						""
 
 
-# CITY > [ALG] ALGERIA > Relizane
+# CITY > [ALG] ALGERIA > [ALG-48] Relizane
 #====================================================================================
 "CITY_NAME_CHANGE"		8625311		"Relizane"						""
 
 
-# CITY > [ALG] ALGERIA > Saïda
+# CITY > [ALG] ALGERIA > [ALG-20] Saïda
 #====================================================================================
 "CITY_NAME_CHANGE"		8625310		"Saïda"							""
 
 
-# CITY > [ALG] ALGERIA > Sétif
+# CITY > [ALG] ALGERIA > [ALG-19] Sétif
 #====================================================================================
 "CITY_NAME_CHANGE"		105318		"Sétif"							""
 "CITY_NAME_CHANGE"		8625314		"El Eulma"						""
 
 
-# CITY > [ALG] ALGERIA > Sidi Bel Abbès
+# CITY > [ALG] ALGERIA > [ALG-22] Sidi Bel Abbès
 #====================================================================================
 "CITY_NAME_CHANGE"		105321		"Sidi Bel Abbès"					""
 
 
-# CITY > [ALG] ALGERIA > Skikda
+# CITY > [ALG] ALGERIA > [ALG-21] Skikda
 #====================================================================================
 "CITY_NAME_CHANGE"		7601673		"Skikda"						""
 
 
-# CITY > [ALG] ALGERIA > Souk Ahras
+# CITY > [ALG] ALGERIA > [ALG-41] Souk Ahras
 #====================================================================================
 "CITY_NAME_CHANGE"		8630041		"Souk Ahras"						""
 
 
-# CITY > [ALG] ALGERIA > Tébessa
+# CITY > [ALG] ALGERIA > [ALG-12] Tébessa
 #====================================================================================
 "CITY_NAME_CHANGE"		8625325		"Tébessa"						""
 
 
-# CITY > [ALG] ALGERIA > Tiaret
+# CITY > [ALG] ALGERIA > [ALG-14] Tiaret
 #====================================================================================
 "CITY_NAME_CHANGE"		8625309		"Tiaret"						""
 
 
-# CITY > [ALG] ALGERIA > Tizi Ouzou
+# CITY > [ALG] ALGERIA > [ALG-15] Tizi Ouzou
 #====================================================================================
 "CITY_NAME_CHANGE"		105320		"Tizi Ouzou"						""
 
 
-# CITY > [ALG] ALGERIA > Tlemcen
+# CITY > [ALG] ALGERIA > [ALG-13] Tlemcen
 #====================================================================================
 "CITY_NAME_CHANGE"		105323		"Tlemcen"						""
 "CITY_NAME_CHANGE"		7601620		"Maghnia"						""
@@ -1326,14 +1327,14 @@
 "CITY_NAME_CHANGE"		67118499	"Aixovall"						""
 
 
-# CITY > [ANG] ANGOLA > Bengo Province
+# CITY > [ANG] ANGOLA > [ANG-BGO] Bengo
 #====================================================================================
 "CITY_NAME_CHANGE"		13110227	"Bula Atumba"						""
 "CITY_NAME_CHANGE"		95063386	"Caxito"						""
 "CITY_NAME_CHANGE"		2000038190	"Ambriz"						""
 
 
-# CITY > [ANG] ANGOLA > Benguela Province
+# CITY > [ANG] ANGOLA > [ANG-BGU] Benguela
 #====================================================================================
 "CITY_NAME_CHANGE"		8626851		"Lobito"						""
 "CITY_NAME_CHANGE"		23017918	"Benguela"						""
@@ -1341,32 +1342,32 @@
 "CITY_NAME_CHANGE"		2000039886	"Catumbela"						""
 
 
-# CITY > [ANG] ANGOLA > Bié Province
+# CITY > [ANG] ANGOLA > [ANG-BIE] Bié
 #====================================================================================
 "CITY_NAME_CHANGE"		13190773	"Cuito"							""
 "CITY_NAME_CHANGE"		2000000796	"Nharêa"						""
 
 
-# CITY > [ANG] ANGOLA > Cabinda Province
+# CITY > [ANG] ANGOLA > [ANG-CAB] Cabinda
 #====================================================================================
 "CITY_NAME_CHANGE"		8626850		"Cabinda"						""
 "CITY_NAME_CHANGE"		95054888	"Buco-Zau"						""
 "CITY_NAME_CHANGE"		2000152582	"Lândana"						""
 
 
-# CITY > [ANG] ANGOLA > Cuando Cubango Province
+# CITY > [ANG] ANGOLA > [ANG-CCU] Cuando Cubango
 #====================================================================================
 "CITY_NAME_CHANGE"		13191315	"Menongue"						""
 
 
-# CITY > [ANG] ANGOLA > Cuanza Norte Province
+# CITY > [ANG] ANGOLA > [ANG-CNO] Cuanza Norte
 #====================================================================================
 "CITY_NAME_CHANGE"		13139002	"N'dalatando"						""
 "CITY_NAME_CHANGE"		2000092380	"Golungo Alto"						""
 "CITY_NAME_CHANGE"		2000152806	"Quiculungo"						""
 
 
-# CITY > [ANG] ANGOLA > Cuanza Sul Province
+# CITY > [ANG] ANGOLA > [ANG-CUS] Cuanza Sul
 #====================================================================================
 "CITY_NAME_CHANGE"		12029292	"Calulo"						""
 "CITY_NAME_CHANGE"		2000012393	"Gabela"						""
@@ -1375,25 +1376,25 @@
 "CITY_NAME_CHANGE"		2000239470	"Porto Amboim"						""
 
 
-# CITY > [ANG] ANGOLA > Cunene Province
+# CITY > [ANG] ANGOLA > [ANG-CNN] Cunene
 #====================================================================================
 "CITY_NAME_CHANGE"		95054881	"Ondjiva"						""
 "CITY_NAME_CHANGE"		2000038196	"Cuanhama"						""
 
 
-# CITY > [ANG] ANGOLA > Huambo Province
+# CITY > [ANG] ANGOLA > [ANG-HUA] Huambo
 #====================================================================================
 "CITY_NAME_CHANGE"		12010554	"Huambo"						""
 "CITY_NAME_CHANGE"		95050000	"Caála"							""
 
 
-# CITY > [ANG] ANGOLA > Huíla Province
+# CITY > [ANG] ANGOLA > [ANG-HUI] Huíla
 #====================================================================================
 "CITY_NAME_CHANGE"		12011350	"Chibia"						""
 "CITY_NAME_CHANGE"		23017919	"Lubango"						""
 
 
-# CITY > [ANG] ANGOLA > Luanda Province
+# CITY > [ANG] ANGOLA > [ANG-LUA] Luanda
 #====================================================================================
 "CITY_NAME_CHANGE"		103003		"Luanda"						""
 "CITY_NAME_CHANGE"		19162114	"Cazenga"						""
@@ -1406,43 +1407,43 @@
 "CITY_NAME_CHANGE"		2000239469	"Cacuaco"						""
 
 
-# CITY > [ANG] ANGOLA > Lunda Norte Province
+# CITY > [ANG] ANGOLA > [ANG-LNO] Lunda Norte
 #====================================================================================
 "CITY_NAME_CHANGE"		12011351	"Dundo"							""
 "CITY_NAME_CHANGE"		2000038197	"Cambulo"						""
 "CITY_NAME_CHANGE"		2000073676	"Lucapa"						""
 
 
-# CITY > [ANG] ANGOLA > Lunda Sul Province
+# CITY > [ANG] ANGOLA > [ANG-LSU] Lunda Sul
 #====================================================================================
 "CITY_NAME_CHANGE"		13153510	"Saurimo"						""
 "CITY_NAME_CHANGE"		49038539	"Dala"							""
 
 
-# CITY > [ANG] ANGOLA > Malanje Province
+# CITY > [ANG] ANGOLA > [ANG-MAL] Malanje
 #====================================================================================
 "CITY_NAME_CHANGE"		311509		"Malanje"						""
 "CITY_NAME_CHANGE"		2000048768	"Luquembo"						""
 
 
-# CITY > [ANG] ANGOLA > Moxico Province
+# CITY > [ANG] ANGOLA > [ANG-MOX] Moxico
 #====================================================================================
 "CITY_NAME_CHANGE"		12011361	"Luena"							""
 
 
-# CITY > [ANG] ANGOLA > Namibe Province
+# CITY > [ANG] ANGOLA > [ANG-NAM] Namibe
 #====================================================================================
 "CITY_NAME_CHANGE"		12011349	"Moçâmedes"						""
 "CITY_NAME_CHANGE"		2000038199	"Tombwa"						""
 
 
-# CITY > [ANG] ANGOLA > Uíge Province
+# CITY > [ANG] ANGOLA > [ANG-UIG] Uíge
 #====================================================================================
 "CITY_NAME_CHANGE"		13148137	"Uíge"							""
 "CITY_NAME_CHANGE"		2000152585	"Sanza Pombo"						""
 
 
-# CITY > [ANG] ANGOLA > Zaire Province
+# CITY > [ANG] ANGOLA > [ANG-ZAI] Zaire
 #====================================================================================
 "CITY_NAME_CHANGE"		12011360	"Soyo"							""
 "CITY_NAME_CHANGE"		13109923	"M'Banza Congo"						""
@@ -1484,12 +1485,12 @@
 "CITY_NAME_CHANGE"		2000324197	"Golden Grove"						""
 
 
-# CITY > [ARG] ARGENTINA > Ciudad de Buenos Aires
+# CITY > [ARG] ARGENTINA > [ARG-00] Ciudad de Buenos Aires
 #====================================================================================
 "CITY_NAME_CHANGE"		102431		"Ciudad de Buenos Aires"				""
 
 
-# CITY > [ARG] ARGENTINA > Buenos Aires / BA
+# CITY > [ARG] ARGENTINA > [ARG-BA] Buenos Aires
 #====================================================================================
 "CITY_NAME_CHANGE"		102435		"La Plata (BA)"						""
 "CITY_NAME_CHANGE"		108490		"Bahía Blanca (BA)"					""
@@ -1526,123 +1527,128 @@
 "CITY_NAME_CHANGE"		2000033379	"Virrey del Pino (BA)"					""
 
 
-# CITY > [ARG] ARGENTINA > Catamarca / CA
+# CITY > [ARG] ARGENTINA > [ARG-CA] Catamarca
 #====================================================================================
 "CITY_NAME_CHANGE"		14005207	"San Fernando del Valle de Catamarca (CA)"		""
 
 
-# CITY > [ARG] ARGENTINA > Chaco / CH
+# CITY > [ARG] ARGENTINA > [ARG-CH] Chaco
 #====================================================================================
 "CITY_NAME_CHANGE"		3100007		"Resistencia (CH)"					""
 
 
-# CITY > [ARG] ARGENTINA > Chubut / CT
+# CITY > [ARG] ARGENTINA > [ARG-CT] Chubut
 #====================================================================================
 "CITY_NAME_CHANGE"		951336		"Comodoro Rivadavia (CT)"				""
 "CITY_NAME_CHANGE"		14005185	"Trelew (CT)"						""
 "CITY_NAME_CHANGE"		14005265	"Puerto Madryn (CT)"					""
 
 
-# CITY > [ARG] ARGENTINA > Córdoba / CB
+# CITY > [ARG] ARGENTINA > [ARG-CB] Córdoba
 #====================================================================================
 "CITY_NAME_CHANGE"		102432		"Córdoba (CB)"						""
 "CITY_NAME_CHANGE"		3101437		"Río Cuarto (CB)"					""
 
 
-# CITY > [ARG] ARGENTINA > Corrientes / CR
+# CITY > [ARG] ARGENTINA > [ARG-CR] Corrientes
 #====================================================================================
 "CITY_NAME_CHANGE"		102439		"Corrientes (CR)"					""
 
 
-# CITY > [ARG] ARGENTINA > Entre Ríos/ ER
+# CITY > [ARG] ARGENTINA > [ARG-ER] Entre Ríos
 #====================================================================================
 "CITY_NAME_CHANGE"		3101440		"Concordia (ER)"					""
 "CITY_NAME_CHANGE"		3101459		"Paraná (ER)"						""
 "CITY_NAME_CHANGE"		14005214	"Gualeguaychú (ER)"					""
 
 
-# CITY > [ARG] ARGENTINA > Formosa / FO
+# CITY > [ARG] ARGENTINA > [ARG-FO] Formosa
 #====================================================================================
 "CITY_NAME_CHANGE"		951339		"Formosa (FO)"						""
 
 
-# CITY > [ARG] ARGENTINA > Jujuy / JY
+# CITY > [ARG] ARGENTINA > [ARG-JY] Jujuy
 #====================================================================================
 "CITY_NAME_CHANGE"		14005188	"San Salvador de Jujuy (JY)"				""
 
 
-# CITY > [ARG] ARGENTINA > La Pampa / LP
+# CITY > [ARG] ARGENTINA > [ARG-LP] La Pampa
 #====================================================================================
 "CITY_NAME_CHANGE"		3101462		"Santa Rosa (LP)"					""
 
 
-# CITY > [ARG] ARGENTINA > La Rioja / LR
+# CITY > [ARG] ARGENTINA > [ARG-LR] La Rioja
 #====================================================================================
 "CITY_NAME_CHANGE"		955713		"La Rioja (LR)"						""
 
 
-# CITY > [ARG] ARGENTINA > Mendoza / MZ
+# CITY > [ARG] ARGENTINA > [ARG-MZ] Mendoza
 #====================================================================================
 "CITY_NAME_CHANGE"		102434		"Mendoza (MZ)"						""
 "CITY_NAME_CHANGE"		14005186	"Godoy Cruz (MZ)"					""
 "CITY_NAME_CHANGE"		14005203	"San Rafael (MZ)"					""
 
 
-# CITY > [ARG] ARGENTINA > Misiones / MI
+# CITY > [ARG] ARGENTINA > [ARG-MI] Misiones
 #====================================================================================
 "CITY_NAME_CHANGE"		14005225	"Posadas (MI)"						""
 
 
-# CITY > [ARG] ARGENTINA > Neuquén / NQ
+# CITY > [ARG] ARGENTINA > [ARG-NQ] Neuquén
 #====================================================================================
 "CITY_NAME_CHANGE"		955714		"Neuquén (NQ)"						""
 
 
-# CITY > [ARG] ARGENTINA > Río Negro / RN
+# CITY > [ARG] ARGENTINA > [ARG-RN] Río Negro
 #====================================================================================
 "CITY_NAME_CHANGE"		14005257	"San Carlos de Bariloche (RN)"				""
 
 
-# CITY > [ARG] ARGENTINA > Salta / SA
+# CITY > [ARG] ARGENTINA > [ARG-SA] Salta
 #====================================================================================
 "CITY_NAME_CHANGE"		102438		"Salta (SA)"						""
 "CITY_NAME_CHANGE"		2000150265	"Coronel Juan Solá (SA)"				""
 
 
-# CITY > [ARG] ARGENTINA > San Juan / SJ
+# CITY > [ARG] ARGENTINA > [ARG-SJ] San Juan
 #====================================================================================
 "CITY_NAME_CHANGE"		108502		"San Juan (SJ)"						""
 
 
-# CITY > [ARG] ARGENTINA > San Luis / SL
+# CITY > [ARG] ARGENTINA > [ARG-SL] San Luis
 #====================================================================================
 "CITY_NAME_CHANGE"		955213		"San Luis (SL)"						""
 "CITY_NAME_CHANGE"		14005296	"Villa Mercedes (SL)"					""
 
 
-# CITY > [ARG] ARGENTINA > Santa Cruz / SC
+# CITY > [ARG] ARGENTINA > [ARG-SC] Santa Cruz
 #====================================================================================
 "CITY_NAME_CHANGE"		14005344	"Río Gallegos (SC)"					""
 
 
-# CITY > [ARG] ARGENTINA > Santa Fe / SF
+# CITY > [ARG] ARGENTINA > [ARG-SF] Santa Fe
 #====================================================================================
 "CITY_NAME_CHANGE"		102433		"Rosario (SF)"						""
 "CITY_NAME_CHANGE"		102437		"Santa Fe (SF)"						""
 
 
-# CITY > [ARG] ARGENTINA > Santiago del Estero / SE
+# CITY > [ARG] ARGENTINA > [ARG-SE] Santiago del Estero
 #====================================================================================
 "CITY_NAME_CHANGE"		3101465		"Santiago del Estero (SE)"				""
 "CITY_NAME_CHANGE"		14014254	"La Banda (SE)"						""
 
 
-# CITY > [ARG] ARGENTINA > Tucumán / TU
+# CITY > [ARG] ARGENTINA > [ARG-TU] Tucumán
 #====================================================================================
 "CITY_NAME_CHANGE"		14005182	"San Miguel de Tucumán (TU)"				""
 
 
-# CITY > [ARM] ARMENIA > Aragatsotn marz
+# CITY > [ARM] ARMENIA > [ARM-ER] Yerevan
+#====================================================================================
+"CITY_NAME_CHANGE"		1300050		"Yerevan"						""
+
+
+# CITY > [ARM] ARMENIA > [ARM-AG] Aragatsotn marz
 #====================================================================================
 "CITY_NAME_CHANGE"		59006846	"Aparan"						""
 "CITY_NAME_CHANGE"		59006848	"Ashtarak"						""
@@ -1652,7 +1658,7 @@
 "CITY_NAME_CHANGE"		59085766	"Norashen (Aragatsotn)"					""
 
 
-# CITY > [ARM] ARMENIA > Ararat marz
+# CITY > [ARM] ARMENIA > [ARM-AR] Ararat marz
 #====================================================================================
 "CITY_NAME_CHANGE"		1300051		"Ararat"						""
 "CITY_NAME_CHANGE"		59006847	"Artashat"						""
@@ -1661,7 +1667,7 @@
 "CITY_NAME_CHANGE"		59085590	"Baghramyan (Ararat)"					""
 
 
-# CITY > [ARM] ARMENIA > Armavir marz
+# CITY > [ARM] ARMENIA > [ARM-AV] Armavir marz
 #====================================================================================
 "CITY_NAME_CHANGE"		59048376	"Vagharshapat"						""
 "CITY_NAME_CHANGE"		59048377	"Armavir"						""
@@ -1670,7 +1676,7 @@
 "CITY_NAME_CHANGE"		59085592	"Baghramyan (Armavir)"					""
 
 
-# CITY > [ARM] ARMENIA > Gegharkunik marz
+# CITY > [ARM] ARMENIA > [ARM-GR] Gegharkunik marz
 #====================================================================================
 "CITY_NAME_CHANGE"		8084142		"Gavar"							""
 "CITY_NAME_CHANGE"		59006852	"Sevan"							""
@@ -1679,7 +1685,7 @@
 "CITY_NAME_CHANGE"		59085368	"Chambarak"						""
 
 
-# CITY > [ARM] ARMENIA > Kotayk marz
+# CITY > [ARM] ARMENIA > [ARM-KT] Kotayk marz
 #====================================================================================
 "CITY_NAME_CHANGE"		1300049		"Hrazdan"						""
 "CITY_NAME_CHANGE"		59006837	"Abovyan"						""
@@ -1690,7 +1696,7 @@
 "CITY_NAME_CHANGE"		59085377	"Charentsavan"						""
 
 
-# CITY > [ARM] ARMENIA > Lori marz
+# CITY > [ARM] ARMENIA > [ARM-LO] Lori marz
 #====================================================================================
 "CITY_NAME_CHANGE"		1300048		"Vanadzor"						""
 "CITY_NAME_CHANGE"		59006845	"Alaverdi"						""
@@ -1702,7 +1708,7 @@
 "CITY_NAME_CHANGE"		59085822	"Teghut (Lori)"						""
 
 
-# CITY > [ARM] ARMENIA > Shirak marz
+# CITY > [ARM] ARMENIA > [ARM-SH] Shirak marz
 #====================================================================================
 "CITY_NAME_CHANGE"		484462		"Gyumri"						""
 "CITY_NAME_CHANGE"		1300045		"Artik"							""
@@ -1710,7 +1716,7 @@
 "CITY_NAME_CHANGE"		59085578	"Hatsik (Shirak)"					""
 
 
-# CITY > [ARM] ARMENIA > Syunik marz
+# CITY > [ARM] ARMENIA > [ARM-SU] Syunik marz
 #====================================================================================
 "CITY_NAME_CHANGE"		1300053		"Goris"							""
 "CITY_NAME_CHANGE"		59006201	"Kapan"							""
@@ -1718,7 +1724,7 @@
 "CITY_NAME_CHANGE"		59085396	"Sisian"						""
 
 
-# CITY > [ARM] ARMENIA > Tavush marz
+# CITY > [ARM] ARMENIA > [ARM-TV] Tavush marz
 #====================================================================================
 "CITY_NAME_CHANGE"		8061072		"Idjevan"						""
 "CITY_NAME_CHANGE"		59006849	"Dilijan"						""
@@ -1728,16 +1734,11 @@
 "CITY_NAME_CHANGE"		59085824	"Teghut (Tavush)"					""
 
 
-# CITY > [ARM] ARMENIA > Vayots Dzor marz
+# CITY > [ARM] ARMENIA > [ARM-VD] Vayots Dzor marz
 #====================================================================================
 "CITY_NAME_CHANGE"		1300052		"Yeghegnadzor"						""
 "CITY_NAME_CHANGE"		59085361	"Vayk"							""
 "CITY_NAME_CHANGE"		59085363	"Djermuk"						""
-
-
-# CITY > [ARM] ARMENIA > Yerevan
-#====================================================================================
-"CITY_NAME_CHANGE"		1300050		"Yerevan"						""
 
 
 # CITY > [ARU] ARUBA
@@ -1752,13 +1753,13 @@
 "CITY_NAME_CHANGE"		82062056	"Savaneta"						""
 
 
-# CITY > [AUS] AUSTRALIA > Australian Capital Territory
+# CITY > [AUS] AUSTRALIA > [AUS-ACT] Australian Capital Territory
 #====================================================================================
 "CITY_NAME_CHANGE"		103173		"Canberra"						""
 "CITY_NAME_CHANGE"		15015364	"Queanbeyan"						""
 
 
-# CITY > [AUS] AUSTRALIA > New South Wales
+# CITY > [AUS] AUSTRALIA > [AUS-NSW] New South Wales
 #====================================================================================
 "CITY_NAME_CHANGE"		104445		"Sydney"						""
 "CITY_NAME_CHANGE"		129981		"Wollongong"						""
@@ -1795,7 +1796,7 @@
 "CITY_NAME_CHANGE"		2000157038	"Shellharbour"						""
 
 
-# CITY > [AUS] AUSTRALIA > Northern NSW
+# CITY > [AUS] AUSTRALIA > [AUS-NN] Northern NSW
 #====================================================================================
 "CITY_NAME_CHANGE"		123011		"Newcastle (NSW)"					""
 "CITY_NAME_CHANGE"		426771		"Coffs Harbour"						""
@@ -1826,7 +1827,7 @@
 "CITY_NAME_CHANGE"		2000157967	"Scone"							""
 
 
-# CITY > [AUS] AUSTRALIA > Northern Territory
+# CITY > [AUS] AUSTRALIA > [AUS-NT] Northern Territory
 #====================================================================================
 "CITY_NAME_CHANGE"		8455154		"Darwin"						""
 "CITY_NAME_CHANGE"		15041724	"Palmerston"						""
@@ -1835,7 +1836,7 @@
 "CITY_NAME_CHANGE"		2000126607	"Borroloola"						""
 
 
-# CITY > [AUS] AUSTRALIA > Queensland
+# CITY > [AUS] AUSTRALIA > [AUS-QLD] Queensland
 #====================================================================================
 "CITY_NAME_CHANGE"		104447		"Brisbane"						""
 "CITY_NAME_CHANGE"		426790		"Bundaberg"						""
@@ -1872,7 +1873,7 @@
 "CITY_NAME_CHANGE"		2000158047	"Laidley"						""
 
 
-# CITY > [AUS] AUSTRALIA > South Australia
+# CITY > [AUS] AUSTRALIA > [AUS-SA] South Australia
 #====================================================================================
 "CITY_NAME_CHANGE"		104448		"Adelaide"						""
 "CITY_NAME_CHANGE"		426839		"Port Pirie"						""
@@ -1884,7 +1885,7 @@
 "CITY_NAME_CHANGE"		2000126583	"Renmark"						""
 
 
-# CITY > [AUS] AUSTRALIA > Tasmania
+# CITY > [AUS] AUSTRALIA > [AUS-TAS] Tasmania
 #====================================================================================
 "CITY_NAME_CHANGE"		426769		"Hobart"						""
 "CITY_NAME_CHANGE"		432593		"Launceston"						""
@@ -1893,7 +1894,7 @@
 "CITY_NAME_CHANGE"		432994		"Burnie"						""
 
 
-# CITY > [AUS] AUSTRALIA > Victoria
+# CITY > [AUS] AUSTRALIA > [AUS-VIC] Victoria
 #====================================================================================
 "CITY_NAME_CHANGE"		104446		"Melbourne"						""
 "CITY_NAME_CHANGE"		129978		"Morwell"						""
@@ -1924,7 +1925,7 @@
 "CITY_NAME_CHANGE"		2000134107	"Hamilton"						""
 
 
-# CITY > [AUS] AUSTRALIA > Western Australia
+# CITY > [AUS] AUSTRALIA > [AUS-WA] Western Australia
 #====================================================================================
 "CITY_NAME_CHANGE"		129980		"Perth"							""
 "CITY_NAME_CHANGE"		426076		"Fremantle"						""
@@ -1945,12 +1946,12 @@
 "CITY_NAME_CHANGE"		2000155327	"Mount Barker"						""
 
 
-# CITY > [AUT] AUSTRIA > Burgenland
+# CITY > [AUT] AUSTRIA > [AUT-01] Burgenland
 #====================================================================================
 "CITY_NAME_CHANGE"		5604612		"Eisenstadt"						""
 
 
-# CITY > [AUT] AUSTRIA > Carinthia
+# CITY > [AUT] AUSTRIA > [AUT-02] Carinthia
 #====================================================================================
 "CITY_NAME_CHANGE"		136536		"Klagenfurt am Wörthersee"				""
 "CITY_NAME_CHANGE"		5604129		"Villach"						""
@@ -1962,7 +1963,7 @@
 "CITY_NAME_CHANGE"		16001147	"Völkermarkt"						""
 
 
-# CITY > [AUT] AUSTRIA > Niederösterreich
+# CITY > [AUT] AUSTRIA > [AUT-03] Niederösterreich
 #====================================================================================
 "CITY_NAME_CHANGE"		5603624		"Zwettl"						""
 "CITY_NAME_CHANGE"		5603695		"Mödling"						""
@@ -1993,7 +1994,7 @@
 "CITY_NAME_CHANGE"		16265639	"Breitenau (NÖ)"					""
 
 
-# CITY > [AUT] AUSTRIA > Oberösterreich
+# CITY > [AUT] AUSTRIA > [AUT-04] Oberösterreich
 #====================================================================================
 "CITY_NAME_CHANGE"		136535		"Braunau am Inn"					""
 "CITY_NAME_CHANGE"		1300068		"Ried im Innkreis"					""
@@ -2012,7 +2013,7 @@
 "CITY_NAME_CHANGE"		16267741	"Kaltenberg (OÖ)"					""
 
 
-# CITY > [AUT] AUSTRIA > Salzburg
+# CITY > [AUT] AUSTRIA > [AUT-05] Salzburg
 #====================================================================================
 "CITY_NAME_CHANGE"		1300069		"Salzburg"						""
 "CITY_NAME_CHANGE"		5606196		"Sankt Johann im Pongau"				""
@@ -2023,7 +2024,7 @@
 "CITY_NAME_CHANGE"		16053403	"Bergheim (Flachgau)"					""
 
 
-# CITY > [AUT] AUSTRIA > Steiermark
+# CITY > [AUT] AUSTRIA > [AUT-06] Steiermark
 #====================================================================================
 "CITY_NAME_CHANGE"		136537		"Leoben"						""
 "CITY_NAME_CHANGE"		1300073		"Graz"							""
@@ -2032,7 +2033,7 @@
 "CITY_NAME_CHANGE"		16001102	"Bruck an der Mur"					""
 
 
-# CITY > [AUT] AUSTRIA > Tirol
+# CITY > [AUT] AUSTRIA > [AUT-07] Tirol
 #====================================================================================
 "CITY_NAME_CHANGE"		136542		"Wörgl"							""
 "CITY_NAME_CHANGE"		1300067		"Innsbruck"						""
@@ -2045,7 +2046,7 @@
 "CITY_NAME_CHANGE"		16101586	"Münster (Tirol)"					""
 
 
-# CITY > [AUT] AUSTRIA > Vorarlberg
+# CITY > [AUT] AUSTRIA > [AUT-08] Vorarlberg
 #====================================================================================
 "CITY_NAME_CHANGE"		136538		"Lustenau"						""
 "CITY_NAME_CHANGE"		5604964		"Dornbirn"						""
@@ -2061,7 +2062,7 @@
 "CITY_NAME_CHANGE"		16079313	"Krumbach (Vorarlberg)"					""
 
 
-# CITY > [AUT] AUSTRIA > Wien/Vienna
+# CITY > [AUT] AUSTRIA > [AUT-09] Wien/Vienna
 #====================================================================================
 "CITY_NAME_CHANGE"		1300072		"Wien"							""
 "CITY_NAME_CHANGE"		2000153095	"Wien - Innere Stadt"					""
@@ -2089,7 +2090,7 @@
 "CITY_NAME_CHANGE"		2000153122	"Wien - Neubau"						""
 
 
-# CITY > [AZE] AZERBAIJAN > Contiguous Azerbaijan
+# CITY > [AZE] AZERBAIJAN > [AZE-00] Contiguous Azerbaijan
 #====================================================================================
 "CITY_NAME_CHANGE"		484463		"Gança"							""
 "CITY_NAME_CHANGE"		1300089		"Şaki"							""
@@ -2462,7 +2463,7 @@
 "CITY_NAME_CHANGE"		59085311	"Tazakand (Zardab rayonu)"				""
 
 
-# CITY > [AZE] AZERBAIJAN > Naxçivan Muxtar Respublikasi
+# CITY > [AZE] AZERBAIJAN > [AZE-NMR] Naxçivan Muxtar Respublikasi
 #====================================================================================
 "CITY_NAME_CHANGE"		1300094		"Naxçivan"						""
 "CITY_NAME_CHANGE"		59080838	"Heydarabad (Sadarak rayonu)"				""
@@ -2510,7 +2511,7 @@
 "CITY_NAME_CHANGE"		23017985	"Freeport"						""
 
 
-# CITY > [BHR] BAHRAIN > Capital Governorate
+# CITY > [BHR] BAHRAIN > [BHR-13] Capital Governorate
 #====================================================================================
 "CITY_NAME_CHANGE"		103191		"Manama"						""
 "CITY_NAME_CHANGE"		120548		"Isa Town"						""
@@ -2520,13 +2521,13 @@
 "CITY_NAME_CHANGE"		23191634	"Tubli"							""
 
 
-# CITY > [BHR] BAHRAIN > Muharraq Governorate
+# CITY > [BHR] BAHRAIN > [BHR-15] Muharraq Governorate
 #====================================================================================
 "CITY_NAME_CHANGE"		5512114		"Muharraq"						""
 "CITY_NAME_CHANGE"		23191636	"Hidd"							""
 
 
-# CITY > [BHR] BAHRAIN > Northern Governorate
+# CITY > [BHR] BAHRAIN > [BHR-17] Northern Governorate
 #====================================================================================
 "CITY_NAME_CHANGE"		1036674		"Hamad Town"						""
 "CITY_NAME_CHANGE"		1036675		"Jidhafs"						""
@@ -2541,18 +2542,18 @@
 "CITY_NAME_CHANGE"		2000194155	"Dar Kulaib"						""
 
 
-# CITY > [BHR] BAHRAIN > Southern Governorate
+# CITY > [BHR] BAHRAIN > [BHR-14] Southern Governorate
 #====================================================================================
 "CITY_NAME_CHANGE"		1036670		"Awali"							""
 "CITY_NAME_CHANGE"		1036671		"Riffa"							""
 
 
-# CITY > [BAN] BANGLADESH > Barisal Division
+# CITY > [BAN] BANGLADESH > [BAN-A] Barisal Division
 #====================================================================================
 "CITY_NAME_CHANGE"		5628935		"Barisal"						""
 
 
-# CITY > [BAN] BANGLADESH > Chittagong Division
+# CITY > [BAN] BANGLADESH > [BAN-B] Chittagong Division
 #====================================================================================
 "CITY_NAME_CHANGE"		5628936		"Chittagong"						""
 "CITY_NAME_CHANGE"		5628937		"Comilla"						""
@@ -2561,7 +2562,7 @@
 "CITY_NAME_CHANGE"		23191495	"Cox's Bazar"						""
 
 
-# CITY > [BAN] BANGLADESH > Dhaka Division
+# CITY > [BAN] BANGLADESH > [BAN-C] Dhaka Division
 #====================================================================================
 "CITY_NAME_CHANGE"		103192		"Dhaka"							""
 "CITY_NAME_CHANGE"		1000194		"Banani"						""
@@ -2575,32 +2576,32 @@
 "CITY_NAME_CHANGE"		2000255493	"Gopalganj"						""
 
 
-# CITY > [BAN] BANGLADESH > Khulna Division
+# CITY > [BAN] BANGLADESH > [BAN-D] Khulna Division
 #====================================================================================
 "CITY_NAME_CHANGE"		1000197		"Khulna"						""
 "CITY_NAME_CHANGE"		1000202		"Jhenaidah"						""
 "CITY_NAME_CHANGE"		5628939		"Jessore"						""
 
 
-# CITY > [BAN] BANGLADESH > Mymensingh Division
+# CITY > [BAN] BANGLADESH > [BAN-H] Mymensingh Division
 #====================================================================================
 "CITY_NAME_CHANGE"		5628940		"Mymensingh"						""
 
 
-# CITY > [BAN] BANGLADESH > Rajshahi Division
+# CITY > [BAN] BANGLADESH > [BAN-E] Rajshahi Division
 #====================================================================================
 "CITY_NAME_CHANGE"		1000195		"Sirajganj"						""
 "CITY_NAME_CHANGE"		5628942		"Rajshahi"						""
 "CITY_NAME_CHANGE"		23331694	"Naogaon"						""
 
 
-# CITY > [BAN] BANGLADESH > Rangpur Division
+# CITY > [BAN] BANGLADESH > [BAN-F] Rangpur Division
 #====================================================================================
 "CITY_NAME_CHANGE"		5628943		"Rangpur"						""
 "CITY_NAME_CHANGE"		23331669	"Gaibandha"						""
 
 
-# CITY > [BAN] BANGLADESH > Sylhet Division
+# CITY > [BAN] BANGLADESH > [BAN-G] Sylhet Division
 #====================================================================================
 "CITY_NAME_CHANGE"		5628945		"Sylhet"						""
 
@@ -2637,7 +2638,7 @@
 "CITY_NAME_CHANGE"		2000318952	"Rices"							""
 
 
-# CITY > [BLR] BELARUS > Brestskaya oblast'
+# CITY > [BLR] BELARUS > [BLR-BR] Brestskaya oblast'
 #====================================================================================
 "CITY_NAME_CHANGE"		1300100		"Brest"							""
 "CITY_NAME_CHANGE"		7480032		"Beryoza"						""
@@ -2647,7 +2648,7 @@
 "CITY_NAME_CHANGE"		17030198	"Stolin"						""
 
 
-# CITY > [BLR] BELARUS > Gomelskaya oblast'
+# CITY > [BLR] BELARUS > [BLR-HO] Gomelskaya oblast'
 #====================================================================================
 "CITY_NAME_CHANGE"		485333		"Kalinkovichi"						""
 "CITY_NAME_CHANGE"		485338		"Gomel"							""
@@ -2658,7 +2659,7 @@
 "CITY_NAME_CHANGE"		7484296		"Zhlobin"						""
 
 
-# CITY > [BLR] BELARUS > Grodnenskaya oblast'
+# CITY > [BLR] BELARUS > [BLR-HR] Grodnenskaya oblast'
 #====================================================================================
 "CITY_NAME_CHANGE"		485331		"Slonim"						""
 "CITY_NAME_CHANGE"		1300098		"Lida"							""
@@ -2668,7 +2669,7 @@
 "CITY_NAME_CHANGE"		17029546	"Novogrudok"						""
 
 
-# CITY > [BLR] BELARUS > Minsk & Minskaya oblast'
+# CITY > [BLR] BELARUS > [BLR-MI] Minsk & Minskaya oblast'
 #====================================================================================
 "CITY_NAME_CHANGE"		483759		"Borisov"						""
 "CITY_NAME_CHANGE"		1300101		"Molodechno"						""
@@ -2683,7 +2684,7 @@
 "CITY_NAME_CHANGE"		17034642	"Borovlyany"						""
 
 
-# CITY > [BLR] BELARUS > Mogilyovskaya oblast'
+# CITY > [BLR] BELARUS > [BLR-MA] Mogilyovskaya oblast'
 #====================================================================================
 "CITY_NAME_CHANGE"		1300107		"Mogilev"						""
 "CITY_NAME_CHANGE"		1300108		"Bobruisk"						""
@@ -2692,7 +2693,7 @@
 "CITY_NAME_CHANGE"		7485032		"Gorki"							""
 
 
-# CITY > [BLR] BELARUS > Vitebskaya oblast'
+# CITY > [BLR] BELARUS > [BLR-VI] Vitebskaya oblast'
 #====================================================================================
 "CITY_NAME_CHANGE"		1300105		"Vitebsk"						""
 "CITY_NAME_CHANGE"		1300106		"Novopolotsk"						""
@@ -2700,18 +2701,7 @@
 "CITY_NAME_CHANGE"		7485033		"Polotsk"						""
 
 
-# CITY > [BEL] BELGIUM > Antwerpen
-#====================================================================================
-"CITY_NAME_CHANGE"		8		"Antwerp"						""
-"CITY_NAME_CHANGE"		10		"Mechelen"						""
-
-
-# CITY > [BEL] BELGIUM > Brabant wallon
-#====================================================================================
-"CITY_NAME_CHANGE"		8150885		"Woluwe-Saint-Lambert"					""
-
-
-# CITY > [BEL] BELGIUM > Brussels-Capital Region
+# CITY > [BEL] BELGIUM > [BEL-BRU] Brussels-Capital Region
 #====================================================================================
 "CITY_NAME_CHANGE"		14		"Brussels"						""
 "CITY_NAME_CHANGE"		3200682		"Molenbeek"						""
@@ -2723,7 +2713,44 @@
 "CITY_NAME_CHANGE"		85140586	"Ixelles"						""
 
 
-# CITY > [BEL] BELGIUM > Hainaut
+# CITY > [BEL] BELGIUM > [BEL-VAN] Antwerpen
+#====================================================================================
+"CITY_NAME_CHANGE"		8		"Antwerp"						""
+"CITY_NAME_CHANGE"		10		"Mechelen"						""
+
+
+# CITY > [BEL] BELGIUM > [BEL-VOV] Oost-Vlaanderen
+#====================================================================================
+"CITY_NAME_CHANGE"		5		"Ghent"							""
+"CITY_NAME_CHANGE"		9		"Aalst"							""
+"CITY_NAME_CHANGE"		43		"Sint-Niklaas"						""
+
+
+# CITY > [BEL] BELGIUM > [BEL-VBR] Vlaams-Brabant
+#====================================================================================
+"CITY_NAME_CHANGE"		57		"Leuven"						""
+
+
+# CITY > [BEL] BELGIUM > [BEL-VLI] Limburg (BE)
+#====================================================================================
+"CITY_NAME_CHANGE"		12		"Genk"							""
+"CITY_NAME_CHANGE"		8155833		"Hasselt"						""
+
+
+# CITY > [BEL] BELGIUM > [BEL-VWV] West-Vlaanderen
+#====================================================================================
+"CITY_NAME_CHANGE"		6		"Bruges"						""
+"CITY_NAME_CHANGE"		26		"Kortrijk"						""
+"CITY_NAME_CHANGE"		27		"Oostende"						""
+"CITY_NAME_CHANGE"		38		"Roeselare"						""
+
+
+# CITY > [BEL] BELGIUM > [BEL-WBR] Brabant wallon
+#====================================================================================
+"CITY_NAME_CHANGE"		8150885		"Woluwe-Saint-Lambert"					""
+
+
+# CITY > [BEL] BELGIUM > [BEL-WHT] Hainaut
 #====================================================================================
 "CITY_NAME_CHANGE"		7		"Mouscron"						""
 "CITY_NAME_CHANGE"		20		"La Louvière"						""
@@ -2732,42 +2759,16 @@
 "CITY_NAME_CHANGE"		42		"Tournai"						""
 
 
-# CITY > [BEL] BELGIUM > Liège
+# CITY > [BEL] BELGIUM > [BEL-WLG] Liège
 #====================================================================================
 "CITY_NAME_CHANGE"		11		"Liège"							""
 "CITY_NAME_CHANGE"		47		"Verviers"						""
 "CITY_NAME_CHANGE"		8162013		"Seraing"						""
 
 
-# CITY > [BEL] BELGIUM > Limburg (BE)
-#====================================================================================
-"CITY_NAME_CHANGE"		12		"Genk"							""
-"CITY_NAME_CHANGE"		8155833		"Hasselt"						""
-
-
-# CITY > [BEL] BELGIUM > Namur
+# CITY > [BEL] BELGIUM > [BEL-WNA] Namur
 #====================================================================================
 "CITY_NAME_CHANGE"		3200627		"Namur"							""
-
-
-# CITY > [BEL] BELGIUM > Oost-Vlaanderen
-#====================================================================================
-"CITY_NAME_CHANGE"		5		"Ghent"							""
-"CITY_NAME_CHANGE"		9		"Aalst"							""
-"CITY_NAME_CHANGE"		43		"Sint-Niklaas"						""
-
-
-# CITY > [BEL] BELGIUM > Vlaams-Brabant
-#====================================================================================
-"CITY_NAME_CHANGE"		57		"Leuven"						""
-
-
-# CITY > [BEL] BELGIUM > West-Vlaanderen
-#====================================================================================
-"CITY_NAME_CHANGE"		6		"Bruges"						""
-"CITY_NAME_CHANGE"		26		"Kortrijk"						""
-"CITY_NAME_CHANGE"		27		"Oostende"						""
-"CITY_NAME_CHANGE"		38		"Roeselare"						""
 
 
 # CITY > [BLZ] BELIZE
@@ -3016,7 +3017,7 @@
 "CITY_NAME_CHANGE"		86042785	"Villa Montes (TA)"					""
 
 
-# CITY > [BIH] BOSNIA & HERZEGOVINA > Federation of Bosnia and Herzegovina
+# CITY > [BIH] BOSNIA & HERZEGOVINA > [BIH-FB] Federation of Bosnia and Herzegovina
 #====================================================================================
 "CITY_NAME_CHANGE"		143649		"Breza"							""
 "CITY_NAME_CHANGE"		143651		"Gabela"						""
@@ -3127,7 +3128,7 @@
 "CITY_NAME_CHANGE"		2000323026	"Bužim"							""
 
 
-# CITY > [BIH] BOSNIA & HERZEGOVINA > Republika Srpska
+# CITY > [BIH] BOSNIA & HERZEGOVINA > [BIH-RS] Republika Srpska
 #====================================================================================
 "CITY_NAME_CHANGE"		143650		"Čelić"							""
 "CITY_NAME_CHANGE"		143653		"Vojkovići"						""
@@ -3184,7 +3185,7 @@
 "CITY_NAME_CHANGE"		2000316746	"Pale"							""
 
 
-# CITY > [BIH] BOSNIA & HERZEGOVINA > Brčko District
+# CITY > [BIH] BOSNIA & HERZEGOVINA > [BIH-BD] Brčko District
 #====================================================================================
 "CITY_NAME_CHANGE"		5786588		"Brčko"							""
 "CITY_NAME_CHANGE"		2000316749	"Gornji Rahić"						""
