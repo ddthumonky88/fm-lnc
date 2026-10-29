@@ -135,13 +135,10 @@ export default function CompetitionDetailPage() {
         const nation = hub?.nation;
         const confedId =
           nation?.confed_id ||
-          nation?.confederation_id ||
-          nation?.confed?.id ||
-          nation?.confederation?.id;
+          nation?.confed?.id;
         const confedName =
           (confedId && CONFED_ID_MAP[String(confedId)]) ||
           nation?.confed?.name ||
-          nation?.confederation?.name ||
           nation?.confed_name ||
           'Confederation';
         const nationName =
@@ -226,27 +223,23 @@ export default function CompetitionDetailPage() {
         setHeaderTitle(compTitle);
         setHeaderId(info.id);
 
-        const nationId = info.nation_id || info.nation?.id;
+        const nationId = info.nation?.id || info.nation_id;
         const nationName =
           info.nation?.name_lg ||
           info.nation?.name ||
-          info.nation_name ||
           info.nation?.name_sh;
         const nationCode =
-          info.nation?.name_3l ||
-          info.nation_three_letter;
+          info.nation?.name_3l;
         const confedId =
           info.confed_id ||
-          info.confederation?.id ||
-          (info as any).confed?.id ||
+          info.confed?.id ||
           info.nation?.confed_id ||
-          info.nation?.confederation?.id;
+          info.nation?.confed?.id;
         const confedName =
           (confedId && CONFED_ID_MAP[String(confedId)]) ||
-          info.confederation?.name ||
-          (info as any).confed?.name ||
+          info.confed?.name ||
           info.confed_name ||
-          info.nation?.confederation?.name ||
+          info.nation?.confed?.name ||
           info.nation?.confed_name ||
           'Confederation';
 
@@ -521,16 +514,13 @@ export default function CompetitionDetailPage() {
     compInfo?.name_lg ||
     compInfo?.name ||
     (isVirtual ? (isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs') : `Competition ${compId}`);
-  const nationId = compInfo?.nation_id || compInfo?.nation?.id || nationIdParam;
+  const nationId = compInfo?.nation?.id || compInfo?.nation_id || nationIdParam;
   const nationName =
     compInfo?.nation?.name_lg ||
     compInfo?.nation?.name ||
-    compInfo?.nation_name ||
     compInfo?.nation?.name_sh;
-  const nationCode =
-    compInfo?.nation?.name_3l ||
-    compInfo?.nation_three_letter;
-  const confedId = compInfo?.confed_id || compInfo?.confederation?.id;
+  const nationCode = compInfo?.nation?.name_3l;
+  const confedId = compInfo?.confed_id || compInfo?.confed?.id;
 
   return (
     <div className="space-y-3">

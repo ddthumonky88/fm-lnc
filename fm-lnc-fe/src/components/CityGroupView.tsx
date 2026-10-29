@@ -54,7 +54,7 @@ export default function CityGroupView({
     const uncategorizedItems: any[] = [];
 
     items.forEach((item) => {
-      let rawCat = (item.region_name || item.region || item.categories)?.trim();
+      let rawCat = (item.region || item.categories)?.trim();
       if (rawCat) {
         rawCat = rawCat.replace(/^\[[^\]]+\]\s*/, '').trim();
       }
@@ -150,8 +150,8 @@ export default function CityGroupView({
     };
 
     return [...items].sort((a, b) => {
-      const catA = (a.categories || '').trim();
-      const catB = (b.categories || '').trim();
+      const catA = (a.region || a.categories || '').trim();
+      const catB = (b.region || b.categories || '').trim();
 
       const rankA = getCategoryRank(catA);
       const rankB = getCategoryRank(catB);

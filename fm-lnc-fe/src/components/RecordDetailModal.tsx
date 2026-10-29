@@ -343,14 +343,12 @@ export default function RecordDetailModal({
     Boolean(
       currentData.is_international ||
       (!currentData.nation_id &&
-        (currentData.confed_id || currentData.confederation || currentData.categories)),
+        (currentData.confed_id || currentData.confed || currentData.categories)),
     );
 
   const rawConfedId =
     currentData.confed_id ||
-    currentData.confederation_id ||
-    currentData.confed?.id ||
-    currentData.confederation?.id;
+    currentData.confed?.id;
   const rawCat = currentData.categories
     ? String(currentData.categories).split(',')[0].trim().toUpperCase()
     : '';
@@ -360,7 +358,6 @@ export default function RecordDetailModal({
   const confedName =
     (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
     currentData.confed?.name ||
-    currentData.confederation?.name ||
     currentData.confed_name ||
     catConfed?.name ||
     rawCat ||
@@ -447,10 +444,10 @@ export default function RecordDetailModal({
     : currentData.nation_id || currentData.country_id || currentData.nation?.id;
   const nationName = isNation
     ? currentData.name_lg || currentData.name || currentData.name_sh
-    : currentData.nation_name || currentData.nation?.name_lg || currentData.nation?.name || currentData.nation?.name_sh;
+    : currentData.nation?.name_lg || currentData.nation?.name || currentData.nation?.name_sh;
   const nationCode = isNation
     ? currentData.name_3l || currentData.code
-    : currentData.nation_three_letter || currentData.nation?.name_3l;
+    : currentData.nation?.name_3l;
 
   // Normalize API Record Type
   const getNormalizedRecordType = (): RecordType => {
@@ -892,11 +889,11 @@ export default function RecordDetailModal({
               {/* Confederation (for International Competition) */}
               {isInternationalComp && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
-                  <span className={getLabelClass(['confed_id', 'confederation_id'], 'pt-0.5')}>
+                  <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>
                     Confed:
                   </span>
                   <span
-                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['confed_id', 'confederation_id'])} break-words text-left`}
+                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['confed_id', 'confed'])} break-words text-left`}
                   >
                     {confedName}
                   </span>
@@ -930,23 +927,23 @@ export default function RecordDetailModal({
               )}
 
               {/* Region (City) */}
-              {isCity && (currentData.region_name || currentData.region || currentData.categories) && (
+              {isCity && currentData.region && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                  <span className={getLabelClass(['categories', 'category', 'region'], 'pt-0.5')}>
+                  <span className={getLabelClass('region', 'pt-0.5')}>
                     Region:
                   </span>
                   <div
-                    className={`flex items-center gap-1 font-semibold text-xs ${getValueClass(['categories', 'category', 'region'], 'text-sky-700')}`}
+                    className={`flex items-center gap-1 font-semibold text-xs ${getValueClass('region', 'text-sky-700')}`}
                   >
                     <EnvironmentOutlined
                       className={
-                        isFieldInactive(['categories', 'category', 'region'])
+                        isFieldInactive('region')
                           ? 'text-red-500'
                           : 'text-sky-500'
                       }
                     />
                     <span>
-                      {String(currentData.region_name || currentData.region || currentData.categories).replace(/^\[[^\]]+\]\s*/, '').trim()}
+                      {String(currentData.region).replace(/^\[[^\]]+\]\s*/, '').trim()}
                     </span>
                   </div>
                 </div>
@@ -987,10 +984,10 @@ export default function RecordDetailModal({
               )}
 
               {/* Club Affiliate Info (Đội 1 & Loại đội con) */}
-              {isClub && (currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id || currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type) && (
+              {isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
                 <>
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['affiliate_club', 'affiliate_club_id', 'parent_id', 'parent', 'parent_club'], 'pt-0.5')}>
+                    <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
                       Affiliate Club:
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -998,27 +995,23 @@ export default function RecordDetailModal({
                         {currentData.affiliate_club?.name_lg ||
                           currentData.affiliate_club?.name_sh ||
                           currentData.affiliate_club?.name ||
-                          currentData.parent_club?.name_lg ||
-                          currentData.parent_club?.name_sh ||
-                          currentData.parent?.name_lg ||
-                          currentData.parent?.name_sh ||
-                          `Club #${currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id}`}
+                          `Club #${currentData.affiliate_club?.id}`}
                       </span>
-                      {(currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id) && (
+                      {currentData.affiliate_club?.id && (
                         <span className="text-[11px] font-mono text-slate-400">
-                          (ID: {currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id})
+                          (ID: {currentData.affiliate_club?.id})
                         </span>
                       )}
                     </div>
                   </div>
-                  {(currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type) && (
+                  {currentData.affiliate_club?.type && (
                     <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                      <span className={getLabelClass(['affiliate_club_type', 'affiliate_type', 'type'], 'pt-0.5')}>
+                      <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
                         Affiliate Type:
                       </span>
                       <div>
                         <span className="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
-                          {currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type}
+                          {currentData.affiliate_club.type}
                         </span>
                       </div>
                     </div>
@@ -1034,7 +1027,7 @@ export default function RecordDetailModal({
                   </span>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {currentData.affiliates.map((aff: any) => {
-                      const affT = aff.affiliate_club?.type || aff.affiliate_club_type || aff.affiliate_type;
+                      const affT = aff.affiliate_club?.type;
                       return (
                         <span
                           key={aff.id}
@@ -1068,7 +1061,7 @@ export default function RecordDetailModal({
               )}
 
               {/* Parent Competition (for Competitions) */}
-              {isComp && (currentData.parent_id || isFieldInactive(['parent_id', 'parent'])) && (
+              {isComp && (currentData.parent_id || currentData.parent || isFieldInactive(['parent_id', 'parent'])) && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['parent_id', 'parent'], 'pt-0.5')}>
                     Parent Comp:
@@ -1079,9 +1072,6 @@ export default function RecordDetailModal({
                     {currentData.parent?.name_lg ||
                       currentData.parent?.name_sh ||
                       currentData.parent?.name ||
-                      currentData.parent_name_lg ||
-                      currentData.parent_name_sh ||
-                      currentData.parent_name ||
                       (currentData.parent_id ? `${currentData.parent_id}` : '-')}
                   </span>
                 </div>
@@ -1568,7 +1558,7 @@ export default function RecordDetailModal({
             {/* City Region Selector */}
             {isCity && (
               <div>
-                <label className={getFormLabelClass(['region', 'region_id', 'categories'])}>
+                <label className={getFormLabelClass('region')}>
                   Region (Khu vực / Tỉnh / Bang)
                 </label>
                 <Select
@@ -1579,7 +1569,6 @@ export default function RecordDetailModal({
                       ...formData,
                       region_id: val || null,
                       region: selected ? selected.name : '',
-                      categories: selected ? selected.name : '',
                     });
                   }}
                   placeholder="Chọn khu vực..."

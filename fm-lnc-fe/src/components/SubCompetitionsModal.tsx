@@ -193,21 +193,9 @@ export default function SubCompetitionsModal({
                   data={{
                     ...child,
                     parent_id: child.parent_id || parentComp?.id,
-                    parent_name:
-                      child.parent_name ||
-                      child.parent_name_sh ||
-                      child.parent_name_lg ||
-                      parentComp?.name_sh ||
-                      parentComp?.name_lg ||
-                      parentComp?.name,
+                    parent: child.parent || parentComp,
                     nation: child.nation || parentComp?.nation,
                     nation_id: child.nation_id || parentComp?.nation_id,
-                    nation_three_letter:
-                      child.nation_three_letter ||
-                      child.nation?.name_3l ||
-                      parentComp?.nation_three_letter ||
-                      parentComp?.name_3l ||
-                      parentComp?.nation?.name_3l,
                   }}
                   onNavigate={handleNavigateChild}
                   onEdit={onEdit}

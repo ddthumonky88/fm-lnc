@@ -1214,15 +1214,15 @@ export default function LncSortitoutsiExplorer() {
                             e.currentTarget.style.display = 'none';
                           }}
                         />
-                      ) : (compInfo?.confederation?.id || compInfo?.confed_id) &&
+                      ) : (compInfo?.confed?.id || compInfo?.confed_id) &&
                         getConfederationLogoUrl(
-                          compInfo.confederation?.id || compInfo.confed_id!,
+                          compInfo.confed?.id || compInfo.confed_id!,
                         ) ? (
                         <img
                           src={getConfederationLogoUrl(
-                            compInfo.confederation?.id || compInfo.confed_id!,
+                            compInfo.confed?.id || compInfo.confed_id!,
                           )}
-                          alt={compInfo.confederation?.name || 'Confederation'}
+                          alt={compInfo.confed?.name || 'Confederation'}
                           className="w-8 h-8 object-contain shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';

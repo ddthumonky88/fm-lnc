@@ -185,13 +185,10 @@ export default function NationDetailPage() {
       const nation = hub.nation;
       const confedId =
         nation?.confed_id ||
-        nation?.confederation_id ||
-        nation?.confed?.id ||
-        nation?.confederation?.id;
+        nation?.confed?.id;
       const confedName =
         (confedId && CONFED_ID_MAP[String(confedId)]) ||
         nation?.confed?.name ||
-        nation?.confederation?.name ||
         nation?.confed_name ||
         'Confederation';
       const nationCode = nation?.name_3l || nation?.name_sh;
@@ -353,8 +350,6 @@ export default function NationDetailPage() {
           ...r,
           nation: r.nation || nationHub.nation,
           nation_id: r.nation_id || r.country_id || nationHub.nation.id,
-          nation_three_letter:
-            r.nation_three_letter || r.nation?.name_3l || nationHub.nation.name_3l,
         }));
   }, [records, nationHub]);
 

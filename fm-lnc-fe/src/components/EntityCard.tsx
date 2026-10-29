@@ -405,20 +405,14 @@ export default function EntityCard({
       : data.nation
         ? {
             id: data.nation.id,
-            code:
-              data.nation.name_3l ||
-              data.nation_three_letter ||
-              data.nation.code,
-            name:
-              data.nation.name_lg ||
-              data.nation.name_sh ||
-              data.nation.name,
+            code: data.nation.name_3l || data.nation.code,
+            name: data.nation.name_lg || data.nation.name_sh || data.nation.name,
           }
         : data.nation_id || data.country_id
           ? {
               id: data.nation_id || data.country_id,
-              code: data.nation_three_letter || data.nation_code,
-              name: data.nation_name,
+              code: data.nation?.name_3l,
+              name: data.nation?.name_lg || data.nation?.name,
             }
           : null;
 
@@ -777,7 +771,7 @@ export default function EntityCard({
                   isInactive: isInactive('name') || isTitleInactive,
                   isRed: isRedKeyword(title),
                 });
-                let regionVal = data.region_name || data.region || data.categories;
+                let regionVal = data.region;
                 if (regionVal) {
                   regionVal = String(regionVal).replace(/^\[[^\]]+\]\s*/, '').trim();
                   fields.push({
@@ -785,7 +779,7 @@ export default function EntityCard({
                     value: regionVal,
                     align: 'start',
                     lineClamp: 2,
-                    isInactive: isInactive('categories') || isInactive('region'),
+                    isInactive: isInactive('region'),
                     isRed: isRedKeyword(regionVal),
                   });
                 }
@@ -835,12 +829,10 @@ export default function EntityCard({
                 });
 
                 // Comp
-                const compObj = data.comp || data.competition;
+                const compObj = data.comp || (data as any).competition;
                 const compNameSh =
                   compObj?.name_sh ||
-                  compObj?.name ||
-                  data.comp_name ||
-                  data.competition_name;
+                  compObj?.name;
                 const compValue = data.is_extinct ? 'EXT' : compNameSh || '-';
                 const isExt = data.is_extinct || compValue === 'EXT';
 
@@ -862,9 +854,9 @@ export default function EntityCard({
                   ),
                 });
 
-                const affClub = data.affiliate_club || data.parent_club || data.parent;
-                const affType = affClub?.type || data.affiliate_club_type || data.affiliate_type;
-                const affId = affClub?.id || data.affiliate_club_id || data.parent_id;
+                const affClub = data.affiliate_club;
+                const affType = affClub?.type;
+                const affId = affClub?.id;
 
                 if (affType || affId) {
                   const pName =
@@ -884,7 +876,7 @@ export default function EntityCard({
                       </span>
                     ),
                     align: 'start',
-                    isInactive: isInactive('affiliate') || isInactive('affiliate_club') || isInactive('parent_id'),
+                    isInactive: isInactive('affiliate_club'),
                   });
                 }
 

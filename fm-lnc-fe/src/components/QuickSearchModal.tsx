@@ -217,7 +217,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                       <div>
                         <div className="text-xs font-semibold text-gray-800">{n.name_lg || n.name}</div>
                         <div className="text-[11px] text-gray-500">
-                          Code: {n.name_3l} &bull; {n.confederation?.name}
+                          Code: {n.name_3l} &bull; {n.confed?.name}
                         </div>
                       </div>
                     </div>

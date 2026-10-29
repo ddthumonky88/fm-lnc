@@ -738,11 +738,8 @@ export class HierarchyService {
         categories: isExtinct ? 'Extinct Competitions' : 'Other Competitions',
         nation_id: nationId,
         nation: mapNationRef(nation),
-        nation_name: nation?.name_lg || nation?.name_sh,
-        nation_name_3l: nation?.name_3l,
-        nation_three_letter: nation?.name_3l,
         confed_id: nation?.confed_id,
-        confederation: nation?.confederation
+        confed: nation?.confederation
           ? { id: String(nation.confederation.id), name: nation.confederation.name }
           : null,
         parent_id: null,

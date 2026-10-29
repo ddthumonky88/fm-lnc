@@ -83,7 +83,9 @@ export function mapParentRef(parent: any): NestedParent | null {
 
 export function mapNation(nation: any, extraStats?: any) {
   if (!nation) return null;
-  const confedObj = nation.confederation
+  const confedObj = nation.confed
+    ? mapConfedRef(nation.confed)
+    : nation.confederation
     ? mapConfedRef(nation.confederation)
     : nation.confed_id || nation.confederation_id
     ? {
@@ -99,9 +101,7 @@ export function mapNation(nation: any, extraStats?: any) {
     name_sh: nation.name_sh ?? null,
     name_3l: nation.name_3l ?? null,
     confed_id: confedId,
-    confederation_id: confedId,
     confed: confedObj,
-    confederation: confedObj,
     inactive_fields: nation.inactive_fields ?? null,
     note: nation.note ?? null,
     ...(extraStats !== undefined ? { stats: extraStats } : {}),
@@ -121,19 +121,23 @@ export function mapCompetition(comp: any, extraStats?: any) {
       }
     : null;
 
-  const confed = comp.confederation
+  const confed = comp.confed
+    ? mapConfedRef(comp.confed)
+    : comp.confederation
     ? mapConfedRef(comp.confederation)
     : comp.confed_id
     ? {
         id: String(comp.confed_id),
         name: comp.confed_name || null,
       }
+    : comp.nation?.confed
+    ? mapConfedRef(comp.nation.confed)
     : comp.nation?.confederation
     ? mapConfedRef(comp.nation.confederation)
     : comp.nation?.confed_id || comp.nation?.confederation_id
     ? {
         id: String(comp.nation.confed_id || comp.nation.confederation_id),
-        name: comp.nation.confed_name || comp.nation.confederation?.name || null,
+        name: comp.nation.confed_name || comp.nation.confed?.name || comp.nation.confederation?.name || null,
       }
     : null;
 
@@ -161,9 +165,11 @@ export function mapCompetition(comp: any, extraStats?: any) {
     is_international: comp.is_international !== undefined ? !!comp.is_international : (!comp.nation && !comp.nation_id),
     note: comp.note ?? null,
     inactive_fields: comp.inactive_fields ?? null,
-    nation,
+    confed_id: confed?.id || (comp.confed_id ? String(comp.confed_id) : null),
     confed,
+    parent_id: parent?.id || (comp.parent_id ? String(comp.parent_id) : null),
     parent,
+    nation,
     ...(comp.clubs_count !== undefined
       ? { clubsCount: comp.clubs_count }
       : comp.clubsCount !== undefined
@@ -196,8 +202,8 @@ export function mapClub(club: any) {
       }
     : null;
 
-  const comp = club.competition
-    ? mapCompRef(club.competition)
+  const comp = club.competition || club.comp
+    ? mapCompRef(club.competition || club.comp)
     : club.comp_id
     ? {
         id: String(club.comp_id),
@@ -207,9 +213,9 @@ export function mapClub(club: any) {
       }
     : null;
 
-  const affClubEntity = club.affiliateClub || club.affiliate_club || club.parent;
-  const affId = club.affiliate_club_id ?? club.parent_id ?? null;
-  const affType = club.affiliate_club_type ?? club.affiliate_type ?? null;
+  const affClubEntity = club.affiliateClub || club.affiliate_club || club.parent_club;
+  const affId = club.affiliate_club_id ?? club.affiliate_club?.id ?? club.parent_id ?? null;
+  const affType = club.affiliate_club_type ?? club.affiliate_club?.type ?? club.affiliate_type ?? null;
 
   const affiliateClub = (affClubEntity || affId)
     ? {
@@ -232,14 +238,7 @@ export function mapClub(club: any) {
     note: club.note ?? null,
     inactive_fields: club.inactive_fields ?? null,
     is_extinct: !!club.is_extinct,
-    affiliate_club_id: affId ? String(affId) : null,
-    affiliate_club_type: affType ?? null,
     affiliate_club: affiliateClub,
-    // Aliases for compatibility
-    parent_id: affId ? String(affId) : null,
-    affiliate_type: affType ?? null,
-    parent_club: affiliateClub,
-    parent: affiliateClub || (club.competition?.parent ? mapParentRef(club.competition.parent) : null),
     nation,
     comp,
     ...(club.affiliates_count !== undefined
@@ -265,7 +264,6 @@ export function mapCity(city: any) {
     : null;
 
   const regEntity = city.regionEntity;
-  const regCode = regEntity?.code ?? null;
   const regName = regEntity?.name ?? null;
   const cleanRegionName = regName || (city.region ? String(city.region).replace(/^\[[^\]]+\]\s*/, '').trim() : null);
 
@@ -275,10 +273,6 @@ export function mapCity(city: any) {
     name_lg: city.name_lg ?? city.name ?? null,
     name_sh: city.name_sh ?? null,
     region: cleanRegionName,
-    region_id: city.region_id ?? regEntity?.id ?? null,
-    region_code: regCode,
-    region_name: cleanRegionName,
-    categories: cleanRegionName,
     is_disabled: !!city.is_disabled,
     inactive_fields: city.is_disabled ? 'name' : null,
     nation,

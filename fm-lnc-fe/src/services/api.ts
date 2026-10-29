@@ -173,26 +173,53 @@ function normalizeEntityFields(item: any): any {
 
   // Confed / nation ID aliases
   if (item.confed_id !== undefined && item.confederation_id === undefined)
-    item.confederation_id = item.confed_id;
+    item.confed_id = item.confed_id;
   if (item.confederation_id !== undefined && item.confed_id === undefined)
     item.confed_id = item.confederation_id;
+  delete item.confederation_id;
+
   if (item.nation_id !== undefined && item.country_id === undefined)
     item.country_id = item.nation_id;
   if (item.country_id !== undefined && item.nation_id === undefined)
     item.nation_id = item.country_id;
 
   // Nested relations
-  if (item.confed && !item.confederation) item.confederation = item.confed;
   if (item.confederation && !item.confed) item.confed = item.confederation;
-  if (item.confed) {
-    if (item.confed_name === undefined) item.confed_name = item.confed.name;
-    if (item.confederation_name === undefined) item.confederation_name = item.confed.name;
+  delete item.confederation;
+  if (item.confed && item.confed_name === undefined) {
+    item.confed_name = item.confed.name;
   }
-  if (item.comp && !item.competition) item.competition = item.comp;
   if (item.competition && !item.comp) item.comp = item.competition;
+  delete item.competition;
+
+  // Club affiliate_club unification
+  if (!item.affiliate_club && (item.affiliate_club_id || item.parent_id || item.parent_club)) {
+    const affObj = item.parent_club || item.affiliate_club || {};
+    item.affiliate_club = {
+      id: String(item.affiliate_club_id || item.parent_id || affObj.id),
+      name_lg: affObj.name_lg ?? affObj.name ?? null,
+      name_sh: affObj.name_sh ?? null,
+      name_6l: affObj.name_6l ?? null,
+      name_3l: affObj.name_3l ?? null,
+      type: item.affiliate_club_type || item.affiliate_type || affObj.type || null,
+    };
+  }
+  delete item.affiliate_club_id;
+  delete item.affiliate_club_type;
+  delete item.parent_club;
+  delete item.affiliate_type;
+  if (item.comp_id !== undefined || item.name_6l !== undefined) {
+    delete item.parent;
+  }
+
+  // City region unification
+  if (!item.region && item.region_name) {
+    item.region = item.region_name;
+  }
+  delete item.region_name;
+  delete item.region_code;
 
   if (item.nation) normalizeEntityFields(item.nation);
-  if (item.competition) normalizeEntityFields(item.competition);
   if (item.comp) normalizeEntityFields(item.comp);
   if (item.parent) normalizeEntityFields(item.parent);
 
@@ -255,11 +282,8 @@ export interface NationItem {
   name_sh?: string;
   name_3l?: string;
   confed_id?: string;
-  confederation_id?: string;
   confed_name?: string;
-  confederation_name?: string;
   confed?: ConfederationItem;
-  confederation?: ConfederationItem;
   inactive_fields?: string | null;
   totalChildren?: number;
   totalComps?: number;
@@ -280,25 +304,18 @@ export interface CompetitionItem {
   bg_color?: string;
   confed_id?: string;
   confed_name?: string;
+  confed?: ConfederationItem;
   nation_id?: string;
-  nation_name?: string;
-  nation_three_letter?: string;
+  nation?: NationItem;
   parent_id?: string;
-  parent_name?: string;
-  parent_name_lg?: string;
-  parent_name_sh?: string;
-  parent_name_3l?: string;
+  parent?: CompetitionItem | null;
   childrenCount?: number;
   type?: string;
   categories?: string;
   is_international?: boolean;
   note?: string;
   inactive_fields?: string;
-  nation?: NationItem;
-  confed?: ConfederationItem;
-  confederation?: ConfederationItem;
   comp?: CompetitionItem;
-  parent?: CompetitionItem;
   is_virtual?: boolean;
   virtual_type?: string;
   clubsCount?: number;
@@ -326,13 +343,7 @@ export interface ClubItem {
   name_3l?: string;
   nation_id?: string;
   comp_id?: string;
-  affiliate_club_id?: string | null;
-  affiliate_club_type?: string | null;
   affiliate_club?: AffiliateClubInfo | null;
-  parent_id?: string | null;
-  affiliate_type?: string | null;
-  parent?: any;
-  parent_club?: any;
   affiliatesCount?: number;
   affiliates?: ClubItem[];
   note?: string;
@@ -340,7 +351,6 @@ export interface ClubItem {
   is_extinct?: boolean;
   nation?: NationItem;
   comp?: CompetitionItem;
-  competition?: CompetitionItem;
 }
 
 export interface StadiumItem {
@@ -375,10 +385,6 @@ export interface CityItem {
   nation_id?: string;
   country_id?: string;
   region?: string;
-  region_id?: number;
-  region_code?: string | null;
-  region_name?: string | null;
-  categories?: string;
   is_disabled?: boolean;
   isDisabled?: boolean;
   inactive_fields?: string;
