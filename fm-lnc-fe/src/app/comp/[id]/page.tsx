@@ -269,19 +269,6 @@ function CompetitionDetailContent() {
           });
         }
         const parentId = info.parent_comp?.id || info.parent_id || info.parent?.id;
-        const parentTitle =
-          info.parent_comp?.name_3l
-            ? `[${info.parent_comp.name_3l}] ${info.parent_comp.name_sh || info.parent_comp.name_lg || ''}`.trim()
-            : info.parent?.name_3l
-              ? `[${info.parent.name_3l}] ${info.parent.name_sh || info.parent.name_lg || ''}`.trim()
-              : String(parentId);
-
-        if (parentId) {
-          crumbs.push({
-            title: parentTitle,
-            href: `/comp/${parentId}${nationId ? `?nationId=${nationId}` : ''}`,
-          });
-        }
         crumbs.push({
           title: String(compId),
         });

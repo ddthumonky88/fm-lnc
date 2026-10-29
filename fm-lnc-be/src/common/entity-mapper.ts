@@ -3,6 +3,7 @@ export interface NestedNation {
   name_lg: string | null;
   name_sh: string | null;
   name_3l: string | null;
+  confed?: NestedConfed | null;
 }
 
 export interface NestedConfed {
@@ -35,11 +36,22 @@ export function mapNationRef(nation: any): NestedNation | null {
   if (!nation) return null;
   const id = nation.id !== undefined && nation.id !== null ? String(nation.id) : null;
   if (!id) return null;
+  const confed = nation.confed
+    ? mapConfedRef(nation.confed)
+    : nation.confederation
+    ? mapConfedRef(nation.confederation)
+    : nation.confed_id || nation.confederation_id
+    ? {
+        id: String(nation.confed_id || nation.confederation_id),
+        name: nation.confed_name || nation.confederation_name || null,
+      }
+    : null;
   return {
     id,
     name_lg: nation.name_lg ?? nation.name ?? null,
     name_sh: nation.name_sh ?? null,
     name_3l: nation.name_3l ?? null,
+    confed,
   };
 }
 
@@ -211,6 +223,7 @@ export function mapClub(club: any) {
         name_lg: club.nation_name_lg || club.nation_name || null,
         name_sh: club.nation_name_sh || null,
         name_3l: club.nation_name_3l || club.nation_three_letter || null,
+        confed: null,
       }
     : null;
 
@@ -240,6 +253,14 @@ export function mapClub(club: any) {
       }
     : null;
 
+  const confed = club.confed
+    ? mapConfedRef(club.confed)
+    : club.confederation
+    ? mapConfedRef(club.confederation)
+    : nation?.confed
+    ? nation.confed
+    : null;
+
   return {
     id: String(club.id),
     name: club.name_sh ?? club.name_lg ?? club.name ?? null,
@@ -252,6 +273,7 @@ export function mapClub(club: any) {
     is_extinct: !!club.is_extinct,
     affiliate_club: affiliateClub,
     nation,
+    confed,
     comp,
     ...(club.affiliates_count !== undefined
       ? { affiliatesCount: club.affiliates_count }

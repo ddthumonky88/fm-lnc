@@ -737,6 +737,35 @@ export class HierarchyService {
     if (!comp) {
       throw new NotFoundException(`Competition with ID ${compId} not found`);
     }
+
+    let effectiveNation = comp.nation;
+    let effectiveConfed = comp.confederation || comp.nation?.confederation;
+    if ((!effectiveNation || !effectiveConfed) && comp.parent_id) {
+      const ancestors = await this.compRepo.query(
+        `WITH RECURSIVE anc AS (
+          SELECT id, parent_id, nation_id, confed_id FROM competitions WHERE id = $1
+          UNION ALL
+          SELECT p.id, p.parent_id, p.nation_id, p.confed_id FROM competitions p INNER JOIN anc ON p.id = anc.parent_id
+        ) SELECT nation_id, confed_id FROM anc WHERE nation_id IS NOT NULL OR confed_id IS NOT NULL LIMIT 1;`,
+        [comp.parent_id],
+      );
+      if (ancestors.length > 0) {
+        if (!effectiveNation && ancestors[0].nation_id) {
+          effectiveNation = await this.nationRepo.findOne({
+            where: { id: ancestors[0].nation_id },
+            relations: ['confederation'],
+          });
+        }
+        if (!effectiveConfed && ancestors[0].confed_id) {
+          effectiveConfed = await this.confedRepo.findOne({
+            where: { id: ancestors[0].confed_id },
+          });
+        } else if (!effectiveConfed && effectiveNation?.confederation) {
+          effectiveConfed = effectiveNation.confederation;
+        }
+      }
+    }
+
     const [subCompsRows, childrenCount] = await Promise.all([
       this.compRepo.query(
         `WITH RECURSIVE sc AS (
@@ -765,6 +794,8 @@ export class HierarchyService {
     ]);
     return mapCompetition({
       ...comp,
+      nation: effectiveNation,
+      confederation: effectiveConfed,
       clubsCount,
       awardsCount,
       childrenCount,
@@ -1050,23 +1081,53 @@ export class HierarchyService {
     const strId = String(clubId);
     const club = await this.clubRepo.findOne({
       where: { id: strId },
-      relations: ['nation', 'competition', 'competition.parent', 'affiliateClub'],
+      relations: [
+        'nation',
+        'nation.confederation',
+        'competition',
+        'competition.nation',
+        'competition.nation.confederation',
+        'competition.confederation',
+        'competition.parent',
+        'affiliateClub',
+        'affiliateClub.nation',
+        'affiliateClub.nation.confederation',
+      ],
     });
     if (!club) {
       throw new NotFoundException(`Club with ID ${clubId} not found`);
     }
 
-    const affiliates = await this.clubRepo.find({
-      where: { affiliate_club_id: strId },
+    const effectiveNation =
+      club.nation ||
+      club.competition?.nation ||
+      club.affiliateClub?.nation;
+    const effectiveConfed =
+      club.nation?.confederation ||
+      club.competition?.confederation ||
+      club.competition?.nation?.confederation ||
+      club.affiliateClub?.nation?.confederation;
+
+    // Resolve club family (root club + all affiliates)
+    const rootClubId = club.affiliate_club_id ? String(club.affiliate_club_id) : strId;
+
+    const familyClubs = await this.clubRepo.find({
+      where: [{ id: rootClubId }, { affiliate_club_id: rootClubId }],
       relations: ['competition', 'nation'],
       order: { id: 'ASC' },
     });
 
-    const mapped = mapClub(club);
+    const mapped = mapClub({
+      ...club,
+      nation: effectiveNation,
+      confederation: effectiveConfed,
+    });
+
     return {
       ...mapped,
-      affiliates: affiliates.map(mapClub),
-      affiliatesCount: affiliates.length,
+      affiliates: familyClubs.filter((c) => String(c.id) !== strId).map(mapClub),
+      affiliatesCount: familyClubs.filter((c) => String(c.id) !== strId).length,
+      familyTeams: familyClubs.map(mapClub),
     };
   }
 

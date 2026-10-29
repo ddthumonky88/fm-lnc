@@ -387,10 +387,13 @@ export interface ClubItem {
   affiliate_club?: AffiliateClubInfo | null;
   affiliatesCount?: number;
   affiliates?: ClubItem[];
+  familyTeams?: ClubItem[];
   note?: string;
   inactive_fields?: string;
   is_extinct?: boolean;
   nation?: NationItem;
+  confed?: ConfederationItem;
+  confed_id?: string;
   comp?: CompetitionItem;
 }
 
@@ -441,6 +444,8 @@ export interface AwardItem {
   nation_id?: string;
   comp_id?: string;
   nation?: NationItem;
+  confed?: ConfederationItem;
+  confed_id?: string;
   comp?: CompetitionItem;
   competition?: CompetitionItem;
 }
