@@ -32,6 +32,7 @@ import {
 import CardGrid from '../../../components/CardGrid';
 import SubCompetitionsModal from '../../../components/SubCompetitionsModal';
 import RecordDetailView from '../../../components/RecordDetailView';
+import TabIconBadge from '../../../components/TabIconBadge';
 import { CompIcon, DomesticCompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
@@ -476,25 +477,30 @@ function CompetitionDetailContent() {
       {
         key: 'INFO',
         label: (
-          <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
-            Info
-          </span>
+          <div className="flex items-center gap-2">
+            <TabIconBadge
+              icon={<InfoCircleOutlined className={activeTab === 'INFO' ? 'text-white' : 'text-slate-600'} />}
+              isActive={activeTab === 'INFO'}
+            />
+            <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
+              Info
+            </span>
+          </div>
         ),
       },
       {
         key: 'CLUBS',
         label: (
-          <Space size={4} title="Clubs">
-            <ClubIcon size={18} className="text-blue-500" />
+          <div className="flex items-center gap-2" title="Clubs">
+            <TabIconBadge
+              icon={<ClubIcon size={16} className={activeTab === 'CLUBS' ? 'text-white' : 'text-blue-500'} />}
+              count={clubsBadgeCount}
+              isActive={activeTab === 'CLUBS'}
+            />
             <span className={`hidden sm:inline ${activeTab === 'CLUBS' ? 'font-bold' : ''}`}>
               Clubs
             </span>
-            <Badge
-              count={clubsBadgeCount}
-              overflowCount={99999}
-              style={{ backgroundColor: activeTab === 'CLUBS' ? '#1d70b8' : '#94a3b8' }}
-            />
-          </Space>
+          </div>
         ),
       },
     ];
@@ -504,17 +510,16 @@ function CompetitionDetailContent() {
         list.push({
           key: 'AWARDS',
           label: (
-            <Space size={4} title="Awards">
-              <AwardIcon size={18} className="text-yellow-500" />
+            <div className="flex items-center gap-2" title="Awards">
+              <TabIconBadge
+                icon={<AwardIcon size={16} className={activeTab === 'AWARDS' ? 'text-white' : 'text-yellow-500'} />}
+                count={awardsBadgeCount}
+                isActive={activeTab === 'AWARDS'}
+              />
               <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>
                 Awards
               </span>
-              <Badge
-                count={awardsBadgeCount}
-                overflowCount={99999}
-                style={{ backgroundColor: activeTab === 'AWARDS' ? '#1d70b8' : '#94a3b8' }}
-              />
-            </Space>
+            </div>
           ),
         });
       }

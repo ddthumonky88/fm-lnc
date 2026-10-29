@@ -16,6 +16,7 @@ import {
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
 import RecordDetailView from '../../../components/RecordDetailView';
+import TabIconBadge from '../../../components/TabIconBadge';
 import { NationIcon, IntCompIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
@@ -250,9 +251,15 @@ function ConfederationDetailContent() {
                 list.push({
                   key: 'INFO',
                   label: (
-                    <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
-                      Info
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <TabIconBadge
+                        icon={<InfoCircleOutlined className={activeTab === 'INFO' ? 'text-white' : 'text-slate-600'} />}
+                        isActive={activeTab === 'INFO'}
+                      />
+                      <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
+                        Info
+                      </span>
+                    </div>
                   ),
                 });
 
@@ -260,21 +267,18 @@ function ConfederationDetailContent() {
                   list.push({
                     key: 'NATIONS',
                     label: (
-                      <Space size={4} title="Countries">
-                        <NationIcon size={18} className="text-cyan-600" />
+                      <div className="flex items-center gap-2" title="Countries">
+                        <TabIconBadge
+                          icon={<NationIcon size={16} className={activeTab === 'NATIONS' ? 'text-white' : 'text-cyan-600'} />}
+                          count={nationsCount}
+                          isActive={activeTab === 'NATIONS'}
+                        />
                         <span
                           className={`hidden sm:inline ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}
                         >
                           Countries
                         </span>
-                        <Badge
-                          count={nationsCount}
-                          overflowCount={99999}
-                          style={{
-                            backgroundColor: activeTab === 'NATIONS' ? '#1d70b8' : '#94a3b8',
-                          }}
-                        />
-                      </Space>
+                      </div>
                     ),
                   });
                 }
@@ -283,22 +287,18 @@ function ConfederationDetailContent() {
                   list.push({
                     key: 'INT_COMPETITIONS',
                     label: (
-                      <Space size={4} title="International Competitions">
-                        <IntCompIcon size={18} className="text-purple-600" />
+                      <div className="flex items-center gap-2" title="International Competitions">
+                        <TabIconBadge
+                          icon={<IntCompIcon size={16} className={activeTab === 'INT_COMPETITIONS' ? 'text-white' : 'text-purple-600'} />}
+                          count={compsCount}
+                          isActive={activeTab === 'INT_COMPETITIONS'}
+                        />
                         <span
                           className={`hidden sm:inline ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}
                         >
                           International Competitions
                         </span>
-                        <Badge
-                          count={compsCount}
-                          overflowCount={99999}
-                          style={{
-                            backgroundColor:
-                              activeTab === 'INT_COMPETITIONS' ? '#1d70b8' : '#94a3b8',
-                          }}
-                        />
-                      </Space>
+                      </div>
                     ),
                   });
                 }

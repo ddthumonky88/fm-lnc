@@ -38,6 +38,7 @@ import {
   CityIcon,
   AwardIcon,
 } from '../../../components/EntityIcons';
+import TabIconBadge from '../../../components/TabIconBadge';
 import { EntityType, RecordType, NationTabKey, NationTabKeyValue } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { matchRecordSearch } from '../../../utils/search';
@@ -371,9 +372,15 @@ export default function NationDetailPage() {
     list.push({
       key: NationTabKey.INFO,
       label: (
-        <span className={activeTab === NationTabKey.INFO ? 'font-bold' : ''}>
-          Info
-        </span>
+        <div className="flex items-center gap-2">
+          <TabIconBadge
+            icon={<InfoCircleOutlined className={activeTab === NationTabKey.INFO ? 'text-white' : 'text-slate-600'} />}
+            isActive={activeTab === NationTabKey.INFO}
+          />
+          <span className={activeTab === NationTabKey.INFO ? 'font-bold' : ''}>
+            Info
+          </span>
+        </div>
       ),
     });
 
@@ -381,21 +388,18 @@ export default function NationDetailPage() {
       list.push({
         key: NationTabKey.DOMESTIC_COMPS,
         label: (
-          <Space size={4} title="Competitions">
-            <DomesticCompIcon size={18} className="text-amber-500" />
+          <div className="flex items-center gap-2" title="Competitions">
+            <TabIconBadge
+              icon={<DomesticCompIcon size={16} className={activeTab === NationTabKey.DOMESTIC_COMPS ? 'text-white' : 'text-amber-500'} />}
+              count={compCount}
+              isActive={activeTab === NationTabKey.DOMESTIC_COMPS}
+            />
             <span
               className={`hidden sm:inline ${activeTab === NationTabKey.DOMESTIC_COMPS ? 'font-bold' : ''}`}
             >
               Competitions
             </span>
-            <Badge
-              count={compCount}
-              overflowCount={99999}
-              style={{
-                backgroundColor: activeTab === NationTabKey.DOMESTIC_COMPS ? '#1d70b8' : '#94a3b8',
-              }}
-            />
-          </Space>
+          </div>
         ),
       });
     }
@@ -404,21 +408,18 @@ export default function NationDetailPage() {
       list.push({
         key: NationTabKey.STADIUMS,
         label: (
-          <Space size={4} title="Stadiums">
-            <StadiumIcon size={18} className="text-emerald-500" />
+          <div className="flex items-center gap-2" title="Stadiums">
+            <TabIconBadge
+              icon={<StadiumIcon size={16} className={activeTab === NationTabKey.STADIUMS ? 'text-white' : 'text-emerald-500'} />}
+              count={stadiumCount}
+              isActive={activeTab === NationTabKey.STADIUMS}
+            />
             <span
               className={`hidden sm:inline ${activeTab === NationTabKey.STADIUMS ? 'font-bold' : ''}`}
             >
               Stadiums
             </span>
-            <Badge
-              count={stadiumCount}
-              overflowCount={99999}
-              style={{
-                backgroundColor: activeTab === NationTabKey.STADIUMS ? '#1d70b8' : '#94a3b8',
-              }}
-            />
-          </Space>
+          </div>
         ),
       });
     }
@@ -427,19 +428,18 @@ export default function NationDetailPage() {
       list.push({
         key: NationTabKey.CITIES,
         label: (
-          <Space size={4} title="Cities">
-            <CityIcon size={18} className="text-sky-500" />
+          <div className="flex items-center gap-2" title="Cities">
+            <TabIconBadge
+              icon={<CityIcon size={16} className={activeTab === NationTabKey.CITIES ? 'text-white' : 'text-sky-500'} />}
+              count={cityCount}
+              isActive={activeTab === NationTabKey.CITIES}
+            />
             <span
               className={`hidden sm:inline ${activeTab === NationTabKey.CITIES ? 'font-bold' : ''}`}
             >
               Cities
             </span>
-            <Badge
-              count={cityCount}
-              overflowCount={99999}
-              style={{ backgroundColor: activeTab === NationTabKey.CITIES ? '#1d70b8' : '#94a3b8' }}
-            />
-          </Space>
+          </div>
         ),
       });
     }
@@ -448,19 +448,18 @@ export default function NationDetailPage() {
       list.push({
         key: NationTabKey.AWARDS,
         label: (
-          <Space size={4} title="Awards">
-            <AwardIcon size={18} className="text-yellow-500" />
+          <div className="flex items-center gap-2" title="Awards">
+            <TabIconBadge
+              icon={<AwardIcon size={16} className={activeTab === NationTabKey.AWARDS ? 'text-white' : 'text-yellow-500'} />}
+              count={awardCount}
+              isActive={activeTab === NationTabKey.AWARDS}
+            />
             <span
               className={`hidden sm:inline ${activeTab === NationTabKey.AWARDS ? 'font-bold' : ''}`}
             >
               Awards
             </span>
-            <Badge
-              count={awardCount}
-              overflowCount={99999}
-              style={{ backgroundColor: activeTab === NationTabKey.AWARDS ? '#1d70b8' : '#94a3b8' }}
-            />
-          </Space>
+          </div>
         ),
       });
     }

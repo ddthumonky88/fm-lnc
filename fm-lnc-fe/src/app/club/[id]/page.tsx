@@ -21,6 +21,7 @@ import {
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
 import RecordDetailView from '../../../components/RecordDetailView';
+import TabIconBadge from '../../../components/TabIconBadge';
 import RecordModal from '../../../components/RecordModal';
 import DeleteConfirmModal from '../../../components/DeleteConfirmModal';
 import { ClubIcon } from '../../../components/EntityIcons';
@@ -279,10 +280,13 @@ function ClubDetailContent() {
                   {
                     key: 'INFO',
                     label: (
-                      <Space size={4}>
-                        <InfoCircleOutlined />
+                      <div className="flex items-center gap-2">
+                        <TabIconBadge
+                          icon={<InfoCircleOutlined className={activeTab === 'INFO' ? 'text-white' : 'text-slate-600'} />}
+                          isActive={activeTab === 'INFO'}
+                        />
                         <span className={activeTab === 'INFO' ? 'font-bold' : ''}>Info</span>
-                      </Space>
+                      </div>
                     ),
                   },
                 ];
@@ -291,19 +295,16 @@ function ClubDetailContent() {
                   list.push({
                     key: 'AFFILIATES',
                     label: (
-                      <Space size={4}>
-                        <BranchesOutlined className="text-blue-600" />
+                      <div className="flex items-center gap-2" title="Affiliates / Teams">
+                        <TabIconBadge
+                          icon={<BranchesOutlined className={activeTab === 'AFFILIATES' ? 'text-white' : 'text-blue-600'} />}
+                          count={affiliatesCount}
+                          isActive={activeTab === 'AFFILIATES'}
+                        />
                         <span className={activeTab === 'AFFILIATES' ? 'font-bold' : ''}>
                           Affiliates / Teams
                         </span>
-                        <Badge
-                          count={affiliatesCount}
-                          overflowCount={999}
-                          style={{
-                            backgroundColor: activeTab === 'AFFILIATES' ? '#1d70b8' : '#94a3b8',
-                          }}
-                        />
-                      </Space>
+                      </div>
                     ),
                   });
                 }

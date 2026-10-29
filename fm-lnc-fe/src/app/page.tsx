@@ -53,6 +53,7 @@ import CompetitionGroupView, {
 } from '../components/CompetitionGroupView';
 import { formatCategoryCode, getCategoryTagColor } from '../components/EntityCard';
 import CityGroupView from '../components/CityGroupView';
+import TabIconBadge from '../components/TabIconBadge';
 import {
   NationIcon,
   IntCompIcon,
@@ -1274,27 +1275,22 @@ export default function LncSortitoutsiExplorer() {
                       <button
                         type="button"
                         onClick={() => handleSwitchCompTab('CLUBS_IN_COMP')}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition cursor-pointer ${
+                        className={`flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
                           currentStep.level === 'CLUBS_IN_COMP'
-                            ? 'bg-blue-600 text-white shadow-2xs'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            ? 'bg-blue-50 text-blue-800 border border-blue-300 shadow-2xs'
+                            : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        <SafetyOutlined />
-                        <span>Clubs</span>
-                        <Badge
+                        <TabIconBadge
+                          icon={<SafetyOutlined className={currentStep.level === 'CLUBS_IN_COMP' ? 'text-white' : 'text-blue-600'} />}
                           count={
                             compInfo?.stats?.club ??
                             compInfo?.clubsCount ??
                             (currentStep.level === 'CLUBS_IN_COMP' ? detailRecords.length : 0)
                           }
-                          overflowCount={9999}
-                          style={{
-                            backgroundColor:
-                              currentStep.level === 'CLUBS_IN_COMP' ? '#1d4ed8' : '#64748b',
-                            color: '#fff',
-                          }}
+                          isActive={currentStep.level === 'CLUBS_IN_COMP'}
                         />
+                        <span>Clubs</span>
                       </button>
 
                       {(((compInfo?.stats?.award ?? compInfo?.awardsCount) || 0) > 0 ||
@@ -1302,27 +1298,22 @@ export default function LncSortitoutsiExplorer() {
                         <button
                           type="button"
                           onClick={() => handleSwitchCompTab('COMP_AWARDS')}
-                          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition cursor-pointer ${
+                          className={`flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
                             currentStep.level === 'COMP_AWARDS'
-                              ? 'bg-amber-500 text-white shadow-2xs'
-                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-300 shadow-2xs'
+                              : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
                           }`}
                         >
-                          <StarOutlined />
-                          <span>Awards</span>
-                          <Badge
+                          <TabIconBadge
+                            icon={<StarOutlined className={currentStep.level === 'COMP_AWARDS' ? 'text-white' : 'text-amber-500'} />}
                             count={
                               compInfo?.stats?.award ??
                               compInfo?.awardsCount ??
                               (currentStep.level === 'COMP_AWARDS' ? detailRecords.length : 0)
                             }
-                            overflowCount={9999}
-                            style={{
-                              backgroundColor:
-                                currentStep.level === 'COMP_AWARDS' ? '#d97706' : '#64748b',
-                              color: '#fff',
-                            }}
+                            isActive={currentStep.level === 'COMP_AWARDS'}
                           />
+                          <span>Awards</span>
                         </button>
                       )}
                     </div>
