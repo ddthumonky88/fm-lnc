@@ -97,7 +97,7 @@ export class LncService {
 
       if (comp.parent_id) {
         const pfxParent = isInactive('parent_id') ? '#' : '';
-        out += `${pfxParent}"COMP_PARENT_ID"\t\t${comp.id}\t\t ${comp.parent_id}\t\t\t\t\t\t""\n`;
+        out += `${pfxParent}"PARENT_COMP_ID"\t\t${comp.id}\t\t ${comp.parent_id}\t\t\t\t\t\t""\n`;
       }
 
       if (comp.fg_color && comp.bg_color) {
@@ -182,7 +182,7 @@ export class LncService {
       if (affId && affType) {
         const isAffInactive = isInactive('affiliate') || isInactive('affiliate_club') || isInactive('parent_id');
         const pfxAff = isAffInactive ? '#' : '';
-        out += `${pfxAff}"CLUB_AFFILIATED_CLUB"\t\t${cl.id}\t"${affType}-${affId}"\t\t\t\t\t\t""\n`;
+        out += `${pfxAff}"AFFILIATED_CLUB_ID"\t\t${cl.id}\t"${affType}-${affId}"\t\t\t\t\t\t""\n`;
       }
       out += `${pfxLong}"CLUB_NAME_CHANGE"\t\t${cl.id}\t"${cl.name_lg}"\t\t\t\t\t\t""${noteStr}\n`;
       out += `${pfxShort}"CLUB_SHORT_NAME_CHANGE"\t${cl.id}\t"${cl.name_sh}"\t\t\t\t\t\t""${noteStr}\n`;

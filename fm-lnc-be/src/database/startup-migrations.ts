@@ -255,7 +255,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
         logger.log(`Populating affiliate clubs from ${clubLncFile}...`);
         const content = fs.readFileSync(clubLncFile, 'utf8');
         const lines = content.split(/\r?\n/);
-        const regex = /^\s*(#?)\s*"CLUB_AFFILIATED_CLUB"\s+(\d+)\s+"([A-Za-z0-9]+)-(\d+)"/;
+        const regex = /^\s*(#?)\s*"(?:AFFILIATED_CLUB_ID|CLUB_AFFILIATED_CLUB)"\s+(\d+)\s+"([A-Za-z0-9]+)-(\d+)"/;
 
         const affiliateRows: { childId: string; parentId: string; type: string; isCommented: boolean }[] = [];
         for (const line of lines) {

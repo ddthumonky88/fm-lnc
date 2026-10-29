@@ -503,7 +503,7 @@ Người dùng có thể tạm ngưng đồng bộ một trường dữ liệu (
 | `clubs` | `name_sh` | `"CLUB_SHORT_NAME_CHANGE"` | `"CLUB_SHORT_NAME_CHANGE" <id> "<name_sh>" ""` |
 | `clubs` | `name_6l` | `"CLUB_6LETTER_NAME_CHANGE"` | `"CLUB_6LETTER_NAME_CHANGE" <id> "<name_6l>" ""` |
 | `clubs` | `name_3l` | `"CLUB_3LETTER_NAME_CHANGE"` | `"CLUB_3LETTER_NAME_CHANGE" <id> "<name_3l>" ""` |
-| `clubs` | `affiliate_club_id`, `affiliate_club_type` | `"CLUB_AFFILIATED_CLUB"` | `"CLUB_AFFILIATED_CLUB" <child_id> "<affiliate_club_type>-<affiliate_club_id>" ""` |
+| `clubs` | `affiliate_club_id`, `affiliate_club_type` | `"AFFILIATED_CLUB_ID"` | `"AFFILIATED_CLUB_ID" <child_id> "<affiliate_club_type>-<affiliate_club_id>" ""` |
 | `cities` | `name` | `"CITY_NAME_CHANGE"` | `"CITY_NAME_CHANGE" <id> "<name>" ""` |
 | `stadiums` | `name` | `"STADIUM_NAME_CHANGE"` | `"STADIUM_NAME_CHANGE" <id> "<name>" ""` |
 | `awards` | `name_lg` | `"AWARD_LONG_NAME_CHANGE"` | `"AWARD_LONG_NAME_CHANGE" <id> "<name_lg>" ""` |

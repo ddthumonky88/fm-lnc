@@ -372,7 +372,7 @@ export class LncParserService {
           continue;
         }
 
-        const parentMatch = cleanLine.match(/^"COMP_PARENT_ID"\s+(\d+)\s+(\d+)/);
+        const parentMatch = cleanLine.match(/^"(?:PARENT_COMP_ID|COMP_PARENT_ID)"\s+(\d+)\s+(\d+)/);
         if (parentMatch) {
           const cid = parseInt(parentMatch[1], 10);
           const pid = parseInt(parentMatch[2], 10);
@@ -569,7 +569,7 @@ export class LncParserService {
           const cmd = m[1];
           const id = parseInt(m[2], 10);
           const val = m[3].trim();
-          if (cmd === 'CLUB_AFFILIATED_CLUB') {
+          if (cmd === 'AFFILIATED_CLUB_ID' || cmd === 'CLUB_AFFILIATED_CLUB') {
             const affM = val.match(/^([A-Za-z0-9]+)-(\d+)/);
             if (affM) {
               if (!clubs[id]) {
