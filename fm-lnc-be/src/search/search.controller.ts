@@ -28,16 +28,16 @@ export class SearchController {
         clubs: [
           {
             id: '676',
-            long_name: 'Liverpool Football Club',
-            short_name: 'Liverpool',
-            nation: { id: '11', long_name: 'England' },
+            name_lg: 'Liverpool Football Club',
+            name_sh: 'Liverpool',
+            nation: { id: '11', name_lg: 'England' },
           },
         ],
         competitions: [
           {
             id: '11',
-            long_name: 'English Premier Division',
-            short_name: 'Premier League',
+            name_lg: 'English Premier Division',
+            name_sh: 'Premier League',
           },
         ],
         nations: [],

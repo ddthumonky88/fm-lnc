@@ -96,8 +96,8 @@ export default function CityGroupView({
 
     const resultGroups: CityCategoryGroup[] = sortedKeys.map((key) => {
       const groupItems = (map.get(key) || []).sort((a, b) => {
-        const nameA = a.long_name || a.name || a.short_name || '';
-        const nameB = b.long_name || b.name || b.short_name || '';
+        const nameA = a.name || a.name_lg || a.name_sh || '';
+        const nameB = b.name || b.name_lg || b.name_sh || '';
         return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
       });
       return {
@@ -110,8 +110,8 @@ export default function CityGroupView({
 
     if (uncategorizedItems.length > 0) {
       uncategorizedItems.sort((a, b) => {
-        const nameA = a.long_name || a.name || a.short_name || '';
-        const nameB = b.long_name || b.name || b.short_name || '';
+        const nameA = a.name || a.name_lg || a.name_sh || '';
+        const nameB = b.name || b.name_lg || b.name_sh || '';
         return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
       });
       resultGroups.push({
@@ -164,8 +164,8 @@ export default function CityGroupView({
         if (catCmp !== 0) return catCmp;
       }
 
-      const nameA = a.long_name || a.name || a.short_name || '';
-      const nameB = b.long_name || b.name || b.short_name || '';
+      const nameA = a.name || a.name_lg || a.name_sh || '';
+      const nameB = b.name || b.name_lg || b.name_sh || '';
       return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
     });
   }, [items]);

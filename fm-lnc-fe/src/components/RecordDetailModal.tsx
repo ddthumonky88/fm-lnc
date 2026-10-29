@@ -134,14 +134,14 @@ export default function RecordDetailModal({
   // Form State
   const [formData, setFormData] = useState<any>({
     id: '',
-    long_name: '',
-    short_name: '',
-    three_letter_name: '',
-    six_letter_name: '',
+    name: '',
+    name_lg: '',
+    name_sh: '',
+    name_6l: '',
+    name_3l: '',
     first_name: '',
     second_name: '',
     common_name: '',
-    name: '',
     fg_color: '',
     bg_color: '',
     type: '',
@@ -221,14 +221,14 @@ export default function RecordDetailModal({
 
       setFormData({
         id: activeData.id !== undefined && activeData.id !== null ? String(activeData.id) : '',
-        long_name: activeData.long_name || '',
-        short_name: activeData.short_name || '',
-        three_letter_name: activeData.three_letter_name || activeData.code || '',
-        six_letter_name: activeData.six_letter_name || '',
+        name_lg: activeData.name_lg || '',
+        name_sh: activeData.name_sh || '',
+        name_3l: activeData.name_3l || activeData.code || '',
+        name_6l: activeData.name_6l || '',
         first_name: activeData.first_name || '',
         second_name: activeData.second_name || '',
         common_name: activeData.common_name || '',
-        name: activeData.name || activeData.long_name || '',
+        name: activeData.name || activeData.name_lg || '',
         fg_color: activeData.fg_color || '',
         bg_color: activeData.bg_color || '',
         type: activeData.type || activeData.categories || '',
@@ -379,7 +379,7 @@ export default function RecordDetailModal({
         String(currentData.id).startsWith('ext-')
         ? 'Extinct Clubs'
         : 'Other Clubs'
-      : currentData.short_name || currentData.long_name || currentData.name || 'Unnamed';
+      : currentData.name_sh || currentData.name_lg || currentData.name || 'Unnamed';
 
   const getTypeLabel = () => {
     if (isInternationalComp) return 'International Competition';
@@ -446,11 +446,11 @@ export default function RecordDetailModal({
     ? currentData.id
     : currentData.nation_id || currentData.country_id || currentData.nation?.id;
   const nationName = isNation
-    ? currentData.long_name || currentData.name
-    : currentData.nation_name || currentData.nation?.long_name || currentData.nation?.name;
+    ? currentData.name_lg || currentData.name || currentData.name_sh
+    : currentData.nation_name || currentData.nation?.name_lg || currentData.nation?.name || currentData.nation?.name_sh;
   const nationCode = isNation
-    ? currentData.three_letter_name || currentData.code
-    : currentData.nation_three_letter || currentData.nation?.three_letter_name;
+    ? currentData.name_3l || currentData.code
+    : currentData.nation_three_letter || currentData.nation?.name_3l;
 
   // Normalize API Record Type
   const getNormalizedRecordType = (): RecordType => {
@@ -481,15 +481,26 @@ export default function RecordDetailModal({
         }
       }
 
-      // Validations
+      // Validations & Unified Name Mapping (name, name_lg, name_sh, name_6l, name_3l)
+      const nLg = (payload.name_lg || '').trim();
+      const nSh = (payload.name_sh || nLg).trim();
+      const n6l = (payload.name_6l || '').trim();
+      const n3l = (payload.name_3l || '').trim().toUpperCase();
+      const nName = (payload.name || nLg || nSh || '').trim();
+
+      payload.name = nName;
+      payload.name_lg = nLg;
+      payload.name_sh = nSh;
+      payload.name_6l = n6l || null;
+      payload.name_3l = n3l || null;
+
       if (isCity || isStadium || isStage) {
-        if (!payload.name?.trim()) throw new Error('Please enter Name');
+        if (!nName) throw new Error('Please enter Name');
       } else if (isPlayer) {
         if (!payload.first_name?.trim()) throw new Error('Please enter First Name');
         if (!payload.second_name?.trim()) throw new Error('Please enter Second Name');
       } else {
-        if (!payload.long_name?.trim()) throw new Error('Please enter Long Name (LN)');
-        if (!payload.short_name?.trim()) payload.short_name = payload.long_name;
+        if (!nLg) throw new Error('Please enter Long Name (LN)');
       }
 
       if (isComp) {
@@ -513,7 +524,7 @@ export default function RecordDetailModal({
       }
 
       if (isRegion) {
-        payload.name = formData.name || formData.long_name;
+        payload.name = formData.name || formData.name_lg;
         payload.code = formData.code?.trim() || null;
         payload.nation_id = formData.nation_id || null;
       }
@@ -785,9 +796,9 @@ export default function RecordDetailModal({
                 </>
               ) : isCity || isStadium || isStage ? (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                  <span className={getLabelClass(['name', 'long_name'], 'pt-0.5')}>Name:</span>
+                  <span className={getLabelClass(['name', 'name_lg'], 'pt-0.5')}>Name:</span>
                   <span
-                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name', 'long_name'])} line-clamp-3 break-words text-left`}
+                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name', 'name_lg'])} line-clamp-3 break-words text-left`}
                     style={{
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
@@ -795,18 +806,18 @@ export default function RecordDetailModal({
                       overflow: 'hidden',
                       wordBreak: 'break-word',
                     }}
-                    title={currentData.name || currentData.long_name || '-'}
+                    title={currentData.name || currentData.name_lg || '-'}
                   >
-                    {currentData.name || currentData.long_name || '-'}
+                    {currentData.name || currentData.name_lg || '-'}
                   </span>
                 </div>
               ) : (
                 <>
                   {/* LN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['long_name', 'name'], 'pt-0.5')}>LN:</span>
+                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['long_name', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -817,20 +828,20 @@ export default function RecordDetailModal({
                       title={
                         currentData.is_virtual
                           ? '-'
-                          : currentData.long_name || currentData.name || title
+                          : currentData.name_lg || currentData.name || title
                       }
                     >
                       {currentData.is_virtual
                         ? '-'
-                        : currentData.long_name || currentData.name || title}
+                        : currentData.name_lg || currentData.name || title}
                     </span>
                   </div>
 
                   {/* SN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass('short_name', 'pt-0.5')}>SN:</span>
+                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass('short_name')} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -838,40 +849,40 @@ export default function RecordDetailModal({
                         overflow: 'hidden',
                         wordBreak: 'break-word',
                       }}
-                      title={currentData.is_virtual ? '-' : currentData.short_name || '-'}
+                      title={currentData.is_virtual ? '-' : currentData.name_sh || '-'}
                     >
-                      {currentData.is_virtual ? '-' : currentData.short_name || '-'}
+                      {currentData.is_virtual ? '-' : currentData.name_sh || '-'}
                     </span>
                   </div>
 
                   {/* 3N */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span
-                      className={getLabelClass(['three_letter_name', 'three_letter'], 'pt-0.5')}
+                      className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}
                     >
                       3N:
                     </span>
                     <span
-                      className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['three_letter_name', 'three_letter'])} break-words text-left`}
+                      className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
                     >
                       {currentData.is_virtual
                         ? '-'
-                        : currentData.three_letter_name || nationCode || '-'}
+                        : currentData.name_3l || nationCode || '-'}
                     </span>
                   </div>
 
                   {/* 6N */}
                   {(type === 'club' ||
                     type === EntityType.CLUB ||
-                    currentData.six_letter_name !== undefined) && (
+                    currentData.name_6l !== undefined) && (
                     <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                      <span className={getLabelClass(['six_letter_name', 'six_letter'], 'pt-0.5')}>
+                      <span className={getLabelClass(['name_6l'], 'pt-0.5')}>
                         6N:
                       </span>
                       <span
-                        className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['six_letter_name', 'six_letter'])} break-words text-left`}
+                        className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
                       >
-                        {currentData.six_letter_name || '-'}
+                        {currentData.name_6l || '-'}
                       </span>
                     </div>
                   )}
@@ -959,8 +970,8 @@ export default function RecordDetailModal({
                           className={`font-bold text-xs sm:text-[13px] ${getValueClass(['comp_id', 'competition_id'])} line-clamp-3 break-words`}
                         >
                           {currentData.competition?.name_sh ||
-                            currentData.competition?.short_name ||
-                            currentData.competition?.long_name ||
+                            currentData.competition?.name_lg ||
+                            currentData.competition?.name ||
                             currentData.comp_name ||
                             `Competition ${currentData.comp_id}`}
                         </span>
@@ -986,10 +997,11 @@ export default function RecordDetailModal({
                       <span className="font-bold text-xs sm:text-[13px] text-slate-800">
                         {currentData.affiliate_club?.name_lg ||
                           currentData.affiliate_club?.name_sh ||
+                          currentData.affiliate_club?.name ||
                           currentData.parent_club?.name_lg ||
-                          currentData.parent_club?.short_name ||
+                          currentData.parent_club?.name_sh ||
                           currentData.parent?.name_lg ||
-                          currentData.parent?.short_name ||
+                          currentData.parent?.name_sh ||
                           `Club #${currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id}`}
                       </span>
                       {(currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id) && (
@@ -1031,7 +1043,7 @@ export default function RecordDetailModal({
                           {affT && (
                             <span className="font-bold text-sky-600">[{affT}]</span>
                           )}
-                          <span>{aff.short_name || aff.name_sh || aff.long_name || aff.name_lg}</span>
+                          <span>{aff.name_sh || aff.name_lg || aff.name}</span>
                           <span className="text-[10px] font-mono text-slate-400">({aff.id})</span>
                         </span>
                       );
@@ -1064,9 +1076,12 @@ export default function RecordDetailModal({
                   <span
                     className={`font-bold text-xs sm:text-[13px] ${getValueClass(['parent_id', 'parent'])} line-clamp-3 break-words text-left`}
                   >
-                    {currentData.parent_long_name ||
+                    {currentData.parent?.name_lg ||
+                      currentData.parent?.name_sh ||
+                      currentData.parent?.name ||
+                      currentData.parent_name_lg ||
+                      currentData.parent_name_sh ||
                       currentData.parent_name ||
-                      currentData.parent?.long_name ||
                       (currentData.parent_id ? `${currentData.parent_id}` : '-')}
                   </span>
                 </div>
@@ -1296,13 +1311,13 @@ export default function RecordDetailModal({
               /* Name for Stadium, City, Stage */
               <div className="space-y-3">
                 <div>
-                  <label className={getFormLabelClass(['name', 'long_name'])}>
+                  <label className={getFormLabelClass('name')}>
                     Name <span className="text-red-500">*</span>
                   </label>
                   <Input
                     value={formData.name}
                     onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value, long_name: e.target.value })
+                      setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder="Enter name..."
                     className="rounded-lg"
@@ -1331,12 +1346,17 @@ export default function RecordDetailModal({
               /* Club / Competition / Award / Nation Fields */
               <div className="space-y-3">
                 <div>
-                  <label className={getFormLabelClass(['long_name', 'name'])}>
+                  <label className={getFormLabelClass(['name_lg', 'name'])}>
                     Long name<span className="text-red-500">*</span>
                   </label>
                   <Input
-                    value={formData.long_name}
-                    onChange={(e) => setFormData({ ...formData, long_name: e.target.value })}
+                    value={formData.name_lg ?? ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        name_lg: e.target.value,
+                      })
+                    }
                     placeholder="Enter long name..."
                     className="rounded-lg"
                     required
@@ -1345,26 +1365,32 @@ export default function RecordDetailModal({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={getFormLabelClass('short_name')}>Short name</label>
+                    <label className={getFormLabelClass(['name_sh'])}>Short name</label>
                     <Input
-                      value={formData.short_name}
-                      onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
+                      value={formData.name_sh ?? ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          name_sh: e.target.value,
+                        })
+                      }
                       placeholder="Enter short name..."
                       className="rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className={getFormLabelClass(['three_letter_name', 'three_letter'])}>
+                    <label className={getFormLabelClass(['name_3l', 'code'])}>
                       3-Letter name
                     </label>
                     <Input
-                      value={formData.three_letter_name}
-                      onChange={(e) =>
+                      value={formData.name_3l ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value.toUpperCase();
                         setFormData({
                           ...formData,
-                          three_letter_name: e.target.value.toUpperCase(),
-                        })
-                      }
+                          name_3l: val,
+                        });
+                      }}
                       placeholder="Enter 3-letter name..."
                       maxLength={3}
                       className="font-mono uppercase rounded-lg"
@@ -1374,13 +1400,16 @@ export default function RecordDetailModal({
 
                 {(isClub || type === 'club' || type === EntityType.CLUB) && (
                   <div>
-                    <label className={getFormLabelClass(['six_letter_name', 'six_letter'])}>
+                    <label className={getFormLabelClass(['name_6l'])}>
                       6-Letter name
                     </label>
                     <Input
-                      value={formData.six_letter_name}
+                      value={formData.name_6l ?? ''}
                       onChange={(e) =>
-                        setFormData({ ...formData, six_letter_name: e.target.value })
+                        setFormData({
+                          ...formData,
+                          name_6l: e.target.value,
+                        })
                       }
                       placeholder="Enter 6-letter name..."
                       maxLength={6}
@@ -1434,7 +1463,7 @@ export default function RecordDetailModal({
                         color: previewFgInfo ? previewFgInfo.css : '#000000',
                       }}
                     >
-                      {formData.short_name || formData.long_name || 'Preview Title'}
+                      {formData.name_sh || formData.name_lg || formData.name || 'Preview Title'}
                     </span>
                   </div>
                 )}

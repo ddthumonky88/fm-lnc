@@ -140,10 +140,10 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                     className="py-2 px-2 hover:bg-blue-50 rounded cursor-pointer flex items-center justify-between transition"
                   >
                     <div>
-                      <div className="text-xs font-semibold text-gray-800">{c.long_name}</div>
+                      <div className="text-xs font-semibold text-gray-800">{c.name_lg || c.name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {c.short_name} {c.three_letter_name ? `(${c.three_letter_name})` : ''}{' '}
-                        &bull; {c.nation?.short_name || 'Free Club'}
+                        {c.name_sh || c.name} {c.name_3l ? `(${c.name_3l})` : ''}{' '}
+                        &bull; {c.nation?.name_sh || c.nation?.name_lg || 'Free Club'}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
@@ -172,10 +172,10 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                     className="py-2 px-2 hover:bg-emerald-50 rounded cursor-pointer flex items-center justify-between transition"
                   >
                     <div>
-                      <div className="text-xs font-semibold text-emerald-900">{comp.long_name}</div>
+                      <div className="text-xs font-semibold text-emerald-900">{comp.name_lg || comp.name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {comp.short_name} &bull;{' '}
-                        {comp.is_international ? 'International' : comp.nation?.short_name}
+                        {comp.name_sh || comp.name} &bull;{' '}
+                        {comp.is_international ? 'International' : comp.nation?.name_sh || comp.nation?.name_lg}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
@@ -204,10 +204,10 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                     className="py-2 px-2 hover:bg-amber-50 rounded cursor-pointer flex items-center justify-between transition"
                   >
                     <div className="flex items-center gap-2.5">
-                      {getNationLogoUrl(n.id, n.three_letter_name) ? (
+                      {getNationLogoUrl(n.id, n.name_3l) ? (
                         <img
-                          src={getNationLogoUrl(n.id, n.three_letter_name)}
-                          alt={n.short_name || n.long_name}
+                          src={getNationLogoUrl(n.id, n.name_3l)}
+                          alt={n.name_sh || n.name_lg || n.name}
                           className="w-5 h-3.5 object-cover rounded-xs border border-slate-200 shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -215,9 +215,9 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                         />
                       ) : null}
                       <div>
-                        <div className="text-xs font-semibold text-gray-800">{n.long_name}</div>
+                        <div className="text-xs font-semibold text-gray-800">{n.name_lg || n.name}</div>
                         <div className="text-[11px] text-gray-500">
-                          Code: {n.three_letter_name} &bull; {n.confederation?.name}
+                          Code: {n.name_3l} &bull; {n.confederation?.name}
                         </div>
                       </div>
                     </div>
@@ -249,7 +249,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                     <div>
                       <div className="text-xs font-semibold text-gray-800">{s.name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {s.nation?.short_name || 'Standard'}
+                        {s.nation?.name_sh || s.nation?.name_lg || 'Standard'}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
@@ -280,7 +280,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                     <div>
                       <div className="text-xs font-semibold text-gray-800">{ci.name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {ci.nation?.short_name} &bull; {ci.categories || 'Default'}
+                        {ci.nation?.name_sh || ci.nation?.name_lg} &bull; {ci.categories || 'Default'}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
@@ -309,12 +309,13 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                     className="py-2 px-2 hover:bg-yellow-50 rounded cursor-pointer flex items-center justify-between transition"
                   >
                     <div>
-                      <div className="text-xs font-semibold text-yellow-950">{a.long_name}</div>
+                      <div className="text-xs font-semibold text-yellow-950">{a.name_lg || a.name}</div>
                       <div className="text-[11px] text-gray-500">
-                        {a.short_name} &bull;{' '}
-                        {a.competition?.short_name ||
-                          a.competition?.long_name ||
-                          a.nation?.short_name ||
+                        {a.name_sh || a.name} &bull;{' '}
+                        {a.competition?.name_sh ||
+                          a.competition?.name_lg ||
+                          a.nation?.name_sh ||
+                          a.nation?.name_lg ||
                           'Global Award'}
                       </div>
                     </div>

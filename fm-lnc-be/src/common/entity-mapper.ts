@@ -37,9 +37,9 @@ export function mapNationRef(nation: any): NestedNation | null {
   if (!id) return null;
   return {
     id,
-    name_lg: nation.name_lg ?? nation.long_name ?? nation.name ?? null,
-    name_sh: nation.name_sh ?? nation.short_name ?? null,
-    name_3l: nation.name_3l ?? nation.three_letter_name ?? null,
+    name_lg: nation.name_lg ?? nation.name ?? null,
+    name_sh: nation.name_sh ?? null,
+    name_3l: nation.name_3l ?? null,
   };
 }
 
@@ -59,9 +59,9 @@ export function mapCompRef(comp: any): NestedComp | null {
   if (!id) return null;
   return {
     id,
-    name_lg: comp.name_lg ?? comp.long_name ?? comp.name ?? null,
-    name_sh: comp.name_sh ?? comp.short_name ?? null,
-    name_3l: comp.name_3l ?? comp.three_letter_name ?? null,
+    name_lg: comp.name_lg ?? comp.name ?? null,
+    name_sh: comp.name_sh ?? null,
+    name_3l: comp.name_3l ?? null,
   };
 }
 
@@ -71,9 +71,9 @@ export function mapClubRef(club: any): NestedClub | null {
   if (!id) return null;
   return {
     id,
-    name_lg: club.name_lg ?? club.long_name ?? club.name ?? null,
-    name_sh: club.name_sh ?? club.short_name ?? null,
-    name_3l: club.name_3l ?? club.three_letter_name ?? null,
+    name_lg: club.name_lg ?? club.name ?? null,
+    name_sh: club.name_sh ?? null,
+    name_3l: club.name_3l ?? null,
   };
 }
 
@@ -94,9 +94,10 @@ export function mapNation(nation: any, extraStats?: any) {
   const confedId = confedObj?.id || (nation.confed_id ? String(nation.confed_id) : null);
   return {
     id: String(nation.id),
-    name_lg: nation.long_name ?? nation.name_lg ?? null,
-    name_sh: nation.short_name ?? nation.name_sh ?? null,
-    name_3l: nation.three_letter_name ?? nation.name_3l ?? null,
+    name: nation.name_lg ?? nation.name ?? null,
+    name_lg: nation.name_lg ?? nation.name ?? null,
+    name_sh: nation.name_sh ?? null,
+    name_3l: nation.name_3l ?? null,
     confed_id: confedId,
     confederation_id: confedId,
     confed: confedObj,
@@ -114,9 +115,9 @@ export function mapCompetition(comp: any, extraStats?: any) {
     : comp.nation_id
     ? {
         id: String(comp.nation_id),
-        name_lg: comp.nation_long_name || comp.nation_name || null,
-        name_sh: comp.nation_short_name || null,
-        name_3l: comp.nation_three_letter || null,
+        name_lg: comp.nation_name_lg || comp.nation_name || null,
+        name_sh: comp.nation_name_sh || null,
+        name_3l: comp.nation_name_3l || comp.nation_three_letter || null,
       }
     : null;
 
@@ -141,17 +142,18 @@ export function mapCompetition(comp: any, extraStats?: any) {
     : comp.parent_id
     ? {
         id: String(comp.parent_id),
-        name_lg: comp.parent_long_name || null,
-        name_sh: comp.parent_short_name || null,
-        name_3l: comp.parent_three_letter || comp.parent_three_letter_name || null,
+        name_lg: comp.parent_name_lg || null,
+        name_sh: comp.parent_name_sh || null,
+        name_3l: comp.parent_name_3l || comp.parent_three_letter || null,
       }
     : null;
 
   return {
     id: String(comp.id),
-    name_lg: comp.long_name ?? comp.name_lg ?? null,
-    name_sh: comp.short_name ?? comp.name_sh ?? null,
-    name_3l: comp.three_letter_name ?? comp.name_3l ?? null,
+    name: comp.name_sh ?? comp.name_lg ?? comp.name ?? null,
+    name_lg: comp.name_lg ?? comp.name ?? null,
+    name_sh: comp.name_sh ?? null,
+    name_3l: comp.name_3l ?? null,
     fg_color: comp.fg_color ?? null,
     bg_color: comp.bg_color ?? null,
     type: comp.type ?? comp.categories ?? null,
@@ -188,9 +190,9 @@ export function mapClub(club: any) {
     : club.nation_id
     ? {
         id: String(club.nation_id),
-        name_lg: club.nation_long_name || club.nation_name || null,
-        name_sh: club.nation_short_name || null,
-        name_3l: club.nation_three_letter || null,
+        name_lg: club.nation_name_lg || club.nation_name || null,
+        name_sh: club.nation_name_sh || null,
+        name_3l: club.nation_name_3l || club.nation_three_letter || null,
       }
     : null;
 
@@ -199,9 +201,9 @@ export function mapClub(club: any) {
     : club.comp_id
     ? {
         id: String(club.comp_id),
-        name_lg: club.comp_long_name || club.competition_name || null,
-        name_sh: club.comp_short_name || null,
-        name_3l: club.comp_three_letter || null,
+        name_lg: club.comp_name_lg || club.competition_name || null,
+        name_sh: club.comp_name_sh || null,
+        name_3l: club.comp_name_3l || club.comp_three_letter || null,
       }
     : null;
 
@@ -212,20 +214,21 @@ export function mapClub(club: any) {
   const affiliateClub = (affClubEntity || affId)
     ? {
         id: String(affClubEntity?.id || affId),
-        name_lg: affClubEntity?.name_lg ?? affClubEntity?.long_name ?? affClubEntity?.name ?? null,
-        name_sh: affClubEntity?.name_sh ?? affClubEntity?.short_name ?? null,
-        name_6l: affClubEntity?.name_6l ?? affClubEntity?.six_letter_name ?? null,
-        name_3l: affClubEntity?.name_3l ?? affClubEntity?.three_letter_name ?? null,
+        name_lg: affClubEntity?.name_lg ?? affClubEntity?.name ?? null,
+        name_sh: affClubEntity?.name_sh ?? null,
+        name_6l: affClubEntity?.name_6l ?? null,
+        name_3l: affClubEntity?.name_3l ?? null,
         type: affType ? String(affType) : null,
       }
     : null;
 
   return {
     id: String(club.id),
-    name_lg: club.long_name ?? club.name_lg ?? null,
-    name_sh: club.short_name ?? club.name_sh ?? null,
-    name_6l: club.six_letter_name ?? club.name_6l ?? null,
-    name_3l: club.three_letter_name ?? club.name_3l ?? null,
+    name: club.name_sh ?? club.name_lg ?? club.name ?? null,
+    name_lg: club.name_lg ?? club.name ?? null,
+    name_sh: club.name_sh ?? null,
+    name_6l: club.name_6l ?? null,
+    name_3l: club.name_3l ?? null,
     note: club.note ?? null,
     inactive_fields: club.inactive_fields ?? null,
     is_extinct: !!club.is_extinct,
@@ -255,9 +258,9 @@ export function mapCity(city: any) {
     : (city.nation_id || city.country_id)
     ? {
         id: String(city.nation_id || city.country_id),
-        name_lg: city.nation_long_name || city.nation_name || null,
-        name_sh: city.nation_short_name || null,
-        name_3l: city.nation_three_letter || null,
+        name_lg: city.nation_name_lg || city.nation_name || null,
+        name_sh: city.nation_name_sh || null,
+        name_3l: city.nation_name_3l || city.nation_three_letter || null,
       }
     : null;
 
@@ -269,6 +272,8 @@ export function mapCity(city: any) {
   return {
     id: String(city.id),
     name: city.name,
+    name_lg: city.name_lg ?? city.name ?? null,
+    name_sh: city.name_sh ?? null,
     region: cleanRegionName,
     region_id: city.region_id ?? regEntity?.id ?? null,
     region_code: regCode,
@@ -287,15 +292,17 @@ export function mapStadium(stadium: any) {
     : stadium.nation_id
     ? {
         id: String(stadium.nation_id),
-        name_lg: stadium.nation_long_name || stadium.nation_name || null,
-        name_sh: stadium.nation_short_name || null,
-        name_3l: stadium.nation_three_letter || null,
+        name_lg: stadium.nation_name_lg || stadium.nation_name || null,
+        name_sh: stadium.nation_name_sh || null,
+        name_3l: stadium.nation_name_3l || stadium.nation_three_letter || null,
       }
     : null;
 
   return {
     id: String(stadium.id),
     name: stadium.name,
+    name_lg: stadium.name_lg ?? stadium.name ?? null,
+    name_sh: stadium.name_sh ?? null,
     type: stadium.type || 'stadium',
     is_disabled: !!stadium.is_disabled,
     inactive_fields: stadium.is_disabled ? 'name' : null,
@@ -310,9 +317,9 @@ export function mapAward(award: any) {
     : award.nation_id
     ? {
         id: String(award.nation_id),
-        name_lg: award.nation_long_name || award.nation_name || null,
-        name_sh: award.nation_short_name || null,
-        name_3l: award.nation_three_letter || null,
+        name_lg: award.nation_name_lg || award.nation_name || null,
+        name_sh: award.nation_name_sh || null,
+        name_3l: award.nation_name_3l || award.nation_three_letter || null,
       }
     : null;
 
@@ -321,17 +328,18 @@ export function mapAward(award: any) {
     : award.comp_id
     ? {
         id: String(award.comp_id),
-        name_lg: award.comp_long_name || award.competition_name || null,
-        name_sh: award.comp_short_name || null,
-        name_3l: award.comp_three_letter || null,
+        name_lg: award.comp_name_lg || award.competition_name || null,
+        name_sh: award.comp_name_sh || null,
+        name_3l: award.comp_name_3l || award.comp_three_letter || null,
       }
     : null;
 
   return {
     id: String(award.id),
-    name_lg: award.long_name ?? award.name_lg ?? null,
-    name_sh: award.short_name ?? award.name_sh ?? null,
-    name_3l: award.three_letter_name ?? award.name_3l ?? null,
+    name: award.name_sh ?? award.name_lg ?? award.name ?? null,
+    name_lg: award.name_lg ?? award.name ?? null,
+    name_sh: award.name_sh ?? null,
+    name_3l: award.name_3l ?? null,
     nation,
     comp,
   };
@@ -342,6 +350,8 @@ export function mapRegion(region: any) {
   return {
     id: region.id,
     name: region.name,
+    name_lg: region.name_lg ?? region.name ?? null,
+    name_sh: region.name_sh ?? null,
     code: region.code || null,
     nation_id: region.nation_id ? String(region.nation_id) : null,
     nation: region.nation ? mapNationRef(region.nation) : null,

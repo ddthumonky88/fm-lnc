@@ -28,8 +28,8 @@ export function normalizeSearchText(str: any): string {
 /**
  * Checks whether an entity record matches a search query string.
  * Supports diacritics-insensitive matching across common fields:
- * id, name, long_name, short_name, first_name, second_name, common_name,
- * three_letter_name, six_letter_name, categories, note, region, etc.
+ * id, name, name_lg, name_sh, name_6l, name_3l, first_name, second_name, common_name,
+ * categories, note, region, etc.
  */
 export function matchRecordSearch(
   record: any,
@@ -45,13 +45,13 @@ export function matchRecordSearch(
   const candidateValues: any[] = [
     record.id,
     record.name,
-    record.long_name,
-    record.short_name,
+    record.name_lg,
+    record.name_sh,
+    record.name_6l,
+    record.name_3l,
     record.first_name,
     record.second_name,
     record.common_name,
-    record.three_letter_name,
-    record.six_letter_name,
     record.type,
     record.categories,
     record.note,
@@ -61,21 +61,19 @@ export function matchRecordSearch(
     record.stadium_name,
     record.nation_name,
     record.nation?.name,
-    record.nation?.long_name,
-    record.nation?.short_name,
-    record.nation?.three_letter_name,
+    record.nation?.name_lg,
+    record.nation?.name_sh,
+    record.nation?.name_3l,
     record.comp_name,
     record.competition_name,
     record.comp?.name,
-    record.comp?.long_name,
-    record.comp?.short_name,
-    record.comp?.name_sh,
     record.comp?.name_lg,
+    record.comp?.name_sh,
+    record.comp?.name_3l,
     record.competition?.name,
-    record.competition?.long_name,
-    record.competition?.short_name,
-    record.competition?.name_sh,
     record.competition?.name_lg,
+    record.competition?.name_sh,
+    record.competition?.name_3l,
     ...extraFields,
   ];
 

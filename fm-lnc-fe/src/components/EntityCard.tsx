@@ -342,14 +342,14 @@ export default function EntityCard({
     }
   };
 
-  const code3 = formatCode(data.three_letter_name);
-  const code6 = formatCode(data.six_letter_name);
+  const code3 = formatCode(data.name_3l);
+  const code6 = formatCode(data.name_6l);
   const title =
     type === EntityType.PLAYER || type === 'player'
       ? `${data.first_name || ''} ${data.second_name || ''}`.trim() ||
         data.common_name ||
         'Unnamed Player'
-      : data.long_name || data.name || 'Unnamed';
+      : data.name_lg || data.name || 'Unnamed';
   const subtitle =
     type === EntityType.PLAYER || type === 'player'
       ? data.common_name
@@ -357,7 +357,7 @@ export default function EntityCard({
         : 'Person / Player'
       : type === EntityType.STAGE || type === 'stage'
         ? 'Tournament Stage'
-        : data.short_name || '';
+        : data.name_sh || '';
   const hasThreeLetter =
     [
       EntityType.NATION,
@@ -366,7 +366,8 @@ export default function EntityCard({
       'nation',
       'competition',
       'club',
-    ].includes(type as any) || 'three_letter_name' in data;
+    ].includes(type as any) ||
+    'name_3l' in data;
   const fgInfo = parseColorInfo(data.fg_color);
   const bgInfo = parseColorInfo(data.bg_color);
 
@@ -391,20 +392,27 @@ export default function EntityCard({
     type !== 'nation' &&
     !data.is_virtual;
 
-  const isTitleInactive = isInactive('long_name') || isInactive('name');
+  const isTitleInactive =
+    isInactive('name_lg') || isInactive('name');
 
   const nationInfo =
     type === EntityType.NATION || type === 'nation'
       ? {
           id: data.id,
-          code: data.three_letter_name,
-          name: data.long_name || data.short_name || data.name,
+          code: data.name_3l,
+          name: data.name_lg || data.name_sh || data.name,
         }
       : data.nation
         ? {
             id: data.nation.id,
-            code: data.nation.three_letter_name || data.nation_three_letter || data.nation.code,
-            name: data.nation.long_name || data.nation.short_name || data.nation.name,
+            code:
+              data.nation.name_3l ||
+              data.nation_three_letter ||
+              data.nation.code,
+            name:
+              data.nation.name_lg ||
+              data.nation.name_sh ||
+              data.nation.name,
           }
         : data.nation_id || data.country_id
           ? {
@@ -444,7 +452,7 @@ export default function EntityCard({
         id: fakeId,
         virtualId: data.id,
         nationId: nId,
-        title: data.long_name || data.short_name,
+        title: data.name_lg || data.name_sh || title,
         metadata: { is_extinct: isExtinct, nation_id: nId },
       });
     } else if (type === EntityType.NATION || type === 'nation') {
@@ -453,7 +461,7 @@ export default function EntityCard({
         onNavigate({
           level: 'NATION_HUB',
           id: data.id,
-          title: `[${data.three_letter_name || ''}] ${data.long_name}`,
+          title: `[${data.name_3l || ''}] ${data.name_lg || data.name || ''}`,
         });
       } else if (data.id) {
         router.push(`/nation/${data.id}`);
@@ -463,13 +471,13 @@ export default function EntityCard({
         onNavigate({
           level: 'CLUBS_IN_COMP',
           id: data.id,
-          title: `${data.short_name || data.long_name}`,
+          title: `${data.name_sh || data.name_lg || data.name || ''}`,
         });
       } else if ((data.awardsCount || 0) > 0) {
         onNavigate({
           level: 'COMP_AWARDS',
           id: data.id,
-          title: `${data.short_name || data.long_name} - Awards`,
+          title: `${data.name_sh || data.name_lg || data.name || ''} - Awards`,
         });
       }
     }
@@ -766,7 +774,7 @@ export default function EntityCard({
                   value: title,
                   align: 'start',
                   lineClamp: 3,
-                  isInactive: isInactive('name') || isInactive('long_name') || isTitleInactive,
+                  isInactive: isInactive('name') || isTitleInactive,
                   isRed: isRedKeyword(title),
                 });
                 let regionVal = data.region_name || data.region || data.categories;
@@ -787,47 +795,50 @@ export default function EntityCard({
                   value: title,
                   align: 'start',
                   lineClamp: 3,
-                  isInactive: isInactive('name') || isInactive('long_name') || isTitleInactive,
+                  isInactive: isInactive('name') || isTitleInactive,
                   isRed: isRedKeyword(title),
                 });
               } else if (entityTypeStr === 'club') {
                 fields.push({
                   label: 'LN:',
-                  value: data.is_virtual ? '-' : data.long_name || title,
+                  value: data.is_virtual ? '-' : data.name_lg || title,
                   align: 'start',
                   lineClamp: 2,
-                  isInactive: isInactive('long_name') || isInactive('name') || isTitleInactive,
-                  isRed: isRedKeyword(data.long_name || title),
+                  isInactive:
+                    isInactive('name_lg') ||
+                    isInactive('name') ||
+                    isTitleInactive,
+                  isRed: isRedKeyword(data.name_lg || title),
                 });
 
-                if (hasThreeLetter || data.short_name || data.is_virtual) {
+                if (hasThreeLetter || data.name_sh || data.is_virtual) {
                   fields.push({
                     label: 'SN:',
-                    value: data.is_virtual ? '-' : data.short_name || title,
+                    value: data.is_virtual ? '-' : data.name_sh || title,
                     align: 'start',
                     lineClamp: 2,
-                    isInactive: isInactive('short_name'),
-                    isRed: isRedKeyword(data.short_name || title),
+                    isInactive: isInactive('name_sh'),
+                    isRed: isRedKeyword(data.name_sh || title),
                   });
                 }
 
                 fields.push({
                   label: '6N:',
                   value: code6 || '-',
-                  isInactive: isInactive('six_letter_name'),
+                  isInactive: isInactive('name_6l'),
                 });
 
                 fields.push({
                   label: '3N:',
                   value: data.is_virtual ? '-' : code3 || '-',
-                  isInactive: isInactive('three_letter_name'),
+                  isInactive: isInactive('name_3l'),
                 });
 
                 // Comp
                 const compObj = data.comp || data.competition;
                 const compNameSh =
                   compObj?.name_sh ||
-                  compObj?.short_name ||
+                  compObj?.name ||
                   data.comp_name ||
                   data.competition_name;
                 const compValue = data.is_extinct ? 'EXT' : compNameSh || '-';
@@ -844,7 +855,7 @@ export default function EntityCard({
                             ? 'text-gray-400 font-normal'
                             : 'text-gray-800'
                       }`}
-                      title={compObj?.name_lg || compObj?.long_name || compValue}
+                      title={compObj?.name_lg || compObj?.name || compValue}
                     >
                       {compValue}
                     </span>
@@ -858,9 +869,8 @@ export default function EntityCard({
                 if (affType || affId) {
                   const pName =
                     affClub?.name_sh ||
-                    affClub?.short_name ||
                     affClub?.name_lg ||
-                    affClub?.long_name ||
+                    affClub?.name ||
                     affId;
                   fields.push({
                     label: 'Affiliate:',
@@ -921,32 +931,37 @@ export default function EntityCard({
                 // Default: Competition, Nation, Award, Confederation, etc.
                 fields.push({
                   label: 'LN:',
-                  value: data.is_virtual ? '-' : data.long_name || title,
+                  value: data.is_virtual ? '-' : data.name_lg || title,
                   align: 'start',
                   lineClamp: 2,
-                  isInactive: isInactive('long_name') || isInactive('name') || isTitleInactive,
-                  isRed: isRedKeyword(data.long_name || title),
+                  isInactive:
+                    isInactive('name_lg') ||
+                    isInactive('name') ||
+                    isTitleInactive,
+                  isRed: isRedKeyword(data.name_lg || title),
                 });
 
-                if (hasThreeLetter || data.short_name || data.is_virtual) {
+                if (hasThreeLetter || data.name_sh || data.is_virtual) {
                   fields.push({
                     label: 'SN:',
-                    value: data.is_virtual ? '-' : data.short_name || title,
+                    value: data.is_virtual ? '-' : data.name_sh || title,
                     align: 'start',
                     lineClamp: 2,
-                    isInactive: isInactive('short_name'),
-                    isRed: isRedKeyword(data.short_name || title),
+                    isInactive: isInactive('name_sh'),
+                    isRed: isRedKeyword(data.name_sh || title),
                   });
                 }
 
                 if (
                   entityTypeStr !== 'award' &&
-                  (hasThreeLetter || data.three_letter_name || data.is_virtual)
+                  (hasThreeLetter ||
+                    data.name_3l ||
+                    data.is_virtual)
                 ) {
                   fields.push({
                     label: '3N:',
                     value: data.is_virtual ? '-' : code3 || '-',
-                    isInactive: isInactive('three_letter_name'),
+                    isInactive: isInactive('name_3l'),
                   });
                 }
               }

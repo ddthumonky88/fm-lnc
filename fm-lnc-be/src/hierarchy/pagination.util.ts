@@ -30,19 +30,19 @@ function getPropertyValue(obj: any, property: string): any {
     return property.split('.').reduce((acc, part) => acc?.[part], obj);
   }
 
-  // Name property aliases
-  if (property === 'long_name' || property === 'name_lg' || property === 'name') return obj.name_lg ?? obj.long_name ?? obj.name;
-  if (property === 'short_name' || property === 'name_sh') return obj.name_sh ?? obj.short_name;
-  if (property === 'three_letter_name' || property === 'name_3l') return obj.name_3l ?? obj.three_letter_name;
-  if (property === 'six_letter_name' || property === 'name_6l') return obj.name_6l ?? obj.six_letter_name;
+  // Name property fields
+  if (property === 'name_lg' || property === 'name') return obj.name_lg ?? obj.name;
+  if (property === 'name_sh') return obj.name_sh;
+  if (property === 'name_3l') return obj.name_3l;
+  if (property === 'name_6l') return obj.name_6l;
   if (property === 'categories' || property === 'region') return obj.region ?? obj.categories;
 
   // Relational aliases
-  if (property === 'nation_name') return obj.nation?.name_lg ?? obj.nation?.long_name ?? obj.nation_name;
-  if (property === 'nation_three_letter') return obj.nation?.name_3l ?? obj.nation?.three_letter_name ?? obj.nation_three_letter;
+  if (property === 'nation_name' || property === 'nation_name_lg') return obj.nation?.name_lg ?? obj.nation_name;
+  if (property === 'nation_three_letter' || property === 'nation_name_3l') return obj.nation?.name_3l ?? obj.nation_three_letter;
   if (property === 'confed_name') return obj.confed?.name ?? obj.confed_name;
-  if (property === 'parent_name') return obj.parent?.name_sh ?? obj.parent?.name_lg ?? obj.parent_name;
-  if (property === 'competition_name') return obj.comp?.name_sh ?? obj.comp?.name_lg ?? obj.competition_name;
+  if (property === 'parent_name' || property === 'parent_name_sh') return obj.parent?.name_sh ?? obj.parent?.name_lg ?? obj.parent_name;
+  if (property === 'competition_name' || property === 'comp_name') return obj.comp?.name_sh ?? obj.comp?.name_lg ?? obj.competition_name;
 
   // Stats handling
   if (obj.stats && typeof obj.stats === 'object') {

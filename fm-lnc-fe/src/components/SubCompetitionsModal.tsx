@@ -100,7 +100,7 @@ export default function SubCompetitionsModal({
   };
 
   const parentShortName =
-    parentComp?.short_name || parentComp?.long_name || `Competition ${parentComp?.id}`;
+    parentComp?.name_sh || parentComp?.name_lg || parentComp?.name || `Competition ${parentComp?.id}`;
 
   return (
     <>
@@ -195,15 +195,19 @@ export default function SubCompetitionsModal({
                     parent_id: child.parent_id || parentComp?.id,
                     parent_name:
                       child.parent_name ||
-                      child.parent_short_name ||
-                      parentComp?.short_name ||
-                      parentComp?.long_name,
+                      child.parent_name_sh ||
+                      child.parent_name_lg ||
+                      parentComp?.name_sh ||
+                      parentComp?.name_lg ||
+                      parentComp?.name,
                     nation: child.nation || parentComp?.nation,
                     nation_id: child.nation_id || parentComp?.nation_id,
                     nation_three_letter:
                       child.nation_three_letter ||
+                      child.nation?.name_3l ||
                       parentComp?.nation_three_letter ||
-                      parentComp?.three_letter_name,
+                      parentComp?.name_3l ||
+                      parentComp?.nation?.name_3l,
                   }}
                   onNavigate={handleNavigateChild}
                   onEdit={onEdit}

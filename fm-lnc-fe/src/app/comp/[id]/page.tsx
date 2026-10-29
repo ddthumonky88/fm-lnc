@@ -144,12 +144,14 @@ export default function CompetitionDetailPage() {
           nation?.confederation?.name ||
           nation?.confed_name ||
           'Confederation';
-        const nationName = nation?.long_name || 'Nation';
+        const nationName =
+          nation?.name_lg ||
+          nation?.name ||
+          nation?.name_sh ||
+          'Nation';
         const nationCode =
-          nation?.three_letter_name ||
           nation?.name_3l ||
           nation?.code ||
-          nation?.short_name ||
           nation?.name_sh;
 
         const virtualTag = rawId.startsWith('oth-') || rawId.startsWith('ext-')
@@ -162,9 +164,10 @@ export default function CompetitionDetailPage() {
 
         setCompInfo({
           id: virtualTag,
-          long_name: virtualTitle,
-          short_name: virtualShort,
-          three_letter_name: isVirtualExtinct ? 'EXT' : 'OTH',
+          name: virtualShort,
+          name_lg: virtualTitle,
+          name_sh: virtualShort,
+          name_3l: isVirtualExtinct ? 'EXT' : 'OTH',
           nation_id: targetNationId,
           nation_name: nationName,
           nation_three_letter: nationCode,
@@ -215,16 +218,23 @@ export default function CompetitionDetailPage() {
 
       if (info) {
         setCompInfo(info);
-        const compTitle = info.short_name || info.long_name || `Competition ${compId}`;
+        const compTitle =
+          info.name_sh ||
+          info.name_lg ||
+          info.name ||
+          `Competition ${compId}`;
         setHeaderTitle(compTitle);
         setHeaderId(info.id);
 
         const nationId = info.nation_id || info.nation?.id;
-        const nationName = info.nation_name || info.nation?.long_name || info.nation?.name_lg;
+        const nationName =
+          info.nation?.name_lg ||
+          info.nation?.name ||
+          info.nation_name ||
+          info.nation?.name_sh;
         const nationCode =
-          info.nation_three_letter ||
-          info.nation?.three_letter_name ||
-          info.nation?.name_3l;
+          info.nation?.name_3l ||
+          info.nation_three_letter;
         const confedId =
           info.confed_id ||
           info.confederation?.id ||
@@ -507,12 +517,19 @@ export default function CompetitionDetailPage() {
   }, [clubsBadgeCount, awardsBadgeCount, activeTab, isVirtual, compInfo?.awardsCount]);
 
   const compTitle =
-    compInfo?.short_name ||
-    compInfo?.long_name ||
+    compInfo?.name_sh ||
+    compInfo?.name_lg ||
+    compInfo?.name ||
     (isVirtual ? (isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs') : `Competition ${compId}`);
   const nationId = compInfo?.nation_id || compInfo?.nation?.id || nationIdParam;
-  const nationName = compInfo?.nation_name || compInfo?.nation?.long_name;
-  const nationCode = compInfo?.nation_three_letter || compInfo?.nation?.three_letter_name;
+  const nationName =
+    compInfo?.nation?.name_lg ||
+    compInfo?.nation?.name ||
+    compInfo?.nation_name ||
+    compInfo?.nation?.name_sh;
+  const nationCode =
+    compInfo?.nation?.name_3l ||
+    compInfo?.nation_three_letter;
   const confedId = compInfo?.confed_id || compInfo?.confederation?.id;
 
   return (

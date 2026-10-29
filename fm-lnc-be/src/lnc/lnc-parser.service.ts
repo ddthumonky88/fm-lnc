@@ -177,17 +177,17 @@ export class LncParserService {
             if (!nations[id]) nations[id] = { confed_id: curConfedId, inactive_fields: new Set() };
             if (!nations[id].inactive_fields) nations[id].inactive_fields = new Set();
             if (cmd === 'NATION_LONG_NAME_CHANGE') {
-              nations[id].long_name = val;
-              if (isCommented) nations[id].inactive_fields.add('long_name');
-              else nations[id].inactive_fields.delete('long_name');
+              nations[id].name_lg = val;
+              if (isCommented) nations[id].inactive_fields.add('name_lg');
+              else nations[id].inactive_fields.delete('name_lg');
             } else if (cmd === 'NATION_SHORT_NAME_CHANGE') {
-              nations[id].short_name = val;
-              if (isCommented) nations[id].inactive_fields.add('short_name');
-              else nations[id].inactive_fields.delete('short_name');
+              nations[id].name_sh = val;
+              if (isCommented) nations[id].inactive_fields.add('name_sh');
+              else nations[id].inactive_fields.delete('name_sh');
             } else if (cmd === 'NATION_3LETTER_NAME_CHANGE') {
-              nations[id].three_letter_name = val;
-              if (isCommented) nations[id].inactive_fields.add('three_letter_name');
-              else nations[id].inactive_fields.delete('three_letter_name');
+              nations[id].name_3l = val;
+              if (isCommented) nations[id].inactive_fields.add('name_3l');
+              else nations[id].inactive_fields.delete('name_3l');
             }
           } else if (cmd === 'CITY_NAME_CHANGE') {
             if (!cities[id]) {
@@ -210,9 +210,9 @@ export class LncParserService {
 
       for (const [idStr, ndata] of Object.entries(nations)) {
         const id = parseInt(idStr, 10);
-        const lName = ndata.long_name || `Nation ${id}`;
-        const sName = ndata.short_name || lName;
-        const code = ndata.three_letter_name || 'UNK';
+        const lName = ndata.name_lg || `Nation ${id}`;
+        const sName = ndata.name_sh || lName;
+        const code = ndata.name_3l || 'UNK';
         const cid = ndata.confed_id || 7;
 
         codeToNationId[code] = id;
@@ -413,32 +413,32 @@ export class LncParserService {
             if (!comps[id]) comps[id] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
             if (!comps[id].inactive_fields) comps[id].inactive_fields = new Set();
             if (cmd === 'COMP_LONG_NAME_CHANGE') {
-              comps[id].long_name = val;
-              if (isCommented) comps[id].inactive_fields.add('long_name');
-              else comps[id].inactive_fields.delete('long_name');
+              comps[id].name_lg = val;
+              if (isCommented) comps[id].inactive_fields.add('name_lg');
+              else comps[id].inactive_fields.delete('name_lg');
             }
             if (cmd === 'COMP_SHORT_NAME_CHANGE') {
-              comps[id].short_name = val;
-              if (isCommented) comps[id].inactive_fields.add('short_name');
-              else comps[id].inactive_fields.delete('short_name');
+              comps[id].name_sh = val;
+              if (isCommented) comps[id].inactive_fields.add('name_sh');
+              else comps[id].inactive_fields.delete('name_sh');
             }
             if (cmd === 'COMP_3LETTER_NAME_CHANGE') {
-              comps[id].three_letter_name = val;
-              if (isCommented) comps[id].inactive_fields.add('three_letter_name');
-              else comps[id].inactive_fields.delete('three_letter_name');
+              comps[id].name_3l = val;
+              if (isCommented) comps[id].inactive_fields.add('name_3l');
+              else comps[id].inactive_fields.delete('name_3l');
             }
           } else if (cmd === 'AWARD_LONG_NAME_CHANGE' || cmd === 'AWARD_SHORT_NAME_CHANGE') {
             if (!awards[id]) awards[id] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
             if (!awards[id].inactive_fields) awards[id].inactive_fields = new Set();
             if (cmd === 'AWARD_LONG_NAME_CHANGE') {
-              awards[id].long_name = val;
-              if (isCommented) awards[id].inactive_fields.add('long_name');
-              else awards[id].inactive_fields.delete('long_name');
+              awards[id].name_lg = val;
+              if (isCommented) awards[id].inactive_fields.add('name_lg');
+              else awards[id].inactive_fields.delete('name_lg');
             }
             if (cmd === 'AWARD_SHORT_NAME_CHANGE') {
-              awards[id].short_name = val;
-              if (isCommented) awards[id].inactive_fields.add('short_name');
-              else awards[id].inactive_fields.delete('short_name');
+              awards[id].name_sh = val;
+              if (isCommented) awards[id].inactive_fields.add('name_sh');
+              else awards[id].inactive_fields.delete('name_sh');
             }
           } else if (cmd === 'STAGE_NAME_LONG_NAME_CHANGE') {
             await queryRunner.query(
@@ -452,9 +452,9 @@ export class LncParserService {
       const compNameToId: Record<string, number> = {};
       for (const [idStr, cdata] of Object.entries(comps)) {
         const id = parseInt(idStr, 10);
-        const lName = cdata.long_name || `Competition ${id}`;
-        const sName = cdata.short_name || lName;
-        const code = cdata.three_letter_name || null;
+        const lName = cdata.name_lg || `Competition ${id}`;
+        const sName = cdata.name_sh || lName;
+        const code = cdata.name_3l || null;
         const fg = cdata.fg_color || null;
         const bg = cdata.bg_color || null;
         const natId = cdata.nat_code ? codeToNationId[cdata.nat_code] || null : null;
@@ -488,8 +488,8 @@ export class LncParserService {
 
       for (const [idStr, adata] of Object.entries(awards)) {
         const id = parseInt(idStr, 10);
-        const lName = adata.long_name || `Award ${id}`;
-        const sName = adata.short_name || lName;
+        const lName = adata.name_lg || `Award ${id}`;
+        const sName = adata.name_sh || lName;
         const natId = adata.nat_code ? codeToNationId[adata.nat_code.toUpperCase()] || null : null;
         let compId = null;
         if (adata.cat) {
@@ -589,24 +589,24 @@ export class LncParserService {
             }
             if (!clubs[id].inactive_fields) clubs[id].inactive_fields = new Set();
             if (cmd === 'CLUB_NAME_CHANGE') {
-              clubs[id].long_name = val;
-              if (isCommented) clubs[id].inactive_fields.add('long_name');
-              else clubs[id].inactive_fields.delete('long_name');
+              clubs[id].name_lg = val;
+              if (isCommented) clubs[id].inactive_fields.add('name_lg');
+              else clubs[id].inactive_fields.delete('name_lg');
             }
             if (cmd === 'CLUB_SHORT_NAME_CHANGE') {
-              clubs[id].short_name = val;
-              if (isCommented) clubs[id].inactive_fields.add('short_name');
-              else clubs[id].inactive_fields.delete('short_name');
+              clubs[id].name_sh = val;
+              if (isCommented) clubs[id].inactive_fields.add('name_sh');
+              else clubs[id].inactive_fields.delete('name_sh');
             }
             if (cmd === 'CLUB_3LETTER_NAME_CHANGE') {
-              clubs[id].three_letter_name = val;
-              if (isCommented) clubs[id].inactive_fields.add('three_letter_name');
-              else clubs[id].inactive_fields.delete('three_letter_name');
+              clubs[id].name_3l = val;
+              if (isCommented) clubs[id].inactive_fields.add('name_3l');
+              else clubs[id].inactive_fields.delete('name_3l');
             }
             if (cmd === 'CLUB_6LETTER_NAME_CHANGE') {
-              clubs[id].six_letter_name = val;
-              if (isCommented) clubs[id].inactive_fields.add('six_letter_name');
-              else clubs[id].inactive_fields.delete('six_letter_name');
+              clubs[id].name_6l = val;
+              if (isCommented) clubs[id].inactive_fields.add('name_6l');
+              else clubs[id].inactive_fields.delete('name_6l');
             }
             if (note && !clubs[id].note) clubs[id].note = note;
           } else if (cmd === 'STADIUM_NAME_CHANGE') {
@@ -624,8 +624,8 @@ export class LncParserService {
 
       for (const [idStr, cdata] of Object.entries(clubs)) {
         const id = parseInt(idStr, 10);
-        const lName = cdata.long_name || `Club ${id}`;
-        const sName = cdata.short_name || lName;
+        const lName = cdata.name_lg || `Club ${id}`;
+        const sName = cdata.name_sh || lName;
         const natId = cdata.nat_code ? codeToNationId[cdata.nat_code] || null : null;
         let compId = null;
         if (cdata.comp_cat) {
@@ -660,7 +660,7 @@ export class LncParserService {
              is_extinct = EXCLUDED.is_extinct,
              affiliate_club_id = EXCLUDED.affiliate_club_id,
              affiliate_club_type = EXCLUDED.affiliate_club_type`,
-          [id, lName, sName, cdata.six_letter_name || null, cdata.three_letter_name || null, natId, compId, cdata.note || null, inactStr, isExtinct, cdata.affiliate_club_id ? String(cdata.affiliate_club_id) : (cdata.parent_id ? String(cdata.parent_id) : null), cdata.affiliate_club_type || cdata.affiliate_type || null],
+          [id, lName, sName, cdata.name_6l || null, cdata.name_3l || null, natId, compId, cdata.note || null, inactStr, isExtinct, cdata.affiliate_club_id ? String(cdata.affiliate_club_id) : (cdata.parent_id ? String(cdata.parent_id) : null), cdata.affiliate_club_type || cdata.affiliate_type || null],
         );
       }
 

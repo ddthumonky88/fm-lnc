@@ -104,9 +104,9 @@ export class LncService {
         const pfx = isInactive('colors') ? '#' : '';
         out += `${pfx}"COMP_COLOUR_CHANGE"\t\t${comp.id}\t\t0 ${comp.fg_color} ${comp.bg_color}\t\t""\n`;
       }
-      const pfxLong = isInactive('long_name') || isInactive('name_lg') ? '#' : '';
-      const pfxShort = isInactive('short_name') || isInactive('name_sh') ? '#' : '';
-      const pfx3 = isInactive('three_letter_name') || isInactive('name_3l') ? '#' : '';
+      const pfxLong = isInactive('name_lg') ? '#' : '';
+      const pfxShort = isInactive('name_sh') ? '#' : '';
+      const pfx3 = isInactive('name_3l') ? '#' : '';
       out += `${pfxLong}"COMP_LONG_NAME_CHANGE"\t${comp.id}\t\t"${comp.name_lg}"\t\t\t\t\t""\n`;
       out += `${pfxShort}"COMP_SHORT_NAME_CHANGE"\t${comp.id}\t\t"${comp.name_sh}"\t\t\t\t\t""\n`;
       if (comp.name_3l) {
@@ -172,10 +172,10 @@ export class LncService {
         .filter(Boolean);
       const isInactive = (f: string) => inactiveList.includes(f);
 
-      const pfxLong = isInactive('long_name') || isInactive('name_lg') ? '#' : '';
-      const pfxShort = isInactive('short_name') || isInactive('name_sh') ? '#' : '';
-      const pfx6 = isInactive('six_letter_name') || isInactive('name_6l') ? '#' : '';
-      const pfx3 = isInactive('three_letter_name') || isInactive('name_3l') ? '#' : '';
+      const pfxLong = isInactive('name_lg') ? '#' : '';
+      const pfxShort = isInactive('name_sh') ? '#' : '';
+      const pfx6 = isInactive('name_6l') ? '#' : '';
+      const pfx3 = isInactive('name_3l') ? '#' : '';
 
       const affId = cl.affiliate_club_id;
       const affType = cl.affiliate_club_type;
@@ -224,8 +224,8 @@ export class LncService {
         .map((s) => s.trim().toLowerCase())
         .filter(Boolean);
       const isInactive = (f: string) => inactList.includes(f);
-      const pfxLong = isInactive('long_name') || isInactive('name_lg') ? '#' : '';
-      const pfxShort = isInactive('short_name') || isInactive('name_sh') ? '#' : '';
+      const pfxLong = isInactive('name_lg') ? '#' : '';
+      const pfxShort = isInactive('name_sh') ? '#' : '';
       out += `${pfxLong}"AWARD_LONG_NAME_CHANGE"\t${a.id}\t"${a.name_lg}"\t\t\t\t\t\t""\n`;
       out += `${pfxShort}"AWARD_SHORT_NAME_CHANGE"\t${a.id}\t"${a.name_sh}"\t\t\t\t\t\t""\n\n`;
     }

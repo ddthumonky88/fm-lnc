@@ -194,16 +194,8 @@ export default function NationDetailPage() {
         nation?.confederation?.name ||
         nation?.confed_name ||
         'Confederation';
-      const nationCode =
-        nation?.three_letter_name ||
-        nation?.name_3l ||
-        nation?.short_name ||
-        nation?.name_sh;
-      const nationName =
-        nation?.long_name ||
-        nation?.name_lg ||
-        nation?.short_name ||
-        nation?.name_sh;
+      const nationCode = nation?.name_3l || nation?.name_sh;
+      const nationName = nation?.name_lg || nation?.name || nation?.name_sh;
       const nationTitle = nationCode
         ? `[${nationCode}] ${nationName || nationId}`
         : nationName || `Nation ${nationId}`;
@@ -362,9 +354,7 @@ export default function NationDetailPage() {
           nation: r.nation || nationHub.nation,
           nation_id: r.nation_id || r.country_id || nationHub.nation.id,
           nation_three_letter:
-            r.nation_three_letter ||
-            r.nation?.three_letter_name ||
-            nationHub.nation.three_letter_name,
+            r.nation_three_letter || r.nation?.name_3l || nationHub.nation.name_3l,
         }));
   }, [records, nationHub]);
 
@@ -513,12 +503,11 @@ export default function NationDetailPage() {
 
   const nation = nationHub?.nation;
   const nationShortName =
-    nation?.short_name ||
     nation?.name_sh ||
-    nation?.long_name ||
+    nation?.name ||
     nation?.name_lg ||
     `Nation ${nationId}`;
-  const nationLongName = nation?.long_name || nation?.name_lg;
+  const nationLongName = nation?.name_lg || nation?.name;
 
   return (
     <div className="space-y-3">
@@ -531,9 +520,9 @@ export default function NationDetailPage() {
           {/* Nation Info Banner */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              {getNationLogoUrl(nationId, nation?.three_letter_name) ? (
+              {getNationLogoUrl(nationId, nation?.name_3l) ? (
                 <img
-                  src={getNationLogoUrl(nationId, nation?.three_letter_name)}
+                  src={getNationLogoUrl(nationId, nation?.name_3l)}
                   alt={nationShortName}
                   className="w-9 h-6 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
                   onError={(e) => {

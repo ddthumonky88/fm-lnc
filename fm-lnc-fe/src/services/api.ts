@@ -140,19 +140,10 @@ function normalizeEntityFields(item: any): any {
       item.totalChildren = s.children;
   }
 
-  // Name fields aliases
-  if (item.name_lg !== undefined && item.long_name === undefined) item.long_name = item.name_lg;
-  if (item.long_name !== undefined && item.name_lg === undefined) item.name_lg = item.long_name;
-  if (item.name_sh !== undefined && item.short_name === undefined) item.short_name = item.name_sh;
-  if (item.short_name !== undefined && item.name_sh === undefined) item.name_sh = item.short_name;
-  if (item.name_3l !== undefined && item.three_letter_name === undefined)
-    item.three_letter_name = item.name_3l;
-  if (item.three_letter_name !== undefined && item.name_3l === undefined)
-    item.name_3l = item.three_letter_name;
-  if (item.name_6l !== undefined && item.six_letter_name === undefined)
-    item.six_letter_name = item.name_6l;
-  if (item.six_letter_name !== undefined && item.name_6l === undefined)
-    item.name_6l = item.six_letter_name;
+  // Name fields normalization
+  if (!item.name) {
+    item.name = item.name_sh || item.name_lg || undefined;
+  }
 
   // City region / categories
   if (item.region !== undefined && item.categories === undefined) item.categories = item.region;
@@ -169,7 +160,6 @@ function normalizeEntityFields(item: any): any {
   if (item.isDisabled !== undefined && item.is_disabled === undefined)
     item.is_disabled = item.isDisabled;
   const isClubRecord =
-    item.six_letter_name !== undefined ||
     item.name_6l !== undefined ||
     item.comp_id !== undefined ||
     item.is_extinct !== undefined;
@@ -260,14 +250,12 @@ export interface ConfederationItem {
 
 export interface NationItem {
   id: string;
+  name?: string;
   name_lg?: string;
-  long_name: string;
   name_sh?: string;
-  short_name: string;
   name_3l?: string;
-  three_letter_name: string;
   confed_id?: string;
-  confederation_id: string;
+  confederation_id?: string;
   confed_name?: string;
   confederation_name?: string;
   confed?: ConfederationItem;
@@ -284,12 +272,10 @@ export interface NationItem {
 
 export interface CompetitionItem {
   id: string;
+  name?: string;
   name_lg?: string;
-  long_name: string;
   name_sh?: string;
-  short_name: string;
   name_3l?: string;
-  three_letter_name: string;
   fg_color?: string;
   bg_color?: string;
   confed_id?: string;
@@ -299,8 +285,9 @@ export interface CompetitionItem {
   nation_three_letter?: string;
   parent_id?: string;
   parent_name?: string;
-  parent_long_name?: string;
-  parent_short_name?: string;
+  parent_name_lg?: string;
+  parent_name_sh?: string;
+  parent_name_3l?: string;
   childrenCount?: number;
   type?: string;
   categories?: string;
@@ -322,6 +309,7 @@ export interface CompetitionItem {
 
 export interface AffiliateClubInfo {
   id: string;
+  name?: string | null;
   name_lg?: string | null;
   name_sh?: string | null;
   name_6l?: string | null;
@@ -331,14 +319,11 @@ export interface AffiliateClubInfo {
 
 export interface ClubItem {
   id: string;
+  name?: string;
   name_lg?: string;
-  long_name: string;
   name_sh?: string;
-  short_name: string;
   name_6l?: string;
-  six_letter_name?: string;
   name_3l?: string;
-  three_letter_name?: string;
   nation_id?: string;
   comp_id?: string;
   affiliate_club_id?: string | null;
@@ -361,6 +346,8 @@ export interface ClubItem {
 export interface StadiumItem {
   id: string;
   name: string;
+  name_lg?: string;
+  name_sh?: string;
   nation_id?: string;
   type?: 'stadium' | 'training pitch' | string;
   is_disabled?: boolean;
@@ -373,6 +360,8 @@ export interface StadiumItem {
 export interface RegionItem {
   id: number;
   name: string;
+  name_lg?: string;
+  name_sh?: string;
   nation_id: string;
   code?: string;
   citiesCount?: number;
@@ -381,6 +370,8 @@ export interface RegionItem {
 export interface CityItem {
   id: string;
   name: string;
+  name_lg?: string;
+  name_sh?: string;
   nation_id?: string;
   country_id?: string;
   region?: string;
@@ -396,10 +387,10 @@ export interface CityItem {
 
 export interface AwardItem {
   id: string;
+  name?: string;
   name_lg?: string;
-  long_name: string;
   name_sh?: string;
-  short_name: string;
+  name_3l?: string;
   nation_id?: string;
   comp_id?: string;
   nation?: NationItem;

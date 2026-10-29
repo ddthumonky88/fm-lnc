@@ -627,7 +627,7 @@ export default function LncSortitoutsiExplorer() {
 
     if (currentStep.level === HierarchyLevel.NATION_HUB && currentStep.id) {
       setHeaderLogo({
-        url: getNationLogoUrl(currentStep.id, currentStep.metadata?.three_letter_name),
+        url: getNationLogoUrl(currentStep.id, currentStep.metadata?.name_3l),
         isFlag: true,
         alt: currentStep.title,
       });
@@ -966,11 +966,11 @@ export default function LncSortitoutsiExplorer() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-3 border-b border-gray-100">
               <div>
                 <h2 className="text-base font-bold text-gray-800 flex items-center gap-2.5">
-                  {getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.three_letter_name) ? (
+                  {getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.name_3l) ? (
                     <img
                       src={getNationLogoUrl(
                         nationHub.nation?.id,
-                        nationHub.nation?.three_letter_name,
+                        nationHub.nation?.name_3l,
                       )}
                       alt={currentStep.title}
                       className="w-8 h-5.5 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
@@ -1202,13 +1202,13 @@ export default function LncSortitoutsiExplorer() {
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center gap-3">
                       {compInfo?.nation &&
-                      getNationLogoUrl(compInfo.nation.id, compInfo.nation.three_letter_name) ? (
+                      getNationLogoUrl(compInfo.nation.id, compInfo.nation.name_3l) ? (
                         <img
                           src={getNationLogoUrl(
                             compInfo.nation.id,
-                            compInfo.nation.three_letter_name,
+                            compInfo.nation.name_3l,
                           )}
-                          alt={compInfo.nation.short_name || compInfo.nation.long_name}
+                          alt={compInfo.nation.name_sh || compInfo.nation.name_lg || compInfo.nation.name}
                           className="w-8 h-6 object-cover rounded-xs border border-slate-200 shadow-2xs shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -1236,8 +1236,9 @@ export default function LncSortitoutsiExplorer() {
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h2 className="text-base sm:text-lg font-bold text-slate-800 m-0">
-                            {compInfo?.short_name ||
-                              compInfo?.long_name ||
+                            {compInfo?.name_sh ||
+                              compInfo?.name_lg ||
+                              compInfo?.name ||
                               currentStep.title.replace(/ - (Clubs|Awards)$/, '')}
                           </h2>
                           {currentStep.id && (
@@ -1260,8 +1261,8 @@ export default function LncSortitoutsiExplorer() {
                             </Tooltip>
                           )}
                         </div>
-                        {compInfo?.long_name && compInfo.long_name !== compInfo.short_name && (
-                          <div className="text-xs text-slate-500 mt-0.5">{compInfo.long_name}</div>
+                        {compInfo?.name_lg && compInfo.name_lg !== compInfo.name_sh && (
+                          <div className="text-xs text-slate-500 mt-0.5">{compInfo.name_lg}</div>
                         )}
                       </div>
                     </div>
@@ -1578,13 +1579,13 @@ export default function LncSortitoutsiExplorer() {
             pushStep({
               level: HierarchyLevel.NATION_HUB,
               id: item.id,
-              title: `[${item.three_letter_name}] ${item.long_name}`,
+              title: `[${item.name_3l}] ${item.name_lg || item.name}`,
             });
           } else if (type === EntityType.COMPETITION || type === 'competition') {
             pushStep({
               level: HierarchyLevel.CLUBS_IN_COMP,
               id: item.id,
-              title: `${item.short_name || item.long_name}`,
+              title: `${item.name_sh || item.name_lg || item.name}`,
             });
           } else {
             // Edit or view directly

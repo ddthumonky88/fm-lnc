@@ -71,9 +71,9 @@ export class HierarchyController {
       example: {
         nation: {
           id: '11',
-          long_name: 'England',
-          short_name: 'England',
-          three_letter_name: 'ENG',
+          name_lg: 'England',
+          name_sh: 'England',
+          name_3l: 'ENG',
           confederation_id: '1',
           confederation: { id: '1', name: 'Europe (UEFA)' },
         },
@@ -239,9 +239,9 @@ export class HierarchyController {
       type: 'object',
       example: {
         id: '11',
-        long_name: 'England',
-        short_name: 'England',
-        three_letter_name: 'ENG',
+        name_lg: 'England',
+        name_sh: 'England',
+        name_3l: 'ENG',
         confederation_id: '1',
         confederation_name: 'Europe (UEFA)',
         confederation: { id: '1', name: 'Europe (UEFA)' },
@@ -273,10 +273,10 @@ export class HierarchyController {
       type: 'object',
       example: {
         id: '676',
-        long_name: 'Liverpool Football Club',
-        short_name: 'Liverpool',
-        six_letter_name: "L'pool",
-        three_letter_name: 'LIV',
+        name_lg: 'Liverpool Football Club',
+        name_sh: 'Liverpool',
+        name_6l: "L'pool",
+        name_3l: 'LIV',
         nation_id: '11',
         comp_id: '11',
         is_extinct: false,
@@ -331,8 +331,8 @@ export class HierarchyController {
       type: 'object',
       example: {
         id: '456',
-        long_name: "PFA Players' Player of the Year",
-        short_name: 'PFA Player of the Year',
+        name_lg: "PFA Players' Player of the Year",
+        name_sh: 'PFA Player of the Year',
         nation_id: '11',
         comp_id: '11',
         nation_name: 'England',
@@ -377,7 +377,7 @@ export class HierarchyController {
         code: 'ALG-05',
         nation_id: '5',
         citiesCount: 2,
-        nation: { id: '5', long_name: 'Algeria', short_name: 'Algeria', three_letter_name: 'ALG' },
+        nation: { id: '5', name_lg: 'Algeria', name_sh: 'Algeria', name_3l: 'ALG' },
       },
     },
   })
@@ -394,15 +394,15 @@ export class HierarchyController {
       type: 'object',
       example: {
         id: '11',
-        long_name: 'English Premier Division',
-        short_name: 'Premier League',
-        three_letter_name: 'PL',
+        name_lg: 'English Premier Division',
+        name_sh: 'Premier League',
+        name_3l: 'PL',
         fg_color: '255 255 255',
         bg_color: '56 0 60',
         clubsCount: 20,
         awardsCount: 12,
         childrenCount: 0,
-        nation: { id: '11', long_name: 'England', short_name: 'England' },
+        nation: { id: '11', name_lg: 'England', name_sh: 'England' },
         confederation: { id: '1', name: 'Europe (UEFA)' },
       },
     },
@@ -422,9 +422,9 @@ export class HierarchyController {
       example: [
         {
           id: '1301394',
-          long_name: 'UEFA Champions League Qualifying Phase',
-          short_name: 'Champions League Qualifying',
-          three_letter_name: 'UCLQ',
+          name_lg: 'UEFA Champions League Qualifying Phase',
+          name_sh: 'Champions League Qualifying',
+          name_3l: 'UCLQ',
           parent_id: '1301393',
           parent_name: 'Champions League',
           clubsCount: 32,
@@ -479,7 +479,7 @@ export class HierarchyController {
     description: 'Danh sách toàn bộ giải thưởng',
     schema: {
       type: 'array',
-      example: [{ id: '456', long_name: "Ballon d'Or", short_name: "Ballon d'Or" }],
+      example: [{ id: '456', name_lg: "Ballon d'Or", name_sh: "Ballon d'Or" }],
     },
   })
   @Post('awards')

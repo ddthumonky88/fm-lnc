@@ -155,9 +155,9 @@ export function sortCompetitionsByCategory(a: any, b: any): number {
     if (catComp !== 0) return catComp;
   }
 
-  // Fallback: alphabetical by name
-  const nameA = a.long_name || a.short_name || a.name || '';
-  const nameB = b.long_name || b.short_name || b.name || '';
+  // Fallback: alphabetical by name (name, name_lg, name_sh)
+  const nameA = a.name_lg || a.name_sh || a.name || '';
+  const nameB = b.name_lg || b.name_sh || b.name || '';
   return String(nameA).localeCompare(String(nameB), undefined, {
     numeric: true,
     sensitivity: 'base',

@@ -204,10 +204,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           onClose={() => setIsSearchModalOpen(false)}
           onSelectItem={(item, type) => {
             if (type === EntityType.NATION || type === 'nation') {
-              router.push(`/?nationId=${item.id}&nationName=${encodeURIComponent(item.long_name)}`);
+              router.push(`/?nationId=${item.id}&nationName=${encodeURIComponent(item.name_lg || item.name || '')}`);
             } else if (type === EntityType.COMPETITION || type === 'competition') {
               router.push(
-                `/?compId=${item.id}&compName=${encodeURIComponent(item.short_name || item.long_name)}`,
+                `/?compId=${item.id}&compName=${encodeURIComponent(item.name_sh || item.name_lg || item.name || '')}`,
               );
             } else {
               handleOpenRecordModal(type as RecordType, item);

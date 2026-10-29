@@ -17,16 +17,13 @@ function normalizeInputData(data: any): any {
   if (!data || typeof data !== 'object') return data;
   const d = { ...data };
   if (d.long_name !== undefined && d.name_lg === undefined) d.name_lg = d.long_name;
-  if (d.name_lg !== undefined && d.long_name === undefined) d.long_name = d.name_lg;
-
   if (d.short_name !== undefined && d.name_sh === undefined) d.name_sh = d.short_name;
-  if (d.name_sh !== undefined && d.short_name === undefined) d.short_name = d.name_sh;
-
   if (d.six_letter_name !== undefined && d.name_6l === undefined) d.name_6l = d.six_letter_name;
-  if (d.name_6l !== undefined && d.six_letter_name === undefined) d.six_letter_name = d.name_6l;
-
   if (d.three_letter_name !== undefined && d.name_3l === undefined) d.name_3l = d.three_letter_name;
-  if (d.name_3l !== undefined && d.three_letter_name === undefined) d.three_letter_name = d.name_3l;
+  delete d.long_name;
+  delete d.short_name;
+  delete d.six_letter_name;
+  delete d.three_letter_name;
 
   if (d.categories !== undefined && d.region === undefined) d.region = d.categories;
   if (d.region !== undefined && d.categories === undefined) d.categories = d.region;

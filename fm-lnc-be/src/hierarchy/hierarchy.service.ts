@@ -114,12 +114,12 @@ export class HierarchyService {
     const raw = await this.compRepo.query(
       `SELECT c.*,
         conf.name as confed_name,
-        n.name_3l as nation_three_letter,
-        n.name_lg as nation_long_name,
-        n.name_sh as nation_short_name,
-        p.name_lg as parent_long_name,
-        p.name_sh as parent_short_name,
-        p.name_3l as parent_three_letter,
+        n.name_3l as nation_name_3l,
+        n.name_lg as nation_name_lg,
+        n.name_sh as nation_name_sh,
+        p.name_lg as parent_name_lg,
+        p.name_sh as parent_name_sh,
+        p.name_3l as parent_name_3l,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (WITH RECURSIVE sc AS (
           SELECT id FROM competitions WHERE id = c.id
@@ -260,12 +260,12 @@ export class HierarchyService {
     const raw = await this.compRepo.query(
       `SELECT c.*,
         conf.name as confed_name,
-        n.name_3l as nation_three_letter,
-        n.name_lg as nation_long_name,
-        n.name_sh as nation_short_name,
-        p.name_lg as parent_long_name,
-        p.name_sh as parent_short_name,
-        p.name_3l as parent_three_letter,
+        n.name_3l as nation_name_3l,
+        n.name_lg as nation_name_lg,
+        n.name_sh as nation_name_sh,
+        p.name_lg as parent_name_lg,
+        p.name_sh as parent_name_sh,
+        p.name_3l as parent_name_3l,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (WITH RECURSIVE sc AS (
           SELECT id FROM competitions WHERE id = c.id
@@ -730,9 +730,7 @@ export class HierarchyService {
 
       return {
         id: fakeId,
-        long_name: longName,
-        short_name: shortName,
-        three_letter_name: threeLetter,
+        name: shortName,
         name_lg: longName,
         name_sh: shortName,
         name_3l: threeLetter,
@@ -741,6 +739,7 @@ export class HierarchyService {
         nation_id: nationId,
         nation: mapNationRef(nation),
         nation_name: nation?.name_lg || nation?.name_sh,
+        nation_name_3l: nation?.name_3l,
         nation_three_letter: nation?.name_3l,
         confed_id: nation?.confed_id,
         confederation: nation?.confederation
@@ -818,12 +817,12 @@ export class HierarchyService {
     const raw = await this.compRepo.query(
       `SELECT c.*,
         conf.name as confed_name,
-        n.name_3l as nation_three_letter,
-        n.name_lg as nation_long_name,
-        n.name_sh as nation_short_name,
-        p.name_lg as parent_long_name,
-        p.name_sh as parent_short_name,
-        p.name_3l as parent_three_letter,
+        n.name_3l as nation_name_3l,
+        n.name_lg as nation_name_lg,
+        n.name_sh as nation_name_sh,
+        p.name_lg as parent_name_lg,
+        p.name_sh as parent_name_sh,
+        p.name_3l as parent_name_3l,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
         (WITH RECURSIVE sc AS (
           SELECT id FROM competitions WHERE id = c.id
@@ -1175,14 +1174,7 @@ export class HierarchyService {
       name: region.name,
       code: region.code || null,
       nation_id: region.nation_id,
-      nation: region.nation
-        ? {
-            id: region.nation.id,
-            long_name: region.nation.name_lg,
-            short_name: region.nation.name_sh,
-            three_letter_name: region.nation.name_3l,
-          }
-        : null,
+      nation: region.nation ? mapNationRef(region.nation) : null,
       citiesCount,
     };
   }
