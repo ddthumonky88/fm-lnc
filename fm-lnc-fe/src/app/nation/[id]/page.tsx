@@ -12,6 +12,9 @@ import {
   PlusOutlined,
   ArrowLeftOutlined,
   CopyOutlined,
+  CheckOutlined,
+  EditOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import {
   fetchNationHub,
@@ -28,6 +31,7 @@ import {
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
 import CityGroupView from '../../../components/CityGroupView';
+import RecordDetailView from '../../../components/RecordDetailView';
 import {
   DomesticCompIcon,
   StadiumIcon,
@@ -37,6 +41,17 @@ import {
 import { EntityType, RecordType, NationTabKey, NationTabKeyValue } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { matchRecordSearch } from '../../../utils/search';
+
+const CONFED_ID_MAP: Record<string, string> = {
+  '1': 'CAF',
+  '2': 'AFC',
+  '3': 'UEFA',
+  '4': 'CONCACAF',
+  '5': 'OFC',
+  '6': 'CONMEBOL',
+  '7': 'World',
+  '8': 'EXTINCT',
+};
 
 export default function NationDetailPage() {
   const params = useParams();
@@ -54,7 +69,7 @@ export default function NationDetailPage() {
   const nationId = params?.id ? String(params.id) : '';
 
   const [nationHub, setNationHub] = useState<NationHubData | null>(null);
-  const [activeTab, setActiveTab] = useState<NationTabKeyValue>(NationTabKey.DOMESTIC_COMPS);
+  const [activeTab, setActiveTab] = useState<NationTabKeyValue>(NationTabKey.INFO);
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tabLoading, setTabLoading] = useState(false);
@@ -69,6 +84,14 @@ export default function NationDetailPage() {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchInput, setSearchInput] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [copiedId, setCopiedId] = useState(false);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(true);
+    message.success(`Copied: ${text}`);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
 
   const activeTabRef = useRef(activeTab);
   useEffect(() => {
@@ -94,7 +117,7 @@ export default function NationDetailPage() {
       size = 20,
       regionId?: number | string,
     ) => {
-      if (!nationId) return;
+      if (!nationId || tabKey === NationTabKey.INFO) return;
       setTabLoading(true);
       try {
         const effRegionId = regionId !== undefined ? regionId : selectedRegionIdRef.current;
@@ -160,12 +183,29 @@ export default function NationDetailPage() {
         .catch((err) => console.error('Failed to load regions', err));
 
       const nation = hub.nation;
-      const confedId = nation?.confederation_id;
-      const confedName = nation?.confederation?.name || 'Confederation';
-      const nationCode = nation?.three_letter_name;
-      const nationName = nation?.long_name;
+      const confedId =
+        nation?.confed_id ||
+        nation?.confederation_id ||
+        nation?.confed?.id ||
+        nation?.confederation?.id;
+      const confedName =
+        (confedId && CONFED_ID_MAP[String(confedId)]) ||
+        nation?.confed?.name ||
+        nation?.confederation?.name ||
+        nation?.confed_name ||
+        'Confederation';
+      const nationCode =
+        nation?.three_letter_name ||
+        nation?.name_3l ||
+        nation?.short_name ||
+        nation?.name_sh;
+      const nationName =
+        nation?.long_name ||
+        nation?.name_lg ||
+        nation?.short_name ||
+        nation?.name_sh;
       const nationTitle = nationCode
-        ? `[${nationCode}] ${nationName}`
+        ? `[${nationCode}] ${nationName || nationId}`
         : nationName || `Nation ${nationId}`;
 
       setHeaderTitle(nationTitle);
@@ -173,7 +213,7 @@ export default function NationDetailPage() {
       setBackHref(confedId ? `/confed/${confedId}` : '/');
       setBreadcrumbs([
         {
-          title: 'HOME',
+          title: 'FM',
           href: '/',
         },
         ...(confedId
@@ -185,37 +225,38 @@ export default function NationDetailPage() {
             ]
           : []),
         {
-          title: nationCode || nation?.name_3l || nationName || nationTitle,
+          title: nationCode || nationId,
         },
       ]);
       setHeaderLogo({
-        url: getNationLogoUrl(nation.id, nation.three_letter_name),
-        alt: nation.long_name,
+        url: getNationLogoUrl(nation?.id || nationId, nationCode),
+        alt: nationName || `Nation ${nationId}`,
         isFlag: true,
       });
 
-      // Keep active tab if it exists and has records, otherwise fallback to first non-empty tab
-      let targetTab: NationTabKeyValue = activeTabRef.current;
-      const countForTarget =
-        targetTab === NationTabKey.DOMESTIC_COMPS
-          ? hub.counts.domesticComps
-          : targetTab === NationTabKey.STADIUMS
-            ? hub.counts.stadiums
-            : targetTab === NationTabKey.CITIES
-              ? hub.counts.cities
-              : targetTab === NationTabKey.AWARDS
-                ? hub.counts.awards
-                : 0;
+      // Keep active tab if it exists, otherwise default to INFO
+      let targetTab: NationTabKeyValue = activeTabRef.current || NationTabKey.INFO;
+      if (targetTab !== NationTabKey.INFO) {
+        const countForTarget =
+          targetTab === NationTabKey.DOMESTIC_COMPS
+            ? hub.counts.domesticComps
+            : targetTab === NationTabKey.STADIUMS
+              ? hub.counts.stadiums
+              : targetTab === NationTabKey.CITIES
+                ? hub.counts.cities
+                : targetTab === NationTabKey.AWARDS
+                  ? hub.counts.awards
+                  : 0;
 
-      if (!countForTarget || countForTarget === 0) {
-        if (hub.counts.domesticComps > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
-        else if (hub.counts.stadiums > 0) targetTab = NationTabKey.STADIUMS;
-        else if (hub.counts.cities > 0) targetTab = NationTabKey.CITIES;
-        else if (hub.counts.awards > 0) targetTab = NationTabKey.AWARDS;
+        if (!countForTarget || countForTarget === 0) {
+          targetTab = NationTabKey.INFO;
+        }
       }
 
       setActiveTab(targetTab);
-      await loadTabRecords(targetTab, 1, '', pageSizeRef.current, selectedRegionIdRef.current);
+      if (targetTab !== NationTabKey.INFO) {
+        await loadTabRecords(targetTab, 1, '', pageSizeRef.current, selectedRegionIdRef.current);
+      }
     } catch (err: any) {
       console.error(err);
       message.error(err.message || 'Failed to load nation hub');
@@ -248,14 +289,18 @@ export default function NationDetailPage() {
       setPageSize(newPageSize);
     }
     setCurrentPage(newPage);
-    loadTabRecords(activeTab, newPage, searchKeyword, effSize, selectedRegionId);
+    if (activeTab !== NationTabKey.INFO) {
+      loadTabRecords(activeTab, newPage, searchKeyword, effSize, selectedRegionId);
+    }
   };
 
   const handleSearchSubmit = () => {
     const kw = searchInput.trim();
     setSearchKeyword(kw);
     setCurrentPage(1);
-    loadTabRecords(activeTab, 1, kw, pageSize, selectedRegionId);
+    if (activeTab !== NationTabKey.INFO) {
+      loadTabRecords(activeTab, 1, kw, pageSize, selectedRegionId);
+    }
   };
 
   const handleSelectRegion = (regionVal: number | string) => {
@@ -272,7 +317,9 @@ export default function NationDetailPage() {
     setCurrentPage(1);
     setRecords([]);
     setSelectedRegionId('all');
-    await loadTabRecords(tabKey, 1, '', pageSize, 'all');
+    if (tabKey !== NationTabKey.INFO) {
+      await loadTabRecords(tabKey, 1, '', pageSize, 'all');
+    }
   };
 
   const handleDelete = async (type: RecordType, id: string) => {
@@ -328,13 +375,22 @@ export default function NationDetailPage() {
     onChange: handlePageChange,
   };
 
-  // Tab configurations: Hide any tab that has 0 records
+  // Tab configurations: Info is always first, then hide any tab that has 0 records
   const tabItems = useMemo(() => {
     const list: any[] = [];
     const compCount = nationHub?.counts?.domesticComps ?? 0;
     const stadiumCount = nationHub?.counts?.stadiums ?? 0;
     const cityCount = nationHub?.counts?.cities ?? 0;
     const awardCount = nationHub?.counts?.awards ?? 0;
+
+    list.push({
+      key: NationTabKey.INFO,
+      label: (
+        <span className={activeTab === NationTabKey.INFO ? 'font-bold' : ''}>
+          Info
+        </span>
+      ),
+    });
 
     if (compCount > 0) {
       list.push({
@@ -424,23 +480,6 @@ export default function NationDetailPage() {
       });
     }
 
-    // Fallback: If nation has 0 for everything, keep Competitions tab so user can add records
-    if (list.length === 0) {
-      list.push({
-        key: NationTabKey.DOMESTIC_COMPS,
-        label: (
-          <Space size={4} title="Competitions">
-            <DomesticCompIcon size={18} className="text-amber-500" />
-            <span
-              className={`hidden sm:inline ${activeTab === NationTabKey.DOMESTIC_COMPS ? 'font-bold' : ''}`}
-            >
-              Competitions
-            </span>
-          </Space>
-        ),
-      });
-    }
-
     return list;
   }, [nationHub, activeTab]);
 
@@ -473,8 +512,13 @@ export default function NationDetailPage() {
   };
 
   const nation = nationHub?.nation;
-  const nationShortName = nation?.short_name || nation?.long_name || `Nation ${nationId}`;
-  const nationLongName = nation?.long_name;
+  const nationShortName =
+    nation?.short_name ||
+    nation?.name_sh ||
+    nation?.long_name ||
+    nation?.name_lg ||
+    `Nation ${nationId}`;
+  const nationLongName = nation?.long_name || nation?.name_lg;
 
   return (
     <div className="space-y-3">
@@ -704,6 +748,19 @@ export default function NationDetailPage() {
                 defaultPageSize={20}
               />
             </div>
+          )}
+
+          {/* Tab: Nation Information */}
+          {activeTab === NationTabKey.INFO && nationHub && (
+            <RecordDetailView
+              data={nationHub.nation}
+              type={EntityType.NATION}
+              counts={nationHub.counts}
+              onEdit={() => openRecordModal(EntityType.NATION, nationHub.nation)}
+              onNavigateConfed={(cId) => router.push(`/confed/${cId}`)}
+              onSwitchTab={(tab) => handleSwitchTab(tab as NationTabKeyValue)}
+              onNavigateFakeComp={(fakeId) => router.push(`/comp/${fakeId}`)}
+            />
           )}
         </div>
       )}

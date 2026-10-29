@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { RecordType } from '../types';
+import { RecordType, EntityType } from '../types';
 
 export interface BreadcrumbStep {
   title: ReactNode;
@@ -27,7 +27,7 @@ interface AppContextType {
   headerLogo: HeaderLogoInfo | null;
   setHeaderLogo: (logo: HeaderLogoInfo | null) => void;
   openRecordModal: (
-    type: RecordType,
+    type: RecordType | EntityType | string,
     initialData?: any,
     defaultNationId?: string | number,
     defaultCompId?: string | number,
@@ -68,7 +68,7 @@ export function AppContextProvider({
   headerLogo?: HeaderLogoInfo | null;
   setHeaderLogo?: (logo: HeaderLogoInfo | null) => void;
   onOpenRecordModal: (
-    type: RecordType,
+    type: RecordType | EntityType | string,
     initialData?: any,
     defaultNationId?: string | number,
     defaultCompId?: string | number,

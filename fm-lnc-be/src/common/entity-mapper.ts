@@ -83,19 +83,26 @@ export function mapParentRef(parent: any): NestedParent | null {
 
 export function mapNation(nation: any, extraStats?: any) {
   if (!nation) return null;
+  const confedObj = nation.confederation
+    ? mapConfedRef(nation.confederation)
+    : nation.confed_id || nation.confederation_id
+    ? {
+        id: String(nation.confed_id || nation.confederation_id),
+        name: nation.confed_name || nation.confederation_name || null,
+      }
+    : null;
+  const confedId = confedObj?.id || (nation.confed_id ? String(nation.confed_id) : null);
   return {
     id: String(nation.id),
     name_lg: nation.long_name ?? nation.name_lg ?? null,
     name_sh: nation.short_name ?? nation.name_sh ?? null,
     name_3l: nation.three_letter_name ?? nation.name_3l ?? null,
-    confed: nation.confederation
-      ? mapConfedRef(nation.confederation)
-      : nation.confed_id || nation.confederation_id
-      ? {
-          id: String(nation.confed_id || nation.confederation_id),
-          name: nation.confed_name || nation.confederation_name || null,
-        }
-      : null,
+    confed_id: confedId,
+    confederation_id: confedId,
+    confed: confedObj,
+    confederation: confedObj,
+    inactive_fields: nation.inactive_fields ?? null,
+    note: nation.note ?? null,
     ...(extraStats !== undefined ? { stats: extraStats } : {}),
   };
 }
@@ -119,6 +126,13 @@ export function mapCompetition(comp: any, extraStats?: any) {
     ? {
         id: String(comp.confed_id),
         name: comp.confed_name || null,
+      }
+    : comp.nation?.confederation
+    ? mapConfedRef(comp.nation.confederation)
+    : comp.nation?.confed_id || comp.nation?.confederation_id
+    ? {
+        id: String(comp.nation.confed_id || comp.nation.confederation_id),
+        name: comp.nation.confed_name || comp.nation.confederation?.name || null,
       }
     : null;
 

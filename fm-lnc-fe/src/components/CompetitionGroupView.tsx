@@ -2,33 +2,52 @@
 
 import React, { useState, useMemo } from 'react';
 import { Badge, Empty, Select } from 'antd';
-import { StarOutlined, GlobalOutlined, AppstoreOutlined, FilterOutlined } from '@ant-design/icons';
+import { StarOutlined, GlobalOutlined, AppstoreOutlined, FilterOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import CardGrid from './CardGrid';
 import SubCompetitionsModal from './SubCompetitionsModal';
 import { CompIcon, AwardIcon } from './EntityIcons';
 
-export type CompetitionGroupKey = 'all' | 'league' | 'cup' | 'youth' | 'other';
-export type CompetitionCategory = 'league' | 'cup' | 'youth' | 'other';
+export type CompetitionGroupKey = 'all' | 'league' | 'cup' | 'youth' | 'other' | 'extinct';
+export type CompetitionCategory = 'league' | 'cup' | 'youth' | 'other' | 'extinct';
 
 export function getCompetitionGroup(target?: any): CompetitionCategory {
   if (!target) return 'other';
   const item = typeof target === 'object' ? target : { type: target, categories: target };
   const id = String(item?.id || '');
+
+  // 1. Virtual Extinct Clubs
+  if (
+    id === '[EXTINCT]' ||
+    id.startsWith('ext-') ||
+    item?.virtual_type === 'EXTINCT'
+  ) {
+    return 'extinct';
+  }
+
+  // 2. Virtual Other Clubs
   if (
     id === '[OTHER]' ||
-    id === '[EXTINCT]' ||
     id.startsWith('oth-') ||
-    id.startsWith('ext-') ||
-    item?.is_virtual
+    item?.virtual_type === 'OTHER'
   ) {
     return 'other';
   }
+
   const cat = String(item?.type || item?.categories || item?.category || '')
     .trim()
     .toLowerCase();
   if (!cat) return 'other';
-  if (cat.includes('youth')) return 'youth';
+
+  // 3. Extinct competitions
+  if (cat.includes('extinct')) return 'extinct';
+
+  // 4. Youth
+  if (cat.includes('youth') || cat.includes('reserves') || cat.includes('juvenil')) return 'youth';
+
+  // 5. Cup
   if (cat.includes('cup')) return 'cup';
+
+  // 6. League
   if (
     cat.includes('league') ||
     cat.includes('division') ||
@@ -37,6 +56,7 @@ export function getCompetitionGroup(target?: any): CompetitionCategory {
   ) {
     return 'league';
   }
+
   return 'other';
 }
 
@@ -45,6 +65,7 @@ const GROUP_PRIORITY: Record<CompetitionCategory, number> = {
   cup: 2,
   youth: 3,
   other: 4,
+  extinct: 5,
 };
 
 function getLeagueTier(categoryStr: string): number {
@@ -57,7 +78,6 @@ function getLeagueTier(categoryStr: string): number {
 
 function getOtherWeight(item: any): number {
   const id = String(item?.id || '');
-  if (id === '[EXTINCT]' || id.startsWith('ext-') || item?.virtual_type === 'EXTINCT') return 3;
   if (
     id === '[OTHER]' ||
     id.startsWith('oth-') ||
@@ -68,11 +88,22 @@ function getOtherWeight(item: any): number {
   return 1;
 }
 
+function getExtinctWeight(item: any): number {
+  const id = String(item?.id || '');
+  if (
+    id === '[EXTINCT]' ||
+    id.startsWith('ext-') ||
+    item?.virtual_type === 'EXTINCT'
+  )
+    return 2;
+  return 1;
+}
+
 export function sortCompetitionsByCategory(a: any, b: any): number {
   const groupA = getCompetitionGroup(a);
   const groupB = getCompetitionGroup(b);
 
-  // 1. Overall Category group priority: league (1) > cup (2) > youth (3) > other (4)
+  // 1. Overall Category group priority: league (1) > cup (2) > youth (3) > other (4) > extinct (5)
   if (groupA !== groupB) {
     return GROUP_PRIORITY[groupA] - GROUP_PRIORITY[groupB];
   }
@@ -90,7 +121,7 @@ export function sortCompetitionsByCategory(a: any, b: any): number {
     if (catComp !== 0) return catComp;
   }
 
-  // 3. Within 'other': ... > [OTHER] > [EXTINCT]
+  // 3. Within 'other': real competitions first, then [OTHER] Other Clubs
   if (groupA === 'other') {
     const weightA = getOtherWeight(a);
     const weightB = getOtherWeight(b);
@@ -103,7 +134,20 @@ export function sortCompetitionsByCategory(a: any, b: any): number {
     if (catComp !== 0) return catComp;
   }
 
-  // 4. Within 'cup' or 'youth'
+  // 4. Within 'extinct': real extinct comps first, then [EXTINCT] Extinct Clubs
+  if (groupA === 'extinct') {
+    const weightA = getExtinctWeight(a);
+    const weightB = getExtinctWeight(b);
+    if (weightA !== weightB) {
+      return weightA - weightB;
+    }
+    const catA = String(a.type || a.categories || '').trim();
+    const catB = String(b.type || b.categories || '').trim();
+    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
+    if (catComp !== 0) return catComp;
+  }
+
+  // 5. Within 'cup' or 'youth'
   if (groupA === 'cup' || groupA === 'youth') {
     const catA = String(a.type || a.categories || '').trim();
     const catB = String(b.type || b.categories || '').trim();
@@ -167,17 +211,19 @@ export default function CompetitionGroupView({
     return [...visibleItems].sort(sortCompetitionsByCategory);
   }, [visibleItems]);
 
-  const { leagueItems, cupItems, youthItems, otherItems } = useMemo(() => {
+  const { leagueItems, cupItems, youthItems, otherItems, extinctItems } = useMemo(() => {
     const league: any[] = [];
     const cup: any[] = [];
     const youth: any[] = [];
     const other: any[] = [];
+    const extinct: any[] = [];
 
     visibleItems.forEach((item) => {
       const g = getCompetitionGroup(item);
       if (g === 'league') league.push(item);
       else if (g === 'cup') cup.push(item);
       else if (g === 'youth') youth.push(item);
+      else if (g === 'extinct') extinct.push(item);
       else other.push(item);
     });
 
@@ -185,12 +231,14 @@ export default function CompetitionGroupView({
     cup.sort(sortCompetitionsByCategory);
     youth.sort(sortCompetitionsByCategory);
     other.sort(sortCompetitionsByCategory);
+    extinct.sort(sortCompetitionsByCategory);
 
     return {
       leagueItems: league,
       cupItems: cup,
       youthItems: youth,
       otherItems: other,
+      extinctItems: extinct,
     };
   }, [visibleItems]);
 
@@ -219,13 +267,20 @@ export default function CompetitionGroupView({
       },
       {
         key: 'other' as const,
-        label: 'Other',
+        label: 'Other Competitions',
         icon: <GlobalOutlined className="text-gray-500 text-sm" />,
         color: '#64748b',
         items: otherItems,
       },
+      {
+        key: 'extinct' as const,
+        label: 'Extinct Competitions',
+        icon: <CloseCircleOutlined className="text-rose-500 text-sm" />,
+        color: '#e11d48',
+        items: extinctItems,
+      },
     ],
-    [leagueItems, cupItems, youthItems, otherItems],
+    [leagueItems, cupItems, youthItems, otherItems, extinctItems],
   );
 
   const selectOptions = useMemo(() => {
@@ -233,10 +288,15 @@ export default function CompetitionGroupView({
       {
         value: 'all',
         label: (
-          <span className="flex items-center gap-1.5 text-xs">
-            <AppstoreOutlined className="text-blue-500" />
-            <span>All Categories</span>
-          </span>
+          <div className="flex items-center justify-between gap-2 w-full">
+            <span className="flex items-center gap-1.5 text-xs">
+              <AppstoreOutlined className="text-blue-500" />
+              <span>All Categories</span>
+            </span>
+            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-blue-50 text-blue-600 font-semibold">
+              {visibleItems.length}
+            </span>
+          </div>
         ),
       },
       ...groupConfigs
@@ -244,14 +304,19 @@ export default function CompetitionGroupView({
         .map((g) => ({
           value: g.key,
           label: (
-            <span className="flex items-center gap-1.5 text-xs">
-              {g.icon}
-              <span>{g.label}</span>
-            </span>
+            <div className="flex items-center justify-between gap-2 w-full">
+              <span className="flex items-center gap-1.5 text-xs">
+                {g.icon}
+                <span>{g.label}</span>
+              </span>
+              <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-gray-100 text-gray-600 font-semibold">
+                {g.items.length}
+              </span>
+            </div>
           ),
         })),
     ];
-  }, [groupConfigs]);
+  }, [groupConfigs, visibleItems.length]);
 
   if (loading) {
     return (
@@ -269,9 +334,10 @@ export default function CompetitionGroupView({
           value={selectedGroup}
           onChange={(val) => setSelectedGroup(val as CompetitionGroupKey)}
           options={selectOptions}
-          className="w-48 text-xs"
+          className="w-56 text-xs"
+          popupMatchSelectWidth={false}
           popupClassName="text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1"
-          dropdownStyle={{ fontSize: '12px' }}
+          dropdownStyle={{ fontSize: '12px', minWidth: 230 }}
           suffixIcon={<FilterOutlined className="text-gray-400 text-xs" />}
         />
       </div>

@@ -87,7 +87,7 @@ export default function LncSortitoutsiExplorer() {
     useApp();
 
   const [navStack, setNavStack] = useState<NavStep[]>([
-    { level: HierarchyLevel.CONTINENTS, title: 'HOME' },
+    { level: HierarchyLevel.CONTINENTS, title: 'FM' },
   ]);
   const [loading, setLoading] = useState(false);
 

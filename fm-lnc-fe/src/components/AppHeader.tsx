@@ -68,10 +68,11 @@ export default function AppHeader({
     }
     if (
       currentStepTitle &&
+      currentStepTitle !== 'FM' &&
       currentStepTitle !== 'HOME' &&
       currentStepTitle !== 'Confederations & Nations'
     ) {
-      return [{ title: 'HOME', href: '/' }, { title: currentStepTitle }];
+      return [{ title: 'FM', href: '/' }, { title: currentStepTitle }];
     }
     return [];
   }, [breadcrumbs, currentStepTitle]);

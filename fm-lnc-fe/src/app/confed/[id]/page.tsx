@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, Badge, Input, Button, Space, message } from 'antd';
-import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, InfoCircleOutlined, CopyOutlined, CheckOutlined } from '@ant-design/icons';
 import {
   fetchContinents,
   fetchNationsByContinent,
@@ -15,9 +15,21 @@ import {
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
 import CompetitionGroupView from '../../../components/CompetitionGroupView';
+import RecordDetailView from '../../../components/RecordDetailView';
 import { NationIcon, IntCompIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
+
+const CONFED_ID_MAP: Record<string, string> = {
+  '1': 'CAF',
+  '2': 'AFC',
+  '3': 'UEFA',
+  '4': 'CONCACAF',
+  '5': 'OFC',
+  '6': 'CONMEBOL',
+  '7': 'World',
+  '8': 'EXTINCT',
+};
 
 function ConfederationDetailContent() {
   const params = useParams();
@@ -34,14 +46,27 @@ function ConfederationDetailContent() {
   } = useApp();
 
   const confedId = params?.id ? String(params.id) : '';
-  const initialTab = searchParams.get('tab') === 'int' ? 'INT_COMPETITIONS' : 'NATIONS';
+  const initialTab =
+    searchParams.get('tab') === 'int'
+      ? 'INT_COMPETITIONS'
+      : searchParams.get('tab') === 'nations'
+        ? 'NATIONS'
+        : 'INFO';
 
   const [confederation, setConfederation] = useState<ConfederationItem | null>(null);
   const [nations, setNations] = useState<NationItem[]>([]);
   const [intComps, setIntComps] = useState<CompetitionItem[]>([]);
-  const [activeTab, setActiveTab] = useState<'NATIONS' | 'INT_COMPETITIONS'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'NATIONS' | 'INT_COMPETITIONS' | 'INFO'>(initialTab);
   const [loading, setLoading] = useState(true);
   const [tabLoading, setTabLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(true);
+    message.success(`Copied: ${text}`);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
 
   // Server pagination and search states (pageSize = 20)
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,16 +90,17 @@ function ConfederationDetailContent() {
       const found = continentsList.find((c) => String(c.id) === String(confedId));
       if (found) {
         setConfederation(found);
-        setHeaderTitle(found.name);
+        const displayName = CONFED_ID_MAP[String(found.id)] || found.name;
+        setHeaderTitle(displayName);
         setHeaderId(found.id);
         setBackHref('/');
         setBreadcrumbs([
           {
-            title: 'HOME',
+            title: 'FM',
             href: '/',
           },
           {
-            title: found.name,
+            title: displayName,
           },
         ]);
         setHeaderLogo({
@@ -123,7 +149,9 @@ function ConfederationDetailContent() {
 
   useEffect(() => {
     loadConfedInfo();
-    loadTabData(activeTab, 1, '', pageSize);
+    if (activeTab !== 'INFO') {
+      loadTabData(activeTab, 1, '', pageSize);
+    }
     return () => {
       setBreadcrumbs([]);
       setBackHref(null);
@@ -138,23 +166,29 @@ function ConfederationDetailContent() {
       setPageSize(newPageSize);
     }
     setCurrentPage(newPage);
-    loadTabData(activeTab, newPage, searchKeyword, effSize);
+    if (activeTab !== 'INFO') {
+      loadTabData(activeTab, newPage, searchKeyword, effSize);
+    }
   };
 
   const handleSearchSubmit = () => {
     const kw = searchInput.trim();
     setSearchKeyword(kw);
     setCurrentPage(1);
-    loadTabData(activeTab, 1, kw, pageSize);
+    if (activeTab !== 'INFO') {
+      loadTabData(activeTab, 1, kw, pageSize);
+    }
   };
 
   const handleSwitchTab = (key: string) => {
-    const tabKey = key as 'NATIONS' | 'INT_COMPETITIONS';
+    const tabKey = key as 'NATIONS' | 'INT_COMPETITIONS' | 'INFO';
     setActiveTab(tabKey);
     setSearchInput('');
     setSearchKeyword('');
     setCurrentPage(1);
-    loadTabData(tabKey, 1, '', pageSize);
+    if (tabKey !== 'INFO') {
+      loadTabData(tabKey, 1, '', pageSize);
+    }
   };
 
   const handleNavigate = (step: any) => {
@@ -200,6 +234,15 @@ function ConfederationDetailContent() {
               items={(() => {
                 const list: any[] = [];
 
+                list.push({
+                  key: 'INFO',
+                  label: (
+                    <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
+                      Info
+                    </span>
+                  ),
+                });
+
                 if (nationsCount > 0) {
                   list.push({
                     key: 'NATIONS',
@@ -242,18 +285,6 @@ function ConfederationDetailContent() {
                               activeTab === 'INT_COMPETITIONS' ? '#1d70b8' : '#94a3b8',
                           }}
                         />
-                      </Space>
-                    ),
-                  });
-                }
-
-                if (list.length === 0) {
-                  list.push({
-                    key: 'NATIONS',
-                    label: (
-                      <Space size={4} title="Countries">
-                        <NationIcon size={18} className="text-cyan-600" />
-                        <span className="hidden sm:inline font-semibold">Countries</span>
                       </Space>
                     ),
                   });
@@ -355,6 +386,19 @@ function ConfederationDetailContent() {
                   }
                 />
               </div>
+            )}
+
+            {/* Tab: Confederation Information */}
+            {activeTab === 'INFO' && confederation && (
+              <RecordDetailView
+                data={confederation}
+                type={EntityType.CONFEDERATION}
+                counts={{
+                  totalNations: nationsCount,
+                  totalIntComps: compsCount,
+                }}
+                onSwitchTab={(tab) => handleSwitchTab(tab)}
+              />
             )}
           </div>
         )}

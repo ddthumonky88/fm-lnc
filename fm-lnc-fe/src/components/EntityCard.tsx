@@ -76,6 +76,7 @@ export function formatCategoryCode(categoryStr?: string | null): string {
     upper === 'CUP' ||
     upper === 'YTH' ||
     upper === 'OTH' ||
+    upper === 'EXT' ||
     /^L\d+$/.test(upper) ||
     upper === 'L'
   ) {
@@ -83,6 +84,11 @@ export function formatCategoryCode(categoryStr?: string | null): string {
   }
 
   const lower = trimmed.toLowerCase();
+
+  // 0. Extinct => EXT
+  if (lower.includes('extinct')) {
+    return 'EXT';
+  }
 
   // 1. Youth => YTH
   if (

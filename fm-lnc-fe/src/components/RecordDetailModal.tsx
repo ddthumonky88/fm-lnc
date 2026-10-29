@@ -81,13 +81,14 @@ const CONFED_NAME_MAP: Record<string, { id: string; name: string }> = {
 };
 
 const CONFED_ID_MAP: Record<string, string> = {
-  '1': 'Africa',
-  '2': 'Asia',
-  '3': 'Europe',
-  '4': 'North America',
-  '5': 'Oceania',
-  '6': 'South America',
+  '1': 'CAF',
+  '2': 'AFC',
+  '3': 'UEFA',
+  '4': 'CONCACAF',
+  '5': 'OFC',
+  '6': 'CONMEBOL',
   '7': 'World',
+  '8': 'EXTINCT',
 };
 
 export default function RecordDetailModal({
@@ -312,7 +313,7 @@ export default function RecordDetailModal({
     const inactive = field ? isFieldInactive(field) : false;
     return `${
       inactive ? 'text-red-600 font-normal' : 'text-slate-400 font-semibold'
-    } text-xs shrink-0 select-none break-words leading-tight ${extraClass}`;
+    } text-xs shrink-0 select-none whitespace-nowrap leading-tight ${extraClass}`;
   };
 
   const getValueClass = (field?: string | string[], defaultClass: string = 'text-slate-800') => {
@@ -346,7 +347,10 @@ export default function RecordDetailModal({
     );
 
   const rawConfedId =
-    currentData.confed_id || currentData.confederation_id || currentData.confederation?.id;
+    currentData.confed_id ||
+    currentData.confederation_id ||
+    currentData.confed?.id ||
+    currentData.confederation?.id;
   const rawCat = currentData.categories
     ? String(currentData.categories).split(',')[0].trim().toUpperCase()
     : '';
@@ -354,9 +358,10 @@ export default function RecordDetailModal({
 
   const confedId = rawConfedId ? String(rawConfedId) : catConfed?.id || null;
   const confedName =
-    currentData.confed_name ||
-    currentData.confederation?.name ||
     (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
+    currentData.confed?.name ||
+    currentData.confederation?.name ||
+    currentData.confed_name ||
     catConfed?.name ||
     rawCat ||
     'International';
@@ -749,7 +754,7 @@ export default function RecordDetailModal({
               {/* Names Block */}
               {isPlayer ? (
                 <>
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass('first_name', 'pt-0.5')}>FN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass('first_name')} line-clamp-3 break-words text-left`}
@@ -758,7 +763,7 @@ export default function RecordDetailModal({
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass('second_name', 'pt-0.5')}>SN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass('second_name')} line-clamp-3 break-words text-left`}
@@ -768,7 +773,7 @@ export default function RecordDetailModal({
                   </div>
 
                   {currentData.common_name && (
-                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                       <span className={getLabelClass('common_name', 'pt-0.5')}>CN:</span>
                       <span
                         className={`font-bold text-xs sm:text-[13px] ${getValueClass('common_name', 'text-purple-700')} italic line-clamp-3 break-words text-left`}
@@ -779,7 +784,7 @@ export default function RecordDetailModal({
                   )}
                 </>
               ) : isCity || isStadium || isStage ? (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['name', 'long_name'], 'pt-0.5')}>Name:</span>
                   <span
                     className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name', 'long_name'])} line-clamp-3 break-words text-left`}
@@ -798,7 +803,7 @@ export default function RecordDetailModal({
               ) : (
                 <>
                   {/* LN */}
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['long_name', 'name'], 'pt-0.5')}>LN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass(['long_name', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
@@ -822,7 +827,7 @@ export default function RecordDetailModal({
                   </div>
 
                   {/* SN */}
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass('short_name', 'pt-0.5')}>SN:</span>
                     <span
                       className={`font-bold text-xs sm:text-[13px] ${getValueClass('short_name')} line-clamp-3 break-words text-left`}
@@ -840,7 +845,7 @@ export default function RecordDetailModal({
                   </div>
 
                   {/* 3N */}
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span
                       className={getLabelClass(['three_letter_name', 'three_letter'], 'pt-0.5')}
                     >
@@ -859,7 +864,7 @@ export default function RecordDetailModal({
                   {(type === 'club' ||
                     type === EntityType.CLUB ||
                     currentData.six_letter_name !== undefined) && (
-                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                       <span className={getLabelClass(['six_letter_name', 'six_letter'], 'pt-0.5')}>
                         6N:
                       </span>
@@ -875,7 +880,7 @@ export default function RecordDetailModal({
 
               {/* Confederation (for International Competition) */}
               {isInternationalComp && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span className={getLabelClass(['confed_id', 'confederation_id'], 'pt-0.5')}>
                     Confed:
                   </span>
@@ -889,7 +894,7 @@ export default function RecordDetailModal({
 
               {/* Associated Nation */}
               {!isNation && !isInternationalComp && nationId && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
                     Nation:
                   </span>
@@ -915,7 +920,7 @@ export default function RecordDetailModal({
 
               {/* Region (City) */}
               {isCity && (currentData.region_name || currentData.region || currentData.categories) && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['categories', 'category', 'region'], 'pt-0.5')}>
                     Region:
                   </span>
@@ -938,7 +943,7 @@ export default function RecordDetailModal({
 
               {/* Assigned Competition / League for Club */}
               {isClub && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['comp_id', 'competition_id'], 'pt-0.5')}>
                     Comp:
                   </span>
@@ -973,7 +978,7 @@ export default function RecordDetailModal({
               {/* Club Affiliate Info (Đội 1 & Loại đội con) */}
               {isClub && (currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id || currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type) && (
                 <>
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['affiliate_club', 'affiliate_club_id', 'parent_id', 'parent', 'parent_club'], 'pt-0.5')}>
                       Affiliate Club:
                     </span>
@@ -995,7 +1000,7 @@ export default function RecordDetailModal({
                     </div>
                   </div>
                   {(currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type) && (
-                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                    <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                       <span className={getLabelClass(['affiliate_club_type', 'affiliate_type', 'type'], 'pt-0.5')}>
                         Affiliate Type:
                       </span>
@@ -1011,7 +1016,7 @@ export default function RecordDetailModal({
 
               {/* First Team Affiliates list */}
               {isClub && currentData.affiliates && currentData.affiliates.length > 0 && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['affiliates'], 'pt-0.5')}>
                     Affiliates ({currentData.affiliates.length}):
                   </span>
@@ -1037,7 +1042,7 @@ export default function RecordDetailModal({
 
               {/* Type (Stadium) */}
               {isStadium && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('type', 'pt-0.5')}>Type:</span>
                   <div className="flex items-center gap-1.5 text-left">
                     <Tag
@@ -1052,7 +1057,7 @@ export default function RecordDetailModal({
 
               {/* Parent Competition (for Competitions) */}
               {isComp && (currentData.parent_id || isFieldInactive(['parent_id', 'parent'])) && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['parent_id', 'parent'], 'pt-0.5')}>
                     Parent Comp:
                   </span>
@@ -1071,7 +1076,7 @@ export default function RecordDetailModal({
               {isComp &&
                 currentData.childrenCount !== undefined &&
                 currentData.childrenCount > 0 && (
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['sub_competitions', 'children'], 'pt-0.5')}>
                       Sub-Comps:
                     </span>
@@ -1083,7 +1088,7 @@ export default function RecordDetailModal({
 
               {/* Total Competitions for Nation */}
               {currentData.totalComps !== undefined && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('competitions', 'pt-0.5')}>Competitions:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-amber-700 text-left">
                     {currentData.totalComps}
@@ -1093,7 +1098,7 @@ export default function RecordDetailModal({
 
               {/* Clubs Count - Hidden for International Competitions */}
               {!isInternationalComp && currentData.clubsCount !== undefined && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-blue-700 text-left">
                     {currentData.clubsCount}
@@ -1103,7 +1108,7 @@ export default function RecordDetailModal({
 
               {/* Awards Count */}
               {currentData.awardsCount !== undefined && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('awards', 'pt-0.5')}>Awards:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-amber-700 text-left">
                     {currentData.awardsCount}
@@ -1113,7 +1118,7 @@ export default function RecordDetailModal({
 
               {/* Total Nations */}
               {currentData.totalNations !== undefined && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('nations', 'pt-0.5')}>Nations:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-cyan-700 text-left">
                     {currentData.totalNations}
@@ -1123,7 +1128,7 @@ export default function RecordDetailModal({
 
               {/* Type / Categories (Non-City) */}
               {!isCity && (currentData.type || currentData.categories) && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span className={getLabelClass(['type', 'categories', 'category'], 'pt-0.5')}>
                     Type:
                   </span>
@@ -1141,7 +1146,7 @@ export default function RecordDetailModal({
 
               {/* BG Color Row */}
               {bgInfo && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span
                     className={getLabelClass(['bg_color', 'background_color'], 'pt-0.5')}
                     title="Background Color"
@@ -1166,7 +1171,7 @@ export default function RecordDetailModal({
 
               {/* FG Color Row */}
               {fgInfo && (
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span
                     className={getLabelClass(['fg_color', 'foreground_color'], 'pt-0.5')}
                     title="Foreground Color"

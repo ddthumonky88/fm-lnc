@@ -24,7 +24,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
-  const [recordModalType, setRecordModalType] = useState<RecordType>(RecordType.CLUB);
+  const [recordModalType, setRecordModalType] = useState<RecordType | EntityType | string>(RecordType.CLUB);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [defaultNationId, setDefaultNationId] = useState<string | number | undefined>(undefined);
   const [defaultCompId, setDefaultCompId] = useState<string | number | undefined>(undefined);
@@ -119,7 +119,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }, [handleSyncLnc, handleExportLnc]);
 
   const handleOpenRecordModal = useCallback(
-    (type: RecordType, initialData?: any, natId?: string | number, cId?: string | number) => {
+    (type: RecordType | EntityType | string, initialData?: any, natId?: string | number, cId?: string | number) => {
       setRecordModalType(type);
       setEditingRecord(initialData || null);
       setDefaultNationId(natId);

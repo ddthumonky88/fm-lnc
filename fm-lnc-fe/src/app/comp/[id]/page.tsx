@@ -13,6 +13,8 @@ import {
   CopyOutlined,
   CheckOutlined,
   BranchesOutlined,
+  InfoCircleOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import {
   fetchCompetitionInfo,
@@ -29,11 +31,22 @@ import {
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
 import SubCompetitionsModal from '../../../components/SubCompetitionsModal';
+import RecordDetailView from '../../../components/RecordDetailView';
 import { CompIcon, DomesticCompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { formatCategoryCode, getCategoryTagColor } from '../../../components/EntityCard';
 import { matchRecordSearch } from '../../../utils/search';
+
+const CONFED_ID_MAP: Record<string, string> = {
+  '1': 'Africa',
+  '2': 'Asia',
+  '3': 'Europe',
+  '4': 'North America',
+  '5': 'Oceania',
+  '6': 'South America',
+  '7': 'World',
+};
 
 export default function CompetitionDetailPage() {
   const router = useRouter();
@@ -65,7 +78,7 @@ export default function CompetitionDetailPage() {
   const [compInfo, setCompInfo] = useState<
     (CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }) | null
   >(null);
-  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS'>('CLUBS');
+  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS' | 'INFO'>('INFO');
   const [clubs, setClubs] = useState<ClubItem[]>([]);
   const [awards, setAwards] = useState<AwardItem[]>([]);
   const [isSubCompsModalOpen, setIsSubCompsModalOpen] = useState(false);
@@ -120,10 +133,24 @@ export default function CompetitionDetailPage() {
         const hub = await fetchNationHub(targetNationId).catch(() => null);
 
         const nation = hub?.nation;
-        const confedId = nation?.confederation_id;
-        const confedName = nation?.confederation?.name || 'Confederation';
+        const confedId =
+          nation?.confed_id ||
+          nation?.confederation_id ||
+          nation?.confed?.id ||
+          nation?.confederation?.id;
+        const confedName =
+          (confedId && CONFED_ID_MAP[String(confedId)]) ||
+          nation?.confed?.name ||
+          nation?.confederation?.name ||
+          nation?.confed_name ||
+          'Confederation';
         const nationName = nation?.long_name || 'Nation';
-        const nationCode = nation?.three_letter_name;
+        const nationCode =
+          nation?.three_letter_name ||
+          nation?.name_3l ||
+          nation?.code ||
+          nation?.short_name ||
+          nation?.name_sh;
 
         const virtualTag = rawId.startsWith('oth-') || rawId.startsWith('ext-')
           ? rawId
@@ -142,7 +169,8 @@ export default function CompetitionDetailPage() {
           nation_name: nationName,
           nation_three_letter: nationCode,
           confed_id: confedId,
-          categories: 'Other',
+          type: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
+          categories: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
           clubsCount: isVirtualExtinct ? hub?.counts?.extinctClubs || 0 : hub?.counts?.independentClubs || 0,
           awardsCount: 0,
           childrenCount: 0,
@@ -153,7 +181,7 @@ export default function CompetitionDetailPage() {
 
         const crumbs: any[] = [
           {
-            title: 'HOME',
+            title: 'FM',
             href: '/',
           },
         ];
@@ -168,7 +196,7 @@ export default function CompetitionDetailPage() {
           href: `/nation/${targetNationId}`,
         });
         crumbs.push({
-          title: virtualTitle,
+          title: String(compId),
         });
 
         setBreadcrumbs(crumbs);
@@ -192,14 +220,29 @@ export default function CompetitionDetailPage() {
         setHeaderId(info.id);
 
         const nationId = info.nation_id || info.nation?.id;
-        const nationName = info.nation_name || info.nation?.long_name;
-        const nationCode = info.nation_three_letter || info.nation?.three_letter_name;
-        const confedId = info.confed_id || info.confederation?.id;
-        const confedName = info.confederation?.name || 'Confederation';
+        const nationName = info.nation_name || info.nation?.long_name || info.nation?.name_lg;
+        const nationCode =
+          info.nation_three_letter ||
+          info.nation?.three_letter_name ||
+          info.nation?.name_3l;
+        const confedId =
+          info.confed_id ||
+          info.confederation?.id ||
+          (info as any).confed?.id ||
+          info.nation?.confed_id ||
+          info.nation?.confederation?.id;
+        const confedName =
+          (confedId && CONFED_ID_MAP[String(confedId)]) ||
+          info.confederation?.name ||
+          (info as any).confed?.name ||
+          info.confed_name ||
+          info.nation?.confederation?.name ||
+          info.nation?.confed_name ||
+          'Confederation';
 
         const crumbs: any[] = [
           {
-            title: 'HOME',
+            title: 'FM',
             href: '/',
           },
         ];
@@ -211,18 +254,18 @@ export default function CompetitionDetailPage() {
         }
         if (nationId) {
           crumbs.push({
-            title: nationCode || info.nation?.name_3l || nationName || 'Nation',
+            title: nationCode || nationName || 'Nation',
             href: `/nation/${nationId}`,
           });
         }
         if (info.parent_id) {
           crumbs.push({
-            title: info.parent_name || `Parent (${info.parent_id})`,
+            title: String(info.parent_id),
             href: `/comp/${info.parent_id}${nationId ? `?nationId=${nationId}` : ''}`,
           });
         }
         crumbs.push({
-          title: compTitle,
+          title: String(compId),
         });
 
         setBreadcrumbs(crumbs);
@@ -272,7 +315,8 @@ export default function CompetitionDetailPage() {
 
   // Load tab records with BE pagination & keyword search
   const loadTabData = useCallback(
-    async (tab: 'CLUBS' | 'AWARDS', page: number, size: number, keyword: string) => {
+    async (tab: 'CLUBS' | 'AWARDS' | 'INFO', page: number, size: number, keyword: string) => {
+      if (tab === 'INFO') return;
       setTabLoading(true);
       try {
         if (tab === 'CLUBS') {
@@ -353,6 +397,7 @@ export default function CompetitionDetailPage() {
   }, [loadCompInfo, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
 
   useEffect(() => {
+    if (activeTab === 'INFO') return;
     loadTabData(activeTab, currentPage, pageSize, debouncedKeyword);
   }, [loadTabData, activeTab, currentPage, pageSize, debouncedKeyword, refreshSignal]);
 
@@ -364,7 +409,7 @@ export default function CompetitionDetailPage() {
   };
 
   const handleTabChange = (key: string) => {
-    const nextTab = key as 'CLUBS' | 'AWARDS';
+    const nextTab = key as 'CLUBS' | 'AWARDS' | 'INFO';
     setActiveTab(nextTab);
     setTableFilter('');
     setDebouncedKeyword('');
@@ -411,6 +456,14 @@ export default function CompetitionDetailPage() {
 
   const tabItems = useMemo(() => {
     const list: any[] = [
+      {
+        key: 'INFO',
+        label: (
+          <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
+            Info
+          </span>
+        ),
+      },
       {
         key: 'CLUBS',
         label: (
@@ -567,46 +620,48 @@ export default function CompetitionDetailPage() {
             className="mb-3"
           />
 
-          {/* Sub Toolbar: Count, Filter, Add */}
-          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <Input
-                prefix={<SearchOutlined className="text-gray-400" />}
-                placeholder={activeTab === 'CLUBS' ? 'Filter clubs...' : 'Filter awards...'}
-                value={tableFilter}
-                onChange={(e) => setTableFilter(e.target.value)}
-                onPressEnter={() => setDebouncedKeyword(tableFilter.trim())}
-                allowClear
-                className="flex-1 sm:w-60"
-              />
+          {/* Sub Toolbar: Count, Filter, Add (only for list tabs) */}
+          {activeTab !== 'INFO' && (
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <Input
+                  prefix={<SearchOutlined className="text-gray-400" />}
+                  placeholder={activeTab === 'CLUBS' ? 'Filter clubs...' : 'Filter awards...'}
+                  value={tableFilter}
+                  onChange={(e) => setTableFilter(e.target.value)}
+                  onPressEnter={() => setDebouncedKeyword(tableFilter.trim())}
+                  allowClear
+                  className="flex-1 sm:w-60"
+                />
 
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  if (activeTab === 'CLUBS') {
-                    openRecordModal(
-                      RecordType.CLUB,
-                      isVirtual ? { is_extinct: isVirtualExtinct, nation_id: nationId } : null,
-                      nationId,
-                      isVirtual ? undefined : compId,
-                    );
-                  } else {
-                    openRecordModal(RecordType.AWARD, null, nationId, compId);
-                  }
-                }}
-                className="bg-blue-600 shrink-0"
-                title={activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
-              >
-                <span className="hidden sm:inline">
-                  {activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
-                </span>
-              </Button>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    if (activeTab === 'CLUBS') {
+                      openRecordModal(
+                        RecordType.CLUB,
+                        isVirtual ? { is_extinct: isVirtualExtinct, nation_id: nationId } : null,
+                        nationId,
+                        isVirtual ? undefined : compId,
+                      );
+                    } else {
+                      openRecordModal(RecordType.AWARD, null, nationId, compId);
+                    }
+                  }}
+                  className="bg-blue-600 shrink-0"
+                  title={activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
+                >
+                  <span className="hidden sm:inline">
+                    {activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
+                  </span>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Main List */}
-          {activeTab === 'CLUBS' ? (
+          {activeTab === 'CLUBS' && (
             <CardGrid
               key="comp-clubs"
               items={clubs}
@@ -632,7 +687,9 @@ export default function CompetitionDetailPage() {
               }
               defaultPageSize={20}
             />
-          ) : (
+          )}
+
+          {activeTab === 'AWARDS' && (
             <CardGrid
               key="comp-awards"
               items={awards}
@@ -649,6 +706,36 @@ export default function CompetitionDetailPage() {
               onDelete={(rec) => handleDeleteAward(String(rec.id))}
               emptyText="No awards found in this competition"
               defaultPageSize={20}
+            />
+          )}
+
+          {/* Tab: Competition Information */}
+          {activeTab === 'INFO' && compInfo && (
+            <RecordDetailView
+              data={compInfo}
+              type={
+                compInfo.is_international
+                  ? 'international_competition'
+                  : RecordType.COMPETITION
+              }
+              onEdit={
+                !isVirtual
+                  ? () =>
+                      openRecordModal(
+                        RecordType.COMPETITION,
+                        compInfo,
+                        nationId,
+                        compInfo.parent_id,
+                      )
+                  : undefined
+              }
+              onNavigateConfed={(cId) => router.push(`/confed/${cId}`)}
+              onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
+              onNavigateParentComp={(pId) =>
+                router.push(`/comp/${pId}${nationId ? `?nationId=${nationId}` : ''}`)
+              }
+              onOpenSubComps={() => setIsSubCompsModalOpen(true)}
+              onSwitchTab={(tab) => handleTabChange(tab as 'INFO' | 'CLUBS' | 'AWARDS')}
             />
           )}
         </div>

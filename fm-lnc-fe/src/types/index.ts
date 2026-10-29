@@ -51,6 +51,7 @@ export enum NationTabKey {
   CITIES = 'cities',
   AWARDS = 'awards',
   REGIONS = 'regions',
+  INFO = 'info',
 }
 
 export type NationTabKeyValue = NationTabKey | `${NationTabKey}`;

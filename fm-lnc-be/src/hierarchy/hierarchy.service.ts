@@ -121,8 +121,16 @@ export class HierarchyService {
         p.name_sh as parent_short_name,
         p.name_3l as parent_three_letter,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
-        (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
-        (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
+        (WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = c.id
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id IN (SELECT id FROM sc))::int as clubs_count,
+        (WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = c.id
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT COUNT(*) FROM awards a WHERE a.comp_id IN (SELECT id FROM sc))::int as awards_count
       FROM competitions c
       LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
@@ -259,8 +267,16 @@ export class HierarchyService {
         p.name_sh as parent_short_name,
         p.name_3l as parent_three_letter,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
-        (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
-        (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
+        (WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = c.id
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id IN (SELECT id FROM sc))::int as clubs_count,
+        (WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = c.id
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT COUNT(*) FROM awards a WHERE a.comp_id IN (SELECT id FROM sc))::int as awards_count
       FROM competitions c
       LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
@@ -310,8 +326,8 @@ export class HierarchyService {
       name_lg: '[OTHER] Other Clubs',
       name_sh: 'Other Clubs',
       name_3l: 'OTH',
-      type: 'Other',
-      categories: 'Other',
+      type: 'Other Competitions',
+      categories: 'Other Competitions',
       nation: nationRef,
       confed: null,
       parent: null,
@@ -330,8 +346,8 @@ export class HierarchyService {
       name_lg: '[EXTINCT] Extinct Clubs',
       name_sh: 'Extinct Clubs',
       name_3l: 'EXT',
-      type: 'Other',
-      categories: 'Other',
+      type: 'Extinct Competitions',
+      categories: 'Extinct Competitions',
       nation: nationRef,
       confed: null,
       parent: null,
@@ -409,7 +425,22 @@ export class HierarchyService {
       qb.andWhere('club.is_extinct = true');
     } else {
       if (compId) {
-        qb.andWhere('club.comp_id = :compId', { compId });
+        const descRows = await this.compRepo.query(
+          `WITH RECURSIVE sc AS (
+            SELECT id FROM competitions WHERE id = $1
+            UNION ALL
+            SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+          ) SELECT id FROM sc;`,
+          [compId],
+        );
+        const compIds = descRows.map((r: any) => String(r.id));
+        if (compIds.length === 1) {
+          qb.andWhere('club.comp_id = :compId', { compId: compIds[0] });
+        } else if (compIds.length > 1) {
+          qb.andWhere('club.comp_id IN (:...compIds)', { compIds });
+        } else {
+          qb.andWhere('club.comp_id = :compId', { compId });
+        }
       }
       if (nationId) {
         qb.andWhere('club.nation_id = :nationId', { nationId });
@@ -623,7 +654,22 @@ export class HierarchyService {
       .leftJoinAndSelect('award.competition', 'competition');
 
     if (compId && String(compId).toLowerCase() !== 'all') {
-      qb.where('award.comp_id = :compId', { compId: String(compId) });
+      const descRows = await this.compRepo.query(
+        `WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = $1
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT id FROM sc;`,
+        [String(compId)],
+      );
+      const compIds = descRows.map((r: any) => String(r.id));
+      if (compIds.length === 1) {
+        qb.where('award.comp_id = :compId', { compId: compIds[0] });
+      } else if (compIds.length > 1) {
+        qb.where('award.comp_id IN (:...compIds)', { compIds });
+      } else {
+        qb.where('award.comp_id = :compId', { compId: String(compId) });
+      }
     }
 
     const searchKey = (filter?.keyword || '').trim();
@@ -690,8 +736,8 @@ export class HierarchyService {
         name_lg: longName,
         name_sh: shortName,
         name_3l: threeLetter,
-        type: 'Other',
-        categories: 'Other',
+        type: isExtinct ? 'Extinct Competitions' : 'Other Competitions',
+        categories: isExtinct ? 'Extinct Competitions' : 'Other Competitions',
         nation_id: nationId,
         nation: mapNationRef(nation),
         nation_name: nation?.name_lg || nation?.name_sh,
@@ -715,15 +761,36 @@ export class HierarchyService {
 
     const comp = await this.compRepo.findOne({
       where: { id: strId },
-      relations: ['nation', 'confederation', 'parent'],
+      relations: ['nation', 'nation.confederation', 'confederation', 'parent'],
     });
     if (!comp) {
       throw new NotFoundException(`Competition with ID ${compId} not found`);
     }
-    const [clubsCount, awardsCount, childrenCount] = await Promise.all([
-      this.clubRepo.count({ where: { comp_id: strId } }),
-      this.awardRepo.count({ where: { comp_id: strId } }),
+    const [subCompsRows, childrenCount] = await Promise.all([
+      this.compRepo.query(
+        `WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = $1
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT id FROM sc;`,
+        [strId],
+      ),
       this.compRepo.count({ where: { parent_id: strId } }),
+    ]);
+    const allCompIds = subCompsRows.map((r: any) => String(r.id));
+    const [clubsCount, awardsCount] = await Promise.all([
+      allCompIds.length > 0
+        ? this.clubRepo
+            .createQueryBuilder('club')
+            .where('club.comp_id IN (:...allCompIds)', { allCompIds })
+            .getCount()
+        : 0,
+      allCompIds.length > 0
+        ? this.awardRepo
+            .createQueryBuilder('award')
+            .where('award.comp_id IN (:...allCompIds)', { allCompIds })
+            .getCount()
+        : 0,
     ]);
     return mapCompetition(
       {
@@ -758,8 +825,16 @@ export class HierarchyService {
         p.name_sh as parent_short_name,
         p.name_3l as parent_three_letter,
         (SELECT COUNT(*) FROM competitions sub WHERE sub.parent_id = c.id)::int as children_count,
-        (SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id = c.id)::int as clubs_count,
-        (SELECT COUNT(*) FROM awards a WHERE a.comp_id = c.id)::int as awards_count
+        (WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = c.id
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT COUNT(*) FROM clubs cl WHERE cl.comp_id IN (SELECT id FROM sc))::int as clubs_count,
+        (WITH RECURSIVE sc AS (
+          SELECT id FROM competitions WHERE id = c.id
+          UNION ALL
+          SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
+        ) SELECT COUNT(*) FROM awards a WHERE a.comp_id IN (SELECT id FROM sc))::int as awards_count
       FROM competitions c
       LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id

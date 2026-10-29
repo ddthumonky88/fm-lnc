@@ -272,6 +272,7 @@ export interface NationItem {
   confederation_name?: string;
   confed?: ConfederationItem;
   confederation?: ConfederationItem;
+  inactive_fields?: string | null;
   totalChildren?: number;
   totalComps?: number;
   totalClubs?: number;
@@ -423,6 +424,7 @@ export interface NationHubData {
   counts: {
     domesticComps: number;
     independentClubs: number;
+    extinctClubs?: number;
     allClubs: number;
     stadiums: number;
     cities: number;
