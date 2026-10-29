@@ -250,19 +250,16 @@ export function mapCity(city: any) {
   const regEntity = city.regionEntity;
   const regCode = regEntity?.code ?? null;
   const regName = regEntity?.name ?? null;
-  let formattedRegion = city.region ?? city.categories ?? null;
-  if (regName) {
-    formattedRegion = regCode ? `[${regCode}] ${regName}` : regName;
-  }
+  const cleanRegionName = regName || (city.region ? String(city.region).replace(/^\[[^\]]+\]\s*/, '').trim() : null);
 
   return {
     id: String(city.id),
     name: city.name,
-    region: formattedRegion,
+    region: cleanRegionName,
     region_id: city.region_id ?? regEntity?.id ?? null,
     region_code: regCode,
-    region_name: regName || city.region || null,
-    categories: formattedRegion,
+    region_name: cleanRegionName,
+    categories: cleanRegionName,
     is_disabled: !!city.is_disabled,
     inactive_fields: city.is_disabled ? 'name' : null,
     nation,

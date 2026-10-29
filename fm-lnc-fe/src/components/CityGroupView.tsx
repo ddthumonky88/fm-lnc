@@ -54,7 +54,10 @@ export default function CityGroupView({
     const uncategorizedItems: any[] = [];
 
     items.forEach((item) => {
-      const rawCat = item.categories?.trim();
+      let rawCat = (item.region_name || item.region || item.categories)?.trim();
+      if (rawCat) {
+        rawCat = rawCat.replace(/^\[[^\]]+\]\s*/, '').trim();
+      }
       if (!rawCat) {
         uncategorizedItems.push(item);
       } else {
@@ -178,8 +181,8 @@ export default function CityGroupView({
           value: r.id,
           label:
             r.citiesCount !== undefined && r.citiesCount > 0
-              ? `${r.code ? `[${r.code}] ` : ''}${r.name} (${r.citiesCount})`
-              : `${r.code ? `[${r.code}] ` : ''}${r.name}`,
+              ? `${r.name} (${r.citiesCount})`
+              : r.name,
         })),
       ];
     }

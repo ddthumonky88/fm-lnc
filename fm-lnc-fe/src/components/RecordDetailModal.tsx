@@ -914,7 +914,7 @@ export default function RecordDetailModal({
               )}
 
               {/* Region (City) */}
-              {isCity && currentData.categories && (
+              {isCity && (currentData.region_name || currentData.region || currentData.categories) && (
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['categories', 'category', 'region'], 'pt-0.5')}>
                     Region:
@@ -929,7 +929,9 @@ export default function RecordDetailModal({
                           : 'text-sky-500'
                       }
                     />
-                    <span>{currentData.categories}</span>
+                    <span>
+                      {String(currentData.region_name || currentData.region || currentData.categories).replace(/^\[[^\]]+\]\s*/, '').trim()}
+                    </span>
                   </div>
                 </div>
               )}
@@ -1543,7 +1545,7 @@ export default function RecordDetailModal({
                       ...formData,
                       region_id: val || null,
                       region: selected ? selected.name : '',
-                      categories: selected ? (selected.code ? `[${selected.code}] ${selected.name}` : selected.name) : '',
+                      categories: selected ? selected.name : '',
                     });
                   }}
                   placeholder="Chọn khu vực..."
@@ -1555,7 +1557,7 @@ export default function RecordDetailModal({
                   }
                   options={cityRegions.map((r) => ({
                     value: r.id,
-                    label: r.code ? `[${r.code}] ${r.name}` : r.name,
+                    label: r.name,
                   }))}
                 />
               </div>

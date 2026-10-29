@@ -763,8 +763,9 @@ export default function EntityCard({
                   isInactive: isInactive('name') || isInactive('long_name') || isTitleInactive,
                   isRed: isRedKeyword(title),
                 });
-                const regionVal = data.region || data.categories;
+                let regionVal = data.region_name || data.region || data.categories;
                 if (regionVal) {
+                  regionVal = String(regionVal).replace(/^\[[^\]]+\]\s*/, '').trim();
                   fields.push({
                     label: 'Region:',
                     value: regionVal,
