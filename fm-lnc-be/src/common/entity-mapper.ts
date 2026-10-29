@@ -3,7 +3,7 @@ export interface NestedNation {
   name_lg: string | null;
   name_sh: string | null;
   name_3l: string | null;
-  confed?: NestedConfed | null;
+  confed?: string | null;
 }
 
 export interface NestedConfed {
@@ -36,16 +36,9 @@ export function mapNationRef(nation: any): NestedNation | null {
   if (!nation) return null;
   const id = nation.id !== undefined && nation.id !== null ? String(nation.id) : null;
   if (!id) return null;
-  const confed = nation.confed
-    ? mapConfedRef(nation.confed)
-    : nation.confederation
-    ? mapConfedRef(nation.confederation)
-    : nation.confed_id || nation.confederation_id
-    ? {
-        id: String(nation.confed_id || nation.confederation_id),
-        name: nation.confed_name || nation.confederation_name || null,
-      }
-    : null;
+  const confed = typeof nation.confed === 'string'
+    ? nation.confed
+    : nation.confed?.name || nation.confed?.id || nation.confederation?.name || nation.confed_name || null;
   return {
     id,
     name_lg: nation.name_lg ?? nation.name ?? null,
@@ -95,23 +88,16 @@ export function mapParentRef(parent: any): NestedParent | null {
 
 export function mapNation(nation: any, extraStats?: any) {
   if (!nation) return null;
-  const confedObj = nation.confed
-    ? mapConfedRef(nation.confed)
-    : nation.confederation
-    ? mapConfedRef(nation.confederation)
-    : nation.confed_id || nation.confederation_id
-    ? {
-        id: String(nation.confed_id || nation.confederation_id),
-        name: nation.confed_name || nation.confederation_name || null,
-      }
-    : null;
+  const confedVal = typeof nation.confed === 'string'
+    ? nation.confed
+    : nation.confed?.name || nation.confed?.id || nation.confederation?.name || nation.confed_name || null;
   return {
     id: String(nation.id),
     name: nation.name_lg ?? nation.name ?? null,
     name_lg: nation.name_lg ?? nation.name ?? null,
     name_sh: nation.name_sh ?? null,
     name_3l: nation.name_3l ?? null,
-    confed: confedObj,
+    confed: confedVal,
     inactive_fields: nation.inactive_fields ?? null,
     note: nation.note ?? null,
     ...(extraStats !== undefined ? { stats: extraStats } : {}),
@@ -128,28 +114,13 @@ export function mapCompetition(comp: any, extraStats?: any) {
         name_lg: comp.nation_name_lg || comp.nation_name || null,
         name_sh: comp.nation_name_sh || null,
         name_3l: comp.nation_name_3l || comp.nation_three_letter || null,
+        confed: comp.nation?.confed || null,
       }
     : null;
 
-  const confed = comp.confed
-    ? mapConfedRef(comp.confed)
-    : comp.confederation
-    ? mapConfedRef(comp.confederation)
-    : comp.confed_id
-    ? {
-        id: String(comp.confed_id),
-        name: comp.confed_name || null,
-      }
-    : comp.nation?.confed
-    ? mapConfedRef(comp.nation.confed)
-    : comp.nation?.confederation
-    ? mapConfedRef(comp.nation.confederation)
-    : comp.nation?.confed_id || comp.nation?.confederation_id
-    ? {
-        id: String(comp.nation.confed_id || comp.nation.confederation_id),
-        name: comp.nation.confed_name || comp.nation.confed?.name || comp.nation.confederation?.name || null,
-      }
-    : null;
+  const confed = typeof comp.confed === 'string'
+    ? comp.confed
+    : comp.confed?.name || comp.confed?.id || comp.confederation?.name || comp.confed_name || nation?.confed || comp.nation?.confed || null;
 
   const parent_comp = comp.parent_comp
     ? mapParentRef(comp.parent_comp)
@@ -223,7 +194,7 @@ export function mapClub(club: any) {
         name_lg: club.nation_name_lg || club.nation_name || null,
         name_sh: club.nation_name_sh || null,
         name_3l: club.nation_name_3l || club.nation_three_letter || null,
-        confed: null,
+        confed: club.nation?.confed || null,
       }
     : null;
 
@@ -253,13 +224,9 @@ export function mapClub(club: any) {
       }
     : null;
 
-  const confed = club.confed
-    ? mapConfedRef(club.confed)
-    : club.confederation
-    ? mapConfedRef(club.confederation)
-    : nation?.confed
-    ? nation.confed
-    : null;
+  const confed = typeof club.confed === 'string'
+    ? club.confed
+    : club.confed?.name || club.confed?.id || nation?.confed || null;
 
   return {
     id: String(club.id),

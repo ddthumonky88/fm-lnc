@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import {
-  Confederation,
   Nation,
   Competition,
   Club,
@@ -13,6 +12,7 @@ import {
   Stage,
   Region,
 } from '../entities';
+import { normalizeConfed, CONFEDERATION_LIST } from '../entities/confederation.entity';
 import { paginateAndSort } from './pagination.util';
 import {
   PaginationQueryDto,
@@ -37,7 +37,6 @@ import {
 @Injectable()
 export class HierarchyService {
   constructor(
-    @InjectRepository(Confederation) private confedRepo: Repository<Confederation>,
     @InjectRepository(Nation) private nationRepo: Repository<Nation>,
     @InjectRepository(Competition) private compRepo: Repository<Competition>,
     @InjectRepository(Club) private clubRepo: Repository<Club>,
@@ -50,24 +49,26 @@ export class HierarchyService {
   ) {}
 
   async getListConfederations() {
-    const confeds = await this.confedRepo.find({ order: { id: 'ASC' } });
+    const confeds = ['CAF', 'AFC', 'UEFA', 'CONCACAF', 'OFC', 'CONMEBOL', 'WORLD', 'EXTINCT'];
 
     const results = await Promise.all(
-      confeds.map(async (c) => {
+      confeds.map(async (name) => {
         const totalNations = await this.nationRepo.count({
-          where: { confed_id: String(c.id) },
+          where: { confed: name },
         });
 
         // Count international competitions for this confederation
         const totalIntComps = await this.compRepo
           .createQueryBuilder('comp')
-          .where('comp.confed_id = :cid', { cid: String(c.id) })
+          .where('comp.confed = :cid', { cid: name })
           .andWhere('comp.nation_id IS NULL')
+          .andWhere('(comp.parent_id IS NULL OR comp.parent_id = \'\')')
           .getCount();
 
         return {
-          id: String(c.id),
-          name: c.name,
+          id: name,
+          name,
+          confed: name,
           stats: {
             nations: totalNations,
             intComps: totalIntComps,
@@ -95,8 +96,9 @@ export class HierarchyService {
       String(filter.confedId).toLowerCase() !== 'null' &&
       String(filter.confedId).toLowerCase() !== 'undefined'
     ) {
-      params.push(String(filter.confedId));
-      whereClause += ` AND c.confed_id = $${params.length}`;
+      const code = normalizeConfed(filter.confedId);
+      params.push(code);
+      whereClause += ` AND c.confed = $${params.length}`;
     }
 
     const searchKey = (filter.keyword || '').trim();
@@ -107,7 +109,7 @@ export class HierarchyService {
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
-        conf.name as confed_name,
+        c.confed as confed_name,
         n.name_3l as nation_name_3l,
         n.name_lg as nation_name_lg,
         n.name_sh as nation_name_sh,
@@ -126,7 +128,6 @@ export class HierarchyService {
           SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
         ) SELECT COUNT(*) FROM awards a WHERE a.comp_id IN (SELECT id FROM sc))::int as awards_count
       FROM competitions c
-      LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
@@ -142,7 +143,6 @@ export class HierarchyService {
   async getNationHub(nationId: string) {
     const nation = await this.nationRepo.findOne({
       where: { id: String(nationId) },
-      relations: ['confederation'],
     });
 
     if (!nation) return null;
@@ -228,7 +228,6 @@ export class HierarchyService {
     const nation = strNationId
       ? await this.nationRepo.findOne({
           where: { id: strNationId },
-          relations: ['confederation'],
         })
       : null;
 
@@ -249,7 +248,6 @@ export class HierarchyService {
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
-        conf.name as confed_name,
         n.name_3l as nation_name_3l,
         n.name_lg as nation_name_lg,
         n.name_sh as nation_name_sh,
@@ -268,7 +266,6 @@ export class HierarchyService {
           SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
         ) SELECT COUNT(*) FROM awards a WHERE a.comp_id IN (SELECT id FROM sc))::int as awards_count
       FROM competitions c
-      LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
@@ -305,7 +302,7 @@ export class HierarchyService {
       name_sh: null,
       name_3l: null,
     };
-    const confedRef = nation?.confederation ? mapConfedRef(nation.confederation) : null;
+    const confedRef = nation?.confed || null;
 
     const virtualOther = {
       id: `oth-${strNationId}`,
@@ -688,7 +685,6 @@ export class HierarchyService {
       const nation = nationId
         ? await this.nationRepo.findOne({
             where: { id: nationId },
-            relations: ['confederation'],
           })
         : null;
 
@@ -718,7 +714,7 @@ export class HierarchyService {
         name_3l: tag,
         type: isExtinct ? 'Extinct Competitions' : 'Other Competitions',
         nation: mapNationRef(nation),
-        confed: nation?.confederation ? mapConfedRef(nation.confederation) : null,
+        confed: nation?.confed || null,
         parent_comp: null,
         is_virtual: true,
         virtual_type: isExtinct ? 'EXTINCT' : 'OTHER',
@@ -732,36 +728,33 @@ export class HierarchyService {
 
     const comp = await this.compRepo.findOne({
       where: { id: strId },
-      relations: ['nation', 'nation.confederation', 'confederation', 'parent'],
+      relations: ['nation', 'parent'],
     });
     if (!comp) {
       throw new NotFoundException(`Competition with ID ${compId} not found`);
     }
 
     let effectiveNation = comp.nation;
-    let effectiveConfed = comp.confederation || comp.nation?.confederation;
+    let effectiveConfed = comp.confed || comp.nation?.confed;
     if ((!effectiveNation || !effectiveConfed) && comp.parent_id) {
       const ancestors = await this.compRepo.query(
         `WITH RECURSIVE anc AS (
-          SELECT id, parent_id, nation_id, confed_id FROM competitions WHERE id = $1
+          SELECT id, parent_id, nation_id, confed FROM competitions WHERE id = $1
           UNION ALL
-          SELECT p.id, p.parent_id, p.nation_id, p.confed_id FROM competitions p INNER JOIN anc ON p.id = anc.parent_id
-        ) SELECT nation_id, confed_id FROM anc WHERE nation_id IS NOT NULL OR confed_id IS NOT NULL LIMIT 1;`,
+          SELECT p.id, p.parent_id, p.nation_id, p.confed FROM competitions p INNER JOIN anc ON p.id = anc.parent_id
+        ) SELECT nation_id, confed FROM anc WHERE nation_id IS NOT NULL OR confed IS NOT NULL LIMIT 1;`,
         [comp.parent_id],
       );
       if (ancestors.length > 0) {
         if (!effectiveNation && ancestors[0].nation_id) {
           effectiveNation = await this.nationRepo.findOne({
             where: { id: ancestors[0].nation_id },
-            relations: ['confederation'],
           });
         }
-        if (!effectiveConfed && ancestors[0].confed_id) {
-          effectiveConfed = await this.confedRepo.findOne({
-            where: { id: ancestors[0].confed_id },
-          });
-        } else if (!effectiveConfed && effectiveNation?.confederation) {
-          effectiveConfed = effectiveNation.confederation;
+        if (!effectiveConfed && ancestors[0].confed) {
+          effectiveConfed = ancestors[0].confed;
+        } else if (!effectiveConfed && effectiveNation?.confed) {
+          effectiveConfed = effectiveNation.confed;
         }
       }
     }
@@ -814,7 +807,6 @@ export class HierarchyService {
 
     const raw = await this.compRepo.query(
       `SELECT c.*,
-        conf.name as confed_name,
         n.name_3l as nation_name_3l,
         n.name_lg as nation_name_lg,
         n.name_sh as nation_name_sh,
@@ -833,7 +825,6 @@ export class HierarchyService {
           SELECT sub.id FROM competitions sub INNER JOIN sc ON sub.parent_id = sc.id
         ) SELECT COUNT(*) FROM awards a WHERE a.comp_id IN (SELECT id FROM sc))::int as awards_count
       FROM competitions c
-      LEFT JOIN confederations conf ON conf.id = c.confed_id
       LEFT JOIN nations n ON n.id = c.nation_id
       LEFT JOIN competitions p ON p.id = c.parent_id
       WHERE ${whereClause}
@@ -917,8 +908,9 @@ export class HierarchyService {
       String(filter.confedId).toLowerCase() !== 'null' &&
       String(filter.confedId).toLowerCase() !== 'undefined'
     ) {
-      params.push(String(filter.confedId));
-      whereClause += ` AND n.confed_id = $${params.length}`;
+      const code = normalizeConfed(filter.confedId);
+      params.push(code);
+      whereClause += ` AND n.confed = $${params.length}`;
     }
     const searchKey = (filter.keyword || '').trim();
     if (searchKey) {
@@ -927,14 +919,13 @@ export class HierarchyService {
     }
 
     const raw = await this.nationRepo.query(
-      `SELECT n.id, n.name_lg, n.name_sh, n.name_3l, n.confed_id, conf.name as confederation_name,
+      `SELECT n.id, n.name_lg, n.name_sh, n.name_3l, n.confed,
         (SELECT COUNT(*) FROM competitions c WHERE c.nation_id = n.id AND (c.parent_id IS NULL OR c.parent_id = ''))::int as total_comps,
         (SELECT COUNT(*) FROM clubs cl WHERE cl.nation_id = n.id)::int as total_clubs,
         (SELECT COUNT(*) FROM stadiums s WHERE s.nation_id = n.id)::int as total_stadiums,
         (SELECT COUNT(*) FROM cities ci WHERE ci.nation_id = n.id)::int as total_cities,
         (SELECT COUNT(*) FROM awards a WHERE a.nation_id = n.id AND a.comp_id IS NULL)::int as total_awards
       FROM nations n
-      LEFT JOIN confederations conf ON n.confed_id = conf.id
       WHERE ${whereClause}
       ORDER BY n.name_lg ASC;`,
       params,
@@ -966,50 +957,51 @@ export class HierarchyService {
   }
 
   async getContinentInfo(confedId: string) {
-    const strId = String(confedId);
-    const confed = await this.confedRepo.findOne({ where: { id: strId } });
-    if (!confed) {
+    const code = normalizeConfed(confedId);
+    if (!code) {
       throw new NotFoundException(`Confederation with ID ${confedId} not found`);
     }
 
     const [totalNations, totalIntComps, totalComps, totalClubs, totalStadiums, totalCities, totalAwards] =
       await Promise.all([
-        this.nationRepo.count({ where: { confed_id: strId } }),
+        this.nationRepo.count({ where: { confed: code } }),
         this.compRepo
           .createQueryBuilder('comp')
-          .where('comp.confed_id = :cid', { cid: strId })
+          .where('comp.confed = :cid', { cid: code })
           .andWhere('comp.nation_id IS NULL')
           .andWhere('(comp.parent_id IS NULL OR comp.parent_id = \'\')')
           .getCount(),
         this.compRepo
           .createQueryBuilder('comp')
           .leftJoin('comp.nation', 'nation')
-          .where('comp.confed_id = :cid OR nation.confed_id = :cid', { cid: strId })
+          .where('comp.confed = :cid OR nation.confed = :cid', { cid: code })
           .getCount(),
         this.clubRepo
           .createQueryBuilder('club')
           .innerJoin('club.nation', 'nation')
-          .where('nation.confed_id = :cid', { cid: strId })
+          .where('nation.confed = :cid', { cid: code })
           .getCount(),
         this.stadiumRepo
           .createQueryBuilder('stadium')
           .innerJoin('stadium.nation', 'nation')
-          .where('nation.confed_id = :cid', { cid: strId })
+          .where('nation.confed = :cid', { cid: code })
           .getCount(),
         this.cityRepo
           .createQueryBuilder('city')
           .innerJoin('city.nation', 'nation')
-          .where('nation.confed_id = :cid', { cid: strId })
+          .where('nation.confed = :cid', { cid: code })
           .getCount(),
         this.awardRepo
           .createQueryBuilder('award')
           .innerJoin('award.nation', 'nation')
-          .where('nation.confed_id = :cid', { cid: strId })
+          .where('nation.confed = :cid', { cid: code })
           .getCount(),
       ]);
 
     return {
-      ...confed,
+      id: code,
+      name: code,
+      confed: code,
       stats: {
         nations: totalNations,
         intComps: totalIntComps,
@@ -1026,7 +1018,6 @@ export class HierarchyService {
     const strId = String(nationId);
     const nation = await this.nationRepo.findOne({
       where: { id: strId },
-      relations: ['confederation'],
     });
     if (!nation) {
       throw new NotFoundException(`Nation with ID ${nationId} not found`);
@@ -1083,15 +1074,11 @@ export class HierarchyService {
       where: { id: strId },
       relations: [
         'nation',
-        'nation.confederation',
         'competition',
         'competition.nation',
-        'competition.nation.confederation',
-        'competition.confederation',
         'competition.parent',
         'affiliateClub',
         'affiliateClub.nation',
-        'affiliateClub.nation.confederation',
       ],
     });
     if (!club) {
@@ -1103,10 +1090,10 @@ export class HierarchyService {
       club.competition?.nation ||
       club.affiliateClub?.nation;
     const effectiveConfed =
-      club.nation?.confederation ||
-      club.competition?.confederation ||
-      club.competition?.nation?.confederation ||
-      club.affiliateClub?.nation?.confederation;
+      club.nation?.confed ||
+      club.competition?.confed ||
+      club.competition?.nation?.confed ||
+      club.affiliateClub?.nation?.confed;
 
     // Resolve club family (root club + all affiliates)
     const rootClubId = club.affiliate_club_id ? String(club.affiliate_club_id) : strId;

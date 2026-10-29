@@ -98,40 +98,22 @@ export class LncParserService {
       await queryRunner.query(`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS parent_id BIGINT`);
       await queryRunner.query(`CREATE INDEX IF NOT EXISTS idx_competitions_parent_id ON competitions(parent_id)`);
 
-      // 1. Confederations
-      const confeds = [
-        [1, 'CAF'],
-        [2, 'AFC'],
-        [3, 'UEFA'],
-        [4, 'CONCACAF'],
-        [5, 'OFC'],
-        [6, 'CONMEBOL'],
-        [7, 'World'],
-        [8, 'EXTINCT'],
-      ];
-      for (const [id, name] of confeds) {
-        await queryRunner.query(
-          `INSERT INTO confederations (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name`,
-          [id, name],
-        );
-      }
-
-      const confedMap: Record<string, number> = {
-        CAF: 1, AFRICA: 1,
-        AFC: 2, ASIA: 2,
-        UEFA: 3, EUROPE: 3,
-        CONCACAF: 4, 'NORTH AMERICA': 4,
-        OFC: 5, OCEANIA: 5,
-        CONMEBOL: 6, 'SOUTH AMERICA': 6,
-        WORLD: 7, INTERNATIONAL: 7, FIFA: 7,
-        EXTINCT: 8, OTHER: 8,
+      const confedMap: Record<string, string> = {
+        CAF: 'CAF', AFRICA: 'CAF',
+        AFC: 'AFC', ASIA: 'AFC',
+        UEFA: 'UEFA', EUROPE: 'UEFA',
+        CONCACAF: 'CONCACAF', 'NORTH AMERICA': 'CONCACAF',
+        OFC: 'OFC', OCEANIA: 'OFC',
+        CONMEBOL: 'CONMEBOL', 'SOUTH AMERICA': 'CONMEBOL',
+        WORLD: 'WORLD', INTERNATIONAL: 'WORLD', FIFA: 'WORLD',
+        EXTINCT: 'EXTINCT', OTHER: 'EXTINCT',
       };
 
       // 2. Parse City & Nation
       const cityNatLines = fs.readFileSync(fileCityNat, 'utf-8').split(/\r?\n/);
       const nations: Record<number, any> = {};
       const cities: Record<number, any> = {};
-      let curConfedId = 7;
+      let curConfed = 'WORLD';
       let curNatCode: string | null = null;
       let curNatName: string | null = null;
       let curCityCat: string | null = null;
@@ -143,8 +125,8 @@ export class LncParserService {
           const h = line.replace(/^#+/, '').trim();
           if (h.startsWith('NATION >')) {
             const parts = h.split('>').map((p) => p.trim());
-            const cName = parts[1]?.toUpperCase() || 'OTHER';
-            curConfedId = confedMap[cName] || 7;
+            const cName = parts[1]?.toUpperCase() || 'WORLD';
+            curConfed = confedMap[cName] || 'WORLD';
             continue;
           } else if (h.startsWith('CITY >')) {
             const parts = h.split('>').map((p) => p.trim());
@@ -174,7 +156,7 @@ export class LncParserService {
           const id = parseInt(m[2], 10);
           const val = m[3].trim();
           if (cmd === 'NATION_LONG_NAME_CHANGE' || cmd === 'NATION_SHORT_NAME_CHANGE' || cmd === 'NATION_3LETTER_NAME_CHANGE') {
-            if (!nations[id]) nations[id] = { confed_id: curConfedId, inactive_fields: new Set() };
+            if (!nations[id]) nations[id] = { confed: curConfed, inactive_fields: new Set() };
             if (!nations[id].inactive_fields) nations[id].inactive_fields = new Set();
             if (cmd === 'NATION_LONG_NAME_CHANGE') {
               nations[id].name_lg = val;
@@ -213,7 +195,7 @@ export class LncParserService {
         const lName = ndata.name_lg || `Nation ${id}`;
         const sName = ndata.name_sh || lName;
         const code = ndata.name_3l || 'UNK';
-        const cid = ndata.confed_id || 7;
+        const cid = ndata.confed || 'WORLD';
 
         codeToNationId[code] = id;
         nameToNationId[lName.toUpperCase()] = id;
@@ -224,13 +206,13 @@ export class LncParserService {
           : null;
 
         await queryRunner.query(
-          `INSERT INTO nations (id, name_lg, name_sh, name_3l, confed_id, inactive_fields)
+          `INSERT INTO nations (id, name_lg, name_sh, name_3l, confed, inactive_fields)
            VALUES ($1, $2, $3, $4, $5, $6)
            ON CONFLICT (id) DO UPDATE SET
              name_lg = EXCLUDED.name_lg,
              name_sh = EXCLUDED.name_sh,
              name_3l = EXCLUDED.name_3l,
-             confed_id = EXCLUDED.confed_id,
+             confed = EXCLUDED.confed,
              inactive_fields = EXCLUDED.inactive_fields`,
           [id, lName, sName, code, cid, inactStr],
         );
@@ -310,7 +292,7 @@ export class LncParserService {
       const compOtherLines = fs.readFileSync(fileCompOther, 'utf-8').split(/\r?\n/);
       const comps: Record<number, any> = {};
       const awards: Record<number, any> = {};
-      let curCompConfedId: number | null = null;
+      let curCompConfed: string | null = null;
       let curCompNatCode: string | null = null;
       let curCompCat: string | null = null;
 
@@ -321,8 +303,8 @@ export class LncParserService {
           const h = line.replace(/^#+/, '').trim();
           if (h.startsWith('COMP >')) {
             const parts = h.split('>').map((p) => p.trim());
-            const cf = parts[1]?.toUpperCase() || 'OTHER';
-            curCompConfedId = confedMap[cf] || 7;
+            const cf = parts[1]?.toUpperCase() || 'WORLD';
+            curCompConfed = confedMap[cf] || 'WORLD';
             curCompNatCode = null;
             if (parts.length > 2) {
               const m = parts[2].match(/\[([A-Z0-9]+)\]/);
@@ -332,8 +314,8 @@ export class LncParserService {
             continue;
           } else if (h.startsWith('AWARDS >')) {
             const parts = h.split('>').map((p) => p.trim());
-            const cf = parts[1]?.toUpperCase() || 'OTHER';
-            curCompConfedId = confedMap[cf] || 7;
+            const cf = parts[1]?.toUpperCase() || 'WORLD';
+            curCompConfed = confedMap[cf] || 'WORLD';
             curCompNatCode = null;
             if (parts.length >= 4) {
               const m = parts[2].match(/\[([A-Za-z0-9]{3})\]/);
@@ -377,7 +359,7 @@ export class LncParserService {
           const cid = parseInt(parentMatch[1], 10);
           const pid = parseInt(parentMatch[2], 10);
           if (!comps[cid]) {
-            comps[cid] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+            comps[cid] = { confed: curCompConfed, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
           }
           if (!comps[cid].inactive_fields) comps[cid].inactive_fields = new Set();
           comps[cid].parent_id = pid;
@@ -391,7 +373,7 @@ export class LncParserService {
           const cid = parseInt(colMatch[1], 10);
           const tokens = colMatch[2].trim().split(/\s+/);
           if (!comps[cid]) {
-            comps[cid] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+            comps[cid] = { confed: curCompConfed, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
           }
           if (!comps[cid].inactive_fields) comps[cid].inactive_fields = new Set();
           if (tokens.length >= 7) {
@@ -410,7 +392,7 @@ export class LncParserService {
           const id = parseInt(m[2], 10);
           const val = m[3].trim();
           if (cmd === 'COMP_LONG_NAME_CHANGE' || cmd === 'COMP_SHORT_NAME_CHANGE' || cmd === 'COMP_3LETTER_NAME_CHANGE') {
-            if (!comps[id]) comps[id] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+            if (!comps[id]) comps[id] = { confed: curCompConfed, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
             if (!comps[id].inactive_fields) comps[id].inactive_fields = new Set();
             if (cmd === 'COMP_LONG_NAME_CHANGE') {
               comps[id].name_lg = val;
@@ -428,7 +410,7 @@ export class LncParserService {
               else comps[id].inactive_fields.delete('name_3l');
             }
           } else if (cmd === 'AWARD_LONG_NAME_CHANGE' || cmd === 'AWARD_SHORT_NAME_CHANGE') {
-            if (!awards[id]) awards[id] = { confed_id: curCompConfedId, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
+            if (!awards[id]) awards[id] = { confed: curCompConfed, nat_code: curCompNatCode, cat: curCompCat, inactive_fields: new Set() };
             if (!awards[id].inactive_fields) awards[id].inactive_fields = new Set();
             if (cmd === 'AWARD_LONG_NAME_CHANGE') {
               awards[id].name_lg = val;
@@ -469,7 +451,7 @@ export class LncParserService {
           : null;
 
         await queryRunner.query(
-          `INSERT INTO competitions (id, name_lg, name_sh, name_3l, fg_color, bg_color, confed_id, nation_id, type, inactive_fields, parent_id)
+          `INSERT INTO competitions (id, name_lg, name_sh, name_3l, fg_color, bg_color, confed, nation_id, type, inactive_fields, parent_id)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
            ON CONFLICT (id) DO UPDATE SET
              name_lg = EXCLUDED.name_lg,
@@ -477,12 +459,12 @@ export class LncParserService {
              name_3l = EXCLUDED.name_3l,
              fg_color = EXCLUDED.fg_color,
              bg_color = EXCLUDED.bg_color,
-             confed_id = EXCLUDED.confed_id,
+             confed = EXCLUDED.confed,
              nation_id = EXCLUDED.nation_id,
              type = EXCLUDED.type,
              inactive_fields = EXCLUDED.inactive_fields,
              parent_id = EXCLUDED.parent_id`,
-          [id, lName, sName, code, fg, bg, cdata.confed_id, natId, cdata.cat, inactStr, parentId],
+          [id, lName, sName, code, fg, bg, cdata.confed, natId, cdata.cat, inactStr, parentId],
         );
       }
 

@@ -15,7 +15,6 @@ import {
   Award,
   Person,
   Stage,
-  Confederation,
 } from '../entities';
 import { Repository } from 'typeorm';
 import { RawResponse } from '../common/raw-response.decorator';
@@ -26,7 +25,6 @@ export class LncController {
   constructor(
     private readonly lncService: LncService,
     private readonly lncParserService: LncParserService,
-    @InjectRepository(Confederation) private confedRepo: Repository<Confederation>,
     @InjectRepository(Nation) private nationRepo: Repository<Nation>,
     @InjectRepository(City) private cityRepo: Repository<City>,
     @InjectRepository(Competition) private compRepo: Repository<Competition>,
@@ -188,7 +186,7 @@ export class LncController {
       people,
       stages,
     ] = await Promise.all([
-      this.confedRepo.count(),
+      Promise.resolve(8),
       this.nationRepo.count(),
       this.cityRepo.count(),
       this.compRepo.count(),

@@ -1,8 +1,8 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Nation } from './nation.entity';
-import { Confederation } from './confederation.entity';
 import { Club } from './club.entity';
 import { Award } from './award.entity';
+import { ConfederationEnum } from './confederation.entity';
 
 @Entity('competitions')
 export class Competition {
@@ -24,8 +24,8 @@ export class Competition {
   @Column({ type: 'varchar', length: 100, nullable: true })
   bg_color: string;
 
-  @Column({ type: 'varchar', length: 64, nullable: true })
-  confed_id: string;
+  @Column({ type: 'varchar', length: 32, nullable: true })
+  confed: ConfederationEnum | string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
   nation_id: string;
@@ -41,10 +41,6 @@ export class Competition {
 
   @Column({ type: 'text', nullable: true })
   inactive_fields: string;
-
-  @ManyToOne(() => Confederation, (confed) => confed.competitions, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'confed_id' })
-  confederation: Confederation;
 
   @ManyToOne(() => Nation, (nation) => nation.competitions, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'nation_id' })

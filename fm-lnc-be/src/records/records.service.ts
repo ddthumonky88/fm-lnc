@@ -11,6 +11,7 @@ import {
   Person,
   Stage,
   Region,
+  normalizeConfed,
 } from '../entities';
 
 function normalizeInputData(data: any): any {
@@ -35,14 +36,18 @@ function normalizeInputData(data: any): any {
   if (d.is_disabled !== undefined) d.is_disabled = !!d.is_disabled;
   else if (d.inactive_fields !== undefined) d.is_disabled = Boolean(d.inactive_fields && String(d.inactive_fields).trim() !== '');
 
-  if (d.confederation_id !== undefined && d.confed_id === undefined) d.confed_id = d.confederation_id;
+  if (d.confederation_id !== undefined && d.confed === undefined) d.confed = d.confederation_id;
+  if (d.confed_id !== undefined && d.confed === undefined) d.confed = d.confed_id;
   if (d.country_id !== undefined && d.nation_id === undefined) d.nation_id = d.country_id;
 
   if (d.nation && typeof d.nation === 'object' && d.nation.id) {
     d.nation_id = d.nation.id;
   }
-  if (d.confed && typeof d.confed === 'object' && d.confed.id) {
-    d.confed_id = d.confed.id;
+  if (d.confed && typeof d.confed === 'object') {
+    d.confed = d.confed.name || d.confed.id;
+  }
+  if (d.confed !== undefined) {
+    d.confed = normalizeConfed(d.confed);
   }
   if (d.comp && typeof d.comp === 'object' && d.comp.id) {
     d.comp_id = d.comp.id;

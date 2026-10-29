@@ -1,18 +1,47 @@
-import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { Nation } from './nation.entity';
-import { Competition } from './competition.entity';
+export enum ConfederationEnum {
+  CAF = 'CAF',
+  AFC = 'AFC',
+  UEFA = 'UEFA',
+  CONCACAF = 'CONCACAF',
+  OFC = 'OFC',
+  CONMEBOL = 'CONMEBOL',
+  WORLD = 'WORLD',
+  EXTINCT = 'EXTINCT',
+}
 
-@Entity('confederations')
-export class Confederation {
-  @PrimaryColumn({ type: 'varchar', length: 64 })
-  id: string;
+export const CONFEDERATION_LIST = [
+  'CAF',
+  'AFC',
+  'UEFA',
+  'CONCACAF',
+  'OFC',
+  'CONMEBOL',
+  'WORLD',
+  'EXTINCT',
+] as const;
 
-  @Column({ type: 'varchar', length: 255 })
-  name: string;
+export const CONFED_ID_MAP: Record<string, string> = {
+  '1': 'CAF',
+  '2': 'AFC',
+  '3': 'UEFA',
+  '4': 'CONCACAF',
+  '5': 'OFC',
+  '6': 'CONMEBOL',
+  '7': 'WORLD',
+  '8': 'EXTINCT',
+  CAF: 'CAF',
+  AFC: 'AFC',
+  UEFA: 'UEFA',
+  CONCACAF: 'CONCACAF',
+  OFC: 'OFC',
+  CONMEBOL: 'CONMEBOL',
+  WORLD: 'WORLD',
+  World: 'WORLD',
+  EXTINCT: 'EXTINCT',
+};
 
-  @OneToMany(() => Nation, (nation) => nation.confederation)
-  nations: Nation[];
-
-  @OneToMany(() => Competition, (comp) => comp.confederation)
-  competitions: Competition[];
+export function normalizeConfed(confedIdOrName?: string | null): string | null {
+  if (!confedIdOrName) return null;
+  const str = String(confedIdOrName).trim();
+  return CONFED_ID_MAP[str] || CONFED_ID_MAP[str.toUpperCase()] || str;
 }

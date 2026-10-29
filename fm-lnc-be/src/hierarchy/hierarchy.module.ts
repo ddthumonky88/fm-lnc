@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  Confederation,
   Nation,
   Competition,
   Club,
@@ -18,7 +17,6 @@ import { HierarchyController } from './hierarchy.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Confederation,
       Nation,
       Competition,
       Club,

@@ -12,7 +12,8 @@ import {
   Award,
   Person,
   Stage,
-  Confederation,
+  normalizeConfed,
+  ConfederationEnum,
 } from '../entities';
 
 @Injectable()
@@ -20,7 +21,6 @@ export class LncService {
   private readonly logger = new Logger(LncService.name);
 
   constructor(
-    @InjectRepository(Confederation) private confedRepo: Repository<Confederation>,
     @InjectRepository(Nation) private nationRepo: Repository<Nation>,
     @InjectRepository(City) private cityRepo: Repository<City>,
     @InjectRepository(Competition) private compRepo: Repository<Competition>,
@@ -40,12 +40,11 @@ export class LncService {
 
     // 1. NATIONS
     const nations = await this.nationRepo.find({
-      relations: ['confederation'],
       order: { id: 'ASC' },
     });
     let lastConf = '';
     for (const nat of nations) {
-      const confName = nat.confederation?.name || 'WORLD';
+      const confName = nat.confed || 'WORLD';
       if (confName !== lastConf) {
         out += `\n# NATION > ${confName}\n${hr}`;
         lastConf = confName;
@@ -78,11 +77,11 @@ export class LncService {
 
     // 3. COMPETITIONS
     const comps = await this.compRepo.find({
-      relations: ['nation', 'confederation'],
+      relations: ['nation'],
       order: { id: 'ASC' },
     });
     for (const comp of comps) {
-      const conf = comp.confederation?.name || 'INTERNATIONAL';
+      const conf = comp.confed || 'INTERNATIONAL';
       const isInter = !comp.nation_id;
       const natCode = comp.nation?.name_3l || (isInter ? 'INT' : 'NAT');
       const natName = comp.nation?.name_sh || (isInter ? 'International' : 'National');
@@ -118,7 +117,7 @@ export class LncService {
 
     // 4. CLUBS
     const clubs = await this.clubRepo.find({
-      relations: ['nation', 'competition', 'nation.confederation'],
+      relations: ['nation', 'competition'],
       order: {
         nation: { id: 'ASC' },
         comp_id: 'ASC',
@@ -140,7 +139,7 @@ export class LncService {
     let lastClubSectionKey = '';
 
     for (const cl of clubs) {
-      const confName = cl.nation?.confederation?.name || 'World';
+      const confName = cl.nation?.confed || 'WORLD';
       const conf = CONFED_CODE_MAP[confName] || confName.toUpperCase();
       const code = cl.nation?.name_3l || 'NAT';
       const nat = (cl.nation?.name_lg || cl.nation?.name_sh || 'Nation').toUpperCase();
@@ -269,37 +268,10 @@ export class LncService {
       );
     }
 
-    const confedMap: Record<string, string> = {
-      CAF: '1', AFRICA: '1',
-      AFC: '2', ASIA: '2',
-      UEFA: '3', EUROPE: '3',
-      CONCACAF: '4', 'NORTH AMERICA': '4',
-      OFC: '5', OCEANIA: '5',
-      CONMEBOL: '6', 'SOUTH AMERICA': '6',
-      WORLD: '7', INTERNATIONAL: '7', FIFA: '7',
-      EXTINCT: '8',
-      OTHER: '8',
-    };
-
-    // Ensure confederations
-    const confeds = [
-      { id: '1', name: 'CAF' },
-      { id: '2', name: 'AFC' },
-      { id: '3', name: 'UEFA' },
-      { id: '4', name: 'CONCACAF' },
-      { id: '5', name: 'OFC' },
-      { id: '6', name: 'CONMEBOL' },
-      { id: '7', name: 'World' },
-      { id: '8', name: 'EXTINCT' },
-    ];
-    for (const c of confeds) {
-      await this.confedRepo.save(c);
-    }
-
     // 1. FM24 - City & Nation.lnc
     const contentCityNat = fs.readFileSync(fileCityNation, 'utf-8');
     const linesCityNat = contentCityNat.split(/\r?\n/);
-    let curConfedId = '7';
+    let curConfed = 'WORLD';
     let curNationCode: string | null = null;
     let curCityCat: string | null = null;
 
@@ -313,8 +285,8 @@ export class LncService {
         const h = line.replace(/^#+/, '').trim();
         if (h.startsWith('NATION >')) {
           const parts = h.split('>').map((p) => p.trim());
-          const cName = parts[1]?.toUpperCase() || 'OTHER';
-          curConfedId = confedMap[cName] || '7';
+          const cName = parts[1]?.toUpperCase() || 'WORLD';
+          curConfed = normalizeConfed(cName) || 'WORLD';
         } else if (h.startsWith('CITY >')) {
           const parts = h.split('>').map((p) => p.trim());
           if (parts.length > 1) {
@@ -333,15 +305,15 @@ export class LncService {
         const val = match[3].trim();
 
         if (cmd === 'NATION_LONG_NAME_CHANGE') {
-          const nat = nationsMap.get(id) || { id, confed_id: curConfedId };
+          const nat = nationsMap.get(id) || { id, confed: curConfed };
           nat.name_lg = val;
           nationsMap.set(id, nat);
         } else if (cmd === 'NATION_SHORT_NAME_CHANGE') {
-          const nat = nationsMap.get(id) || { id, confed_id: curConfedId };
+          const nat = nationsMap.get(id) || { id, confed: curConfed };
           nat.name_sh = val;
           nationsMap.set(id, nat);
         } else if (cmd === 'NATION_3LETTER_NAME_CHANGE') {
-          const nat = nationsMap.get(id) || { id, confed_id: curConfedId };
+          const nat = nationsMap.get(id) || { id, confed: curConfed };
           nat.name_3l = val;
           nationsMap.set(id, nat);
         } else if (cmd === 'CITY_NAME_CHANGE') {
@@ -372,7 +344,7 @@ export class LncService {
         name_lg: longName,
         name_sh: shortName,
         name_3l: code,
-        confed_id: n.confed_id ? String(n.confed_id) : '7',
+        confed: n.confed ? String(n.confed) : 'WORLD',
       } as Nation;
     });
 

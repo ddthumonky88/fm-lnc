@@ -100,6 +100,10 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
               ALTER TABLE "clubs" ADD COLUMN IF NOT EXISTS "affiliate_club_type" VARCHAR(64);
           END IF;
 
+          -- Ensure confed column exists on nations and competitions
+          ALTER TABLE "nations" ADD COLUMN IF NOT EXISTS "confed" VARCHAR(32);
+          ALTER TABLE "competitions" ADD COLUMN IF NOT EXISTS "confed" VARCHAR(32);
+
           -- 2. Drop existing foreign key constraints so column types can be altered safely
           FOR r IN (
               SELECT tc.table_name, tc.constraint_name
@@ -109,17 +113,16 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
               EXECUTE 'ALTER TABLE "' || r.table_name || '" DROP CONSTRAINT IF EXISTS "' || r.constraint_name || '" CASCADE;';
           END LOOP;
 
-          -- 3. Alter all id and foreign key columns to VARCHAR(64)
-          ALTER TABLE IF EXISTS "confederations" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
+          -- Drop table confederations if it still exists
+          DROP TABLE IF EXISTS "confederations" CASCADE;
 
+          -- 3. Alter all id and foreign key columns to VARCHAR(64)
           ALTER TABLE IF EXISTS "nations" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
-          ALTER TABLE IF EXISTS "nations" ALTER COLUMN "confed_id" TYPE VARCHAR(64) USING "confed_id"::text;
 
           ALTER TABLE IF EXISTS "cities" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
           ALTER TABLE IF EXISTS "cities" ALTER COLUMN "nation_id" TYPE VARCHAR(64) USING "nation_id"::text;
 
           ALTER TABLE IF EXISTS "competitions" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
-          ALTER TABLE IF EXISTS "competitions" ALTER COLUMN "confed_id" TYPE VARCHAR(64) USING "confed_id"::text;
           ALTER TABLE IF EXISTS "competitions" ALTER COLUMN "nation_id" TYPE VARCHAR(64) USING "nation_id"::text;
           ALTER TABLE IF EXISTS "competitions" ALTER COLUMN "parent_id" TYPE VARCHAR(64) USING "parent_id"::text;
 
@@ -140,11 +143,6 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
 
           -- 4. Re-create foreign keys
           BEGIN
-              ALTER TABLE "nations" ADD CONSTRAINT "fk_nations_confed" FOREIGN KEY ("confed_id") REFERENCES "confederations"("id") ON DELETE SET NULL;
-          EXCEPTION WHEN OTHERS THEN NULL;
-          END;
-
-          BEGIN
               ALTER TABLE "regions" ADD CONSTRAINT "fk_regions_nation" FOREIGN KEY ("nation_id") REFERENCES "nations"("id") ON DELETE CASCADE;
           EXCEPTION WHEN OTHERS THEN NULL;
           END;
@@ -156,11 +154,6 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
 
           BEGIN
               ALTER TABLE "cities" ADD CONSTRAINT "fk_cities_region" FOREIGN KEY ("region_id") REFERENCES "regions"("id") ON DELETE SET NULL;
-          EXCEPTION WHEN OTHERS THEN NULL;
-          END;
-
-          BEGIN
-              ALTER TABLE "competitions" ADD CONSTRAINT "fk_comps_confed" FOREIGN KEY ("confed_id") REFERENCES "confederations"("id") ON DELETE SET NULL;
           EXCEPTION WHEN OTHERS THEN NULL;
           END;
 
@@ -213,6 +206,40 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
       END $$;
     `);
     logger.log('Schema DDL verified: regions, parent_id, affiliate_club_id, and VARCHAR(64) types are up to date.');
+
+    // Ensure confed column is populated from confed_id if needed
+    await dataSource.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'nations' AND column_name = 'confed_id') THEN
+          UPDATE nations SET confed = CASE confed_id
+            WHEN '1' THEN 'CAF'
+            WHEN '2' THEN 'AFC'
+            WHEN '3' THEN 'UEFA'
+            WHEN '4' THEN 'CONCACAF'
+            WHEN '5' THEN 'OFC'
+            WHEN '6' THEN 'CONMEBOL'
+            WHEN '7' THEN 'WORLD'
+            WHEN '8' THEN 'EXTINCT'
+            ELSE confed
+          END WHERE confed IS NULL;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'competitions' AND column_name = 'confed_id') THEN
+          UPDATE competitions SET confed = CASE confed_id
+            WHEN '1' THEN 'CAF'
+            WHEN '2' THEN 'AFC'
+            WHEN '3' THEN 'UEFA'
+            WHEN '4' THEN 'CONCACAF'
+            WHEN '5' THEN 'OFC'
+            WHEN '6' THEN 'CONMEBOL'
+            WHEN '7' THEN 'WORLD'
+            WHEN '8' THEN 'EXTINCT'
+            ELSE confed
+          END WHERE confed IS NULL AND confed_id IS NOT NULL;
+        END IF;
+      END $$;
+    `);
 
     // 2. Check if parent_id data is populated for competitions
     const compCountRes = await dataSource.query(`

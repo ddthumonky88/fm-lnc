@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  Confederation,
   Nation,
   City,
   Competition,
@@ -18,7 +17,6 @@ import { LncController } from './lnc.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Confederation,
       Nation,
       City,
       Competition,

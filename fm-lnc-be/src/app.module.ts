@@ -3,7 +3,6 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
 import {
-  Confederation,
   Nation,
   City,
   Competition,
@@ -39,7 +38,6 @@ dotenv.config();
       password: process.env.DB_PASSWORD || '123456',
       database: process.env.DB_NAME || 'fm_lnc_db',
       entities: [
-        Confederation,
         Nation,
         City,
         Competition,

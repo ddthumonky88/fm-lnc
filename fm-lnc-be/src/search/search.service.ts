@@ -66,7 +66,6 @@ export class SearchService {
       this.compRepo
         .createQueryBuilder('c')
         .leftJoinAndSelect('c.nation', 'nation')
-        .leftJoinAndSelect('c.confederation', 'confed')
         .where('c.name_lg ILIKE :q', { q: `%${term}%` })
         .orWhere('c.name_sh ILIKE :q', { q: `%${term}%` })
         .orWhere('c.name_3l ILIKE :q', { q: `%${term}%` })
@@ -77,7 +76,6 @@ export class SearchService {
 
       this.nationRepo
         .createQueryBuilder('n')
-        .leftJoinAndSelect('n.confederation', 'confed')
         .where('n.name_lg ILIKE :q', { q: `%${term}%` })
         .orWhere('n.name_sh ILIKE :q', { q: `%${term}%` })
         .orWhere('n.name_3l ILIKE :q', { q: `%${term}%` })
