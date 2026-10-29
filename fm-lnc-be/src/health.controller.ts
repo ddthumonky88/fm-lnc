@@ -12,12 +12,12 @@ export class HealthController {
     schema: {
       type: 'object',
       properties: {
-        status: { type: 'string', example: 'ok' },
-        timestamp: { type: 'string', example: '2026-10-24T15:00:00.000Z' },
+        status: { type: 'string', example: 'string' },
+        timestamp: { type: 'string', example: 'string' },
       },
       example: {
-        status: 'ok',
-        timestamp: '2026-10-24T15:00:00.000Z',
+        status: 'string',
+        timestamp: 'string',
       },
     },
   })

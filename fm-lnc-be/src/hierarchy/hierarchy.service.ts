@@ -31,6 +31,7 @@ import {
   mapStadium,
   mapAward,
   mapNationRef,
+  mapConfedRef,
 } from '../common/entity-mapper';
 
 @Injectable()
@@ -48,15 +49,8 @@ export class HierarchyService {
     @InjectRepository(Region) private regionRepo: Repository<Region>,
   ) {}
 
-  async getListConfederations(filter?: SearchFilterDto) {
-    let confeds = await this.confedRepo.find({ order: { id: 'ASC' } });
-    const searchKey = (filter?.keyword || '').trim();
-    if (searchKey) {
-      const q = searchKey.toLowerCase();
-      confeds = confeds.filter(
-        (c) => c.name.toLowerCase().includes(q) || String(c.id).includes(q),
-      );
-    }
+  async getListConfederations() {
+    const confeds = await this.confedRepo.find({ order: { id: 'ASC' } });
 
     const results = await Promise.all(
       confeds.map(async (c) => {
@@ -140,11 +134,7 @@ export class HierarchyService {
       params,
     );
 
-    const items = raw.map((r: any) =>
-      mapCompetition(r, {
-        children: (r.clubs_count || 0) + (r.awards_count || 0),
-      }),
-    );
+    const items = raw.map((r: any) => mapCompetition(r));
 
     return paginateAndSort(items, filter);
   }
@@ -287,15 +277,10 @@ export class HierarchyService {
     );
 
     const comps = raw.map((r: any) =>
-      mapCompetition(
-        {
-          ...r,
-          nation: r.nation_id ? r.nation : nation,
-        },
-        {
-          children: (r.clubs_count || 0) + (r.awards_count || 0),
-        },
-      ),
+      mapCompetition({
+        ...r,
+        nation: r.nation_id ? r.nation : nation,
+      }),
     );
 
     if (!strNationId) {
@@ -320,44 +305,43 @@ export class HierarchyService {
       name_sh: null,
       name_3l: null,
     };
+    const confedRef = nation?.confederation ? mapConfedRef(nation.confederation) : null;
 
     const virtualOther = {
       id: `oth-${strNationId}`,
-      name_lg: '[OTHER] Other Clubs',
-      name_sh: 'Other Clubs',
-      name_3l: 'OTH',
+      name: '[OTHER]',
+      name_lg: '[OTHER]',
+      name_sh: '[OTHER]',
+      name_3l: '[OTHER]',
       type: 'Other Competitions',
-      categories: 'Other Competitions',
       nation: nationRef,
-      confed: null,
-      parent: null,
+      confed: confedRef,
+      parent_comp: null,
       is_virtual: true,
       virtual_type: 'OTHER',
-      clubsCount: otherClubsCount,
-      awardsCount: 0,
-      childrenCount: 0,
       stats: {
-        children: otherClubsCount,
+        club: otherClubsCount,
+        award: 0,
+        children: 0,
       },
     };
 
     const virtualExtinct = {
       id: `ext-${strNationId}`,
-      name_lg: '[EXTINCT] Extinct Clubs',
-      name_sh: 'Extinct Clubs',
-      name_3l: 'EXT',
+      name: '[EXTINCT]',
+      name_lg: '[EXTINCT]',
+      name_sh: '[EXTINCT]',
+      name_3l: '[EXTINCT]',
       type: 'Extinct Competitions',
-      categories: 'Extinct Competitions',
       nation: nationRef,
-      confed: null,
-      parent: null,
+      confed: confedRef,
+      parent_comp: null,
       is_virtual: true,
       virtual_type: 'EXTINCT',
-      clubsCount: extinctClubsCount,
-      awardsCount: 0,
-      childrenCount: 0,
       stats: {
-        children: extinctClubsCount,
+        club: extinctClubsCount,
+        award: 0,
+        children: 0,
       },
     };
 
@@ -373,10 +357,10 @@ export class HierarchyService {
       );
     };
 
-    if (matchVirtual(virtualOther.name_lg, virtualOther.type || virtualOther.categories)) {
+    if (matchVirtual(virtualOther.name_lg, virtualOther.type)) {
       virtualItems.push(virtualOther);
     }
-    if (matchVirtual(virtualExtinct.name_lg, virtualExtinct.type || virtualExtinct.categories)) {
+    if (matchVirtual(virtualExtinct.name_lg, virtualExtinct.type)) {
       virtualItems.push(virtualExtinct);
     }
 
@@ -724,33 +708,24 @@ export class HierarchyService {
       const fakeId = isExtinct
         ? (nationId ? `ext-${nationId}` : '[EXTINCT]')
         : (nationId ? `oth-${nationId}` : '[OTHER]');
-      const shortName = isExtinct ? 'Extinct Clubs' : 'Other Clubs';
-      const longName = isExtinct ? '[EXTINCT] Extinct Clubs' : '[OTHER] Other Clubs';
-      const threeLetter = isExtinct ? 'EXT' : 'OTH';
+      const tag = isExtinct ? '[EXTINCT]' : '[OTHER]';
 
       return {
         id: fakeId,
-        name: shortName,
-        name_lg: longName,
-        name_sh: shortName,
-        name_3l: threeLetter,
+        name: tag,
+        name_lg: tag,
+        name_sh: tag,
+        name_3l: tag,
         type: isExtinct ? 'Extinct Competitions' : 'Other Competitions',
-        categories: isExtinct ? 'Extinct Competitions' : 'Other Competitions',
-        nation_id: nationId,
         nation: mapNationRef(nation),
-        confed_id: nation?.confed_id,
-        confed: nation?.confederation
-          ? { id: String(nation.confederation.id), name: nation.confederation.name }
-          : null,
-        parent_id: null,
-        parent: null,
+        confed: nation?.confederation ? mapConfedRef(nation.confederation) : null,
+        parent_comp: null,
         is_virtual: true,
         virtual_type: isExtinct ? 'EXTINCT' : 'OTHER',
-        clubsCount: count,
-        awardsCount: 0,
-        childrenCount: 0,
         stats: {
-          children: count,
+          club: count,
+          award: 0,
+          children: 0,
         },
       };
     }
@@ -788,17 +763,12 @@ export class HierarchyService {
             .getCount()
         : 0,
     ]);
-    return mapCompetition(
-      {
-        ...comp,
-        clubsCount,
-        awardsCount,
-        childrenCount,
-      },
-      {
-        children: clubsCount + awardsCount,
-      },
-    );
+    return mapCompetition({
+      ...comp,
+      clubsCount,
+      awardsCount,
+      childrenCount,
+    });
   }
 
   async getSubCompetitions(compId: string, filter?: PaginationQueryDto) {
@@ -840,11 +810,7 @@ export class HierarchyService {
       params,
     );
 
-    const items = raw.map((r: any) =>
-      mapCompetition(r, {
-        children: (r.clubs_count || 0) + (r.awards_count || 0),
-      }),
-    );
+    const items = raw.map((r: any) => mapCompetition(r));
 
     return paginateAndSort(items, filter);
   }

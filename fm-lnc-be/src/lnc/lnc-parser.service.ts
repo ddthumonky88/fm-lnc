@@ -578,8 +578,6 @@ export class LncParserService {
               if (!clubs[id].inactive_fields) clubs[id].inactive_fields = new Set();
               clubs[id].affiliate_club_type = affM[1].trim();
               clubs[id].affiliate_club_id = parseInt(affM[2], 10);
-              if (isCommented) clubs[id].inactive_fields.add('affiliate');
-              else clubs[id].inactive_fields.delete('affiliate');
             }
             continue;
           }

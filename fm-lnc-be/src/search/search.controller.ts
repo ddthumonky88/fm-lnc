@@ -27,25 +27,56 @@ export class SearchController {
       example: {
         clubs: [
           {
-            id: '676',
-            name_lg: 'Liverpool Football Club',
-            name_sh: 'Liverpool',
-            nation: { id: '11', name_lg: 'England' },
+            id: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            nation: { id: 'string', name_lg: 'string' },
           },
         ],
         competitions: [
           {
-            id: '11',
-            name_lg: 'English Premier Division',
-            name_sh: 'Premier League',
+            id: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
           },
         ],
-        nations: [],
-        stadiums: [],
-        cities: [],
-        awards: [],
-        players: [],
-        stages: [],
+        nations: [
+          {
+            id: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+          },
+        ],
+        stadiums: [
+          {
+            id: 'string',
+            name: 'string',
+          },
+        ],
+        cities: [
+          {
+            id: 'string',
+            name: 'string',
+          },
+        ],
+        awards: [
+          {
+            id: 'string',
+            name_lg: 'string',
+          },
+        ],
+        players: [
+          {
+            id: 'string',
+            name: 'string',
+          },
+        ],
+        stages: [
+          {
+            id: 'string',
+            name: 'string',
+          },
+        ],
       },
     },
   })

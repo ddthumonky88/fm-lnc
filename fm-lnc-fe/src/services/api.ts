@@ -219,9 +219,39 @@ function normalizeEntityFields(item: any): any {
   delete item.region_name;
   delete item.region_code;
 
+  // Competition stats mapping
+  if (item.stats && typeof item.stats === 'object') {
+    if (item.stats.club !== undefined && item.clubsCount === undefined) {
+      item.clubsCount = item.stats.club;
+    }
+    if (item.stats.award !== undefined && item.awardsCount === undefined) {
+      item.awardsCount = item.stats.award;
+    }
+    if (item.stats.children !== undefined && item.childrenCount === undefined) {
+      item.childrenCount = item.stats.children;
+    }
+  }
+
+  // parent_comp mapping
+  if (item.parent_comp !== undefined && item.parent === undefined) {
+    item.parent = item.parent_comp;
+  }
+  if (item.parent !== undefined && item.parent_comp === undefined) {
+    item.parent_comp = item.parent;
+  }
+  if (item.parent_id === undefined && item.parent_comp?.id) {
+    item.parent_id = item.parent_comp.id;
+  }
+
+  // confed mapping
+  if (item.confed && item.confed_id === undefined) {
+    item.confed_id = item.confed.id;
+  }
+
   if (item.nation) normalizeEntityFields(item.nation);
   if (item.comp) normalizeEntityFields(item.comp);
   if (item.parent) normalizeEntityFields(item.parent);
+  if (item.parent_comp) normalizeEntityFields(item.parent_comp);
 
   return item;
 }
@@ -309,6 +339,7 @@ export interface CompetitionItem {
   nation?: NationItem;
   parent_id?: string;
   parent?: CompetitionItem | null;
+  parent_comp?: CompetitionItem | null;
   childrenCount?: number;
   type?: string;
   categories?: string;
@@ -648,10 +679,17 @@ export async function fetchListConfederations(
     typeof queryOrForceRefresh === 'object' && queryOrForceRefresh !== null
       ? queryOrForceRefresh.keyword || (queryOrForceRefresh as any).q || ''
       : '';
-  const url = kw
-    ? `${getApiBase()}/hierarchy/list-confederations?keyword=${encodeURIComponent(kw)}`
-    : `${getApiBase()}/hierarchy/list-confederations`;
-  return cachedFetch<ConfederationItem[]>(url, forceRefresh);
+  const url = `${getApiBase()}/hierarchy/list-confederations`;
+  const p = cachedFetch<ConfederationItem[]>(url, forceRefresh);
+  if (kw) {
+    return p.then((list) => {
+      const q = kw.toLowerCase();
+      return (list || []).filter(
+        (c) => c.name?.toLowerCase().includes(q) || String(c.id).includes(q),
+      );
+    });
+  }
+  return p;
 }
 
 export async function fetchContinents(
@@ -1053,7 +1091,7 @@ export async function fetchCities(
 }
 
 export async function fetchRegions(
-  nationId: string,
+  nationId?: string,
   queryOrForceRefresh?: PaginationQuery | boolean,
   forceRefresh = false,
 ): Promise<RegionItem[]> {
@@ -1061,25 +1099,21 @@ export async function fetchRegions(
     queryOrForceRefresh,
     forceRefresh,
   );
-  if (nationId && String(nationId).toLowerCase() !== 'all') {
-    (filter as any).nationId = String(nationId);
-  }
-  return cachedPost<RegionItem[]>(
-    `${getApiBase()}/hierarchy/regions/search`,
-    filter,
-    refresh,
-  );
+  const target = nationId && String(nationId).toLowerCase() !== 'all' ? String(nationId) : '';
+  const kw = (filter as any)?.keyword || (queryOrForceRefresh as any)?.keyword || '';
+  const params = new URLSearchParams();
+  if (target) params.set('nationId', target);
+  if (kw) params.set('keyword', kw);
+  const qs = params.toString();
+  const url = qs ? `${getApiBase()}/hierarchy/regions?${qs}` : `${getApiBase()}/hierarchy/regions`;
+  return cachedFetch<RegionItem[]>(url, refresh);
 }
 
 export async function fetchAllRegionsByNation(
   nationId: string,
   forceRefresh = false,
 ): Promise<RegionItem[]> {
-  const target = nationId && String(nationId).toLowerCase() !== 'all' ? String(nationId) : 'all';
-  return cachedFetch<RegionItem[]>(
-    `${getApiBase()}/hierarchy/nations/${target}/regions`,
-    forceRefresh,
-  );
+  return fetchRegions(nationId, false, forceRefresh);
 }
 
 export async function fetchClubAffiliates(

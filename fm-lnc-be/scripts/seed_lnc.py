@@ -181,15 +181,15 @@ def seed():
                     if cmd == 'NATION_LONG_NAME_CHANGE':
                         if id_val not in nations: nations[id_val] = {'confed_id': cur_confed_id, 'inactive_fields': set()}
                         nations[id_val]['long_name'] = val
-                        nations[id_val].setdefault('inactive_fields', set()).add('long_name')
+                        nations[id_val].setdefault('inactive_fields', set()).add('name_lg')
                     elif cmd == 'NATION_SHORT_NAME_CHANGE':
                         if id_val not in nations: nations[id_val] = {'confed_id': cur_confed_id, 'inactive_fields': set()}
                         nations[id_val]['short_name'] = val
-                        nations[id_val].setdefault('inactive_fields', set()).add('short_name')
+                        nations[id_val].setdefault('inactive_fields', set()).add('name_sh')
                     elif cmd == 'NATION_3LETTER_NAME_CHANGE':
                         if id_val not in nations: nations[id_val] = {'confed_id': cur_confed_id, 'inactive_fields': set()}
                         nations[id_val]['three_letter_name'] = val
-                        nations[id_val].setdefault('inactive_fields', set()).add('three_letter_name')
+                        nations[id_val].setdefault('inactive_fields', set()).add('name_3l')
                     elif cmd == 'CITY_NAME_CHANGE':
                         cities[id_val] = {
                             'name': val,
@@ -206,15 +206,15 @@ def seed():
                 if cmd == 'NATION_LONG_NAME_CHANGE':
                     if id_val not in nations: nations[id_val] = {'confed_id': cur_confed_id, 'inactive_fields': set()}
                     nations[id_val]['long_name'] = val
-                    nations[id_val].setdefault('inactive_fields', set()).discard('long_name')
+                    nations[id_val].setdefault('inactive_fields', set()).discard('name_lg')
                 elif cmd == 'NATION_SHORT_NAME_CHANGE':
                     if id_val not in nations: nations[id_val] = {'confed_id': cur_confed_id, 'inactive_fields': set()}
                     nations[id_val]['short_name'] = val
-                    nations[id_val].setdefault('inactive_fields', set()).discard('short_name')
+                    nations[id_val].setdefault('inactive_fields', set()).discard('name_sh')
                 elif cmd == 'NATION_3LETTER_NAME_CHANGE':
                     if id_val not in nations: nations[id_val] = {'confed_id': cur_confed_id, 'inactive_fields': set()}
                     nations[id_val]['three_letter_name'] = val
-                    nations[id_val].setdefault('inactive_fields', set()).discard('three_letter_name')
+                    nations[id_val].setdefault('inactive_fields', set()).discard('name_3l')
                 elif cmd == 'CITY_NAME_CHANGE':
                     cities[id_val] = {
                         'name': val,
@@ -330,22 +330,22 @@ def seed():
                             comps[id_val] = {'confed_id': cur_confed_id, 'nation_code': cur_nat_code, 'category': cur_cat, 'inactive_fields': set()}
                         if cmd == 'COMP_LONG_NAME_CHANGE':
                             comps[id_val]['long_name'] = val
-                            comps[id_val].setdefault('inactive_fields', set()).add('long_name')
+                            comps[id_val].setdefault('inactive_fields', set()).add('name_lg')
                         elif cmd == 'COMP_SHORT_NAME_CHANGE':
                             comps[id_val]['short_name'] = val
-                            comps[id_val].setdefault('inactive_fields', set()).add('short_name')
+                            comps[id_val].setdefault('inactive_fields', set()).add('name_sh')
                         elif cmd == 'COMP_3LETTER_NAME_CHANGE':
                             comps[id_val]['three_letter_name'] = val
-                            comps[id_val].setdefault('inactive_fields', set()).add('three_letter_name')
+                            comps[id_val].setdefault('inactive_fields', set()).add('name_3l')
                     elif cmd in ('AWARD_LONG_NAME_CHANGE', 'AWARD_SHORT_NAME_CHANGE'):
                         if id_val not in awards:
                             awards[id_val] = {'confed_id': cur_confed_id, 'nation_code': cur_nat_code, 'category': cur_cat, 'inactive_fields': set()}
                         if cmd == 'AWARD_LONG_NAME_CHANGE':
                             awards[id_val]['long_name'] = val
-                            awards[id_val].setdefault('inactive_fields', set()).add('long_name')
+                            awards[id_val].setdefault('inactive_fields', set()).add('name_lg')
                         elif cmd == 'AWARD_SHORT_NAME_CHANGE':
                             awards[id_val]['short_name'] = val
-                            awards[id_val].setdefault('inactive_fields', set()).add('short_name')
+                            awards[id_val].setdefault('inactive_fields', set()).add('name_sh')
                 continue
 
             if 'CHANGE_PLAYER_NAME' in l:
@@ -389,22 +389,22 @@ def seed():
                         comps[id_val] = {'confed_id': cur_confed_id, 'nation_code': cur_nat_code, 'category': cur_cat, 'inactive_fields': set()}
                     if cmd == 'COMP_LONG_NAME_CHANGE':
                         comps[id_val]['long_name'] = val
-                        comps[id_val].setdefault('inactive_fields', set()).discard('long_name')
+                        comps[id_val].setdefault('inactive_fields', set()).discard('name_lg')
                     elif cmd == 'COMP_SHORT_NAME_CHANGE':
                         comps[id_val]['short_name'] = val
-                        comps[id_val].setdefault('inactive_fields', set()).discard('short_name')
+                        comps[id_val].setdefault('inactive_fields', set()).discard('name_sh')
                     elif cmd == 'COMP_3LETTER_NAME_CHANGE':
                         comps[id_val]['three_letter_name'] = val
-                        comps[id_val].setdefault('inactive_fields', set()).discard('three_letter_name')
+                        comps[id_val].setdefault('inactive_fields', set()).discard('name_3l')
                 elif cmd in ('AWARD_LONG_NAME_CHANGE', 'AWARD_SHORT_NAME_CHANGE'):
                     if id_val not in awards:
                         awards[id_val] = {'confed_id': cur_confed_id, 'nation_code': cur_nat_code, 'category': cur_cat, 'inactive_fields': set()}
                     if cmd == 'AWARD_LONG_NAME_CHANGE':
                         awards[id_val]['long_name'] = val
-                        awards[id_val].setdefault('inactive_fields', set()).discard('long_name')
+                        awards[id_val].setdefault('inactive_fields', set()).discard('name_lg')
                     elif cmd == 'AWARD_SHORT_NAME_CHANGE':
                         awards[id_val]['short_name'] = val
-                        awards[id_val].setdefault('inactive_fields', set()).discard('short_name')
+                        awards[id_val].setdefault('inactive_fields', set()).discard('name_sh')
                 elif cmd == 'STAGE_NAME_LONG_NAME_CHANGE':
                     stages[id_val] = val
 
@@ -530,16 +530,16 @@ def seed():
                         clubs[id_val].setdefault('inactive_fields', set())
                         if cmd == 'CLUB_NAME_CHANGE':
                             clubs[id_val]['long_name'] = val
-                            clubs[id_val]['inactive_fields'].add('long_name')
+                            clubs[id_val]['inactive_fields'].add('name_lg')
                         elif cmd == 'CLUB_SHORT_NAME_CHANGE':
                             clubs[id_val]['short_name'] = val
-                            clubs[id_val]['inactive_fields'].add('short_name')
+                            clubs[id_val]['inactive_fields'].add('name_sh')
                         elif cmd == 'CLUB_3LETTER_NAME_CHANGE':
                             clubs[id_val]['three_letter_name'] = val
-                            clubs[id_val]['inactive_fields'].add('three_letter_name')
+                            clubs[id_val]['inactive_fields'].add('name_3l')
                         elif cmd == 'CLUB_6LETTER_NAME_CHANGE':
                             clubs[id_val]['six_letter_name'] = val
-                            clubs[id_val]['inactive_fields'].add('six_letter_name')
+                            clubs[id_val]['inactive_fields'].add('name_6l')
                     elif cmd == 'STADIUM_NAME_CHANGE':
                         if id_val not in stadiums:
                             stadiums[id_val] = {
@@ -573,16 +573,16 @@ def seed():
                     clubs[id_val].setdefault('inactive_fields', set())
                     if cmd == 'CLUB_NAME_CHANGE':
                         clubs[id_val]['long_name'] = val
-                        clubs[id_val]['inactive_fields'].discard('long_name')
+                        clubs[id_val]['inactive_fields'].discard('name_lg')
                     elif cmd == 'CLUB_SHORT_NAME_CHANGE':
                         clubs[id_val]['short_name'] = val
-                        clubs[id_val]['inactive_fields'].discard('short_name')
+                        clubs[id_val]['inactive_fields'].discard('name_sh')
                     elif cmd == 'CLUB_3LETTER_NAME_CHANGE':
                         clubs[id_val]['three_letter_name'] = val
-                        clubs[id_val]['inactive_fields'].discard('three_letter_name')
+                        clubs[id_val]['inactive_fields'].discard('name_3l')
                     elif cmd == 'CLUB_6LETTER_NAME_CHANGE':
                         clubs[id_val]['six_letter_name'] = val
-                        clubs[id_val]['inactive_fields'].discard('six_letter_name')
+                        clubs[id_val]['inactive_fields'].discard('name_6l')
                     if note and not clubs[id_val].get('note'):
                         clubs[id_val]['note'] = note
                 elif cmd == 'STADIUM_NAME_CHANGE':

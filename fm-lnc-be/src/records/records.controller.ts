@@ -19,19 +19,19 @@ export class RecordsController {
     schema: {
       type: 'object',
       example: {
-        id: '676',
-        name_lg: 'Liverpool Football Club',
-        name_sh: 'Liverpool',
-        name_6l: "L'pool",
-        name_3l: 'LIV',
-        nation_id: '11',
-        comp_id: '11',
-        is_extinct: false,
-        competition_name: 'Premier League',
-        nation_name: 'England',
-        nation_three_letter: 'ENG',
-        nation: { id: '11', name_lg: 'England', name_sh: 'England', name_3l: 'ENG' },
-        competition: { id: '11', name_lg: 'English Premier Division', name_sh: 'Premier League', name_3l: 'PL' },
+        id: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        name_6l: 'string',
+        name_3l: 'string',
+        nation_id: 'string',
+        comp_id: 'string',
+        is_extinct: true,
+        competition_name: 'string',
+        nation_name: 'string',
+        nation_three_letter: 'string',
+        nation: { id: 'string', name_lg: 'string', name_sh: 'string', name_3l: 'string' },
+        competition: { id: 'string', name_lg: 'string', name_sh: 'string', name_3l: 'string' },
       },
     },
   })
@@ -51,14 +51,14 @@ export class RecordsController {
     schema: {
       type: 'object',
       example: {
-        id: '676',
-        name_lg: 'Liverpool Football Club',
-        name_sh: 'Liverpool',
-        name_6l: "L'pool",
-        name_3l: 'LIV',
-        nation_id: '11',
-        comp_id: '11',
-        is_extinct: false,
+        id: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        name_6l: 'string',
+        name_3l: 'string',
+        nation_id: 'string',
+        comp_id: 'string',
+        is_extinct: true,
       },
     },
   })
@@ -77,12 +77,12 @@ export class RecordsController {
     schema: {
       type: 'object',
       example: {
-        id: '990001',
-        name_lg: 'Hanoi Police FC',
-        name_sh: 'CAHN',
-        name_3l: 'CAH',
-        nation_id: '560',
-        comp_id: '1301389',
+        id: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        name_3l: 'string',
+        nation_id: 'string',
+        comp_id: 'string',
       },
     },
   })
@@ -102,10 +102,10 @@ export class RecordsController {
     schema: {
       type: 'object',
       example: {
-        id: '676',
-        name_lg: 'Liverpool Football Club',
-        name_sh: 'Liverpool',
-        note: 'Updated via Swagger / LNC Manager',
+        id: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        note: 'string',
       },
     },
   })
@@ -127,11 +127,11 @@ export class RecordsController {
       type: 'object',
       properties: {
         success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'club with ID 990001 deleted successfully' },
+        message: { type: 'string', example: 'string' },
       },
       example: {
         success: true,
-        message: 'club with ID 990001 deleted successfully',
+        message: 'string',
       },
     },
   })

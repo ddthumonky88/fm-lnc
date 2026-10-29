@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Param, Query, Body, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiOkResponse, ApiQuery, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { HierarchyService } from './hierarchy.service';
 import {
   PageableQueryDto,
@@ -19,29 +19,68 @@ export class HierarchyController {
   constructor(private readonly hierarchyService: HierarchyService) {}
 
   @ApiOperation({ summary: 'Lấy danh sách Confederations (châu lục)' })
-  @ApiBody({ type: SearchFilterDto, required: false })
   @ApiOkResponse({
     description: 'Danh sách các liên đoàn kèm số lượng quốc gia và giải đấu quốc tế',
     schema: {
       type: 'array',
       example: [
-        { id: '1', name: 'Africa', stats: { nations: 57, intComps: 23 } },
-        { id: '2', name: 'Asia', stats: { nations: 47, intComps: 38 } },
-        { id: '3', name: 'Europe', stats: { nations: 56, intComps: 31 } },
-        { id: '4', name: 'North America', stats: { nations: 43, intComps: 20 } },
-        { id: '5', name: 'Oceania', stats: { nations: 15, intComps: 9 } },
-        { id: '6', name: 'South America', stats: { nations: 10, intComps: 12 } },
-        { id: '7', name: 'World', stats: { nations: 22, intComps: 31 } },
+        {
+          id: 'string',
+          name: 'string',
+          stats: {
+            nations: 0,
+            intComps: 0,
+          },
+        },
       ],
     },
   })
   @Get('list-confederations')
-  getListConfederations(@Query() query?: SearchFilterDto) {
-    return this.hierarchyService.getListConfederations(query);
+  getListConfederations() {
+    return this.hierarchyService.getListConfederations();
   }
 
   @ApiOperation({ summary: 'Tìm kiếm quốc gia có phân trang và lọc theo liên đoàn' })
   @ApiBody({ type: SearchFilterDto, required: false })
+  @ApiOkResponse({
+    description: 'Danh sách quốc gia có phân trang',
+    schema: {
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+            confed: {
+              id: 'string',
+              name: 'string',
+            },
+            inactive_fields: 'string',
+            note: 'string',
+            stats: {
+              comps: 0,
+              clubs: 0,
+              stadiums: 0,
+              cities: 0,
+              awards: 0,
+              children: 0,
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
+    },
+  })
   @Post('nations/search')
   searchNations(
     @Query() query?: NationSearchQueryDto,
@@ -53,6 +92,57 @@ export class HierarchyController {
 
   @ApiOperation({ summary: 'Tìm kiếm giải đấu quốc tế có phân trang và lọc theo liên đoàn' })
   @ApiBody({ type: SearchFilterDto, required: false })
+  @ApiOkResponse({
+    description: 'Danh sách giải đấu quốc tế có phân trang',
+    schema: {
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+            fg_color: 'string',
+            bg_color: 'string',
+            type: 'string',
+            note: 'string',
+            inactive_fields: 'string',
+            confed: {
+              id: 'string',
+              name: 'string',
+            },
+            parent_comp: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            stats: {
+              club: 0,
+              award: 0,
+              children: 0,
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
+    },
+  })
   @Post('int-competitions/search')
   searchIntCompetitions(
     @Query() query?: IntCompetitionSearchQueryDto,
@@ -70,20 +160,35 @@ export class HierarchyController {
       type: 'object',
       example: {
         nation: {
-          id: '11',
-          name_lg: 'England',
-          name_sh: 'England',
-          name_3l: 'ENG',
-          confederation_id: '1',
-          confederation: { id: '1', name: 'Europe (UEFA)' },
+          id: 'string',
+          name: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+          confed: {
+            id: 'string',
+            name: 'string',
+          },
+          inactive_fields: 'string',
+          note: 'string',
+        },
+        stats: {
+          domesticComps: 0,
+          independentClubs: 0,
+          allClubs: 0,
+          stadiums: 0,
+          cities: 0,
+          awards: 0,
+          regions: 0,
         },
         counts: {
-          domesticComps: 16,
-          independentClubs: 120,
-          allClubs: 450,
-          stadiums: 65,
-          cities: 110,
-          awards: 25,
+          domesticComps: 0,
+          independentClubs: 0,
+          allClubs: 0,
+          stadiums: 0,
+          cities: 0,
+          awards: 0,
+          regions: 0,
         },
       },
     },
@@ -97,6 +202,57 @@ export class HierarchyController {
 
   @ApiOperation({ summary: 'Tìm kiếm giải đấu quốc nội có phân trang và lọc theo quốc gia' })
   @ApiBody({ type: SearchFilterDto, required: false })
+  @ApiOkResponse({
+    description: 'Danh sách giải đấu quốc nội có phân trang',
+    schema: {
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+            fg_color: 'string',
+            bg_color: 'string',
+            type: 'string',
+            note: 'string',
+            inactive_fields: 'string',
+            confed: {
+              id: 'string',
+              name: 'string',
+            },
+            parent_comp: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            stats: {
+              club: 0,
+              award: 0,
+              children: 0,
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
+    },
+  })
   @Post('domestic-competitions/search')
   searchDomesticCompetitions(
     @Query() query?: DomesticCompetitionSearchQueryDto,
@@ -111,6 +267,56 @@ export class HierarchyController {
       'Tìm kiếm CLB có phân trang theo quốc gia hoặc giải đấu (với Other Clubs: compId = oth-{nationId}, Extinct Clubs: compId = ext-{nationId})',
   })
   @ApiBody({ type: SearchFilterDto, required: false })
+  @ApiOkResponse({
+    description: 'Danh sách CLB có phân trang',
+    schema: {
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_6l: 'string',
+            name_3l: 'string',
+            note: 'string',
+            inactive_fields: 'string',
+            is_extinct: true,
+            affiliate_club: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_6l: 'string',
+              name_3l: 'string',
+              type: 'string',
+            },
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            comp: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            affiliatesCount: 0,
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
+    },
+  })
   @Post('club/search')
   searchClub(
     @Query() query?: ClubSearchQueryDto,
@@ -122,6 +328,39 @@ export class HierarchyController {
 
   @ApiOperation({ summary: 'Tìm kiếm sân vận động có phân trang và lọc theo quốc gia' })
   @ApiBody({ type: SearchFilterDto, required: false })
+  @ApiOkResponse({
+    description: 'Danh sách sân vận động có phân trang',
+    schema: {
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            type: 'string',
+            is_disabled: true,
+            inactive_fields: 'string',
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
+    },
+  })
   @Post('stadiums/search')
   searchStadiums(
     @Query() query?: NationScopedSearchQueryDto,
@@ -133,6 +372,39 @@ export class HierarchyController {
 
   @ApiOperation({ summary: 'Tìm kiếm thành phố có phân trang và lọc theo quốc gia' })
   @ApiBody({ type: SearchFilterDto, required: false })
+  @ApiOkResponse({
+    description: 'Danh sách thành phố có phân trang',
+    schema: {
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            region: 'string',
+            is_disabled: true,
+            inactive_fields: 'string',
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
+    },
+  })
   @Post('cities/search')
   searchCities(
     @Query() query?: CitySearchQueryDto,
@@ -142,33 +414,21 @@ export class HierarchyController {
     return this.hierarchyService.getCities(filter);
   }
 
-  @ApiOperation({ summary: 'Lấy tất cả khu vực (regions) theo quốc gia' })
-  @ApiParam({ name: 'nationId', description: 'ID quốc gia (hoặc "all" để lấy tất cả)' })
+  @ApiOperation({ summary: 'Lấy tất cả khu vực (regions) (hỗ trợ lọc nationId / keyword)' })
+  @ApiQuery({ name: 'nationId', required: false, description: 'ID quốc gia (hoặc "all" để lấy tất cả)' })
+  @ApiQuery({ name: 'keyword', required: false, description: 'Từ khóa tìm kiếm (tên hoặc mã code)' })
   @ApiOkResponse({
-    description: 'Danh sách các khu vực (regions) thuộc quốc gia kèm id, name, code',
+    description: 'Danh sách các khu vực (regions) kèm id, name, code, nation_id, citiesCount',
     schema: {
       type: 'array',
       example: [
-        { id: 328, name: 'Batna', code: 'ALG-05', nation_id: '5', citiesCount: 2 },
-        { id: 187, name: 'Djelfa', code: 'ALG-17', nation_id: '5', citiesCount: 1 },
-      ],
-    },
-  })
-  @Get('nations/:nationId/regions')
-  getRegionsByNationParam(
-    @Param('nationId') nationId: string,
-    @Query() query?: any,
-  ) {
-    return this.hierarchyService.getRegionsByNation({ ...query, nationId });
-  }
-
-  @ApiOperation({ summary: 'Lấy tất cả khu vực (regions) (hỗ trợ lọc nationId / nation_id / keyword)' })
-  @ApiOkResponse({
-    description: 'Danh sách các khu vực (regions)',
-    schema: {
-      type: 'array',
-      example: [
-        { id: 328, name: 'Batna', code: 'ALG-05', nation_id: '5', citiesCount: 2 },
+        {
+          id: 0,
+          name: 'string',
+          code: 'string',
+          nation_id: 'string',
+          citiesCount: 0,
+        },
       ],
     },
   })
@@ -176,26 +436,74 @@ export class HierarchyController {
   getRegions(
     @Query('nationId') nationId?: string,
     @Query('nation_id') nationIdSnake?: string,
+    @Query('keyword') keyword?: string,
     @Query() query?: any,
   ) {
     const targetNationId = nationId || nationIdSnake || query?.nationId || query?.nation_id;
-    return this.hierarchyService.getRegionsByNation({ ...query, nationId: targetNationId });
+    const searchKey = keyword || query?.keyword;
+    return this.hierarchyService.getRegionsByNation({ ...query, nationId: targetNationId, keyword: searchKey });
   }
 
-  @ApiOperation({ summary: 'Tìm kiếm khu vực (regions) có phân trang và lọc theo quốc gia' })
-  @ApiBody({ type: SearchFilterDto, required: false })
+  @ApiExcludeEndpoint()
+  @Get('nations/:nationId/regions')
+  getRegionsByNationParam(
+    @Param('nationId') nationId: string,
+    @Query() query?: any,
+  ) {
+    return this.getRegions(nationId, undefined, undefined, query);
+  }
+
+  @ApiExcludeEndpoint()
   @Post('regions/search')
   searchRegions(
     @Query() query?: NationScopedSearchQueryDto,
     @Body() body?: SearchFilterDto,
   ) {
     const filter = { ...query, ...body };
-    return this.hierarchyService.getRegionsByNation(filter);
+    const targetNatId = filter.nationId || (filter as any).nation_id;
+    return this.getRegions(targetNatId, undefined, filter.keyword, filter);
   }
 
   @ApiOperation({ summary: 'Tìm kiếm giải thưởng theo quốc gia hoặc giải đấu' })
   @ApiBody({ type: SearchFilterDto, required: false })
-  @Post('awards/search')
+  @ApiOkResponse({
+    description: 'Danh sách giải thưởng có phân trang',
+    schema: {
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+            inactive_fields: 'string',
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            comp: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
+    },
+  })
   searchAwards(
     @Query() query?: AwardSearchQueryDto,
     @Body() body?: SearchFilterDto,
@@ -214,15 +522,15 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: '1',
-        name: 'Europe (UEFA)',
-        totalNations: 55,
-        totalIntComps: 12,
-        totalComps: 420,
-        totalClubs: 6500,
-        totalStadiums: 980,
-        totalCities: 620,
-        totalAwards: 180,
+        id: 'string',
+        name: 'string',
+        totalNations: 0,
+        totalIntComps: 0,
+        totalComps: 0,
+        totalClubs: 0,
+        totalStadiums: 0,
+        totalCities: 0,
+        totalAwards: 0,
       },
     },
   })
@@ -238,24 +546,26 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: '11',
-        name_lg: 'England',
-        name_sh: 'England',
-        name_3l: 'ENG',
-        confederation_id: '1',
-        confederation_name: 'Europe (UEFA)',
-        confederation: { id: '1', name: 'Europe (UEFA)' },
+        id: 'string',
+        name: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        name_3l: 'string',
+        confed: {
+          id: 'string',
+          name: 'string',
+        },
         counts: {
-          domesticComps: 16,
-          parentComps: 14,
-          totalComps: 22,
-          independentClubs: 120,
-          extinctClubs: 15,
-          allClubs: 450,
-          stadiums: 65,
-          cities: 110,
-          awards: 25,
-          totalAwards: 40,
+          domesticComps: 0,
+          parentComps: 0,
+          totalComps: 0,
+          independentClubs: 0,
+          extinctClubs: 0,
+          allClubs: 0,
+          stadiums: 0,
+          cities: 0,
+          awards: 0,
+          totalAwards: 0,
         },
       },
     },
@@ -272,17 +582,36 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: '676',
-        name_lg: 'Liverpool Football Club',
-        name_sh: 'Liverpool',
-        name_6l: "L'pool",
-        name_3l: 'LIV',
-        nation_id: '11',
-        comp_id: '11',
-        is_extinct: false,
-        competition_name: 'Premier League',
-        nation_name: 'England',
-        nation_three_letter: 'ENG',
+        id: 'string',
+        name: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        name_6l: 'string',
+        name_3l: 'string',
+        note: 'string',
+        inactive_fields: 'string',
+        is_extinct: true,
+        affiliate_club: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_6l: 'string',
+          name_3l: 'string',
+          type: 'string',
+        },
+        nation: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
+        comp: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
+        affiliatesCount: 0,
       },
     },
   })
@@ -295,6 +624,43 @@ export class HierarchyController {
   @ApiParam({ name: 'id', description: 'ID của câu lạc bộ đội 1' })
   @ApiOkResponse({
     description: 'Danh sách các đội con / đội trẻ / đội dự bị liên kết kèm loại đội con',
+    schema: {
+      type: 'array',
+      example: [
+        {
+          id: 'string',
+          name: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_6l: 'string',
+          name_3l: 'string',
+          note: 'string',
+          inactive_fields: 'string',
+          is_extinct: true,
+          affiliate_club: {
+            id: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_6l: 'string',
+            name_3l: 'string',
+            type: 'string',
+          },
+          nation: {
+            id: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+          },
+          comp: {
+            id: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+          },
+          affiliatesCount: 0,
+        },
+      ],
+    },
   })
   @Get('clubs/:id/affiliates')
   getClubAffiliates(@Param('id') id: string) {
@@ -309,12 +675,19 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: '123',
-        name: 'London',
-        country_id: '11',
-        categories: 'Capital',
-        nation_name: 'England',
-        nation_three_letter: 'ENG',
+        id: 'string',
+        name: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        region: 'string',
+        is_disabled: true,
+        inactive_fields: 'string',
+        nation: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
       },
     },
   })
@@ -330,13 +703,24 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: '456',
-        name_lg: "PFA Players' Player of the Year",
-        name_sh: 'PFA Player of the Year',
-        nation_id: '11',
-        comp_id: '11',
-        nation_name: 'England',
-        competition_name: 'Premier League',
+        id: 'string',
+        name: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        name_3l: 'string',
+        inactive_fields: 'string',
+        nation: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
+        comp: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
       },
     },
   })
@@ -352,11 +736,19 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: '789',
-        name: 'Anfield',
-        nation_id: '11',
-        nation_name: 'England',
-        nation_three_letter: 'ENG',
+        id: 'string',
+        name: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        type: 'string',
+        is_disabled: true,
+        inactive_fields: 'string',
+        nation: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
       },
     },
   })
@@ -372,12 +764,17 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: 328,
-        name: 'Batna',
-        code: 'ALG-05',
-        nation_id: '5',
-        citiesCount: 2,
-        nation: { id: '5', name_lg: 'Algeria', name_sh: 'Algeria', name_3l: 'ALG' },
+        id: 0,
+        name: 'string',
+        code: 'string',
+        nation_id: 'string',
+        citiesCount: 0,
+        nation: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
       },
     },
   })
@@ -393,17 +790,37 @@ export class HierarchyController {
     schema: {
       type: 'object',
       example: {
-        id: '11',
-        name_lg: 'English Premier Division',
-        name_sh: 'Premier League',
-        name_3l: 'PL',
-        fg_color: '255 255 255',
-        bg_color: '56 0 60',
-        clubsCount: 20,
-        awardsCount: 12,
-        childrenCount: 0,
-        nation: { id: '11', name_lg: 'England', name_sh: 'England' },
-        confederation: { id: '1', name: 'Europe (UEFA)' },
+        id: 'string',
+        name: 'string',
+        name_lg: 'string',
+        name_sh: 'string',
+        name_3l: 'string',
+        fg_color: 'string',
+        bg_color: 'string',
+        type: 'string',
+        note: 'string',
+        inactive_fields: 'string',
+        confed: {
+          id: 'string',
+          name: 'string',
+        },
+        parent_comp: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
+        nation: {
+          id: 'string',
+          name_lg: 'string',
+          name_sh: 'string',
+          name_3l: 'string',
+        },
+        stats: {
+          club: 0,
+          award: 0,
+          children: 0,
+        },
       },
     },
   })
@@ -418,20 +835,52 @@ export class HierarchyController {
   @ApiOkResponse({
     description: 'Danh sách các giải đấu con / phân hạng (parent_id = :id)',
     schema: {
-      type: 'array',
-      example: [
-        {
-          id: '1301394',
-          name_lg: 'UEFA Champions League Qualifying Phase',
-          name_sh: 'Champions League Qualifying',
-          name_3l: 'UCLQ',
-          parent_id: '1301393',
-          parent_name: 'Champions League',
-          clubsCount: 32,
-          awardsCount: 0,
-          childrenCount: 0,
-        },
-      ],
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+            fg_color: 'string',
+            bg_color: 'string',
+            type: 'string',
+            note: 'string',
+            inactive_fields: 'string',
+            confed: {
+              id: 'string',
+              name: 'string',
+            },
+            parent_comp: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            stats: {
+              club: 0,
+              award: 0,
+              children: 0,
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
     },
   })
   @Post('competitions/:id/sub-competitions')
@@ -448,10 +897,25 @@ export class HierarchyController {
   @ApiOkResponse({
     description: 'Danh sách cầu thủ/nhân sự',
     schema: {
-      type: 'array',
-      example: [
-        { id: '12345', first_name: 'Lionel', common_name: 'Messi', second_name: 'Messi' },
-      ],
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            first_name: 'string',
+            common_name: 'string',
+            second_name: 'string',
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
     },
   })
   @Post('players')
@@ -464,8 +928,23 @@ export class HierarchyController {
   @ApiOkResponse({
     description: 'Danh sách giai đoạn/vòng đấu',
     schema: {
-      type: 'array',
-      example: [{ id: '1', name: 'Vòng bảng' }],
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
     },
   })
   @Post('stages')
@@ -478,8 +957,39 @@ export class HierarchyController {
   @ApiOkResponse({
     description: 'Danh sách toàn bộ giải thưởng',
     schema: {
-      type: 'array',
-      example: [{ id: '456', name_lg: "Ballon d'Or", name_sh: "Ballon d'Or" }],
+      type: 'object',
+      example: {
+        content: [
+          {
+            id: 'string',
+            name: 'string',
+            name_lg: 'string',
+            name_sh: 'string',
+            name_3l: 'string',
+            inactive_fields: 'string',
+            nation: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+            comp: {
+              id: 'string',
+              name_lg: 'string',
+              name_sh: 'string',
+              name_3l: 'string',
+            },
+          },
+        ],
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasPrevious: true,
+        hasNext: true,
+        first: true,
+        last: true,
+      },
     },
   })
   @Post('awards')

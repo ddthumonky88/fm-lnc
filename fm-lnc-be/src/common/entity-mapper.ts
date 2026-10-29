@@ -93,14 +93,12 @@ export function mapNation(nation: any, extraStats?: any) {
         name: nation.confed_name || nation.confederation_name || null,
       }
     : null;
-  const confedId = confedObj?.id || (nation.confed_id ? String(nation.confed_id) : null);
   return {
     id: String(nation.id),
     name: nation.name_lg ?? nation.name ?? null,
     name_lg: nation.name_lg ?? nation.name ?? null,
     name_sh: nation.name_sh ?? null,
     name_3l: nation.name_3l ?? null,
-    confed_id: confedId,
     confed: confedObj,
     inactive_fields: nation.inactive_fields ?? null,
     note: nation.note ?? null,
@@ -141,7 +139,9 @@ export function mapCompetition(comp: any, extraStats?: any) {
       }
     : null;
 
-  const parent = comp.parent
+  const parent_comp = comp.parent_comp
+    ? mapParentRef(comp.parent_comp)
+    : comp.parent
     ? mapParentRef(comp.parent)
     : comp.parent_id
     ? {
@@ -152,6 +152,33 @@ export function mapCompetition(comp: any, extraStats?: any) {
       }
     : null;
 
+  const clubCount =
+    comp.clubs_count !== undefined
+      ? Number(comp.clubs_count)
+      : comp.clubsCount !== undefined
+      ? Number(comp.clubsCount)
+      : extraStats?.club !== undefined
+      ? Number(extraStats.club)
+      : 0;
+
+  const awardCount =
+    comp.awards_count !== undefined
+      ? Number(comp.awards_count)
+      : comp.awardsCount !== undefined
+      ? Number(comp.awardsCount)
+      : extraStats?.award !== undefined
+      ? Number(extraStats.award)
+      : 0;
+
+  const childrenCount =
+    comp.children_count !== undefined
+      ? Number(comp.children_count)
+      : comp.childrenCount !== undefined
+      ? Number(comp.childrenCount)
+      : extraStats?.children !== undefined
+      ? Number(extraStats.children)
+      : 0;
+
   return {
     id: String(comp.id),
     name: comp.name_sh ?? comp.name_lg ?? comp.name ?? null,
@@ -161,31 +188,16 @@ export function mapCompetition(comp: any, extraStats?: any) {
     fg_color: comp.fg_color ?? null,
     bg_color: comp.bg_color ?? null,
     type: comp.type ?? comp.categories ?? null,
-    categories: comp.type ?? comp.categories ?? null,
-    is_international: comp.is_international !== undefined ? !!comp.is_international : (!comp.nation && !comp.nation_id),
     note: comp.note ?? null,
     inactive_fields: comp.inactive_fields ?? null,
-    confed_id: confed?.id || (comp.confed_id ? String(comp.confed_id) : null),
     confed,
-    parent_id: parent?.id || (comp.parent_id ? String(comp.parent_id) : null),
-    parent,
+    parent_comp,
     nation,
-    ...(comp.clubs_count !== undefined
-      ? { clubsCount: comp.clubs_count }
-      : comp.clubsCount !== undefined
-      ? { clubsCount: comp.clubsCount }
-      : {}),
-    ...(comp.awards_count !== undefined
-      ? { awardsCount: comp.awards_count }
-      : comp.awardsCount !== undefined
-      ? { awardsCount: comp.awardsCount }
-      : {}),
-    ...(comp.children_count !== undefined
-      ? { childrenCount: comp.children_count }
-      : comp.childrenCount !== undefined
-      ? { childrenCount: comp.childrenCount }
-      : {}),
-    ...(extraStats !== undefined ? { stats: extraStats } : {}),
+    stats: {
+      club: clubCount,
+      award: awardCount,
+      children: childrenCount,
+    },
   };
 }
 

@@ -285,16 +285,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
               UPDATE clubs AS c
               SET 
                 affiliate_club_id = v.pid,
-                affiliate_club_type = v.type,
-                inactive_fields = CASE
-                  WHEN v.is_comm = true THEN
-                    CASE 
-                      WHEN c.inactive_fields IS NULL OR c.inactive_fields = '' THEN 'affiliate'
-                      WHEN c.inactive_fields ~* '(^|,)\\s*affiliate\\s*(,|$)' THEN c.inactive_fields
-                      ELSE c.inactive_fields || ',affiliate'
-                    END
-                  ELSE c.inactive_fields
-                END
+                affiliate_club_type = v.type
               FROM (VALUES ${valuesClause}) AS v(cid, pid, type, is_comm)
               WHERE c.id = v.cid;
             `);
@@ -406,6 +397,63 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
         logger.log(`Successfully synced regions and linked cities.`);
       }
     }
+
+    // 5. Normalize inactive_fields across all tables (remove affiliate, use name_lg/name_sh/name_6l/name_3l)
+    await dataSource.query(`
+      UPDATE clubs
+      SET inactive_fields = NULLIF(TRIM(BOTH ',' FROM REGEXP_REPLACE(
+        REGEXP_REPLACE(
+          REGEXP_REPLACE(
+            REGEXP_REPLACE(
+              REGEXP_REPLACE(COALESCE(inactive_fields, ''), '(^|,)\\s*affiliate\\s*(,|$)', '\\1\\2', 'gi'),
+              '(^|,)\\s*long_name\\s*(,|$)', '\\1name_lg\\2', 'gi'),
+            '(^|,)\\s*short_name\\s*(,|$)', '\\1name_sh\\2', 'gi'),
+          '(^|,)\\s*six_letter_name\\s*(,|$)', '\\1name_6l\\2', 'gi'),
+        '(^|,)\\s*three_letter_name\\s*(,|$)', '\\1name_3l\\2', 'gi')
+      ), '')
+      WHERE inactive_fields IS NOT NULL AND (
+        inactive_fields ~* '(^|,)\\s*(affiliate|long_name|short_name|six_letter_name|three_letter_name)\\s*(,|$)'
+      );
+
+      UPDATE competitions
+      SET inactive_fields = NULLIF(TRIM(BOTH ',' FROM REGEXP_REPLACE(
+        REGEXP_REPLACE(
+          REGEXP_REPLACE(
+            REGEXP_REPLACE(COALESCE(inactive_fields, ''), '(^|,)\\s*long_name\\s*(,|$)', '\\1name_lg\\2', 'gi'),
+            '(^|,)\\s*short_name\\s*(,|$)', '\\1name_sh\\2', 'gi'),
+          '(^|,)\\s*six_letter_name\\s*(,|$)', '\\1name_6l\\2', 'gi'),
+        '(^|,)\\s*three_letter_name\\s*(,|$)', '\\1name_3l\\2', 'gi')
+      ), '')
+      WHERE inactive_fields IS NOT NULL AND (
+        inactive_fields ~* '(^|,)\\s*(long_name|short_name|six_letter_name|three_letter_name)\\s*(,|$)'
+      );
+
+      UPDATE awards
+      SET inactive_fields = NULLIF(TRIM(BOTH ',' FROM REGEXP_REPLACE(
+        REGEXP_REPLACE(
+          REGEXP_REPLACE(
+            REGEXP_REPLACE(COALESCE(inactive_fields, ''), '(^|,)\\s*long_name\\s*(,|$)', '\\1name_lg\\2', 'gi'),
+            '(^|,)\\s*short_name\\s*(,|$)', '\\1name_sh\\2', 'gi'),
+          '(^|,)\\s*six_letter_name\\s*(,|$)', '\\1name_6l\\2', 'gi'),
+        '(^|,)\\s*three_letter_name\\s*(,|$)', '\\1name_3l\\2', 'gi')
+      ), '')
+      WHERE inactive_fields IS NOT NULL AND (
+        inactive_fields ~* '(^|,)\\s*(long_name|short_name|six_letter_name|three_letter_name)\\s*(,|$)'
+      );
+
+      UPDATE nations
+      SET inactive_fields = NULLIF(TRIM(BOTH ',' FROM REGEXP_REPLACE(
+        REGEXP_REPLACE(
+          REGEXP_REPLACE(
+            REGEXP_REPLACE(COALESCE(inactive_fields, ''), '(^|,)\\s*long_name\\s*(,|$)', '\\1name_lg\\2', 'gi'),
+            '(^|,)\\s*short_name\\s*(,|$)', '\\1name_sh\\2', 'gi'),
+          '(^|,)\\s*six_letter_name\\s*(,|$)', '\\1name_6l\\2', 'gi'),
+        '(^|,)\\s*three_letter_name\\s*(,|$)', '\\1name_3l\\2', 'gi')
+      ), '')
+      WHERE inactive_fields IS NOT NULL AND (
+        inactive_fields ~* '(^|,)\\s*(long_name|short_name|six_letter_name|three_letter_name)\\s*(,|$)'
+      );
+    `);
   } catch (error) {
     logger.error('Startup migration encountered an error:', error);
   }

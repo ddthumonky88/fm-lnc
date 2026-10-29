@@ -180,9 +180,7 @@ export class LncService {
       const affId = cl.affiliate_club_id;
       const affType = cl.affiliate_club_type;
       if (affId && affType) {
-        const isAffInactive = isInactive('affiliate') || isInactive('affiliate_club') || isInactive('parent_id');
-        const pfxAff = isAffInactive ? '#' : '';
-        out += `${pfxAff}"AFFILIATED_CLUB_ID"\t\t${cl.id}\t"${affType}-${affId}"\t\t\t\t\t\t""\n`;
+        out += `#"AFFILIATED_CLUB_ID"\t\t${cl.id}\t"${affType}-${affId}"\t\t\t\t\t\t""\n`;
       }
       out += `${pfxLong}"CLUB_NAME_CHANGE"\t\t${cl.id}\t"${cl.name_lg}"\t\t\t\t\t\t""${noteStr}\n`;
       out += `${pfxShort}"CLUB_SHORT_NAME_CHANGE"\t${cl.id}\t"${cl.name_sh}"\t\t\t\t\t\t""${noteStr}\n`;
