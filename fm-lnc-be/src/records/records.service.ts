@@ -53,14 +53,24 @@ function normalizeInputData(data: any): any {
   if (d.parent && typeof d.parent === 'object' && d.parent.id) {
     d.parent_id = d.parent.id;
   }
+  if (d.affiliate_club && typeof d.affiliate_club === 'object') {
+    if (d.affiliate_club.id) d.affiliate_club_id = d.affiliate_club.id;
+    if (d.affiliate_club.type) d.affiliate_club_type = d.affiliate_club.type;
+  }
   if (d.parent_club && typeof d.parent_club === 'object' && d.parent_club.id) {
-    d.parent_id = d.parent_club.id;
+    d.affiliate_club_id = d.parent_club.id;
+  }
+  if (d.affiliate_type !== undefined && d.affiliate_club_type === undefined) {
+    d.affiliate_club_type = d.affiliate_type;
   }
   if (d.region_id !== undefined) {
     d.region_id = d.region_id && String(d.region_id) !== 'all' ? Number(d.region_id) : null;
   }
-  if (d.affiliate_type !== undefined) {
-    d.affiliate_type = d.affiliate_type ? String(d.affiliate_type).trim().toUpperCase() : null;
+  if (d.affiliate_club_type !== undefined) {
+    d.affiliate_club_type = d.affiliate_club_type ? String(d.affiliate_club_type).trim().toUpperCase() : null;
+  }
+  if (d.affiliate_club_id !== undefined) {
+    d.affiliate_club_id = d.affiliate_club_id ? String(d.affiliate_club_id) : null;
   }
 
   if (d.nation_id !== undefined) d.nation_id = d.nation_id ? String(d.nation_id) : null;
@@ -159,6 +169,17 @@ export class RecordsService {
       delete data.note;
       if (!data.type) data.type = 'stadium';
     }
+    if (type === RecordType.CLUB) {
+      if (data.parent_id !== undefined && data.affiliate_club_id === undefined) {
+        data.affiliate_club_id = data.parent_id;
+      }
+      if (data.affiliate_type !== undefined && data.affiliate_club_type === undefined) {
+        data.affiliate_club_type = data.affiliate_type;
+      }
+      delete data.parent;
+      delete data.parent_club;
+      delete data.affiliate_club;
+    }
     if (type === RecordType.CITY && data.region_id) {
       const reg = await this.regionRepo.findOne({ where: { id: data.region_id } });
       if (reg) {
@@ -184,6 +205,17 @@ export class RecordsService {
     }
     if (type === RecordType.STADIUM) {
       delete data.note;
+    }
+    if (type === RecordType.CLUB) {
+      if (data.parent_id !== undefined && data.affiliate_club_id === undefined) {
+        data.affiliate_club_id = data.parent_id;
+      }
+      if (data.affiliate_type !== undefined && data.affiliate_club_type === undefined) {
+        data.affiliate_club_type = data.affiliate_type;
+      }
+      delete data.parent;
+      delete data.parent_club;
+      delete data.affiliate_club;
     }
     if (type === RecordType.CITY && data.region_id !== undefined) {
       if (data.region_id) {

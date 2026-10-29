@@ -372,7 +372,7 @@ export class HierarchyService {
       .createQueryBuilder('club')
       .leftJoinAndSelect('club.competition', 'competition')
       .leftJoinAndSelect('club.nation', 'nation')
-      .leftJoinAndSelect('club.parent', 'parent');
+      .leftJoinAndSelect('club.affiliateClub', 'affiliateClub');
 
     const nationId =
       filter?.nationId !== undefined &&
@@ -1013,14 +1013,14 @@ export class HierarchyService {
     const strId = String(clubId);
     const club = await this.clubRepo.findOne({
       where: { id: strId },
-      relations: ['nation', 'competition', 'competition.parent', 'parent'],
+      relations: ['nation', 'competition', 'competition.parent', 'affiliateClub'],
     });
     if (!club) {
       throw new NotFoundException(`Club with ID ${clubId} not found`);
     }
 
     const affiliates = await this.clubRepo.find({
-      where: { parent_id: strId },
+      where: { affiliate_club_id: strId },
       relations: ['competition', 'nation'],
       order: { id: 'ASC' },
     });
@@ -1036,8 +1036,8 @@ export class HierarchyService {
   async getClubAffiliates(clubId: string) {
     const strId = String(clubId);
     const affiliates = await this.clubRepo.find({
-      where: { parent_id: strId },
-      relations: ['nation', 'competition', 'parent'],
+      where: { affiliate_club_id: strId },
+      relations: ['nation', 'competition', 'affiliateClub'],
       order: { id: 'ASC' },
     });
     return affiliates.map(mapClub);

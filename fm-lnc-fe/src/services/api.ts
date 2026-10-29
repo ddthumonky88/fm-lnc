@@ -319,6 +319,15 @@ export interface CompetitionItem {
   stats?: EntityStats;
 }
 
+export interface AffiliateClubInfo {
+  id: string;
+  name_lg?: string | null;
+  name_sh?: string | null;
+  name_6l?: string | null;
+  name_3l?: string | null;
+  type?: string | null;
+}
+
 export interface ClubItem {
   id: string;
   name_lg?: string;
@@ -331,6 +340,9 @@ export interface ClubItem {
   three_letter_name?: string;
   nation_id?: string;
   comp_id?: string;
+  affiliate_club_id?: string | null;
+  affiliate_club_type?: string | null;
+  affiliate_club?: AffiliateClubInfo | null;
   parent_id?: string | null;
   affiliate_type?: string | null;
   parent?: any;

@@ -576,8 +576,8 @@ export class LncParserService {
                 clubs[id] = { nat_code: curClubNatCode, comp_cat: curClubCompCat, note, inactive_fields: new Set() };
               }
               if (!clubs[id].inactive_fields) clubs[id].inactive_fields = new Set();
-              clubs[id].affiliate_type = affM[1].trim();
-              clubs[id].parent_id = parseInt(affM[2], 10);
+              clubs[id].affiliate_club_type = affM[1].trim();
+              clubs[id].affiliate_club_id = parseInt(affM[2], 10);
               if (isCommented) clubs[id].inactive_fields.add('affiliate');
               else clubs[id].inactive_fields.delete('affiliate');
             }
@@ -646,7 +646,7 @@ export class LncParserService {
           Boolean(lName?.toLowerCase().includes('extinct'));
 
         await queryRunner.query(
-          `INSERT INTO clubs (id, name_lg, name_sh, name_6l, name_3l, nation_id, comp_id, note, inactive_fields, is_extinct, parent_id, affiliate_type)
+          `INSERT INTO clubs (id, name_lg, name_sh, name_6l, name_3l, nation_id, comp_id, note, inactive_fields, is_extinct, affiliate_club_id, affiliate_club_type)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
            ON CONFLICT (id) DO UPDATE SET
              name_lg = EXCLUDED.name_lg,
@@ -658,9 +658,9 @@ export class LncParserService {
              note = EXCLUDED.note,
              inactive_fields = EXCLUDED.inactive_fields,
              is_extinct = EXCLUDED.is_extinct,
-             parent_id = EXCLUDED.parent_id,
-             affiliate_type = EXCLUDED.affiliate_type`,
-          [id, lName, sName, cdata.six_letter_name || null, cdata.three_letter_name || null, natId, compId, cdata.note || null, inactStr, isExtinct, cdata.parent_id ? String(cdata.parent_id) : null, cdata.affiliate_type || null],
+             affiliate_club_id = EXCLUDED.affiliate_club_id,
+             affiliate_club_type = EXCLUDED.affiliate_club_type`,
+          [id, lName, sName, cdata.six_letter_name || null, cdata.three_letter_name || null, natId, compId, cdata.note || null, inactStr, isExtinct, cdata.affiliate_club_id ? String(cdata.affiliate_club_id) : (cdata.parent_id ? String(cdata.parent_id) : null), cdata.affiliate_club_type || cdata.affiliate_type || null],
         );
       }
 

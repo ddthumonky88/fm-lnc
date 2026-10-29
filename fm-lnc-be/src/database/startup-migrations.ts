@@ -75,20 +75,29 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
               ALTER TABLE "cities" ADD COLUMN "region_id" INTEGER;
           END IF;
 
-          -- Ensure parent_id column exists on clubs (id của đội 1)
-          IF NOT EXISTS (
+          -- Ensure affiliate_club_id & affiliate_club_type columns exist on clubs
+          IF EXISTS (
               SELECT 1 FROM information_schema.columns 
               WHERE table_schema = 'public' AND table_name = 'clubs' AND column_name = 'parent_id'
+          ) AND NOT EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_schema = 'public' AND table_name = 'clubs' AND column_name = 'affiliate_club_id'
           ) THEN
-              ALTER TABLE "clubs" ADD COLUMN "parent_id" VARCHAR(64);
+              ALTER TABLE "clubs" RENAME COLUMN "parent_id" TO "affiliate_club_id";
+          ELSE
+              ALTER TABLE "clubs" ADD COLUMN IF NOT EXISTS "affiliate_club_id" VARCHAR(64);
           END IF;
 
-          -- Ensure affiliate_type column exists on clubs (loại đội con)
-          IF NOT EXISTS (
+          IF EXISTS (
               SELECT 1 FROM information_schema.columns 
               WHERE table_schema = 'public' AND table_name = 'clubs' AND column_name = 'affiliate_type'
+          ) AND NOT EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_schema = 'public' AND table_name = 'clubs' AND column_name = 'affiliate_club_type'
           ) THEN
-              ALTER TABLE "clubs" ADD COLUMN "affiliate_type" VARCHAR(64);
+              ALTER TABLE "clubs" RENAME COLUMN "affiliate_type" TO "affiliate_club_type";
+          ELSE
+              ALTER TABLE "clubs" ADD COLUMN IF NOT EXISTS "affiliate_club_type" VARCHAR(64);
           END IF;
 
           -- 2. Drop existing foreign key constraints so column types can be altered safely
@@ -104,10 +113,10 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
           ALTER TABLE IF EXISTS "confederations" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
 
           ALTER TABLE IF EXISTS "nations" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
-          ALTER TABLE IF EXISTS "nations" ALTER COLUMN "confederation_id" TYPE VARCHAR(64) USING "confederation_id"::text;
+          ALTER TABLE IF EXISTS "nations" ALTER COLUMN "confed_id" TYPE VARCHAR(64) USING "confed_id"::text;
 
           ALTER TABLE IF EXISTS "cities" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
-          ALTER TABLE IF EXISTS "cities" ALTER COLUMN "country_id" TYPE VARCHAR(64) USING "country_id"::text;
+          ALTER TABLE IF EXISTS "cities" ALTER COLUMN "nation_id" TYPE VARCHAR(64) USING "nation_id"::text;
 
           ALTER TABLE IF EXISTS "competitions" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
           ALTER TABLE IF EXISTS "competitions" ALTER COLUMN "confed_id" TYPE VARCHAR(64) USING "confed_id"::text;
@@ -117,7 +126,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
           ALTER TABLE IF EXISTS "clubs" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
           ALTER TABLE IF EXISTS "clubs" ALTER COLUMN "nation_id" TYPE VARCHAR(64) USING "nation_id"::text;
           ALTER TABLE IF EXISTS "clubs" ALTER COLUMN "comp_id" TYPE VARCHAR(64) USING "comp_id"::text;
-          ALTER TABLE IF EXISTS "clubs" ALTER COLUMN "parent_id" TYPE VARCHAR(64) USING "parent_id"::text;
+          ALTER TABLE IF EXISTS "clubs" ALTER COLUMN "affiliate_club_id" TYPE VARCHAR(64) USING "affiliate_club_id"::text;
 
           ALTER TABLE IF EXISTS "stadiums" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
           ALTER TABLE IF EXISTS "stadiums" ALTER COLUMN "nation_id" TYPE VARCHAR(64) USING "nation_id"::text;
@@ -131,7 +140,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
 
           -- 4. Re-create foreign keys
           BEGIN
-              ALTER TABLE "nations" ADD CONSTRAINT "fk_nations_confed" FOREIGN KEY ("confederation_id") REFERENCES "confederations"("id") ON DELETE SET NULL;
+              ALTER TABLE "nations" ADD CONSTRAINT "fk_nations_confed" FOREIGN KEY ("confed_id") REFERENCES "confederations"("id") ON DELETE SET NULL;
           EXCEPTION WHEN OTHERS THEN NULL;
           END;
 
@@ -141,7 +150,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
           END;
 
           BEGIN
-              ALTER TABLE "cities" ADD CONSTRAINT "fk_cities_nation" FOREIGN KEY ("country_id") REFERENCES "nations"("id") ON DELETE SET NULL;
+              ALTER TABLE "cities" ADD CONSTRAINT "fk_cities_nation" FOREIGN KEY ("nation_id") REFERENCES "nations"("id") ON DELETE SET NULL;
           EXCEPTION WHEN OTHERS THEN NULL;
           END;
 
@@ -176,7 +185,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
           END;
 
           BEGIN
-              ALTER TABLE "clubs" ADD CONSTRAINT "fk_clubs_parent" FOREIGN KEY ("parent_id") REFERENCES "clubs"("id") ON DELETE SET NULL;
+              ALTER TABLE "clubs" ADD CONSTRAINT "fk_clubs_affiliate" FOREIGN KEY ("affiliate_club_id") REFERENCES "clubs"("id") ON DELETE SET NULL;
           EXCEPTION WHEN OTHERS THEN NULL;
           END;
 
@@ -200,10 +209,10 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
           CREATE INDEX IF NOT EXISTS "idx_regions_nation_id" ON "regions"("nation_id");
           CREATE INDEX IF NOT EXISTS "idx_regions_code" ON "regions"("code");
           CREATE INDEX IF NOT EXISTS "idx_cities_region_id" ON "cities"("region_id");
-          CREATE INDEX IF NOT EXISTS "idx_clubs_parent_id" ON "clubs"("parent_id");
+          CREATE INDEX IF NOT EXISTS "idx_clubs_affiliate_club_id" ON "clubs"("affiliate_club_id");
       END $$;
     `);
-    logger.log('Schema DDL verified: regions, parent_id, affiliate_type, and VARCHAR(64) types are up to date.');
+    logger.log('Schema DDL verified: regions, parent_id, affiliate_club_id, and VARCHAR(64) types are up to date.');
 
     // 2. Check if parent_id data is populated for competitions
     const compCountRes = await dataSource.query(`
@@ -237,7 +246,7 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
 
     // 3. Check and populate affiliate clubs from FM24 - Club & Stadium.lnc
     const clubCountRes = await dataSource.query(`
-      SELECT COUNT(*)::int as cnt FROM clubs WHERE parent_id IS NOT NULL;
+      SELECT COUNT(*)::int as cnt FROM clubs WHERE affiliate_club_id IS NOT NULL;
     `);
     const clubCount = clubCountRes[0]?.cnt || 0;
     if (clubCount === 0) {
@@ -275,8 +284,8 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
             await dataSource.query(`
               UPDATE clubs AS c
               SET 
-                parent_id = v.pid,
-                affiliate_type = v.type,
+                affiliate_club_id = v.pid,
+                affiliate_club_type = v.type,
                 inactive_fields = CASE
                   WHEN v.is_comm = true THEN
                     CASE 

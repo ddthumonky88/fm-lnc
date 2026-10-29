@@ -844,26 +844,30 @@ export default function EntityCard({
                   ),
                 });
 
-                if (data.affiliate_type || data.parent_id) {
+                const affClub = data.affiliate_club || data.parent_club || data.parent;
+                const affType = affClub?.type || data.affiliate_club_type || data.affiliate_type;
+                const affId = affClub?.id || data.affiliate_club_id || data.parent_id;
+
+                if (affType || affId) {
                   const pName =
-                    data.parent_club?.short_name ||
-                    data.parent_club?.name_lg ||
-                    data.parent?.short_name ||
-                    data.parent?.name_lg ||
-                    data.parent_id;
+                    affClub?.name_sh ||
+                    affClub?.short_name ||
+                    affClub?.name_lg ||
+                    affClub?.long_name ||
+                    affId;
                   fields.push({
                     label: 'Affiliate:',
                     value: (
                       <span
                         className="text-[11px] truncate block text-sky-700 font-semibold"
-                        title={`Parent: ${pName} (${data.parent_id})`}
+                        title={`Parent: ${pName} (${affId})`}
                       >
-                        {data.affiliate_type ? `[${data.affiliate_type}] ` : ''}
+                        {affType ? `[${affType}] ` : ''}
                         {pName || '-'}
                       </span>
                     ),
                     align: 'start',
-                    isInactive: isInactive('affiliate') || isInactive('parent_id'),
+                    isInactive: isInactive('affiliate') || isInactive('affiliate_club') || isInactive('parent_id'),
                   });
                 }
 

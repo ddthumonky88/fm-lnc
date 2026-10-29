@@ -26,10 +26,10 @@ export class Club {
   comp_id: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
-  parent_id: string;
+  affiliate_club_id: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
-  affiliate_type: string;
+  affiliate_club_type: string;
 
   @Column({ type: 'text', nullable: true })
   note: string;
@@ -49,9 +49,9 @@ export class Club {
   competition: Competition;
 
   @ManyToOne(() => Club, (club) => club.affiliates, { onDelete: 'SET NULL', nullable: true })
-  @JoinColumn({ name: 'parent_id' })
-  parent: Club;
+  @JoinColumn({ name: 'affiliate_club_id' })
+  affiliateClub: Club;
 
-  @OneToMany(() => Club, (club) => club.parent)
+  @OneToMany(() => Club, (club) => club.affiliateClub)
   affiliates: Club[];
 }

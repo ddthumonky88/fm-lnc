@@ -153,6 +153,8 @@ export default function RecordDetailModal({
     comp_id: defaultCompId ? String(defaultCompId) : null,
     parent_id: defaultParentId ? String(defaultParentId) : '',
     affiliate_type: '',
+    affiliate_club_id: '',
+    affiliate_club_type: '',
     region_id: null,
     code: '',
   });
@@ -254,6 +256,18 @@ export default function RecordDetailModal({
             ? String(defaultParentId)
             : '',
         affiliate_type: activeData.affiliate_type || '',
+        affiliate_club_id: activeData.affiliate_club?.id
+          ? String(activeData.affiliate_club.id)
+          : activeData.affiliate_club_id
+            ? String(activeData.affiliate_club_id)
+            : activeData.parent_id
+              ? String(activeData.parent_id)
+              : '',
+        affiliate_club_type:
+          activeData.affiliate_club?.type ||
+          activeData.affiliate_club_type ||
+          activeData.affiliate_type ||
+          '',
         region_id: activeData.region_id !== undefined && activeData.region_id !== null ? Number(activeData.region_id) : null,
         code: activeData.code || '',
       });
@@ -481,8 +495,12 @@ export default function RecordDetailModal({
       }
 
       if (isClub) {
-        payload.parent_id = formData.parent_id?.trim() ? String(formData.parent_id).trim() : null;
-        payload.affiliate_type = formData.affiliate_type?.trim() ? String(formData.affiliate_type).trim().toUpperCase() : null;
+        const affId = (formData.affiliate_club_id || formData.parent_id)?.trim() || null;
+        const affType = (formData.affiliate_club_type || formData.affiliate_type)?.trim().toUpperCase() || null;
+        payload.affiliate_club_id = affId;
+        payload.affiliate_club_type = affType;
+        payload.parent_id = affId;
+        payload.affiliate_type = affType;
       }
 
       if (isCity) {
@@ -951,35 +969,37 @@ export default function RecordDetailModal({
               )}
 
               {/* Club Affiliate Info (Đội 1 & Loại đội con) */}
-              {isClub && (currentData.parent_id || currentData.affiliate_type) && (
+              {isClub && (currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id || currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type) && (
                 <>
                   <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['parent_id', 'parent', 'parent_club'], 'pt-0.5')}>
-                      Parent Club:
+                    <span className={getLabelClass(['affiliate_club', 'affiliate_club_id', 'parent_id', 'parent', 'parent_club'], 'pt-0.5')}>
+                      Affiliate Club:
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="font-bold text-xs sm:text-[13px] text-slate-800">
-                        {currentData.parent_club?.name_lg ||
+                        {currentData.affiliate_club?.name_lg ||
+                          currentData.affiliate_club?.name_sh ||
+                          currentData.parent_club?.name_lg ||
                           currentData.parent_club?.short_name ||
                           currentData.parent?.name_lg ||
                           currentData.parent?.short_name ||
-                          `Club #${currentData.parent_id}`}
+                          `Club #${currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id}`}
                       </span>
-                      {currentData.parent_id && (
+                      {(currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id) && (
                         <span className="text-[11px] font-mono text-slate-400">
-                          (ID: {currentData.parent_id})
+                          (ID: {currentData.affiliate_club?.id || currentData.affiliate_club_id || currentData.parent_id})
                         </span>
                       )}
                     </div>
                   </div>
-                  {currentData.affiliate_type && (
+                  {(currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type) && (
                     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,4fr)] items-start gap-3 min-w-0 pb-2 border-b border-sky-100/90">
-                      <span className={getLabelClass(['affiliate_type', 'type'], 'pt-0.5')}>
+                      <span className={getLabelClass(['affiliate_club_type', 'affiliate_type', 'type'], 'pt-0.5')}>
                         Affiliate Type:
                       </span>
                       <div>
                         <span className="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
-                          {currentData.affiliate_type}
+                          {currentData.affiliate_club?.type || currentData.affiliate_club_type || currentData.affiliate_type}
                         </span>
                       </div>
                     </div>
@@ -994,18 +1014,21 @@ export default function RecordDetailModal({
                     Affiliates ({currentData.affiliates.length}):
                   </span>
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {currentData.affiliates.map((aff: any) => (
-                      <span
-                        key={aff.id}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200"
-                      >
-                        {aff.affiliate_type && (
-                          <span className="font-bold text-sky-600">[{aff.affiliate_type}]</span>
-                        )}
-                        <span>{aff.short_name || aff.name_sh || aff.long_name || aff.name_lg}</span>
-                        <span className="text-[10px] font-mono text-slate-400">({aff.id})</span>
-                      </span>
-                    ))}
+                    {currentData.affiliates.map((aff: any) => {
+                      const affT = aff.affiliate_club?.type || aff.affiliate_club_type || aff.affiliate_type;
+                      return (
+                        <span
+                          key={aff.id}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200"
+                        >
+                          {affT && (
+                            <span className="font-bold text-sky-600">[{affT}]</span>
+                          )}
+                          <span>{aff.short_name || aff.name_sh || aff.long_name || aff.name_lg}</span>
+                          <span className="text-[10px] font-mono text-slate-400">({aff.id})</span>
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1447,12 +1470,18 @@ export default function RecordDetailModal({
             {isClub && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-sky-50/50 rounded-xl border border-sky-100">
                 <div>
-                  <label className={getFormLabelClass(['parent_id', 'parent', 'parent_club'])}>
+                  <label className={getFormLabelClass(['affiliate_club', 'affiliate_club_id', 'parent_id', 'parent', 'parent_club'])}>
                     Parent Club ID (ID Đội 1)
                   </label>
                   <Input
-                    value={formData.parent_id || ''}
-                    onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
+                    value={formData.affiliate_club_id || formData.parent_id || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        affiliate_club_id: e.target.value,
+                        parent_id: e.target.value,
+                      })
+                    }
                     placeholder="e.g. 1300491"
                     className="font-mono text-xs rounded-lg"
                   />
@@ -1461,12 +1490,18 @@ export default function RecordDetailModal({
                   </span>
                 </div>
                 <div>
-                  <label className={getFormLabelClass(['affiliate_type', 'type'])}>
+                  <label className={getFormLabelClass(['affiliate_club_type', 'affiliate_type', 'type'])}>
                     Affiliate Type (Loại đội con)
                   </label>
                   <Select
-                    value={formData.affiliate_type || undefined}
-                    onChange={(val) => setFormData({ ...formData, affiliate_type: val })}
+                    value={formData.affiliate_club_type || formData.affiliate_type || undefined}
+                    onChange={(val) =>
+                      setFormData({
+                        ...formData,
+                        affiliate_club_type: val,
+                        affiliate_type: val,
+                      })
+                    }
                     placeholder="Chọn loại đội con..."
                     allowClear
                     showSearch

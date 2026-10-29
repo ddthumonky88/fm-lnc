@@ -191,14 +191,18 @@ export function mapClub(club: any) {
       }
     : null;
 
-  const parentClub = club.parent
-    ? mapClubRef(club.parent)
-    : club.parent_id
+  const affClubEntity = club.affiliateClub || club.affiliate_club || club.parent;
+  const affId = club.affiliate_club_id ?? club.parent_id ?? null;
+  const affType = club.affiliate_club_type ?? club.affiliate_type ?? null;
+
+  const affiliateClub = (affClubEntity || affId)
     ? {
-        id: String(club.parent_id),
-        name_lg: club.parent_name_lg || club.parent_long_name || null,
-        name_sh: club.parent_name_sh || club.parent_short_name || null,
-        name_3l: club.parent_name_3l || club.parent_three_letter || null,
+        id: String(affClubEntity?.id || affId),
+        name_lg: affClubEntity?.name_lg ?? affClubEntity?.long_name ?? affClubEntity?.name ?? null,
+        name_sh: affClubEntity?.name_sh ?? affClubEntity?.short_name ?? null,
+        name_6l: affClubEntity?.name_6l ?? affClubEntity?.six_letter_name ?? null,
+        name_3l: affClubEntity?.name_3l ?? affClubEntity?.three_letter_name ?? null,
+        type: affType ? String(affType) : null,
       }
     : null;
 
@@ -211,10 +215,14 @@ export function mapClub(club: any) {
     note: club.note ?? null,
     inactive_fields: club.inactive_fields ?? null,
     is_extinct: !!club.is_extinct,
-    parent_id: club.parent_id ? String(club.parent_id) : null,
-    affiliate_type: club.affiliate_type ?? null,
-    parent: parentClub || (club.competition?.parent ? mapParentRef(club.competition.parent) : null),
-    parent_club: parentClub,
+    affiliate_club_id: affId ? String(affId) : null,
+    affiliate_club_type: affType ?? null,
+    affiliate_club: affiliateClub,
+    // Aliases for compatibility
+    parent_id: affId ? String(affId) : null,
+    affiliate_type: affType ?? null,
+    parent_club: affiliateClub,
+    parent: affiliateClub || (club.competition?.parent ? mapParentRef(club.competition.parent) : null),
     nation,
     comp,
     ...(club.affiliates_count !== undefined

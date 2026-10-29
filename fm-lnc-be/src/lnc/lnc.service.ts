@@ -177,10 +177,12 @@ export class LncService {
       const pfx6 = isInactive('six_letter_name') || isInactive('name_6l') ? '#' : '';
       const pfx3 = isInactive('three_letter_name') || isInactive('name_3l') ? '#' : '';
 
-      if (cl.parent_id && cl.affiliate_type) {
+      const affId = cl.affiliate_club_id;
+      const affType = cl.affiliate_club_type;
+      if (affId && affType) {
         const isAffInactive = isInactive('affiliate') || isInactive('affiliate_club') || isInactive('parent_id');
         const pfxAff = isAffInactive ? '#' : '';
-        out += `${pfxAff}"CLUB_AFFILIATED_CLUB"\t\t${cl.id}\t"${cl.affiliate_type}-${cl.parent_id}"\t\t\t\t\t\t""\n`;
+        out += `${pfxAff}"CLUB_AFFILIATED_CLUB"\t\t${cl.id}\t"${affType}-${affId}"\t\t\t\t\t\t""\n`;
       }
       out += `${pfxLong}"CLUB_NAME_CHANGE"\t\t${cl.id}\t"${cl.name_lg}"\t\t\t\t\t\t""${noteStr}\n`;
       out += `${pfxShort}"CLUB_SHORT_NAME_CHANGE"\t${cl.id}\t"${cl.name_sh}"\t\t\t\t\t\t""${noteStr}\n`;
