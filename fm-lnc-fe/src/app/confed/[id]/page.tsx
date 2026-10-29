@@ -108,11 +108,15 @@ function ConfederationDetailContent() {
           alt: found.name,
           isFlag: false,
         });
-        if (found.totalNations !== undefined) setTotalNationsRecords(found.totalNations);
-        if (found.totalIntComps !== undefined) setTotalIntCompsRecords(found.totalIntComps);
+        const totalNat = found.stats?.nations ?? found.totalNations;
+        const totalInt = found.stats?.intComps ?? found.totalIntComps;
+        if (totalNat !== undefined) setTotalNationsRecords(totalNat);
+        if (totalInt !== undefined) setTotalIntCompsRecords(totalInt);
       }
     } catch (err: any) {
       console.error('Failed to load confederation info:', err);
+    } finally {
+      setLoading(false);
     }
   }, [confedId, setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo]);
 
@@ -148,11 +152,20 @@ function ConfederationDetailContent() {
   );
 
   useEffect(() => {
-    loadConfedInfo();
-    if (activeTab !== 'INFO') {
-      loadTabData(activeTab, 1, '', pageSize);
-    }
+    let isMounted = true;
+    const init = async () => {
+      setLoading(true);
+      await loadConfedInfo();
+      if (activeTab !== 'INFO') {
+        await loadTabData(activeTab, 1, '', pageSize);
+      }
+      if (isMounted) {
+        setLoading(false);
+      }
+    };
+    init();
     return () => {
+      isMounted = false;
       setBreadcrumbs([]);
       setBackHref(null);
       setHeaderLogo(null);

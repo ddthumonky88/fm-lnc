@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Breadcrumb, Tag, Badge, Input, Button, message, Spin, Tabs, Space, Tooltip } from 'antd';
 import {
@@ -48,7 +48,7 @@ const CONFED_ID_MAP: Record<string, string> = {
   '7': 'World',
 };
 
-export default function CompetitionDetailPage() {
+function CompetitionDetailContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -156,24 +156,30 @@ export default function CompetitionDetailPage() {
           : isVirtualExtinct
             ? `ext-${targetNationId}`
             : `oth-${targetNationId}`;
-        const virtualTitle = isVirtualExtinct ? '[EXTINCT] Extinct Clubs' : '[OTHER] Other Clubs';
-        const virtualShort = isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs';
+        const virtualTitle = isVirtualExtinct ? '[EXTINCT]' : '[OTHER]';
+        const virtualShort = isVirtualExtinct ? '[EXTINCT]' : '[OTHER]';
 
         setCompInfo({
           id: virtualTag,
           name: virtualShort,
           name_lg: virtualTitle,
           name_sh: virtualShort,
-          name_3l: isVirtualExtinct ? 'EXT' : 'OTH',
+          name_3l: virtualShort,
           nation_id: targetNationId,
           nation_name: nationName,
           nation_three_letter: nationCode,
           confed_id: confedId,
+          confed: nation?.confed || (confedId ? { id: confedId, name: confedName } : undefined),
           type: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
           categories: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
           clubsCount: isVirtualExtinct ? hub?.counts?.extinctClubs || 0 : hub?.counts?.independentClubs || 0,
           awardsCount: 0,
           childrenCount: 0,
+          stats: {
+            club: isVirtualExtinct ? hub?.counts?.extinctClubs || 0 : hub?.counts?.independentClubs || 0,
+            award: 0,
+            children: 0,
+          },
         } as any);
 
         setHeaderTitle(virtualTitle);
@@ -261,10 +267,18 @@ export default function CompetitionDetailPage() {
             href: `/nation/${nationId}`,
           });
         }
-        if (info.parent_id) {
+        const parentId = info.parent_comp?.id || info.parent_id || info.parent?.id;
+        const parentTitle =
+          info.parent_comp?.name_3l
+            ? `[${info.parent_comp.name_3l}] ${info.parent_comp.name_sh || info.parent_comp.name_lg || ''}`.trim()
+            : info.parent?.name_3l
+              ? `[${info.parent.name_3l}] ${info.parent.name_sh || info.parent.name_lg || ''}`.trim()
+              : String(parentId);
+
+        if (parentId) {
           crumbs.push({
-            title: String(info.parent_id),
-            href: `/comp/${info.parent_id}${nationId ? `?nationId=${nationId}` : ''}`,
+            title: parentTitle,
+            href: `/comp/${parentId}${nationId ? `?nationId=${nationId}` : ''}`,
           });
         }
         crumbs.push({
@@ -273,8 +287,8 @@ export default function CompetitionDetailPage() {
 
         setBreadcrumbs(crumbs);
         setBackHref(
-          info.parent_id
-            ? `/comp/${info.parent_id}${nationId ? `?nationId=${nationId}` : ''}`
+          parentId
+            ? `/comp/${parentId}${nationId ? `?nationId=${nationId}` : ''}`
             : nationId
               ? `/nation/${nationId}`
               : confedId
@@ -764,5 +778,13 @@ export default function CompetitionDetailPage() {
         }}
       />
     </div>
+  );
+}
+
+export default function CompetitionDetailPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading competition...</div>}>
+      <CompetitionDetailContent />
+    </Suspense>
   );
 }

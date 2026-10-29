@@ -504,6 +504,7 @@ export class HierarchyController {
       },
     },
   })
+  @Post('awards/search')
   searchAwards(
     @Query() query?: AwardSearchQueryDto,
     @Body() body?: SearchFilterDto,
@@ -513,6 +514,15 @@ export class HierarchyController {
       return this.hierarchyService.getAwardsByCompetition(filter);
     }
     return this.hierarchyService.getAwardsByNation(filter);
+  }
+
+  @ApiExcludeEndpoint()
+  @Get('competitions/:compId/awards')
+  getAwardsByComp(
+    @Param('compId') compId: string,
+    @Query() query?: any,
+  ) {
+    return this.hierarchyService.getAwardsByCompetition({ ...query, compId });
   }
 
   @ApiOperation({ summary: 'Lấy thông tin chi tiết một Confederation (Châu lục)' })

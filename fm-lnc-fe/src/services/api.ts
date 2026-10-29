@@ -247,6 +247,14 @@ function normalizeEntityFields(item: any): any {
   if (item.confed && item.confed_id === undefined) {
     item.confed_id = item.confed.id;
   }
+  if (item.confed && item.confed_name === undefined) {
+    item.confed_name = item.confed.name;
+  }
+
+  // is_international inference if missing
+  if (item.is_international === undefined && (item.type !== undefined || item.confed !== undefined)) {
+    item.is_international = Boolean(!item.nation && !item.nation_id && (item.confed || item.confed_id));
+  }
 
   if (item.nation) normalizeEntityFields(item.nation);
   if (item.comp) normalizeEntityFields(item.comp);
@@ -295,6 +303,8 @@ export interface EntityStats {
   cities?: number;
   awards?: number;
   children?: number;
+  club?: number;
+  award?: number;
 }
 
 export interface ConfederationItem {

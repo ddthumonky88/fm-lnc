@@ -342,22 +342,22 @@ export default function RecordDetailModal({
     isComp &&
     Boolean(
       currentData.is_international ||
-      (!currentData.nation_id &&
-        (currentData.confed_id || currentData.confed || currentData.categories)),
+      (!currentData.nation_id && !currentData.nation &&
+        (currentData.confed_id || currentData.confed || currentData.categories || currentData.type)),
     );
 
   const rawConfedId =
-    currentData.confed_id ||
-    currentData.confed?.id;
-  const rawCat = currentData.categories
-    ? String(currentData.categories).split(',')[0].trim().toUpperCase()
+    currentData.confed?.id ||
+    currentData.confed_id;
+  const rawCat = currentData.type || currentData.categories
+    ? String(currentData.type || currentData.categories).split(',')[0].trim().toUpperCase()
     : '';
   const catConfed = rawCat ? CONFED_NAME_MAP[rawCat] : null;
 
   const confedId = rawConfedId ? String(rawConfedId) : catConfed?.id || null;
   const confedName =
-    (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
     currentData.confed?.name ||
+    (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
     currentData.confed_name ||
     catConfed?.name ||
     rawCat ||
@@ -1061,32 +1061,41 @@ export default function RecordDetailModal({
               )}
 
               {/* Parent Competition (for Competitions) */}
-              {isComp && (currentData.parent_id || currentData.parent || isFieldInactive(['parent_id', 'parent'])) && (
+              {isComp &&
+                (currentData.parent_comp ||
+                  currentData.parent ||
+                  currentData.parent_id ||
+                  isFieldInactive(['parent_comp', 'parent_id', 'parent'])) && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                  <span className={getLabelClass(['parent_id', 'parent'], 'pt-0.5')}>
+                  <span className={getLabelClass(['parent_comp', 'parent_id', 'parent'], 'pt-0.5')}>
                     Parent Comp:
                   </span>
                   <span
-                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['parent_id', 'parent'])} line-clamp-3 break-words text-left`}
+                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['parent_comp', 'parent_id', 'parent'])} line-clamp-3 break-words text-left`}
                   >
-                    {currentData.parent?.name_lg ||
-                      currentData.parent?.name_sh ||
-                      currentData.parent?.name ||
-                      (currentData.parent_id ? `${currentData.parent_id}` : '-')}
+                    {(() => {
+                      const p = currentData.parent_comp || currentData.parent;
+                      if (p) {
+                        const pName = p.name_lg || p.name_sh || p.name;
+                        const p3l = p.name_3l ? `[${p.name_3l}] ` : '';
+                        return `${p3l}${pName || p.id}`;
+                      }
+                      return currentData.parent_id ? `${currentData.parent_id}` : '-';
+                    })()}
                   </span>
                 </div>
               )}
 
               {/* Sub-competitions count */}
               {isComp &&
-                currentData.childrenCount !== undefined &&
-                currentData.childrenCount > 0 && (
+                (currentData.stats?.children ?? currentData.childrenCount) !== undefined &&
+                Number(currentData.stats?.children ?? currentData.childrenCount) > 0 && (
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['sub_competitions', 'children'], 'pt-0.5')}>
                       Sub-Comps:
                     </span>
                     <span className="font-bold text-xs sm:text-[13px] text-amber-600 text-left">
-                      {currentData.childrenCount}
+                      {currentData.stats?.children ?? currentData.childrenCount}
                     </span>
                   </div>
                 )}
@@ -1102,21 +1111,22 @@ export default function RecordDetailModal({
               )}
 
               {/* Clubs Count - Hidden for International Competitions */}
-              {!isInternationalComp && currentData.clubsCount !== undefined && (
+              {!isInternationalComp &&
+                (currentData.stats?.club ?? currentData.clubsCount) !== undefined && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-blue-700 text-left">
-                    {currentData.clubsCount}
+                    {currentData.stats?.club ?? currentData.clubsCount}
                   </span>
                 </div>
               )}
 
               {/* Awards Count */}
-              {currentData.awardsCount !== undefined && (
+              {(currentData.stats?.award ?? currentData.awardsCount) !== undefined && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass('awards', 'pt-0.5')}>Awards:</span>
                   <span className="font-bold text-xs sm:text-[13px] text-amber-700 text-left">
-                    {currentData.awardsCount}
+                    {currentData.stats?.award ?? currentData.awardsCount}
                   </span>
                 </div>
               )}
@@ -1203,7 +1213,8 @@ export default function RecordDetailModal({
             {/* Scope & Status Badges */}
             {(currentData.is_extinct ||
               isVirtual ||
-              ((isCity || isStadium) && currentData.is_disabled)) && (
+              ((isCity || isStadium) && currentData.is_disabled) ||
+              inactiveList.length > 0) && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 {(isCity || isStadium) && currentData.is_disabled && (
                   <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
@@ -1221,6 +1232,15 @@ export default function RecordDetailModal({
                       ? 'Extinct Clubs Container'
                       : 'Independent Clubs Container'}
                   </Tag>
+                )}
+                {inactiveList.length > 0 && (
+                  <>
+                    {inactiveList.map((f: string) => (
+                      <Tag key={f} color="error" className="text-xs font-mono font-medium m-0">
+                        {f}
+                      </Tag>
+                    ))}
+                  </>
                 )}
               </div>
             )}

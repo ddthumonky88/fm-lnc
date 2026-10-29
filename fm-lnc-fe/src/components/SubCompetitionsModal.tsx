@@ -54,7 +54,9 @@ export default function SubCompetitionsModal({
 
       // Use in-memory matching first if available
       const localChildren = allCompetitions.filter(
-        (c) => String(c.parent_id) === String(parentComp.id),
+        (c) =>
+          String(c.parent_comp?.id || c.parent_id || c.parent?.id) ===
+          String(parentComp.id),
       );
       if (localChildren.length > 0 && !forceRefresh) {
         setSubComps(localChildren);

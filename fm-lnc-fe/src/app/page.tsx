@@ -1284,6 +1284,7 @@ export default function LncSortitoutsiExplorer() {
                         <span>Clubs</span>
                         <Badge
                           count={
+                            compInfo?.stats?.club ??
                             compInfo?.clubsCount ??
                             (currentStep.level === 'CLUBS_IN_COMP' ? detailRecords.length : 0)
                           }
@@ -1296,7 +1297,7 @@ export default function LncSortitoutsiExplorer() {
                         />
                       </button>
 
-                      {((compInfo?.awardsCount || 0) > 0 ||
+                      {(((compInfo?.stats?.award ?? compInfo?.awardsCount) || 0) > 0 ||
                         currentStep.level === 'COMP_AWARDS') && (
                         <button
                           type="button"
@@ -1311,6 +1312,7 @@ export default function LncSortitoutsiExplorer() {
                           <span>Awards</span>
                           <Badge
                             count={
+                              compInfo?.stats?.award ??
                               compInfo?.awardsCount ??
                               (currentStep.level === 'COMP_AWARDS' ? detailRecords.length : 0)
                             }

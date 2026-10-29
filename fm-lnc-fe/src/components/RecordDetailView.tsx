@@ -151,22 +151,22 @@ export default function RecordDetailView({
     Boolean(
       currentData.is_international ||
         type === 'international_competition' ||
-        (!currentData.nation_id &&
-          (currentData.confed_id || currentData.confed || currentData.categories)),
+        (!currentData.nation_id && !currentData.nation &&
+          (currentData.confed_id || currentData.confed || currentData.categories || currentData.type)),
     );
 
   const rawConfedId =
-    currentData.confed_id ||
-    currentData.confed?.id;
-  const rawCat = currentData.categories
-    ? String(currentData.categories).split(',')[0].trim().toUpperCase()
+    currentData.confed?.id ||
+    currentData.confed_id;
+  const rawCat = currentData.type || currentData.categories
+    ? String(currentData.type || currentData.categories).split(',')[0].trim().toUpperCase()
     : '';
   const catConfed = rawCat ? CONFED_NAME_MAP[rawCat] : null;
 
   const confedId = rawConfedId ? String(rawConfedId) : catConfed?.id || null;
   const confedName =
-    (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
     currentData.confed?.name ||
+    (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
     currentData.confed_name ||
     catConfed?.name ||
     rawCat ||
@@ -483,25 +483,35 @@ export default function RecordDetailView({
         )}
 
         {/* Parent Competition (for Competitions) */}
-        {isComp && (currentData.parent_id || currentData.parent || isFieldInactive(['parent_id', 'parent'])) && (
+        {isComp &&
+          (currentData.parent_comp ||
+            currentData.parent ||
+            currentData.parent_id ||
+            isFieldInactive(['parent_comp', 'parent_id', 'parent'])) && (
           <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['parent_id', 'parent'], 'pt-0.5')}>Parent Comp:</span>
+            <span className={getLabelClass(['parent_comp', 'parent_id', 'parent'], 'pt-0.5')}>Parent Comp:</span>
             <span
               onClick={() => {
-                if (currentData.parent_id && onNavigateParentComp) {
-                  onNavigateParentComp(String(currentData.parent_id));
+                const pId = currentData.parent_comp?.id || currentData.parent?.id || currentData.parent_id;
+                if (pId && onNavigateParentComp) {
+                  onNavigateParentComp(String(pId));
                 }
               }}
               className={`font-bold text-xs sm:text-[13px] ${
-                currentData.parent_id && onNavigateParentComp
+                (currentData.parent_comp?.id || currentData.parent?.id || currentData.parent_id) && onNavigateParentComp
                   ? 'text-blue-600 hover:underline cursor-pointer'
-                  : getValueClass(['parent_id', 'parent'])
+                  : getValueClass(['parent_comp', 'parent_id', 'parent'])
               } line-clamp-3 break-words text-left`}
             >
-              {currentData.parent?.name_lg ||
-                currentData.parent?.name_sh ||
-                currentData.parent?.name ||
-                (currentData.parent_id ? `${currentData.parent_id}` : '-')}
+              {(() => {
+                const p = currentData.parent_comp || currentData.parent;
+                if (p) {
+                  const pName = p.name_lg || p.name_sh || p.name;
+                  const p3l = p.name_3l ? `[${p.name_3l}] ` : '';
+                  return `${p3l}${pName || p.id}`;
+                }
+                return currentData.parent_id ? `${currentData.parent_id}` : '-';
+              })()}
             </span>
           </div>
         )}
@@ -630,8 +640,23 @@ export default function RecordDetailView({
           </div>
         )}
 
+        {/* Sub-competitions count */}
+        {isComp &&
+          (currentData.stats?.children ?? currentData.childrenCount) !== undefined &&
+          Number(currentData.stats?.children ?? currentData.childrenCount) > 0 && (
+            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['sub_competitions', 'children'], 'pt-0.5')}>
+                Sub-Comps:
+              </span>
+              <span className="font-bold text-xs sm:text-[13px] text-amber-600 text-left">
+                {currentData.stats?.children ?? currentData.childrenCount}
+              </span>
+            </div>
+          )}
+
         {/* Clubs Count - Hidden for International Competitions */}
-        {!isInternationalComp && currentData.clubsCount !== undefined && (
+        {!isInternationalComp &&
+          (currentData.stats?.club ?? currentData.clubsCount) !== undefined && (
           <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
             <span
@@ -640,13 +665,15 @@ export default function RecordDetailView({
                 onSwitchTab ? 'cursor-pointer hover:underline' : ''
               }`}
             >
-              {currentData.clubsCount}
+              {currentData.stats?.club ?? currentData.clubsCount}
             </span>
           </div>
         )}
 
         {/* Awards Count */}
-        {(currentData.awardsCount !== undefined || counts?.awards !== undefined) && (
+        {(currentData.stats?.award !== undefined ||
+          currentData.awardsCount !== undefined ||
+          counts?.awards !== undefined) && (
           <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass('awards', 'pt-0.5')}>Awards:</span>
             <span
@@ -655,7 +682,7 @@ export default function RecordDetailView({
                 onSwitchTab ? 'cursor-pointer hover:underline' : ''
               }`}
             >
-              {counts?.awards ?? currentData.awardsCount ?? 0}
+              {counts?.awards ?? currentData.stats?.award ?? currentData.awardsCount ?? 0}
             </span>
           </div>
         )}

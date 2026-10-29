@@ -19,7 +19,9 @@ export function getCompetitionGroup(target?: any): CompetitionCategory {
   if (
     id === '[EXTINCT]' ||
     id.startsWith('ext-') ||
-    item?.virtual_type === 'EXTINCT'
+    item?.virtual_type === 'EXTINCT' ||
+    item?.name_lg === '[EXTINCT]' ||
+    item?.name === '[EXTINCT]'
   ) {
     return 'extinct';
   }
@@ -28,7 +30,9 @@ export function getCompetitionGroup(target?: any): CompetitionCategory {
   if (
     id === '[OTHER]' ||
     id.startsWith('oth-') ||
-    item?.virtual_type === 'OTHER'
+    item?.virtual_type === 'OTHER' ||
+    item?.name_lg === '[OTHER]' ||
+    item?.name === '[OTHER]'
   ) {
     return 'other';
   }
@@ -197,7 +201,7 @@ export default function CompetitionGroupView({
   // Visible items: parent/top-level competitions (sub-competitions are organized inside parent modal)
   const visibleItems = useMemo(() => {
     return items.filter((item) => {
-      if (item.parent_id) return false;
+      if (item.parent_comp?.id || item.parent_id || item.parent?.id) return false;
       return true;
     });
   }, [items]);
