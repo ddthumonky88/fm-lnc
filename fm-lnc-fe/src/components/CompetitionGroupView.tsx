@@ -344,8 +344,12 @@ export default function CompetitionGroupView({
           options={selectOptions}
           className="w-full text-xs"
           popupMatchSelectWidth={false}
-          popupClassName="text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1"
-          dropdownStyle={{ fontSize: '12px', minWidth: 230 }}
+          classNames={{
+            popup: {
+              root: 'text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1',
+            },
+          }}
+          styles={{ popup: { root: { fontSize: '12px', minWidth: 230 } } }}
         />
       </div>
     </div>

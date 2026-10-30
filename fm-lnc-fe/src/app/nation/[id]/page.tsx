@@ -26,6 +26,7 @@ import {
   getNationLogoUrl,
   deleteRecord,
   NationInfoData,
+  getNationCompetitionDisplayCount,
   RegionItem,
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
@@ -71,7 +72,7 @@ function updateNationStatsCount(
 ): NationInfoData['stats'] {
   switch (tabKey) {
     case NationTabKey.DOMESTIC_COMPS:
-      return { ...stats, comps: { ...stats.comps, total: count } };
+      return stats;
     case NationTabKey.STADIUMS:
       return { ...stats, stadiums: count };
     case NationTabKey.CITIES:
@@ -106,6 +107,7 @@ export default function NationDetailPage() {
 
   // Regions state for City filter
   const [regions, setRegions] = useState<RegionItem[]>([]);
+  const regionsNationIdRef = useRef('');
   const [selectedRegionId, setSelectedRegionId] = useState<number | string>('all');
 
   // Server pagination and search states
@@ -153,7 +155,7 @@ export default function NationDetailPage() {
         const effRegionId = regionId !== undefined ? regionId : selectedRegionIdRef.current;
         const query: any = { page: page - 1, size, keyword };
         if (tabKey === NationTabKey.CITIES && effRegionId && effRegionId !== 'all') {
-          query.regionId = Number(effRegionId);
+          query.regionCode = String(effRegionId);
         }
         let data: any[] = [];
         if (tabKey === NationTabKey.DOMESTIC_COMPS) {
@@ -161,7 +163,21 @@ export default function NationDetailPage() {
         } else if (tabKey === NationTabKey.STADIUMS) {
           data = await fetchStadiums(nationId, query);
         } else if (tabKey === NationTabKey.CITIES) {
-          data = await fetchCities(nationId, query);
+          if (regionsNationIdRef.current !== nationId) {
+            setRegions([]);
+            const [cities, fetchedRegions] = await Promise.all([
+              fetchCities(nationId, query),
+              fetchRegions(nationId).catch((err) => {
+                console.error('Failed to load regions', err);
+                return [];
+              }),
+            ]);
+            data = cities;
+            setRegions(fetchedRegions || []);
+            regionsNationIdRef.current = nationId;
+          } else {
+            data = await fetchCities(nationId, query);
+          }
         } else if (tabKey === NationTabKey.AWARDS) {
           data = await fetchAwards(nationId, query);
         }
@@ -197,11 +213,6 @@ export default function NationDetailPage() {
       const nation = await fetchNationInfo(nationId);
       console.log('Nation: ', nation);
       setNationHub(nation);
-
-      // Fetch regions for City filter
-      fetchRegions(nationId)
-        .then((regs) => setRegions(regs || []))
-        .catch((err) => console.error('Failed to load regions', err));
 
       const rawConfed = nation?.confed || null;
       const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
@@ -242,7 +253,7 @@ export default function NationDetailPage() {
 
         switch (targetTab) {
           case NationTabKey.DOMESTIC_COMPS:
-            countForTarget = nation.stats.comps.total;
+            countForTarget = getNationCompetitionDisplayCount(nation.stats);
             break;
           case NationTabKey.STADIUMS:
             countForTarget = nation.stats.stadiums;
@@ -340,16 +351,14 @@ export default function NationDetailPage() {
       setNationHub((prev) => {
         if (!prev) return prev;
         const currentCount =
-          activeTab === NationTabKey.DOMESTIC_COMPS
-            ? prev.stats.comps.total
-            : activeTab === NationTabKey.STADIUMS
+          activeTab === NationTabKey.STADIUMS
               ? prev.stats.stadiums
               : activeTab === NationTabKey.CITIES
                 ? prev.stats.cities
                 : activeTab === NationTabKey.AWARDS
                   ? prev.stats.awards.nation
                   : 0;
-        if (currentCount > 0) {
+        if (activeTab !== NationTabKey.DOMESTIC_COMPS && currentCount > 0) {
           return {
             ...prev,
             stats: updateNationStatsCount(prev.stats, activeTab, currentCount - 1),
@@ -384,7 +393,7 @@ export default function NationDetailPage() {
   // Tab configurations: Info is always first, then hide any tab that has 0 records
   const tabItems = useMemo(() => {
     const list: any[] = [];
-    const compCount = nationHub?.stats?.comps.total ?? 0;
+    const compCount = nationHub ? getNationCompetitionDisplayCount(nationHub.stats) : 0;
     const stadiumCount = nationHub?.stats?.stadiums ?? 0;
     const cityCount = nationHub?.stats?.cities ?? 0;
     const awardCount = nationHub?.stats?.awards.nation ?? 0;
@@ -749,7 +758,7 @@ export default function NationDetailPage() {
               data={nationHub}
               type={EntityType.NATION}
               counts={{
-                domesticComps: nationHub.stats.comps.total,
+                domesticComps: getNationCompetitionDisplayCount(nationHub.stats),
                 parentComps: nationHub.stats.comps.main,
                 independentClubs: nationHub.stats.club.other,
                 extinctClubs: nationHub.stats.club.extinct,

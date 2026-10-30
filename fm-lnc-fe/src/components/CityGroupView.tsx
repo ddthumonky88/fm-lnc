@@ -32,6 +32,18 @@ export interface CityCategoryGroup {
   items: any[];
 }
 
+function normalizeCityRegionGroup(value: unknown): string {
+  const region = String(value || '').trim();
+  if (!region) return '';
+
+  const marker = region.toUpperCase();
+  if (marker === '[REMOVE]' || marker === '[OTHER]' || marker === '[OTHERS]') {
+    return marker;
+  }
+
+  return region.replace(/^\[[^\]]+\]\s+/, '').trim();
+}
+
 export default function CityGroupView({
   items,
   loading,
@@ -53,10 +65,7 @@ export default function CityGroupView({
     const uncategorizedItems: any[] = [];
 
     items.forEach((item) => {
-      let rawCat = (item.region || item.categories)?.trim();
-      if (rawCat) {
-        rawCat = rawCat.replace(/^\[[^\]]+\]\s*/, '').trim();
-      }
+      const rawCat = normalizeCityRegionGroup(item.region || item.categories);
       if (!rawCat) {
         uncategorizedItems.push(item);
       } else {
@@ -177,7 +186,7 @@ export default function CityGroupView({
           label: 'All Regions',
         },
         ...regions.map((r) => ({
-          value: r.id,
+          value: r.regionCode || r.code || String(r.id),
           label:
             r.citiesCount !== undefined && r.citiesCount > 0
               ? `${r.name} (${r.citiesCount})`
@@ -229,8 +238,12 @@ export default function CityGroupView({
           }}
           options={regionOptions}
           className="w-full text-xs"
-          popupClassName="text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1"
-          dropdownStyle={{ fontSize: '12px' }}
+          classNames={{
+            popup: {
+              root: 'text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1',
+            },
+          }}
+          styles={{ popup: { root: { fontSize: '12px' } } }}
         />
       </div>
     </div>

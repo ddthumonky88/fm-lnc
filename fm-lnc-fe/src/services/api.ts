@@ -72,7 +72,7 @@ export interface IndependentClubFilterQuery extends PaginationQuery {
 
 export interface CityFilterQuery extends PaginationQuery {
   category?: string;
-  regionId?: number;
+  regionCode?: string;
 }
 
 export interface PageData<T> {
@@ -212,6 +212,9 @@ function normalizeEntityFields(item: any): any {
   // City region unification
   if (!item.region && item.region_name) {
     item.region = item.region_name;
+  }
+  if (item.region_code !== undefined && item.regionCode === undefined) {
+    item.regionCode = item.region_code;
   }
   delete item.region_name;
   delete item.region_code;
@@ -377,6 +380,7 @@ export interface RegionItem {
   name_sh?: string;
   nation_id: string;
   code?: string;
+  regionCode?: string;
   citiesCount?: number;
 }
 
@@ -437,6 +441,11 @@ export interface NationInfoData {
     region: number;
     cities: number;
   };
+}
+
+export function getNationCompetitionDisplayCount(stats: NationInfoData['stats']): number {
+  const fakeCompetitionCount = Number(stats.club.other > 0) + Number(stats.club.extinct > 0);
+  return stats.comps.main + fakeCompetitionCount;
 }
 
 const inFlightRequests = new Map<string, Promise<any>>();
@@ -576,6 +585,15 @@ async function cachedPost<T>(
   ) {
     queryParams.set('regionId', String(rawPayload.regionId));
     delete payload.regionId;
+  }
+  if (
+    rawPayload.regionCode !== undefined &&
+    rawPayload.regionCode !== null &&
+    rawPayload.regionCode !== '' &&
+    String(rawPayload.regionCode).toLowerCase() !== 'all'
+  ) {
+    queryParams.set('regionCode', String(rawPayload.regionCode));
+    delete payload.regionCode;
   }
   if (
     rawPayload.category !== undefined &&

@@ -20,6 +20,7 @@ import {
   fetchCompetitionInfo,
   fetchClubsInComp,
   fetchAwardsInComp,
+  fetchSubCompetitions,
   fetchIndependentClubs,
   fetchNationInfo,
   getNationLogoUrl,
@@ -30,7 +31,6 @@ import {
   AwardItem,
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
-import SubCompetitionsModal from '../../../components/SubCompetitionsModal';
 import RecordDetailView from '../../../components/RecordDetailView';
 import TabIconBadge from '../../../components/TabIconBadge';
 import { CompIcon, DomesticCompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
@@ -90,10 +90,10 @@ function CompetitionDetailContent() {
   const [compInfo, setCompInfo] = useState<
     (CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }) | null
   >(null);
-  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS' | 'INFO'>('INFO');
+  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS' | 'SUB_COMPS' | 'INFO'>('INFO');
   const [clubs, setClubs] = useState<ClubItem[]>([]);
   const [awards, setAwards] = useState<AwardItem[]>([]);
-  const [isSubCompsModalOpen, setIsSubCompsModalOpen] = useState(false);
+  const [subCompetitions, setSubCompetitions] = useState<CompetitionItem[]>([]);
   const [tableFilter, setTableFilter] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -328,7 +328,12 @@ function CompetitionDetailContent() {
 
   // Load tab records with BE pagination & keyword search
   const loadTabData = useCallback(
-    async (tab: 'CLUBS' | 'AWARDS' | 'INFO', page: number, size: number, keyword: string) => {
+    async (
+      tab: 'CLUBS' | 'AWARDS' | 'SUB_COMPS' | 'INFO',
+      page: number,
+      size: number,
+      keyword: string,
+    ) => {
       if (tab === 'INFO') return;
       setTabLoading(true);
       try {
@@ -388,6 +393,16 @@ function CompetitionDetailContent() {
             }
             return prev;
           });
+        } else if (tab === 'SUB_COMPS' && !isVirtual && compId) {
+          const res = await fetchSubCompetitions(compId, {
+            page: page - 1,
+            size,
+            keyword,
+          });
+          const list = Array.isArray(res) ? res : (res as any)?.content || [];
+          const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
+          setSubCompetitions(list);
+          setTotalRecords(total);
         }
       } catch (err: any) {
         console.error('Failed to load tab data', err);
@@ -425,7 +440,7 @@ function CompetitionDetailContent() {
   };
 
   const handleTabChange = (key: string) => {
-    const nextTab = key as 'CLUBS' | 'AWARDS' | 'INFO';
+    const nextTab = key as 'CLUBS' | 'AWARDS' | 'SUB_COMPS' | 'INFO';
     setActiveTab(nextTab);
     setTableFilter('');
     setDebouncedKeyword('');
@@ -462,6 +477,19 @@ function CompetitionDetailContent() {
     }
   };
 
+  const handleDeleteSubCompetition = async (id: string) => {
+    try {
+      await deleteRecord(RecordType.COMPETITION, id);
+      message.success('Sub-competition deleted');
+      await Promise.all([
+        loadTabData('SUB_COMPS', currentPage, pageSize, debouncedKeyword),
+        loadCompInfo(),
+      ]);
+    } catch (err: any) {
+      message.error(err.message || 'Delete failed');
+    }
+  };
+
   const clubsBadgeCount = debouncedKeyword
     ? (activeTab === 'CLUBS' ? totalRecords : (compInfo?.stats?.club ?? compInfo?.clubsCount ?? 0))
     : (compInfo?.stats?.club ?? compInfo?.clubsCount ?? totalRecords);
@@ -486,6 +514,32 @@ function CompetitionDetailContent() {
           </div>
         ),
       },
+      ...(Number(compInfo?.childrenCount ?? 0) > 0
+        ? [
+            {
+              key: 'SUB_COMPS',
+              label: (
+                <div className="flex items-center gap-2" title="Sub-Competitions">
+                  <TabIconBadge
+                    icon={
+                      <BranchesOutlined
+                        className={activeTab === 'SUB_COMPS' ? 'text-white' : 'text-amber-600'}
+                      />
+                    }
+                    count={compInfo?.childrenCount ?? 0}
+                    showZero={false}
+                    isActive={activeTab === 'SUB_COMPS'}
+                  />
+                  <span
+                    className={`hidden sm:inline ${activeTab === 'SUB_COMPS' ? 'font-bold' : ''}`}
+                  >
+                    Sub-Comps
+                  </span>
+                </div>
+              ),
+            },
+          ]
+        : []),
       {
         key: 'CLUBS',
         label: (
@@ -524,7 +578,15 @@ function CompetitionDetailContent() {
     }
 
     return list;
-  }, [clubsBadgeCount, awardsBadgeCount, activeTab, isVirtual, compInfo?.awardsCount, compInfo?.stats?.award]);
+  }, [
+    clubsBadgeCount,
+    awardsBadgeCount,
+    activeTab,
+    isVirtual,
+    compInfo?.awardsCount,
+    compInfo?.childrenCount,
+    compInfo?.stats?.award,
+  ]);
 
   const compTitle =
     compInfo?.name_sh ||
@@ -605,16 +667,6 @@ function CompetitionDetailContent() {
                     </Tooltip>
                   ) : null}
 
-                  {compInfo?.childrenCount !== undefined && compInfo.childrenCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setIsSubCompsModalOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 text-xs font-medium transition-all cursor-pointer shadow-2xs select-none"
-                      title="Click to view Sub-Competitions"
-                    >
-                      <BranchesOutlined className="text-slate-600 text-xs" />
-                    </button>
-                  )}
                 </div>
 
                 <div className="mt-1 min-w-0">
@@ -649,7 +701,13 @@ function CompetitionDetailContent() {
             <div className="flex items-center gap-2 mb-4 w-full">
               <Input
                 prefix={<SearchOutlined className="text-gray-400" />}
-                placeholder={activeTab === 'CLUBS' ? 'Filter clubs...' : 'Filter awards...'}
+                placeholder={
+                  activeTab === 'CLUBS'
+                    ? 'Filter clubs...'
+                    : activeTab === 'SUB_COMPS'
+                      ? 'Filter sub-competitions...'
+                      : 'Filter awards...'
+                }
                 value={tableFilter}
                 onChange={(e) => setTableFilter(e.target.value)}
                 onPressEnter={() => setDebouncedKeyword(tableFilter.trim())}
@@ -668,12 +726,20 @@ function CompetitionDetailContent() {
                       nationId,
                       isVirtual ? undefined : compId,
                     );
+                  } else if (activeTab === 'SUB_COMPS') {
+                    openRecordModal(RecordType.COMPETITION, null, nationId, compId);
                   } else {
                     openRecordModal(RecordType.AWARD, null, nationId, compId);
                   }
                 }}
                 className="bg-blue-600 shrink-0"
-                title={activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
+                title={
+                  activeTab === 'CLUBS'
+                    ? 'Add Club'
+                    : activeTab === 'SUB_COMPS'
+                      ? 'Add Sub-Competition'
+                      : 'Add Award'
+                }
               />
             </div>
           )}
@@ -727,6 +793,33 @@ function CompetitionDetailContent() {
             />
           )}
 
+          {activeTab === 'SUB_COMPS' && (
+            <CardGrid
+              key="comp-sub-competitions"
+              items={subCompetitions}
+              type={EntityType.COMPETITION}
+              columns={4}
+              loading={tabLoading}
+              serverPagination={{
+                current: currentPage,
+                pageSize,
+                total: totalRecords,
+                onChange: handlePageChange,
+              }}
+              onEdit={(rec) =>
+                openRecordModal(RecordType.COMPETITION, rec, nationId, compId)
+              }
+              onDelete={(rec) => handleDeleteSubCompetition(String(rec.id))}
+              onNavigate={(step) => {
+                if (step?.id) {
+                  router.push(`/comp/${step.id}${nationId ? `?nationId=${nationId}` : ''}`);
+                }
+              }}
+              emptyText="No sub-competitions found"
+              defaultPageSize={20}
+            />
+          )}
+
           {/* Tab: Competition Information */}
           {activeTab === 'INFO' && compInfo && (
             <RecordDetailView
@@ -752,28 +845,14 @@ function CompetitionDetailContent() {
               onNavigateParentComp={(pId) =>
                 router.push(`/comp/${pId}${nationId ? `?nationId=${nationId}` : ''}`)
               }
-              onOpenSubComps={() => setIsSubCompsModalOpen(true)}
-              onSwitchTab={(tab) => handleTabChange(tab as 'INFO' | 'CLUBS' | 'AWARDS')}
+              onSwitchTab={(tab) =>
+                handleTabChange(tab as 'INFO' | 'CLUBS' | 'AWARDS' | 'SUB_COMPS')
+              }
             />
           )}
         </div>
       )}
 
-      {/* Sub-Competitions Modal */}
-      <SubCompetitionsModal
-        isOpen={isSubCompsModalOpen}
-        onClose={() => setIsSubCompsModalOpen(false)}
-        parentComp={compInfo}
-        onEdit={(rec) => openRecordModal(RecordType.COMPETITION, rec, nationId, compId)}
-        onDelete={() => {
-          loadCompInfo();
-          loadTabData(activeTab, currentPage, pageSize, debouncedKeyword);
-        }}
-        onRefreshParent={() => {
-          loadCompInfo();
-          loadTabData(activeTab, currentPage, pageSize, debouncedKeyword);
-        }}
-      />
     </div>
   );
 }

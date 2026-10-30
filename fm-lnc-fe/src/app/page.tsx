@@ -42,6 +42,7 @@ import {
   NationItem,
   CompetitionItem,
   NationInfoData,
+  getNationCompetitionDisplayCount,
   getConfederationLogoUrl,
   getNationLogoUrl,
 } from '../services/api';
@@ -164,7 +165,7 @@ export default function LncSortitoutsiExplorer() {
           if (!keyword) {
             const stats =
               tabKey === NationTabKey.DOMESTIC_COMPS
-                ? { ...prev.stats, comps: { ...prev.stats.comps, total } }
+                ? prev.stats
                 : tabKey === NationTabKey.STADIUMS
                   ? { ...prev.stats, stadiums: total }
                   : tabKey === NationTabKey.CITIES
@@ -244,7 +245,7 @@ export default function LncSortitoutsiExplorer() {
           let targetTab: NationTabKeyValue = activeNationTab;
           const countForActive =
             targetTab === NationTabKey.DOMESTIC_COMPS
-              ? hub.stats.comps.total
+              ? getNationCompetitionDisplayCount(hub.stats)
               : targetTab === NationTabKey.STADIUMS
                 ? hub.stats.stadiums
                 : targetTab === NationTabKey.CITIES
@@ -254,7 +255,8 @@ export default function LncSortitoutsiExplorer() {
                     : 0;
 
           if (countForActive === 0) {
-            if (hub.stats.comps.total > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
+            if (getNationCompetitionDisplayCount(hub.stats) > 0)
+              targetTab = NationTabKey.DOMESTIC_COMPS;
             else if (hub.stats.awards.nation > 0) targetTab = NationTabKey.AWARDS;
             else if (hub.stats.stadiums > 0) targetTab = NationTabKey.STADIUMS;
             else if (hub.stats.cities > 0) targetTab = NationTabKey.CITIES;
@@ -262,7 +264,7 @@ export default function LncSortitoutsiExplorer() {
           setActiveNationTab(targetTab);
 
           const hasAnyChildren =
-            hub.stats.comps.total > 0 ||
+            getNationCompetitionDisplayCount(hub.stats) > 0 ||
             hub.stats.awards.nation > 0 ||
             hub.stats.stadiums > 0 ||
             hub.stats.cities > 0 ||
@@ -568,7 +570,7 @@ export default function LncSortitoutsiExplorer() {
       {
         key: NationTabKey.DOMESTIC_COMPS,
         label: 'Competitions',
-        count: nationHub?.stats?.comps.total || 0,
+        count: nationHub ? getNationCompetitionDisplayCount(nationHub.stats) : 0,
         icon: <DomesticCompIcon size={18} className="text-amber-500" />,
         addLabel: 'Add Competition',
         type: RecordType.COMPETITION,

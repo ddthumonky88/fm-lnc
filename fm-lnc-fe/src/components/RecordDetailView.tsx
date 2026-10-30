@@ -103,7 +103,6 @@ export interface RecordDetailViewProps {
   onNavigateParentComp?: (compId: string) => void;
   onNavigateComp?: (compId: string) => void;
   onNavigateClub?: (clubId: string) => void;
-  onOpenSubComps?: () => void;
   onSwitchTab?: (tabKey: string) => void;
   onNavigateFakeComp?: (fakeCompId: string) => void;
 }
@@ -119,7 +118,6 @@ export default function RecordDetailView({
   onNavigateParentComp,
   onNavigateComp,
   onNavigateClub,
-  onOpenSubComps,
   onSwitchTab,
   onNavigateFakeComp,
 }: RecordDetailViewProps) {
@@ -362,7 +360,7 @@ export default function RecordDetailView({
       <div className="bg-sky-50/70 border border-sky-200/80 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
         {isConfed ? (
           <>
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass('name', 'pt-0.5')}>Name:</span>
               <span
                 className="font-bold text-xs sm:text-[13px] text-slate-900 line-clamp-3 break-words text-left"
@@ -371,7 +369,7 @@ export default function RecordDetailView({
                 {currentData.name || '-'}
               </span>
             </div>
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass('id', 'pt-0.5')}>ID:</span>
               <span className="font-mono font-bold text-xs sm:text-[13px] text-slate-800 break-words text-left">
                 {currentData.id || '-'}
@@ -381,7 +379,7 @@ export default function RecordDetailView({
         ) : (
           <>
             {/* LN */}
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
               <span
                 className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
@@ -392,7 +390,7 @@ export default function RecordDetailView({
             </div>
 
             {/* SN */}
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
               <span
                 className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
@@ -403,12 +401,12 @@ export default function RecordDetailView({
             </div>
 
             {/* 3N */}
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>
                 3N:
               </span>
               <span
-                className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
+                className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
               >
                 {isVirtual ? '-' : currentData.name_3l || nationCode || '-'}
               </span>
@@ -418,10 +416,10 @@ export default function RecordDetailView({
 
         {/* 6N (Club) */}
         {(isClub || currentData.name_6l !== undefined) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6N:</span>
             <span
-              className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
+              className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
             >
               {currentData.name_6l || '-'}
             </span>
@@ -430,7 +428,7 @@ export default function RecordDetailView({
 
         {/* Confederation (for International Competition or Nation or Comp) */}
         {(isInternationalComp || isNation || (!isConfed && (confedId || confedName))) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>
               Confed:
             </span>
@@ -453,7 +451,7 @@ export default function RecordDetailView({
 
         {/* Associated Nation */}
         {!isNation && !isInternationalComp && !isConfed && nationId && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
               Nation:
             </span>
@@ -492,7 +490,7 @@ export default function RecordDetailView({
 
         {/* League / Competition (for Club) */}
         {isClub && (currentData.comp || currentData.comp_id) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['comp_id', 'competition_id', 'comp'], 'pt-0.5')}>
               League:
             </span>
@@ -527,7 +525,7 @@ export default function RecordDetailView({
 
         {/* Region (for City) */}
         {isCity && currentData.region && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass('region', 'pt-0.5')}>Region:</span>
             <span
               className={`font-bold text-xs sm:text-[13px] ${getValueClass('region', 'text-sky-800')} break-words text-left`}
@@ -543,7 +541,7 @@ export default function RecordDetailView({
             currentData.parent ||
             currentData.parent_id ||
             isFieldInactive(['parent_comp', 'parent_id', 'parent'])) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['parent_comp', 'parent_id', 'parent'], 'pt-0.5')}>Parent Comp:</span>
             <span
               onClick={() => {
@@ -574,7 +572,7 @@ export default function RecordDetailView({
         {/* Club Affiliate Info */}
         {isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
           <>
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
                 Affiliate Club:
               </span>
@@ -603,7 +601,7 @@ export default function RecordDetailView({
               </div>
             </div>
             {currentData.affiliate_club?.type && (
-              <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                 <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
                   Affiliate Type:
                 </span>
@@ -619,7 +617,7 @@ export default function RecordDetailView({
 
         {/* First Team Affiliates list */}
         {isClub && currentData.affiliates && currentData.affiliates.length > 0 && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['affiliates'], 'pt-0.5')}>
               Affiliates ({currentData.affiliates.length}):
             </span>
@@ -650,28 +648,9 @@ export default function RecordDetailView({
           </div>
         )}
 
-        {/* Sub-competitions count */}
-        {isComp &&
-          currentData.childrenCount !== undefined &&
-          currentData.childrenCount > 0 && (
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['sub_competitions', 'children'], 'pt-0.5')}>
-                Sub-Comps:
-              </span>
-              <span
-                onClick={onOpenSubComps}
-                className={`font-bold text-xs sm:text-[13px] text-amber-600 text-left ${
-                  onOpenSubComps ? 'cursor-pointer hover:underline' : ''
-                }`}
-              >
-                {currentData.childrenCount}
-              </span>
-            </div>
-          )}
-
         {/* Total Competitions for Nation */}
         {(currentData.totalComps !== undefined || counts?.domesticComps !== undefined) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass('competitions', 'pt-0.5')}>Competitions:</span>
             <span
               onClick={() => onSwitchTab?.('DOMESTIC_COMPS')}
@@ -680,13 +659,18 @@ export default function RecordDetailView({
               }`}
             >
               {counts?.domesticComps ?? currentData.totalComps ?? 0}
+              {currentData.stats?.comps?.total !== undefined && (
+                <span className="font-normal text-slate-500">
+                  {' '}(total: {currentData.stats.comps.total})
+                </span>
+              )}
             </span>
           </div>
         )}
 
         {/* Stadiums for Nation */}
         {counts?.stadiums !== undefined && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass('stadiums', 'pt-0.5')}>Stadiums:</span>
             <span
               onClick={() => onSwitchTab?.('STADIUMS')}
@@ -701,7 +685,7 @@ export default function RecordDetailView({
 
         {/* Cities for Nation */}
         {counts?.cities !== undefined && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass('cities', 'pt-0.5')}>Cities:</span>
             <span
               onClick={() => onSwitchTab?.('CITIES')}
@@ -714,86 +698,9 @@ export default function RecordDetailView({
           </div>
         )}
 
-        {/* Sub-competitions count */}
-        {isComp &&
-          (currentData.stats?.children ?? currentData.childrenCount) !== undefined &&
-          Number(currentData.stats?.children ?? currentData.childrenCount) > 0 && (
-            <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['sub_competitions', 'children'], 'pt-0.5')}>
-                Sub-Comps:
-              </span>
-              <span className="font-bold text-xs sm:text-[13px] text-amber-600 text-left">
-                {currentData.stats?.children ?? currentData.childrenCount}
-              </span>
-            </div>
-          )}
-
-        {/* Clubs Count - Hidden for International Competitions */}
-        {!isInternationalComp &&
-          (statsClubCount ?? currentData.clubsCount) !== undefined && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
-            <span
-              onClick={() => onSwitchTab?.('CLUBS')}
-              className={`font-bold text-xs sm:text-[13px] text-blue-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {statsClubCount ?? currentData.clubsCount}
-            </span>
-          </div>
-        )}
-
-        {/* Awards Count */}
-        {(currentData.stats?.award !== undefined ||
-          currentData.awardsCount !== undefined ||
-          counts?.awards !== undefined) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('awards', 'pt-0.5')}>Awards:</span>
-            <span
-              onClick={() => onSwitchTab?.('AWARDS')}
-              className={`font-bold text-xs sm:text-[13px] text-yellow-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts?.awards ?? currentData.stats?.award ?? currentData.awardsCount ?? 0}
-            </span>
-          </div>
-        )}
-
-        {/* Active Clubs for Nation */}
-        {counts?.independentClubs !== undefined && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('independent_clubs', 'pt-0.5')}>Active Clubs:</span>
-            <span
-              onClick={() => onNavigateFakeComp?.(`oth-${currentData.id}`)}
-              className={`font-bold text-xs sm:text-[13px] text-slate-800 text-left ${
-                onNavigateFakeComp ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts.independentClubs}
-            </span>
-          </div>
-        )}
-
-        {/* Extinct Clubs for Nation */}
-        {counts?.extinctClubs !== undefined && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('extinct_clubs', 'pt-0.5')}>Extinct Clubs:</span>
-            <span
-              onClick={() => onNavigateFakeComp?.(`ext-${currentData.id}`)}
-              className={`font-bold text-xs sm:text-[13px] text-rose-700 text-left ${
-                onNavigateFakeComp ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts.extinctClubs}
-            </span>
-          </div>
-        )}
-
         {/* Total Nations (Confed) */}
         {(currentData.totalNations !== undefined || counts?.totalNations !== undefined) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass('nations', 'pt-0.5')}>Nations:</span>
             <span
               onClick={() => onSwitchTab?.('NATIONS')}
@@ -808,7 +715,7 @@ export default function RecordDetailView({
 
         {/* Total International Competitions (Confed) */}
         {(currentData.totalIntComps !== undefined || counts?.totalIntComps !== undefined) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['int_competitions', 'int_comps'], 'pt-0.5')}>
               Int Comps:
             </span>
@@ -825,7 +732,7 @@ export default function RecordDetailView({
 
         {/* Type / Categories */}
         {(currentData.type || currentData.categories) && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
             <span className={getLabelClass(['type', 'categories', 'category'], 'pt-0.5')}>
               Type:
             </span>
@@ -843,7 +750,7 @@ export default function RecordDetailView({
 
         {/* BG Color Row */}
         {bgInfo && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
             <span
               className={getLabelClass(['bg_color', 'background_color'], 'pt-0.5')}
               title="Background Color"
@@ -868,7 +775,7 @@ export default function RecordDetailView({
 
         {/* FG Color Row */}
         {fgInfo && (
-          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
             <span
               className={getLabelClass(['fg_color', 'foreground_color'], 'pt-0.5')}
               title="Foreground Color"
@@ -890,6 +797,40 @@ export default function RecordDetailView({
             </div>
           </div>
         )}
+
+        {/* Clubs Count - Hidden for International Competitions */}
+        {!isInternationalComp &&
+          (statsClubCount ?? currentData.clubsCount) !== undefined && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
+              <span
+                onClick={() => onSwitchTab?.('CLUBS')}
+                className={`font-bold text-xs sm:text-[13px] text-blue-700 text-left ${
+                  onSwitchTab ? 'cursor-pointer hover:underline' : ''
+                }`}
+              >
+                {statsClubCount ?? currentData.clubsCount}
+              </span>
+            </div>
+          )}
+
+        {/* Awards Count */}
+        {(currentData.stats?.award !== undefined ||
+          currentData.awardsCount !== undefined ||
+          counts?.awards !== undefined) && (
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
+            <span className={getLabelClass('awards', 'pt-0.5')}>Awards:</span>
+            <span
+              onClick={() => onSwitchTab?.('AWARDS')}
+              className={`font-bold text-xs sm:text-[13px] text-yellow-700 text-left ${
+                onSwitchTab ? 'cursor-pointer hover:underline' : ''
+              }`}
+            >
+              {counts?.awards ?? currentData.stats?.award ?? currentData.awardsCount ?? 0}
+            </span>
+          </div>
+        )}
+
       </div>
 
       {/* 3. Scope & Status Badges */}
