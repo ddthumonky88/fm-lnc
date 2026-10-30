@@ -21,7 +21,7 @@ import {
   fetchClubsInComp,
   fetchAwardsInComp,
   fetchIndependentClubs,
-  fetchNationHub,
+  fetchNationInfo,
   getNationLogoUrl,
   getConfederationLogoUrl,
   deleteRecord,
@@ -142,7 +142,7 @@ function CompetitionDetailContent() {
           return;
         }
 
-        const hub = await fetchNationHub(targetNationId).catch(() => null);
+        const hub = await fetchNationInfo(targetNationId).catch(() => null);
 
         const nation = hub?.nation;
         const confedName = nation?.confed;
@@ -177,11 +177,11 @@ function CompetitionDetailContent() {
           confed: nation?.confed || (confedId ? { id: confedId, name: confedName } : undefined),
           type: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
           categories: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
-          clubsCount: isVirtualExtinct ? hub?.counts?.extinctClubs || 0 : hub?.counts?.independentClubs || 0,
+          clubsCount: isVirtualExtinct ? hub?.stats.club.extinct || 0 : hub?.stats.club.other || 0,
           awardsCount: 0,
           childrenCount: 0,
           stats: {
-            club: isVirtualExtinct ? hub?.counts?.extinctClubs || 0 : hub?.counts?.independentClubs || 0,
+            club: isVirtualExtinct ? hub?.stats.club.extinct || 0 : hub?.stats.club.other || 0,
             award: 0,
             children: 0,
           },
@@ -732,7 +732,7 @@ function CompetitionDetailContent() {
             <RecordDetailView
               data={compInfo}
               type={
-                compInfo.is_international
+                !compInfo.nation && !compInfo.nation_id
                   ? 'international_competition'
                   : RecordType.COMPETITION
               }

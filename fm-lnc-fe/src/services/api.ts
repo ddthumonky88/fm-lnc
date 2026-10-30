@@ -290,7 +290,8 @@ export interface NationItem {
   name_lg?: string;
   name_sh?: string;
   name_3l?: string;
-  confed?: string;
+  confed?: any;
+  confed_id?: string;
   totalChildren?: number;
   totalComps?: number;
   totalClubs?: number;
@@ -310,7 +311,11 @@ export interface CompetitionItem {
   fg_color?: string;
   bg_color?: string;
   nation?: NationItem;
+  nation_id?: string;
+  confed?: any;
+  confed_id?: string;
   parent?: CompetitionItem | null;
+  parent_id?: string;
   type?: string;
   note?: string;
   is_virtual?: boolean;
@@ -416,7 +421,7 @@ export interface StageItem {
   name: string;
 }
 
-export interface NationHubData {
+export interface NationInfoData {
   id: string;
   name_lg?: string;
   name_sh?: string;
@@ -425,34 +430,13 @@ export interface NationHubData {
   inactive_fields?: string | null;
   note?: string | null;
   stats: {
-    domesticComps: number;
-    parentComps?: number;
-    comps?: number;
-    independentClubs: number;
-    extinctClubs?: number;
-    clubs?: number;
-    allClubs: number;
+    awards: { total: number; nation: number };
+    comps: { total: number; main: number };
     stadiums: number;
+    club: { total: number; other: number; extinct: number };
+    region: number;
     cities: number;
-    awards: number;
-    totalAwards?: number;
-    regions?: number;
   };
-  counts: {
-    domesticComps: number;
-    parentComps?: number;
-    comps?: number;
-    independentClubs: number;
-    extinctClubs?: number;
-    clubs?: number;
-    allClubs: number;
-    stadiums: number;
-    cities: number;
-    awards: number;
-    totalAwards?: number;
-    regions?: number;
-  };
-  nation: NationItem;
 }
 
 const inFlightRequests = new Map<string, Promise<any>>();
@@ -809,16 +793,41 @@ export async function searchIntCompetitions(
   return fetchIntCompetitions(query?.confedId, query, forceRefresh);
 }
 
-export async function fetchNationHub(
+export async function fetchNationInfo(
   nationId: string,
   forceRefresh = false,
-): Promise<NationHubData> {
+): Promise<NationInfoData> {
   const data = await cachedFetch<any>(
     `${getApiBase()}/hierarchy/nations/${nationId}/info`,
     forceRefresh,
   );
+  const stats = data.stats || {};
   return {
-    ...data,
+    id: data.id,
+    name_lg: data.name_lg,
+    name_sh: data.name_sh,
+    name_3l: data.name_3l,
+    confed: data.confed,
+    inactive_fields: data.inactive_fields,
+    note: data.note,
+    stats: {
+      awards: {
+        total: stats.totalAwards ?? 0,
+        nation: stats.awards ?? 0,
+      },
+      comps: {
+        total: stats.comps ?? 0,
+        main: stats.parentComps ?? 0,
+      },
+      stadiums: stats.stadiums ?? 0,
+      club: {
+        total: stats.allClubs ?? stats.clubs ?? 0,
+        other: stats.independentClubs ?? 0,
+        extinct: stats.extinctClubs ?? 0,
+      },
+      region: stats.regions ?? 0,
+      cities: stats.cities ?? 0,
+    },
   };
 }
 
@@ -953,9 +962,23 @@ export async function fetchCompetitionInfo(
   compId: string,
   forceRefresh = false,
 ): Promise<CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }> {
-  return cachedFetch<
+  const competition = await cachedFetch<
     CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }
   >(`${getApiBase()}/hierarchy/competitions/${compId}/info`, forceRefresh);
+
+  const competitionInfo = { ...competition } as any;
+  delete competitionInfo.is_international;
+  delete competitionInfo.name;
+  delete competitionInfo.parent;
+  delete competitionInfo.totalChildren;
+  if (competitionInfo.nation) {
+    competitionInfo.nation = { ...competitionInfo.nation };
+    delete competitionInfo.nation.is_international;
+    delete competitionInfo.nation.name;
+    delete competitionInfo.nation.parent;
+    delete competitionInfo.nation.totalChildren;
+  }
+  return competitionInfo;
 }
 
 export async function fetchConfederationInfo(
@@ -973,13 +996,6 @@ export async function fetchConfederationInfo(
   }
 > {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/continents/${confedId}/info`, forceRefresh);
-}
-
-export async function fetchNationInfo(
-  nationId: string,
-  forceRefresh = false,
-): Promise<NationItem & { counts: any }> {
-  return cachedFetch<any>(`${getApiBase()}/hierarchy/nations/${nationId}/info`, forceRefresh);
 }
 
 export async function fetchClubInfo(

@@ -25,7 +25,7 @@ import {
   fetchContinents,
   fetchNationsByContinent,
   fetchIntCompetitions,
-  fetchNationHub,
+  fetchNationInfo,
   fetchDomesticCompetitions,
   fetchIndependentClubs,
   fetchClubsInComp,
@@ -41,7 +41,7 @@ import {
   ConfederationItem,
   NationItem,
   CompetitionItem,
-  NationHubData,
+  NationInfoData,
   getConfederationLogoUrl,
   getNationLogoUrl,
 } from '../services/api';
@@ -113,7 +113,7 @@ export default function LncSortitoutsiExplorer() {
   const [continents, setContinents] = useState<ConfederationItem[]>([]);
   const [nations, setNations] = useState<NationItem[]>([]);
   const [intComps, setIntComps] = useState<CompetitionItem[]>([]);
-  const [nationHub, setNationHub] = useState<NationHubData | null>(null);
+  const [nationHub, setNationHub] = useState<NationInfoData | null>(null);
   const [detailRecords, setDetailRecords] = useState<any[]>([]);
   const [compInfo, setCompInfo] = useState<
     (CompetitionItem & { clubsCount: number; awardsCount: number }) | null
@@ -161,20 +161,20 @@ export default function LncSortitoutsiExplorer() {
         setTotalRecords(total);
         setNationHub((prev) => {
           if (!prev) return prev;
-          const keyMap: Record<string, keyof typeof prev.counts> = {
-            [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
-            [NationTabKey.STADIUMS]: 'stadiums',
-            [NationTabKey.CITIES]: 'cities',
-            [NationTabKey.AWARDS]: 'awards',
-          };
-          const countKey = keyMap[tabKey];
-          if (countKey && !keyword) {
+          if (!keyword) {
+            const stats =
+              tabKey === NationTabKey.DOMESTIC_COMPS
+                ? { ...prev.stats, comps: { ...prev.stats.comps, total } }
+                : tabKey === NationTabKey.STADIUMS
+                  ? { ...prev.stats, stadiums: total }
+                  : tabKey === NationTabKey.CITIES
+                    ? { ...prev.stats, cities: total }
+                    : tabKey === NationTabKey.AWARDS
+                      ? { ...prev.stats, awards: { ...prev.stats.awards, nation: total } }
+                      : prev.stats;
             return {
               ...prev,
-              counts: {
-                ...prev.counts,
-                [countKey]: total,
-              },
+              stats,
             };
           }
           return prev;
@@ -237,31 +237,37 @@ export default function LncSortitoutsiExplorer() {
           setIntComps(data);
           setTotalRecords((data as any)?.totalElements ?? (data as any)?.total ?? data.length);
         } else if (currentStep.level === 'NATION_HUB' && currentStep.id !== undefined) {
-          const hub = await fetchNationHub(String(currentStep.id));
+          const hub = await fetchNationInfo(String(currentStep.id));
           setNationHub(hub);
 
           // Auto select tab that has count > 0
           let targetTab: NationTabKeyValue = activeNationTab;
           const countForActive =
             targetTab === NationTabKey.DOMESTIC_COMPS
-              ? hub.counts.domesticComps
+              ? hub.stats.comps.total
               : targetTab === NationTabKey.STADIUMS
-                ? hub.counts.stadiums
+                ? hub.stats.stadiums
                 : targetTab === NationTabKey.CITIES
-                  ? hub.counts.cities
+                  ? hub.stats.cities
                   : targetTab === NationTabKey.AWARDS
-                    ? hub.counts.awards
+                    ? hub.stats.awards.nation
                     : 0;
 
           if (countForActive === 0) {
-            if (hub.counts.domesticComps > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
-            else if (hub.counts.awards > 0) targetTab = NationTabKey.AWARDS;
-            else if (hub.counts.stadiums > 0) targetTab = NationTabKey.STADIUMS;
-            else if (hub.counts.cities > 0) targetTab = NationTabKey.CITIES;
+            if (hub.stats.comps.total > 0) targetTab = NationTabKey.DOMESTIC_COMPS;
+            else if (hub.stats.awards.nation > 0) targetTab = NationTabKey.AWARDS;
+            else if (hub.stats.stadiums > 0) targetTab = NationTabKey.STADIUMS;
+            else if (hub.stats.cities > 0) targetTab = NationTabKey.CITIES;
           }
           setActiveNationTab(targetTab);
 
-          const hasAnyChildren = Object.values(hub.counts).some((c: any) => c > 0);
+          const hasAnyChildren =
+            hub.stats.comps.total > 0 ||
+            hub.stats.awards.nation > 0 ||
+            hub.stats.stadiums > 0 ||
+            hub.stats.cities > 0 ||
+            hub.stats.club.total > 0 ||
+            hub.stats.region > 0;
           if (hasAnyChildren) {
             await loadNationDataForTab(String(currentStep.id), targetTab, page, keyword, size);
           } else {
@@ -381,7 +387,7 @@ export default function LncSortitoutsiExplorer() {
       await deleteRecord(currentRecordType, String(record.id));
       message.success('Record deleted successfully!');
       if (currentStep.level === 'NATION_HUB' && currentStep.id !== undefined) {
-        const hub = await fetchNationHub(String(currentStep.id));
+        const hub = await fetchNationInfo(String(currentStep.id));
         setNationHub(hub);
         await loadNationDataForTab(String(currentStep.id), activeNationTab);
       } else {
@@ -562,7 +568,7 @@ export default function LncSortitoutsiExplorer() {
       {
         key: NationTabKey.DOMESTIC_COMPS,
         label: 'Competitions',
-        count: nationHub?.counts?.domesticComps || 0,
+        count: nationHub?.stats?.comps.total || 0,
         icon: <DomesticCompIcon size={18} className="text-amber-500" />,
         addLabel: 'Add Competition',
         type: RecordType.COMPETITION,
@@ -570,7 +576,7 @@ export default function LncSortitoutsiExplorer() {
       {
         key: NationTabKey.STADIUMS,
         label: 'Stadiums',
-        count: nationHub?.counts?.stadiums || 0,
+        count: nationHub?.stats?.stadiums || 0,
         icon: <StadiumIcon size={18} className="text-emerald-500" />,
         addLabel: 'Add Stadium',
         type: RecordType.STADIUM,
@@ -578,7 +584,7 @@ export default function LncSortitoutsiExplorer() {
       {
         key: NationTabKey.CITIES,
         label: 'Cities',
-        count: nationHub?.counts?.cities || 0,
+        count: nationHub?.stats?.cities || 0,
         icon: <CityIcon size={18} className="text-sky-500" />,
         addLabel: 'Add City',
         type: RecordType.CITY,
@@ -586,7 +592,7 @@ export default function LncSortitoutsiExplorer() {
       {
         key: NationTabKey.AWARDS,
         label: 'Awards',
-        count: nationHub?.counts?.awards || 0,
+        count: nationHub?.stats?.awards.nation || 0,
         icon: <AwardIcon size={18} className="text-yellow-500" />,
         addLabel: 'Add Award',
         type: RecordType.AWARD,
@@ -943,12 +949,9 @@ export default function LncSortitoutsiExplorer() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-3 border-b border-gray-100">
               <div>
                 <h2 className="text-base font-bold text-gray-800 flex items-center gap-2.5">
-                  {getNationLogoUrl(nationHub.nation?.id, nationHub.nation?.name_3l) ? (
+                  {getNationLogoUrl(nationHub.id, nationHub.name_3l) ? (
                     <img
-                      src={getNationLogoUrl(
-                        nationHub.nation?.id,
-                        nationHub.nation?.name_3l,
-                      )}
+                      src={getNationLogoUrl(nationHub.id, nationHub.name_3l)}
                       alt={currentStep.title}
                       className="w-8 h-5.5 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
                       onError={(e) => {
@@ -958,7 +961,7 @@ export default function LncSortitoutsiExplorer() {
                   ) : null}
                   <span>{currentStep.title}</span>
                   <Tag color="cyan" className="font-bold m-0">
-                    {nationHub.nation?.id}
+                    {nationHub?.id}
                   </Tag>
                 </h2>
               </div>
@@ -1471,7 +1474,7 @@ export default function LncSortitoutsiExplorer() {
         onSuccess={() => {
           message.success('Record saved successfully!');
           if (currentStep.level === 'NATION_HUB' && currentStep.id !== undefined) {
-            fetchNationHub(currentStep.id).then(setNationHub);
+            fetchNationInfo(currentStep.id).then(setNationHub);
             loadNationDataForTab(currentStep.id, activeNationTab);
           } else {
             loadCurrentLevelData();

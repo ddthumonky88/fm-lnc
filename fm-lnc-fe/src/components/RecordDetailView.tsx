@@ -89,6 +89,11 @@ export interface RecordDetailViewProps {
     awards?: number;
     independentClubs?: number;
     extinctClubs?: number;
+    parentComps?: number;
+    clubs?: number;
+    allClubs?: number;
+    totalAwards?: number;
+    regions?: number;
     totalNations?: number;
     totalIntComps?: number;
   };
@@ -134,6 +139,9 @@ export default function RecordDetailView({
   const isConfed = type === EntityType.CONFEDERATION;
   const isStage = type === EntityType.STAGE;
   const isAward = type === EntityType.AWARD;
+  const statsClub = currentData.stats?.club;
+  const statsClubCount =
+    statsClub && typeof statsClub === 'object' ? statsClub.total : statsClub;
 
   const isVirtual = Boolean(
     currentData.is_virtual ||
@@ -722,7 +730,7 @@ export default function RecordDetailView({
 
         {/* Clubs Count - Hidden for International Competitions */}
         {!isInternationalComp &&
-          (currentData.stats?.club ?? currentData.clubsCount) !== undefined && (
+          (statsClubCount ?? currentData.clubsCount) !== undefined && (
           <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
             <span
@@ -731,7 +739,7 @@ export default function RecordDetailView({
                 onSwitchTab ? 'cursor-pointer hover:underline' : ''
               }`}
             >
-              {currentData.stats?.club ?? currentData.clubsCount}
+              {statsClubCount ?? currentData.clubsCount}
             </span>
           </div>
         )}

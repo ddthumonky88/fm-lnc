@@ -17,7 +17,7 @@ import {
   InfoCircleOutlined,
 } from '@ant-design/icons';
 import {
-  fetchNationHub,
+  fetchNationInfo,
   fetchDomesticCompetitions,
   fetchStadiums,
   fetchCities,
@@ -25,7 +25,7 @@ import {
   fetchAwards,
   getNationLogoUrl,
   deleteRecord,
-  NationHubData,
+  NationInfoData,
   RegionItem,
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
@@ -64,6 +64,25 @@ const CONFED_ID_MAP: Record<string, string> = {
   Extinct: 'EXTINCT',
 };
 
+function updateNationStatsCount(
+  stats: NationInfoData['stats'],
+  tabKey: NationTabKeyValue,
+  count: number,
+): NationInfoData['stats'] {
+  switch (tabKey) {
+    case NationTabKey.DOMESTIC_COMPS:
+      return { ...stats, comps: { ...stats.comps, total: count } };
+    case NationTabKey.STADIUMS:
+      return { ...stats, stadiums: count };
+    case NationTabKey.CITIES:
+      return { ...stats, cities: count };
+    case NationTabKey.AWARDS:
+      return { ...stats, awards: { ...stats.awards, nation: count } };
+    default:
+      return stats;
+  }
+}
+
 export default function NationDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -79,7 +98,7 @@ export default function NationDetailPage() {
 
   const nationId = params?.id ? String(params.id) : '';
 
-  const [nationHub, setNationHub] = useState<NationHubData | null>(null);
+  const [nationHub, setNationHub] = useState<NationInfoData | null>(null);
   const [activeTab, setActiveTab] = useState<NationTabKeyValue>(NationTabKey.INFO);
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,20 +171,10 @@ export default function NationDetailPage() {
         setTotalRecords(total);
         setNationHub((prev) => {
           if (!prev) return prev;
-          const keyMap: Record<string, keyof typeof prev.counts> = {
-            [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
-            [NationTabKey.STADIUMS]: 'stadiums',
-            [NationTabKey.CITIES]: 'cities',
-            [NationTabKey.AWARDS]: 'awards',
-          };
-          const countKey = keyMap[tabKey];
-          if (countKey && !keyword && (tabKey !== NationTabKey.CITIES || effRegionId === 'all')) {
+          if (!keyword && (tabKey !== NationTabKey.CITIES || effRegionId === 'all')) {
             return {
               ...prev,
-              counts: {
-                ...prev.counts,
-                [countKey]: total,
-              },
+              stats: updateNationStatsCount(prev.stats, tabKey, total),
             };
           }
           return prev;
@@ -185,26 +194,23 @@ export default function NationDetailPage() {
     if (!nationId) return;
     setLoading(true);
     try {
-      const hub = await fetchNationHub(nationId);
-      console.log('Nation: ', hub);
-      setNationHub(hub);
+      const nation = await fetchNationInfo(nationId);
+      console.log('Nation: ', nation);
+      setNationHub(nation);
 
       // Fetch regions for City filter
       fetchRegions(nationId)
         .then((regs) => setRegions(regs || []))
         .catch((err) => console.error('Failed to load regions', err));
 
-      const nation = hub.nation;
       const rawConfed = nation?.confed || null;
       const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
-      const nationCode = nation?.name_3l || nation?.name_sh;
-      const nationName = nation?.name_lg || nation?.name || nation?.name_sh;
-      const nationTitle = nationCode
-        ? `[${nationCode}] ${nationName || nationId}`
-        : nationName || `Nation ${nationId}`;
+      const nationName = nation?.name_sh || nation?.name_lg;
+      const nationCode = nation?.name_3l || nation?.id;
+      const nationTitle = nationName || nationCode;
 
+      setHeaderId(nation?.id);
       setHeaderTitle(nationTitle);
-      setHeaderId(hub.nation?.id);
       setBackHref(confedName ? `/confed/${confedName}` : '/');
       setBreadcrumbs([
         {
@@ -232,16 +238,22 @@ export default function NationDetailPage() {
       // Keep active tab if it exists, otherwise default to INFO
       let targetTab: NationTabKeyValue = activeTabRef.current || NationTabKey.INFO;
       if (targetTab !== NationTabKey.INFO) {
-        const countForTarget =
-          targetTab === NationTabKey.DOMESTIC_COMPS
-            ? hub.counts.domesticComps
-            : targetTab === NationTabKey.STADIUMS
-              ? hub.counts.stadiums
-              : targetTab === NationTabKey.CITIES
-                ? hub.counts.cities
-                : targetTab === NationTabKey.AWARDS
-                  ? hub.counts.awards
-                  : 0;
+        let countForTarget = 0;
+
+        switch (targetTab) {
+          case NationTabKey.DOMESTIC_COMPS:
+            countForTarget = nation.stats.comps.total;
+            break;
+          case NationTabKey.STADIUMS:
+            countForTarget = nation.stats.stadiums;
+            break;
+          case NationTabKey.CITIES:
+            countForTarget = nation.stats.cities;
+            break;
+          case NationTabKey.AWARDS:
+            countForTarget = nation.stats.awards.nation;
+            break;
+        }
 
         if (!countForTarget || countForTarget === 0) {
           targetTab = NationTabKey.INFO;
@@ -327,20 +339,20 @@ export default function NationDetailPage() {
       setRecords((prev) => prev.filter((r) => String(r.id) !== String(id)));
       setNationHub((prev) => {
         if (!prev) return prev;
-        const keyMap: Record<string, keyof typeof prev.counts> = {
-          [NationTabKey.DOMESTIC_COMPS]: 'domesticComps',
-          [NationTabKey.STADIUMS]: 'stadiums',
-          [NationTabKey.CITIES]: 'cities',
-          [NationTabKey.AWARDS]: 'awards',
-        };
-        const countKey = keyMap[activeTab];
-        if (countKey && prev.counts[countKey] > 0) {
+        const currentCount =
+          activeTab === NationTabKey.DOMESTIC_COMPS
+            ? prev.stats.comps.total
+            : activeTab === NationTabKey.STADIUMS
+              ? prev.stats.stadiums
+              : activeTab === NationTabKey.CITIES
+                ? prev.stats.cities
+                : activeTab === NationTabKey.AWARDS
+                  ? prev.stats.awards.nation
+                  : 0;
+        if (currentCount > 0) {
           return {
             ...prev,
-            counts: {
-              ...prev.counts,
-              [countKey]: prev.counts[countKey] - 1,
-            },
+            stats: updateNationStatsCount(prev.stats, activeTab, currentCount - 1),
           };
         }
         return prev;
@@ -353,12 +365,12 @@ export default function NationDetailPage() {
 
   // Filtered / enriched records
   const filteredRecords = useMemo(() => {
-    return !nationHub?.nation
+    return !nationHub
       ? records
       : records.map((r) => ({
           ...r,
-          nation: r.nation || nationHub.nation,
-          nation_id: r.nation_id || r.country_id || nationHub.nation.id,
+          nation: nationHub,
+          nation_id: nationHub.id,
         }));
   }, [records, nationHub]);
 
@@ -372,10 +384,10 @@ export default function NationDetailPage() {
   // Tab configurations: Info is always first, then hide any tab that has 0 records
   const tabItems = useMemo(() => {
     const list: any[] = [];
-    const compCount = nationHub?.counts?.domesticComps ?? 0;
-    const stadiumCount = nationHub?.counts?.stadiums ?? 0;
-    const cityCount = nationHub?.counts?.cities ?? 0;
-    const awardCount = nationHub?.counts?.awards ?? 0;
+    const compCount = nationHub?.stats?.comps.total ?? 0;
+    const stadiumCount = nationHub?.stats?.stadiums ?? 0;
+    const cityCount = nationHub?.stats?.cities ?? 0;
+    const awardCount = nationHub?.stats?.awards.nation ?? 0;
 
     list.push({
       key: NationTabKey.INFO,
@@ -503,13 +515,8 @@ export default function NationDetailPage() {
     }
   };
 
-  const nation = nationHub?.nation;
-  const nationShortName =
-    nation?.name_sh ||
-    nation?.name ||
-    nation?.name_lg ||
-    `Nation ${nationId}`;
-  const nationLongName = nation?.name_lg || nation?.name;
+  const nationShortName = nationHub?.name_sh || nationHub?.name_3l || `Nation ${nationId}`;
+  const nationLongName = nationHub?.name_lg || `Nation ${nationId}`;
 
   return (
     <div className="space-y-3">
@@ -522,9 +529,9 @@ export default function NationDetailPage() {
           {/* Nation Info Banner */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              {getNationLogoUrl(nationId, nation?.name_3l) ? (
+              {getNationLogoUrl(nationId, nationHub?.name_3l) ? (
                 <img
-                  src={getNationLogoUrl(nationId, nation?.name_3l)}
+                  src={getNationLogoUrl(nationId, nationHub?.name_3l)}
                   alt={nationShortName}
                   className="w-9 h-6 object-cover rounded shadow-2xs border border-slate-300 shrink-0"
                   onError={(e) => {
@@ -739,10 +746,22 @@ export default function NationDetailPage() {
           {/* Tab: Nation Information */}
           {activeTab === NationTabKey.INFO && nationHub && (
             <RecordDetailView
-              data={nationHub.nation}
+              data={nationHub}
               type={EntityType.NATION}
-              counts={nationHub.counts}
-              onEdit={() => openRecordModal(EntityType.NATION, nationHub.nation)}
+              counts={{
+                domesticComps: nationHub.stats.comps.total,
+                parentComps: nationHub.stats.comps.main,
+                independentClubs: nationHub.stats.club.other,
+                extinctClubs: nationHub.stats.club.extinct,
+                clubs: nationHub.stats.club.total,
+                allClubs: nationHub.stats.club.total,
+                stadiums: nationHub.stats.stadiums,
+                cities: nationHub.stats.cities,
+                awards: nationHub.stats.awards.nation,
+                totalAwards: nationHub.stats.awards.total,
+                regions: nationHub.stats.region,
+              }}
+              onEdit={() => openRecordModal(EntityType.NATION, nationHub)}
               onNavigateConfed={(cId) => router.push(`/confed/${cId}`)}
               onSwitchTab={(tab) => handleSwitchTab(tab as NationTabKeyValue)}
               onNavigateFakeComp={(fakeId) => router.push(`/comp/${fakeId}`)}
