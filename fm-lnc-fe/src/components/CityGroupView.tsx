@@ -213,8 +213,8 @@ export default function CityGroupView({
   }
 
   const renderToolbar = () => (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs">
-      <div className="flex items-center gap-2.5 flex-wrap">
+    <div className="flex flex-col gap-2.5 bg-white/90 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs mb-3">
+      <div className="w-full">
         <Select
           showSearch
           value={onSelectRegion ? (selectedRegion ?? 'all') : effectiveCategory}
@@ -229,7 +229,7 @@ export default function CityGroupView({
           filterOption={(input, option) =>
             (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
           }
-          className="w-56 text-xs"
+          className="w-full text-xs"
           popupClassName="text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1"
           dropdownStyle={{ fontSize: '12px' }}
           suffixIcon={<FilterOutlined className="text-gray-400 text-xs" />}
@@ -237,7 +237,7 @@ export default function CityGroupView({
       </div>
 
       {extraRight && (
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">{extraRight}</div>
+        <div className="w-full flex items-center gap-2 min-w-0">{extraRight}</div>
       )}
     </div>
   );

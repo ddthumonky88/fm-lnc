@@ -345,17 +345,17 @@ export default function EntityCard({
   const code3 = formatCode(data.name_3l);
   const code6 = formatCode(data.name_6l);
   const title =
-    type === EntityType.PLAYER || type === 'player'
+    type === EntityType.PLAYER
       ? `${data.first_name || ''} ${data.second_name || ''}`.trim() ||
         data.common_name ||
         'Unnamed Player'
       : data.name_lg || data.name || 'Unnamed';
   const subtitle =
-    type === EntityType.PLAYER || type === 'player'
+    type === EntityType.PLAYER
       ? data.common_name
         ? `"${data.common_name}"`
         : 'Person / Player'
-      : type === EntityType.STAGE || type === 'stage'
+      : type === EntityType.STAGE
         ? 'Tournament Stage'
         : data.name_sh || '';
   const hasThreeLetter =
@@ -363,9 +363,6 @@ export default function EntityCard({
       EntityType.NATION,
       EntityType.COMPETITION,
       EntityType.CLUB,
-      'nation',
-      'competition',
-      'club',
     ].includes(type as any) ||
     'name_3l' in data;
   const fgInfo = parseColorInfo(data.fg_color);
@@ -381,22 +378,18 @@ export default function EntityCard({
     onEdit &&
     type !== EntityType.CONFEDERATION &&
     type !== EntityType.NATION &&
-    type !== 'confederation' &&
-    type !== 'nation' &&
     !data.is_virtual;
   const canDelete =
     onDelete &&
     type !== EntityType.CONFEDERATION &&
     type !== EntityType.NATION &&
-    type !== 'confederation' &&
-    type !== 'nation' &&
     !data.is_virtual;
 
   const isTitleInactive =
     isInactive('name_lg') || isInactive('name');
 
   const nationInfo =
-    type === EntityType.NATION || type === 'nation'
+    type === EntityType.NATION
       ? {
           id: data.id,
           code: data.name_3l,
@@ -417,15 +410,15 @@ export default function EntityCard({
           : null;
 
   const isNavigable = Boolean(
-    (onNavigate || type === EntityType.CLUB || type === 'club') &&
+    (onNavigate || type === EntityType.CLUB) &&
     (data.is_virtual ||
-      (type === EntityType.NATION || type === 'nation'
+      (type === EntityType.NATION
         ? (data.totalComps || data.totalChildren || 0) > 0
         : false) ||
-      (type === EntityType.COMPETITION || type === 'competition'
+      (type === EntityType.COMPETITION
         ? (data.clubsCount || data.stats?.club || 0) > 0 || (data.awardsCount || data.stats?.award || 0) > 0
         : false) ||
-      (type === EntityType.CLUB || type === 'club' ? Boolean(data.id && !isSpecialCard) : false)),
+      (type === EntityType.CLUB ? Boolean(data.id && !isSpecialCard) : false)),
   );
 
   const handleNavigateAction = () => {
@@ -450,7 +443,7 @@ export default function EntityCard({
         title: data.name_lg || data.name_sh || title,
         metadata: { is_extinct: isExtinct, nation_id: nId },
       });
-    } else if (type === EntityType.NATION || type === 'nation') {
+    } else if (type === EntityType.NATION) {
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
       if (onNavigate) {
         onNavigate({
@@ -461,7 +454,7 @@ export default function EntityCard({
       } else if (data.id) {
         router.push(`/nation/${data.id}`);
       }
-    } else if (type === EntityType.COMPETITION || type === 'competition') {
+    } else if (type === EntityType.COMPETITION) {
       const clubsCnt = data.clubsCount ?? data.stats?.club ?? 0;
       const awardsCnt = data.awardsCount ?? data.stats?.award ?? 0;
       if (onNavigate) {
@@ -481,7 +474,7 @@ export default function EntityCard({
       } else if (data.id) {
         router.push(`/comp/${data.id}`);
       }
-    } else if (type === EntityType.CLUB || type === 'club') {
+    } else if (type === EntityType.CLUB) {
       if (!isSpecialCard && data.id) {
         if (onNavigate) {
           onNavigate({
@@ -497,7 +490,7 @@ export default function EntityCard({
   };
 
   const renderChildButtons = () => {
-    if (type === EntityType.CONFEDERATION || type === 'confederation') {
+    if (type === EntityType.CONFEDERATION) {
       const count = data.totalNations || 0;
       if (count <= 0) return null;
 
@@ -518,7 +511,7 @@ export default function EntityCard({
       );
     }
 
-    if (type === EntityType.NATION || type === 'nation') {
+    if (type === EntityType.NATION) {
       const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
 
       return (
@@ -542,7 +535,7 @@ export default function EntityCard({
       );
     }
 
-    if (type === EntityType.COMPETITION || type === 'competition') {
+    if (type === EntityType.COMPETITION) {
       const clubsCnt = data.clubsCount ?? data.stats?.club ?? 0;
       const awardsCnt = data.awardsCount ?? data.stats?.award ?? 0;
       const hasClubs = data.is_virtual || clubsCnt > 0;

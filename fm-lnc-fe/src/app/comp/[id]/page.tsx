@@ -40,13 +40,24 @@ import { formatCategoryCode, getCategoryTagColor } from '../../../components/Ent
 import { matchRecordSearch } from '../../../utils/search';
 
 const CONFED_ID_MAP: Record<string, string> = {
-  '1': 'Africa',
-  '2': 'Asia',
-  '3': 'Europe',
-  '4': 'North America',
-  '5': 'Oceania',
-  '6': 'South America',
-  '7': 'World',
+  '1': 'CAF',
+  '2': 'AFC',
+  '3': 'UEFA',
+  '4': 'CONCACAF',
+  '5': 'OFC',
+  '6': 'CONMEBOL',
+  '7': 'WORLD',
+  '8': 'EXTINCT',
+  CAF: 'CAF',
+  AFC: 'AFC',
+  UEFA: 'UEFA',
+  CONCACAF: 'CONCACAF',
+  OFC: 'OFC',
+  CONMEBOL: 'CONMEBOL',
+  WORLD: 'WORLD',
+  World: 'WORLD',
+  EXTINCT: 'EXTINCT',
+  Extinct: 'EXTINCT',
 };
 
 function CompetitionDetailContent() {
@@ -221,7 +232,15 @@ function CompetitionDetailContent() {
       const info = await fetchCompetitionInfo(compId).catch(() => null);
 
       if (info) {
-        setCompInfo(info);
+        const totalClubs = info.stats?.club ?? (info as any).clubsCount ?? 0;
+        const totalAwards = info.stats?.award ?? (info as any).awardsCount ?? 0;
+        const totalChildren = info.stats?.children ?? (info as any).childrenCount ?? 0;
+        setCompInfo({
+          ...info,
+          clubsCount: totalClubs,
+          awardsCount: totalAwards,
+          childrenCount: totalChildren,
+        });
         const compTitle =
           info.name_sh ||
           info.name_lg ||
@@ -237,29 +256,26 @@ function CompetitionDetailContent() {
           info.nation?.name_sh;
         const nationCode =
           info.nation?.name_3l;
-        const confedId =
-          info.confed_id ||
-          info.confed?.id ||
-          info.nation?.confed_id ||
-          info.nation?.confed?.id;
-        const confedName =
-          (confedId && CONFED_ID_MAP[String(confedId)]) ||
-          info.confed?.name ||
-          info.confed_name ||
-          info.nation?.confed?.name ||
-          info.nation?.confed_name ||
-          'Confederation';
 
+        const rawConfed =
+          (typeof info.confed === 'string' ? info.confed : info.confed?.name || info.confed?.id) ||
+          (typeof info.nation?.confed === 'string' ? info.nation.confed : info.nation?.confed?.name || info.nation?.confed?.id) ||
+          info.confed_id ||
+          info.nation?.confed_id ||
+          null;
+        const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
+
+        // Unified breadcrumb: FM > {CONFED} > {NATION_3L} > {COMP_ID} (even for sub-comps)
         const crumbs: any[] = [
           {
             title: 'FM',
             href: '/',
           },
         ];
-        if (confedId) {
+        if (confedName) {
           crumbs.push({
             title: confedName,
-            href: `/confed/${confedId}`,
+            href: `/confed/${confedName}`,
           });
         }
         if (nationId) {
@@ -268,19 +284,19 @@ function CompetitionDetailContent() {
             href: `/nation/${nationId}`,
           });
         }
-        const parentId = info.parent_comp?.id || info.parent_id || info.parent?.id;
         crumbs.push({
           title: String(compId),
         });
 
         setBreadcrumbs(crumbs);
+        const parentId = info.parent_comp?.id || info.parent_id || info.parent?.id;
         setBackHref(
           parentId
             ? `/comp/${parentId}${nationId ? `?nationId=${nationId}` : ''}`
             : nationId
               ? `/nation/${nationId}`
-              : confedId
-                ? `/confed/${confedId}`
+              : confedName
+                ? `/confed/${confedName}`
                 : '/',
         );
 
@@ -393,13 +409,16 @@ function CompetitionDetailContent() {
 
   useEffect(() => {
     loadCompInfo();
+  }, [compId, refreshSignal]);
+
+  useEffect(() => {
     return () => {
       setBreadcrumbs([]);
       setBackHref(null);
       setHeaderLogo(null);
       setHeaderId(undefined);
     };
-  }, [loadCompInfo, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
+  }, [setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
 
   useEffect(() => {
     if (activeTab === 'INFO') return;
@@ -452,12 +471,12 @@ function CompetitionDetailContent() {
   };
 
   const clubsBadgeCount = debouncedKeyword
-    ? (activeTab === 'CLUBS' ? totalRecords : (compInfo?.clubsCount ?? 0))
-    : (compInfo?.clubsCount ?? totalRecords);
+    ? (activeTab === 'CLUBS' ? totalRecords : (compInfo?.stats?.club ?? compInfo?.clubsCount ?? 0))
+    : (compInfo?.stats?.club ?? compInfo?.clubsCount ?? totalRecords);
 
   const awardsBadgeCount = debouncedKeyword
-    ? (activeTab === 'AWARDS' ? totalRecords : (compInfo?.awardsCount ?? 0))
-    : (compInfo?.awardsCount ?? totalRecords);
+    ? (activeTab === 'AWARDS' ? totalRecords : (compInfo?.stats?.award ?? compInfo?.awardsCount ?? 0))
+    : (compInfo?.stats?.award ?? compInfo?.awardsCount ?? totalRecords);
 
   const tabItems = useMemo(() => {
     const list: any[] = [
@@ -482,6 +501,7 @@ function CompetitionDetailContent() {
             <TabIconBadge
               icon={<ClubIcon size={16} className={activeTab === 'CLUBS' ? 'text-white' : 'text-blue-500'} />}
               count={clubsBadgeCount}
+              showZero={true}
               isActive={activeTab === 'CLUBS'}
             />
             <span className={`hidden sm:inline ${activeTab === 'CLUBS' ? 'font-bold' : ''}`}>
@@ -493,27 +513,26 @@ function CompetitionDetailContent() {
     ];
 
     if (!isVirtual) {
-      if ((compInfo?.awardsCount ?? 0) > 0 || activeTab === 'AWARDS') {
-        list.push({
-          key: 'AWARDS',
-          label: (
-            <div className="flex items-center gap-2" title="Awards">
-              <TabIconBadge
-                icon={<AwardIcon size={16} className={activeTab === 'AWARDS' ? 'text-white' : 'text-yellow-500'} />}
-                count={awardsBadgeCount}
-                isActive={activeTab === 'AWARDS'}
-              />
-              <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>
-                Awards
-              </span>
-            </div>
-          ),
-        });
-      }
+      list.push({
+        key: 'AWARDS',
+        label: (
+          <div className="flex items-center gap-2" title="Awards">
+            <TabIconBadge
+              icon={<AwardIcon size={16} className={activeTab === 'AWARDS' ? 'text-white' : 'text-yellow-500'} />}
+              count={awardsBadgeCount}
+              showZero={true}
+              isActive={activeTab === 'AWARDS'}
+            />
+            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>
+              Awards
+            </span>
+          </div>
+        ),
+      });
     }
 
     return list;
-  }, [clubsBadgeCount, awardsBadgeCount, activeTab, isVirtual, compInfo?.awardsCount]);
+  }, [clubsBadgeCount, awardsBadgeCount, activeTab, isVirtual, compInfo?.awardsCount, compInfo?.stats?.award]);
 
   const compTitle =
     compInfo?.name_sh ||

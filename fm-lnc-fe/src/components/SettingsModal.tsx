@@ -189,7 +189,9 @@ export default function SettingsModal({ open, onClose, onRefreshData }: Settings
       }
       open={open}
       onCancel={onClose}
-      width={560}
+      getContainer={() => document.getElementById('mobile-frame-root') || document.body}
+      width="100%"
+      style={{ width: '100%', maxWidth: 'calc(100% - 20px)', margin: '0 auto' }}
       centered
       footer={[
         <Button key="close" onClick={onClose}>

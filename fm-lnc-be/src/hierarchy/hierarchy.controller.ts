@@ -152,50 +152,10 @@ export class HierarchyController {
     return this.hierarchyService.getIntCompetitions(filter);
   }
 
-  @ApiOperation({ summary: 'Lấy hub đầy đủ của một Nation (clubs, competitions, cities...)' })
-  @ApiParam({ name: 'id', description: 'Nation ID' })
-  @ApiOkResponse({
-    description: 'Thông tin Nation Hub kèm số lượng tổng hợp',
-    schema: {
-      type: 'object',
-      example: {
-        nation: {
-          id: 'string',
-          name: 'string',
-          name_lg: 'string',
-          name_sh: 'string',
-          name_3l: 'string',
-          confed: {
-            id: 'string',
-            name: 'string',
-          },
-          inactive_fields: 'string',
-          note: 'string',
-        },
-        stats: {
-          domesticComps: 0,
-          independentClubs: 0,
-          allClubs: 0,
-          stadiums: 0,
-          cities: 0,
-          awards: 0,
-          regions: 0,
-        },
-        counts: {
-          domesticComps: 0,
-          independentClubs: 0,
-          allClubs: 0,
-          stadiums: 0,
-          cities: 0,
-          awards: 0,
-          regions: 0,
-        },
-      },
-    },
-  })
+  @ApiExcludeEndpoint()
   @Get('nations/:id/hub')
   async getNationHub(@Param('id') id: string) {
-    const hub = await this.hierarchyService.getNationHub(id);
+    const hub = await this.hierarchyService.getNationInfo(id);
     if (!hub) throw new NotFoundException(`Nation with ID ${id} not found`);
     return hub;
   }
@@ -549,7 +509,7 @@ export class HierarchyController {
     return this.hierarchyService.getContinentInfo(id);
   }
 
-  @ApiOperation({ summary: 'Lấy thông tin chi tiết một Nation' })
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết và hub của một Nation' })
   @ApiParam({ name: 'id', description: 'Nation ID' })
   @ApiOkResponse({
     description: 'Thông tin chi tiết quốc gia kèm các bộ đếm',

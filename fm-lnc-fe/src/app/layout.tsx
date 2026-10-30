@@ -35,7 +35,7 @@ export const viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.className} ${inter.variable}`}>
-      <body className={`${inter.className} ${inter.variable} antialiased`}>
+      <body className={`${inter.className} ${inter.variable} antialiased desktop-bg`}>
         <AntdRegistry>
           <ConfigProvider
             locale={enUS}
@@ -48,7 +48,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }}
           >
             <App>
-              <AppLayout>{children}</AppLayout>
+              {/* Desktop: center content in a mobile-phone frame */}
+              <div className="mobile-frame-wrapper">
+                <div className="mobile-frame" id="mobile-frame-root">
+                  <AppLayout>{children}</AppLayout>
+                </div>
+              </div>
             </App>
           </ConfigProvider>
         </AntdRegistry>

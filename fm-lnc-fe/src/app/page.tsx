@@ -691,13 +691,13 @@ export default function LncSortitoutsiExplorer() {
               </div>
             </div>
 
-            {/* Mobile Cards (md:hidden) - 2 cards per row */}
-            <div className="md:hidden grid grid-cols-2 gap-2 sm:gap-3">
+            {/* Confederation Cards - 2 cards per row */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
               {filteredContinents.map((c) => (
                 <div
                   key={c.id}
                   onClick={() => router.push(`/confed/${c.id}`)}
-                  className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2 sm:p-3 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-1.5"
+                  className="bg-white border border-gray-200 hover:border-blue-400 active:bg-slate-50 rounded-lg p-2.5 shadow-2xs transition-all cursor-pointer flex flex-col justify-between gap-1.5"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1.5">
@@ -741,26 +741,6 @@ export default function LncSortitoutsiExplorer() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* Desktop Table (hidden md:block) */}
-            <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-              <Table<ConfederationItem>
-                rowKey="id"
-                columns={continentColumns}
-                dataSource={filteredContinents}
-                loading={loading}
-                pagination={{
-                  defaultPageSize: 10,
-                  showSizeChanger: true,
-                  pageSizeOptions: ['10', '20', '50'],
-                  showTotal: (total, range) =>
-                    `Showing ${range[0]} - ${range[1]} of ${total} records`,
-                  size: 'small',
-                }}
-                scroll={{ x: 'max-content' }}
-                size="middle"
-              />
             </div>
           </div>
         )}
@@ -1568,13 +1548,13 @@ export default function LncSortitoutsiExplorer() {
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         onSelectItem={(item, type) => {
-          if (type === EntityType.NATION || type === 'nation') {
+          if (type === EntityType.NATION) {
             pushStep({
               level: HierarchyLevel.NATION_HUB,
               id: item.id,
               title: `[${item.name_3l}] ${item.name_lg || item.name}`,
             });
-          } else if (type === EntityType.COMPETITION || type === 'competition') {
+          } else if (type === EntityType.COMPETITION) {
             pushStep({
               level: HierarchyLevel.CLUBS_IN_COMP,
               id: item.id,

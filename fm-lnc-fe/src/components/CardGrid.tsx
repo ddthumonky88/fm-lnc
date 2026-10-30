@@ -110,10 +110,8 @@ export default function CardGrid({
         entityTypeStr === 'city';
 
   const gridClasses = isSmall
-    ? 'grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-2.5'
-    : columns === 5
-      ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5'
-      : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5';
+    ? 'grid grid-cols-2 gap-2'
+    : 'grid grid-cols-1 gap-3';
 
   return (
     <div>

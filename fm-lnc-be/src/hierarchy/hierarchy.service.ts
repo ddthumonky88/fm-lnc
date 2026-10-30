@@ -141,67 +141,7 @@ export class HierarchyService {
   }
 
   async getNationHub(nationId: string) {
-    const nation = await this.nationRepo.findOne({
-      where: { id: String(nationId) },
-    });
-
-    if (!nation) return null;
-
-    const [
-      domesticComps,
-      independentClubs,
-      allClubs,
-      stadiums,
-      cities,
-      awards,
-      regions,
-    ] = await Promise.all([
-      this.compRepo
-        .createQueryBuilder('c')
-        .where('c.nation_id = :nid', { nid: String(nationId) })
-        .andWhere('(c.parent_id IS NULL OR c.parent_id = :emptyStr)', { emptyStr: '' })
-        .getCount(),
-      this.clubRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
-      this.clubRepo.count({ where: { nation_id: String(nationId) } }),
-      this.stadiumRepo.count({ where: { nation_id: String(nationId) } }),
-      this.cityRepo.count({ where: { nation_id: String(nationId) } }),
-      this.awardRepo.count({ where: { nation_id: String(nationId), comp_id: IsNull() } }),
-      this.regionRepo.count({ where: { nation_id: String(nationId) } }),
-    ]);
-
-    const countsRaw = await this.clubRepo.query(
-      `SELECT
-        COUNT(*) FILTER (WHERE comp_id IS NULL AND (is_extinct = false OR is_extinct IS NULL))::int as other_count,
-        COUNT(*) FILTER (WHERE is_extinct = true)::int as extinct_count
-      FROM clubs
-      WHERE nation_id = $1;`,
-      [String(nationId)],
-    );
-    const otherClubsCount = countsRaw[0]?.other_count || 0;
-    const extinctClubsCount = countsRaw[0]?.extinct_count || 0;
-    const extraComps = 2;
-
-    return {
-      nation: mapNation(nation),
-      stats: {
-        domesticComps: domesticComps + extraComps,
-        independentClubs,
-        allClubs,
-        stadiums,
-        cities,
-        awards,
-        regions: regions || 0,
-      },
-      counts: {
-        domesticComps: domesticComps + extraComps,
-        independentClubs,
-        allClubs,
-        stadiums,
-        cities,
-        awards,
-        regions: regions || 0,
-      },
-    };
+    return this.getNationInfo(nationId);
   }
 
   async getDomesticCompetitions(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
@@ -788,7 +728,7 @@ export class HierarchyService {
     return mapCompetition({
       ...comp,
       nation: effectiveNation,
-      confederation: effectiveConfed,
+      confed: effectiveConfed,
       clubsCount,
       awardsCount,
       childrenCount,
@@ -1033,6 +973,7 @@ export class HierarchyService {
       cities,
       awards,
       totalAwards,
+      regions,
     ] = await Promise.all([
       this.compRepo
         .createQueryBuilder('c')
@@ -1052,20 +993,32 @@ export class HierarchyService {
       this.cityRepo.count({ where: { nation_id: strId } }),
       this.awardRepo.count({ where: { nation_id: strId, comp_id: IsNull() } }),
       this.awardRepo.count({ where: { nation_id: strId } }),
+      this.regionRepo.count({ where: { nation_id: strId } }),
     ]);
 
-    return mapNation(nation, {
+    const counts = {
       domesticComps: domesticComps + 2, // +2 cho [OTHER] và [EXTINCT]
       parentComps: domesticComps,
       comps: totalComps,
       independentClubs,
       extinctClubs,
       clubs: allClubs,
+      allClubs,
       stadiums,
       cities,
       awards,
       totalAwards,
-    });
+      regions: regions || 0,
+    };
+
+    const mapped = mapNation(nation, counts);
+
+    return {
+      ...mapped,
+      counts,
+      stats: counts,
+      nation: mapped,
+    };
   }
 
   async getClubInfo(clubId: string) {
@@ -1107,7 +1060,7 @@ export class HierarchyService {
     const mapped = mapClub({
       ...club,
       nation: effectiveNation,
-      confederation: effectiveConfed,
+      confed: effectiveConfed,
     });
 
     return {

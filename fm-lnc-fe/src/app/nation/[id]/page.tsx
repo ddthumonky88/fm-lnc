@@ -50,8 +50,18 @@ const CONFED_ID_MAP: Record<string, string> = {
   '4': 'CONCACAF',
   '5': 'OFC',
   '6': 'CONMEBOL',
-  '7': 'World',
+  '7': 'WORLD',
   '8': 'EXTINCT',
+  CAF: 'CAF',
+  AFC: 'AFC',
+  UEFA: 'UEFA',
+  CONCACAF: 'CONCACAF',
+  OFC: 'OFC',
+  CONMEBOL: 'CONMEBOL',
+  WORLD: 'WORLD',
+  World: 'WORLD',
+  EXTINCT: 'EXTINCT',
+  Extinct: 'EXTINCT',
 };
 
 export default function NationDetailPage() {
@@ -184,14 +194,12 @@ export default function NationDetailPage() {
         .catch((err) => console.error('Failed to load regions', err));
 
       const nation = hub.nation;
-      const confedId =
+      const rawConfed =
+        (typeof nation?.confed === 'string' ? nation.confed : nation?.confed?.name || nation?.confed?.id) ||
         nation?.confed_id ||
-        nation?.confed?.id;
-      const confedName =
-        (confedId && CONFED_ID_MAP[String(confedId)]) ||
-        nation?.confed?.name ||
         nation?.confed_name ||
-        'Confederation';
+        null;
+      const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
       const nationCode = nation?.name_3l || nation?.name_sh;
       const nationName = nation?.name_lg || nation?.name || nation?.name_sh;
       const nationTitle = nationCode
@@ -200,17 +208,17 @@ export default function NationDetailPage() {
 
       setHeaderTitle(nationTitle);
       setHeaderId(hub.nation?.id);
-      setBackHref(confedId ? `/confed/${confedId}` : '/');
+      setBackHref(confedName ? `/confed/${confedName}` : '/');
       setBreadcrumbs([
         {
           title: 'FM',
           href: '/',
         },
-        ...(confedId
+        ...(confedName
           ? [
               {
                 title: confedName,
-                href: `/confed/${confedId}`,
+                href: `/confed/${confedName}`,
               },
             ]
           : []),
@@ -265,13 +273,16 @@ export default function NationDetailPage() {
 
   useEffect(() => {
     loadNationData();
+  }, [nationId, refreshSignal]);
+
+  useEffect(() => {
     return () => {
       setBreadcrumbs([]);
       setBackHref(null);
       setHeaderLogo(null);
       setHeaderId(undefined);
     };
-  }, [nationId, refreshSignal]);
+  }, [setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
 
   const handlePageChange = (newPage: number, newPageSize?: number) => {
     const effSize = newPageSize && newPageSize !== pageSize ? newPageSize : pageSize;
@@ -568,14 +579,15 @@ export default function NationDetailPage() {
               emptyText="No domestic competitions found"
               serverPagination={serverPagination}
               extraRight={
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Space.Compact className="flex-1 sm:w-64">
+                <div className="flex items-center gap-2 w-full">
+                  <Space.Compact className="flex-1 min-w-0">
                     <Input
                       placeholder="Search competitions..."
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       onPressEnter={handleSearchSubmit}
                       allowClear
+                      className="w-full text-xs"
                     />
                     <Button
                       type="primary"
@@ -591,9 +603,7 @@ export default function NationDetailPage() {
                     className="shrink-0 bg-blue-600"
                     onClick={() => openRecordModal(RecordType.COMPETITION, null, nationId)}
                     title="Add Competition"
-                  >
-                    <span className="hidden sm:inline">Add Competition</span>
-                  </Button>
+                  />
                 </div>
               }
             />
@@ -602,33 +612,31 @@ export default function NationDetailPage() {
           {/* Tab 2: Stadiums */}
           {activeTab === NationTabKey.STADIUMS && (
             <div>
-              <div className="flex justify-end items-center gap-2.5 sm:gap-3 mb-4">
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Space.Compact className="flex-1 sm:w-64">
-                    <Input
-                      placeholder="Search stadiums..."
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                      onPressEnter={handleSearchSubmit}
-                      allowClear
-                    />
-                    <Button
-                      type="primary"
-                      icon={<SearchOutlined />}
-                      onClick={handleSearchSubmit}
-                      title="Search"
-                      className="shrink-0 bg-blue-600"
-                    />
-                  </Space.Compact>
+              <div className="flex items-center gap-2 mb-3 w-full">
+                <Space.Compact className="flex-1 min-w-0">
+                  <Input
+                    placeholder="Search stadiums..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onPressEnter={handleSearchSubmit}
+                    allowClear
+                    className="w-full text-xs"
+                  />
                   <Button
                     type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => openRecordModal(RecordType.STADIUM, null, nationId)}
-                    title="Add Stadium"
-                  >
-                    <span className="hidden sm:inline">Add Stadium</span>
-                  </Button>
-                </div>
+                    icon={<SearchOutlined />}
+                    onClick={handleSearchSubmit}
+                    title="Search"
+                    className="shrink-0 bg-blue-600"
+                  />
+                </Space.Compact>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => openRecordModal(RecordType.STADIUM, null, nationId)}
+                  title="Add Stadium"
+                  className="shrink-0"
+                />
               </div>
               <CardGrid
                 items={filteredRecords}
@@ -658,14 +666,15 @@ export default function NationDetailPage() {
               emptyText="No cities found"
               serverPagination={serverPagination}
               extraRight={
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Space.Compact className="flex-1 sm:w-64">
+                <div className="flex items-center gap-2 w-full">
+                  <Space.Compact className="flex-1 min-w-0">
                     <Input
                       placeholder="Search cities..."
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       onPressEnter={handleSearchSubmit}
                       allowClear
+                      className="w-full text-xs"
                     />
                     <Button
                       type="primary"
@@ -680,9 +689,8 @@ export default function NationDetailPage() {
                     icon={<PlusOutlined />}
                     onClick={() => openRecordModal(RecordType.CITY, null, nationId)}
                     title="Add City"
-                  >
-                    <span className="hidden sm:inline">Add City</span>
-                  </Button>
+                    className="shrink-0"
+                  />
                 </div>
               }
             />
@@ -691,33 +699,31 @@ export default function NationDetailPage() {
           {/* Tab 4: Awards */}
           {activeTab === NationTabKey.AWARDS && (
             <div>
-              <div className="flex justify-end items-center gap-2.5 sm:gap-3 mb-4">
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                  <Space.Compact className="flex-1 sm:w-64">
-                    <Input
-                      placeholder="Search awards..."
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                      onPressEnter={handleSearchSubmit}
-                      allowClear
-                    />
-                    <Button
-                      type="primary"
-                      icon={<SearchOutlined />}
-                      onClick={handleSearchSubmit}
-                      title="Search"
-                      className="shrink-0 bg-blue-600"
-                    />
-                  </Space.Compact>
+              <div className="flex items-center gap-2 mb-3 w-full">
+                <Space.Compact className="flex-1 min-w-0">
+                  <Input
+                    placeholder="Search awards..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onPressEnter={handleSearchSubmit}
+                    allowClear
+                    className="w-full text-xs"
+                  />
                   <Button
                     type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => openRecordModal(RecordType.AWARD, null, nationId)}
-                    title="Add Award"
-                  >
-                    <span className="hidden sm:inline">Add Award</span>
-                  </Button>
-                </div>
+                    icon={<SearchOutlined />}
+                    onClick={handleSearchSubmit}
+                    title="Search"
+                    className="shrink-0 bg-blue-600"
+                  />
+                </Space.Compact>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => openRecordModal(RecordType.AWARD, null, nationId)}
+                  title="Add Award"
+                  className="shrink-0"
+                />
               </div>
               <CardGrid
                 items={filteredRecords}

@@ -146,8 +146,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       refreshSignal={refreshSignal}
       triggerRefresh={triggerRefresh}
     >
-      <div className="flex min-h-screen bg-[#f3f4f6] text-[#333333] font-sans antialiased">
-        {/* Persistent Desktop & Responsive Mobile Sidebar */}
+      <div className="relative flex flex-col h-screen bg-[#f3f4f6] text-[#333333] font-sans antialiased overflow-hidden">
+        {/* Mobile Drawer Overlay (sidebar as drawer only) */}
         <AppSidebar
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -161,7 +161,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         />
 
         {/* Main Content Column */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
           <AppHeader
             collapsed={sidebarCollapsed}
             onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -180,7 +180,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             headerLogo={headerLogo}
           />
 
-          <main className="flex-1 w-full px-3 sm:px-4 lg:px-5 py-3 sm:py-4 pb-4 sm:pb-6">
+          <main className="flex-1 w-full min-h-0 px-3 py-3 pb-24 overflow-y-auto mobile-frame-scroll">
             {children}
           </main>
         </div>
@@ -203,12 +203,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           isOpen={isSearchModalOpen}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectItem={(item, type) => {
-            if (type === EntityType.NATION || type === 'nation') {
+            if (type === EntityType.NATION) {
               router.push(`/?nationId=${item.id}&nationName=${encodeURIComponent(item.name_lg || item.name || '')}`);
-            } else if (type === EntityType.COMPETITION || type === 'competition') {
+            } else if (type === EntityType.COMPETITION) {
               router.push(
                 `/?compId=${item.id}&compName=${encodeURIComponent(item.name_sh || item.name_lg || item.name || '')}`,
               );
+            } else if (type === EntityType.CLUB) {
+              router.push(`/club/${item.id}`);
             } else {
               handleOpenRecordModal(type as RecordType, item);
             }

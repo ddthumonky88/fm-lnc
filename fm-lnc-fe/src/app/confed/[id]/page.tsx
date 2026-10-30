@@ -88,7 +88,13 @@ function ConfederationDetailContent() {
           ? (continents as any).content
           : [];
 
-      const found = continentsList.find((c) => String(c.id) === String(confedId));
+      const found = continentsList.find(
+        (c) =>
+          String(c.id) === String(confedId) ||
+          c.name?.toUpperCase() === String(confedId).toUpperCase() ||
+          CONFED_ID_MAP[String(c.id)]?.toUpperCase() === String(confedId).toUpperCase() ||
+          CONFED_ID_MAP[String(confedId)]?.toUpperCase() === c.name?.toUpperCase()
+      );
       if (found) {
         setConfederation(found);
         const displayName = CONFED_ID_MAP[String(found.id)] || found.name;
@@ -158,7 +164,7 @@ function ConfederationDetailContent() {
       setLoading(true);
       await loadConfedInfo();
       if (activeTab !== 'INFO') {
-        await loadTabData(activeTab, 1, '', pageSize);
+        await loadTabData(activeTab, currentPage, searchKeyword, pageSize);
       }
       if (isMounted) {
         setLoading(false);
@@ -167,12 +173,17 @@ function ConfederationDetailContent() {
     init();
     return () => {
       isMounted = false;
+    };
+  }, [confedId, activeTab, refreshSignal]);
+
+  useEffect(() => {
+    return () => {
       setBreadcrumbs([]);
       setBackHref(null);
       setHeaderLogo(null);
       setHeaderId(undefined);
     };
-  }, [loadConfedInfo, loadTabData, refreshSignal, setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
+  }, [setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
 
   const handlePageChange = (newPage: number, newPageSize?: number) => {
     const effSize = newPageSize && newPageSize !== pageSize ? newPageSize : pageSize;

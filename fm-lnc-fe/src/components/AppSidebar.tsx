@@ -289,26 +289,19 @@ export default function AppSidebar({
 
   return (
     <>
-      {/* Desktop Persistent Sidebar */}
-      <aside
-        className={`hidden lg:block shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out z-40 ${
-          collapsed ? 'w-20' : 'w-64'
-        }`}
-      >
-        {renderSidebarContent(false)}
-      </aside>
+      {/* Desktop Persistent Sidebar: hidden in mobile-frame mode */}
 
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile Drawer Overlay - Contained inside mobile-frame */}
       {isMobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
+        <div className="absolute inset-0 z-50 flex overflow-hidden">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={onCloseMobile}
           />
 
           {/* Slide Drawer */}
-          <div className="relative w-72 max-w-[85vw] h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+          <div className="relative w-64 max-w-[80%] h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
             {renderSidebarContent(true)}
           </div>
         </div>

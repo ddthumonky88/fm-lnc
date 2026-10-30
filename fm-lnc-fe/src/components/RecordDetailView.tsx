@@ -114,20 +114,16 @@ export default function RecordDetailView({
 
   const currentData = data;
 
-  const isPlayer = type === 'player' || type === EntityType.PLAYER || type === RecordType.PLAYER;
-  const isCity = type === 'city' || type === EntityType.CITY || type === RecordType.CITY;
-  const isStadium =
-    type === 'stadium' || type === EntityType.STADIUM || type === RecordType.STADIUM;
+  const isPlayer = type === EntityType.PLAYER;
+  const isCity = type === EntityType.CITY;
+  const isStadium = type === EntityType.STADIUM;
   const isComp =
-    type === 'competition' ||
-    type === EntityType.COMPETITION ||
-    type === RecordType.COMPETITION ||
-    type === 'international_competition';
-  const isClub = type === 'club' || type === EntityType.CLUB || type === RecordType.CLUB;
-  const isNation = type === 'nation' || type === EntityType.NATION;
-  const isConfed = type === 'confederation' || type === EntityType.CONFEDERATION;
-  const isStage = type === 'stage' || type === EntityType.STAGE || type === RecordType.STAGE;
-  const isAward = type === 'award' || type === EntityType.AWARD || type === RecordType.AWARD;
+    type === EntityType.COMPETITION || (type as string) === 'international_competition';
+  const isClub = type === EntityType.CLUB;
+  const isNation = type === EntityType.NATION;
+  const isConfed = type === EntityType.CONFEDERATION;
+  const isStage = type === EntityType.STAGE;
+  const isAward = type === EntityType.AWARD;
 
   const isVirtual = Boolean(
     currentData.is_virtual ||

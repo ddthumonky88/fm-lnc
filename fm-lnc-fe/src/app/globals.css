@@ -6,6 +6,7 @@
   --foreground-rgb: 51, 51, 51;
   --background-start-rgb: 243, 244, 246;
   --background-end-rgb: 243, 244, 246;
+  --mobile-frame-width: 430px;
 }
 
 body {
@@ -19,6 +20,191 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
+}
+
+/* ===== DESKTOP: Mobile-frame layout ===== */
+body.desktop-bg {
+  background: #ffffff;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Wrapper that centers the mobile frame on desktop */
+.mobile-frame-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* The mobile phone frame container */
+.mobile-frame {
+  width: var(--mobile-frame-width);
+  max-width: 100vw;
+  height: 100vh;
+  background: #f3f4f6;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.08), 0 0 0 1px #e2e8f0;
+}
+
+/* On small screens, frame is full width */
+@media (max-width: 520px) {
+  body.desktop-bg {
+    background: #f3f4f6;
+    overflow: auto;
+  }
+  .mobile-frame-wrapper {
+    display: block;
+    padding: 0;
+  }
+  .mobile-frame {
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    box-shadow: none;
+  }
+}
+
+/* Ensure AppLayout fills the mobile frame fully */
+.mobile-frame > * {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Custom smooth scrollbar for mobile frame */
+.mobile-frame-scroll,
+.mobile-frame main {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.mobile-frame-scroll::-webkit-scrollbar,
+.mobile-frame main::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mobile-frame-scroll::-webkit-scrollbar-track,
+.mobile-frame main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-frame-scroll::-webkit-scrollbar-thumb,
+.mobile-frame main::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.mobile-frame-scroll::-webkit-scrollbar-thumb:hover,
+.mobile-frame main::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* Ant Design portals/drawers/tooltips outside frame */
+.ant-drawer-root {
+  position: fixed !important;
+  z-index: 1000 !important;
+}
+/* ====================================== */
+
+/* ===== FORCE MOBILE LAYOUT INSIDE MOBILE FRAME =====
+   Tailwind breakpoints are based on viewport width, not container width.
+   On desktop viewport (>640px, >768px), sm:, md: and lg: classes activate even though
+   the .mobile-frame is only 430px wide. These overrides force mobile layout.
+====================================================== */
+
+/* Neutralize sm: breakpoint effects inside mobile frame */
+@media (min-width: 640px) {
+  /* Elements that were hidden on mobile (<sm) but shown at sm+ must stay hidden */
+  .mobile-frame .hidden.sm\:inline,
+  .mobile-frame .hidden.sm\:inline-block,
+  .mobile-frame .hidden.sm\:inline-flex,
+  .mobile-frame .hidden.sm\:block,
+  .mobile-frame .hidden.sm\:flex,
+  .mobile-frame .hidden.sm\:grid {
+    display: none !important;
+  }
+
+  /* Elements that were shown on mobile (<sm) but hidden at sm+ must stay visible */
+  .mobile-frame .sm\:hidden {
+    display: block !important;
+  }
+  .mobile-frame .sm\:hidden.inline {
+    display: inline !important;
+  }
+  .mobile-frame .sm\:hidden.inline-flex {
+    display: inline-flex !important;
+  }
+  .mobile-frame .sm\:hidden.flex {
+    display: flex !important;
+  }
+  .mobile-frame .sm\:hidden.grid {
+    display: grid !important;
+  }
+}
+
+/* Neutralize md: breakpoint effects inside mobile frame */
+@media (min-width: 768px) {
+  /* Show elements that are hidden at md+ (mobile-only elements) */
+  .mobile-frame .md\:hidden {
+    display: block !important;
+  }
+  .mobile-frame .md\:hidden.grid {
+    display: grid !important;
+  }
+  .mobile-frame .md\:hidden.flex {
+    display: flex !important;
+  }
+  .mobile-frame .md\:hidden.inline-flex {
+    display: inline-flex !important;
+  }
+  .mobile-frame .md\:hidden.inline {
+    display: inline !important;
+  }
+
+  /* Hide elements that only show at md+ (desktop-only elements) */
+  .mobile-frame .md\:block,
+  .mobile-frame .md\:flex,
+  .mobile-frame .md\:grid,
+  .mobile-frame .md\:inline,
+  .mobile-frame .md\:inline-flex,
+  .mobile-frame .md\:inline-block,
+  .mobile-frame .md\:table {
+    display: none !important;
+  }
+}
+
+/* Neutralize lg: breakpoint effects inside mobile frame */
+@media (min-width: 1024px) {
+  /* Show elements that are hidden at lg+ (mobile/tablet-only elements) */
+  .mobile-frame .lg\:hidden {
+    display: block !important;
+  }
+  .mobile-frame .lg\:hidden.flex {
+    display: flex !important;
+  }
+  .mobile-frame .lg\:hidden.inline-flex {
+    display: inline-flex !important;
+  }
+  .mobile-frame .lg\:hidden.grid {
+    display: grid !important;
+  }
+
+  /* Hide elements that only show at lg+ (desktop-only elements) */
+  .mobile-frame .lg\:block,
+  .mobile-frame .lg\:flex,
+  .mobile-frame .lg\:grid,
+  .mobile-frame .lg\:inline,
+  .mobile-frame .lg\:inline-flex,
+  .mobile-frame .lg\:inline-block {
+    display: none !important;
+  }
 }
 
 /* Ensure Ant Design portals, drawers, modals, dropdowns, popovers synchronize with page font */
@@ -57,66 +243,89 @@ body {
     monospace !important;
 }
 
-/* Mobile Modal: Căn giữa màn hình, có lề các cạnh, bo tròn góc, không bám viền */
-@media (max-width: 640px) {
-  .ant-modal-wrap {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 8px !important;
-  }
-
-  .ant-modal,
-  .ant-modal-centered .ant-modal {
-    max-width: calc(100vw - 16px) !important;
-    width: calc(100vw - 16px) !important;
-    margin: auto !important;
-    padding: 0 !important;
-    top: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    right: auto !important;
-    position: relative !important;
-  }
-
-  .ant-modal .ant-modal-content {
-    border-radius: 16px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: 90vh !important;
-    padding: 16px 14px 14px 14px !important;
-    margin: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
-  }
-
-  .ant-modal .ant-modal-header {
-    margin-bottom: 8px !important;
-    padding-bottom: 8px !important;
-    flex-shrink: 0 !important;
-  }
-
-  .ant-modal .ant-modal-body {
-    overflow: hidden !important;
-    flex: 1 1 auto !important;
-    padding: 0 !important;
-  }
-
-  .ant-modal .ant-modal-footer {
-    margin-top: 8px !important;
-    padding-top: 8px !important;
-    flex-shrink: 0 !important;
-  }
+/* ==================== MODAL STYLES (ALWAYS MOBILE FORM INSIDE FRAME) ==================== */
+/* Constrain Ant Design modals inside mobile frame when rendered there */
+#mobile-frame-root .ant-modal-root,
+.mobile-frame .ant-modal-root {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  overflow: hidden !important;
 }
 
-/* Fixed desktop width for RecordDetailModal */
-@media (min-width: 641px) {
-  .record-detail-modal.ant-modal,
-  .record-detail-modal .ant-modal-content {
-    width: 520px !important;
-    max-width: 520px !important;
-  }
+#mobile-frame-root .ant-modal-mask,
+.mobile-frame .ant-modal-mask {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  background-color: rgba(0, 0, 0, 0.55) !important;
+}
+
+#mobile-frame-root .ant-modal-wrap,
+.mobile-frame .ant-modal-wrap {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px !important;
+  overflow: hidden !important;
+}
+
+/* Modal dialog container - always mobile width (max 406px) */
+.ant-modal-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px !important;
+}
+
+.ant-modal,
+.ant-modal-centered .ant-modal,
+.record-detail-modal.ant-modal,
+.sub-competitions-modal.ant-modal {
+  width: min(calc(100vw - 16px), 406px) !important;
+  max-width: min(calc(100vw - 16px), 406px) !important;
+  margin: auto !important;
+  padding: 0 !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  position: relative !important;
+}
+
+.ant-modal .ant-modal-content,
+.record-detail-modal .ant-modal-content,
+.sub-competitions-modal .ant-modal-content {
+  border-radius: 16px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 88vh !important;
+  padding: 16px 14px 14px 14px !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+.ant-modal .ant-modal-header {
+  margin-bottom: 8px !important;
+  padding-bottom: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+.ant-modal .ant-modal-body {
+  overflow: hidden !important;
+  flex: 1 1 auto !important;
+  padding: 0 !important;
+}
+
+.ant-modal .ant-modal-footer {
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  flex-shrink: 0 !important;
 }
 
 /* Custom thanh scroll thanh mảnh: linh hoạt khi có scroll và không có scroll */

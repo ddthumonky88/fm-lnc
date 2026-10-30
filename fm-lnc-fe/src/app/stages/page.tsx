@@ -214,8 +214,8 @@ export default function StagesPage() {
           </div>
         </div>
 
-        {/* Mobile Vertical Cards (md:hidden) - 1 card per row */}
-        <div className="md:hidden">
+        {/* Mobile Vertical Cards - 1 card per row */}
+        <div>
           <div className="grid grid-cols-1 gap-3">
             {stages.length === 0 ? (
               <div className="py-12 text-center text-gray-400 text-xs italic">
@@ -280,27 +280,6 @@ export default function StagesPage() {
               />
             </div>
           )}
-        </div>
-
-        {/* Stages Ant Design Table (hidden md:block) */}
-        <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
-          <Table<StageItem>
-            rowKey="id"
-            columns={columns}
-            dataSource={stages}
-            loading={loading}
-            pagination={{
-              current: page,
-              pageSize: pageSize,
-              total: total,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50', '100'],
-              showTotal: (total, range) => `Showing ${range[0]} - ${range[1]} of ${total} records`,
-              size: 'small',
-            }}
-            onChange={handleTableChange}
-            size="middle"
-          />
         </div>
       </div>
     </div>

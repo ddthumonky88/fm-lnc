@@ -107,18 +107,16 @@ export default function RecordDetailModal({
   const { triggerRefresh } = useApp();
 
   // Determine Type Flags
-  const isPlayer = type === 'player' || type === EntityType.PLAYER || type === RecordType.PLAYER;
-  const isCity = type === 'city' || type === EntityType.CITY || type === RecordType.CITY;
-  const isStadium =
-    type === 'stadium' || type === EntityType.STADIUM || type === RecordType.STADIUM;
-  const isComp =
-    type === 'competition' || type === EntityType.COMPETITION || type === RecordType.COMPETITION;
-  const isClub = type === 'club' || type === EntityType.CLUB || type === RecordType.CLUB;
-  const isNation = type === 'nation' || type === EntityType.NATION;
-  const isConfed = type === 'confederation' || type === EntityType.CONFEDERATION;
-  const isStage = type === 'stage' || type === EntityType.STAGE || type === RecordType.STAGE;
-  const isAward = type === 'award' || type === EntityType.AWARD || type === RecordType.AWARD;
-  const isRegion = type === 'region' || (type as any) === EntityType.REGION || (type as any) === RecordType.REGION;
+  const isPlayer = type === EntityType.PLAYER;
+  const isCity = type === EntityType.CITY;
+  const isStadium = type === EntityType.STADIUM;
+  const isComp = type === EntityType.COMPETITION;
+  const isClub = type === EntityType.CLUB;
+  const isNation = type === EntityType.NATION;
+  const isConfed = type === EntityType.CONFEDERATION;
+  const isStage = type === EntityType.STAGE;
+  const isAward = type === EntityType.AWARD;
+  const isRegion = type === EntityType.REGION;
   const { message } = App.useApp();
 
   const isCreate = !data || initialMode === 'create';
@@ -585,8 +583,9 @@ export default function RecordDetailModal({
         e?.stopPropagation?.();
         onClose();
       }}
-      width={520}
-      style={{ width: '520px', maxWidth: 'calc(100vw - 24px)' }}
+      getContainer={() => document.getElementById('mobile-frame-root') || document.body}
+      width="100%"
+      style={{ width: '100%', maxWidth: 'calc(100% - 20px)', margin: '0 auto' }}
       destroyOnHidden
       centered
       className="record-detail-modal"
@@ -742,7 +741,7 @@ export default function RecordDetailModal({
       <div
         ref={scrollRef}
         onScroll={checkScrollState}
-        className={`py-2 max-h-[calc(88vh-130px)] sm:max-h-[68vh] transition-all duration-150 modal-scroll-container ${
+        className={`py-2 max-h-[60vh] overflow-y-auto transition-all duration-150 modal-scroll-container ${
           hasScroll ? 'has-scroll pl-0.5 sm:pl-1 pr-2 sm:pr-2.5' : 'no-scroll px-0.5 sm:px-1'
         }`}
       >
@@ -869,9 +868,7 @@ export default function RecordDetailModal({
                   </div>
 
                   {/* 6N */}
-                  {(type === 'club' ||
-                    type === EntityType.CLUB ||
-                    currentData.name_6l !== undefined) && (
+                  {(isClub || currentData.name_6l !== undefined) && (
                     <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                       <span className={getLabelClass(['name_6l'], 'pt-0.5')}>
                         6N:
@@ -1408,7 +1405,7 @@ export default function RecordDetailModal({
                   </div>
                 </div>
 
-                {(isClub || type === 'club' || type === EntityType.CLUB) && (
+                {isClub && (
                   <div>
                     <label className={getFormLabelClass(['name_6l'])}>
                       6-Letter name

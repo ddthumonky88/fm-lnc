@@ -835,7 +835,7 @@ export async function fetchNationHub(
   forceRefresh = false,
 ): Promise<NationHubData> {
   return cachedFetch<NationHubData>(
-    `${getApiBase()}/hierarchy/nations/${nationId}/hub`,
+    `${getApiBase()}/hierarchy/nations/${nationId}/info`,
     forceRefresh,
   );
 }

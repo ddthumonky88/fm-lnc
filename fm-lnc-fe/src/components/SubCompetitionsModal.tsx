@@ -149,8 +149,9 @@ export default function SubCompetitionsModal({
         className="sub-competitions-modal font-sans"
         open={isOpen}
         onCancel={onClose}
-        width={960}
-        style={{ maxWidth: 'calc(100vw - 24px)', margin: '0 auto' }}
+        getContainer={() => document.getElementById('mobile-frame-root') || document.body}
+        width="100%"
+        style={{ width: '100%', maxWidth: 'calc(100% - 20px)', margin: '0 auto' }}
         centered
         destroyOnClose
         footer={

@@ -87,16 +87,16 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
     results.stages.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-0 sm:p-4 sm:pt-16">
-      <div className="bg-white rounded-none sm:rounded-lg shadow-2xl max-w-2xl w-full h-full sm:h-auto max-h-[96vh] sm:max-h-[88vh] flex flex-col overflow-hidden border-0 sm:border border-gray-200">
-        <div className="p-3 sm:p-4 border-b border-gray-200 shrink-0 flex items-center gap-2 sm:gap-3">
+    <div className="absolute inset-0 z-50 flex items-start justify-center bg-black/60 p-2.5 pt-3 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full h-[95%] max-h-[95%] flex flex-col overflow-hidden border border-gray-200">
+        <div className="p-3 border-b border-gray-200 shrink-0 flex items-center gap-2">
           <input
             type="text"
             autoFocus
-            placeholder="Search by club, competition, country, stadium, city, award, player, stage, or FM ID..."
+            placeholder="Search club, comp, nation, stadium, ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full text-xs sm:text-sm border-none focus:outline-none placeholder-gray-400"
+            className="w-full text-xs border-none focus:outline-none placeholder-gray-400"
           />
           {searchTerm && (
             <button
