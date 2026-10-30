@@ -1169,31 +1169,24 @@ export default function LncSortitoutsiExplorer() {
                       {compInfo?.nation &&
                       getNationLogoUrl(compInfo.nation.id, compInfo.nation.name_3l) ? (
                         <img
-                          src={getNationLogoUrl(
-                            compInfo.nation.id,
-                            compInfo.nation.name_3l,
-                          )}
+                          src={getNationLogoUrl(compInfo.nation.id, compInfo.nation.name_3l)}
                           alt={compInfo.nation.name_sh || compInfo.nation.name_lg || compInfo.nation.name}
                           className="w-8 h-6 object-cover rounded-xs border border-slate-200 shadow-2xs shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                           }}
                         />
-                      ) : (compInfo?.confed?.id || compInfo?.confed_id) &&
-                        getConfederationLogoUrl(
-                          compInfo.confed?.id || compInfo.confed_id!,
-                        ) ? (
+                      ) : (compInfo?.nation?.confed) &&
+                        getConfederationLogoUrl(compInfo.nation.confed!) ? (
                         <img
-                          src={getConfederationLogoUrl(
-                            compInfo.confed?.id || compInfo.confed_id!,
-                          )}
-                          alt={compInfo.confed?.name || 'Confederation'}
+                          src={getConfederationLogoUrl(compInfo.nation.confed!)}
+                          alt={compInfo.nation.confed}
                           className="w-8 h-8 object-contain shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                           }}
                         />
-                      ) : !compInfo?.nation_id || compInfo?.is_international ? (
+                      ) : (!compInfo?.nation) ? (
                         <IntCompIcon size={24} className="text-purple-600 shrink-0" />
                       ) : (
                         <DomesticCompIcon size={24} className="text-amber-500 shrink-0" />
@@ -1211,17 +1204,17 @@ export default function LncSortitoutsiExplorer() {
                               {currentStep.id}
                             </Tag>
                           )}
-                          {compInfo?.categories && (
+                          {compInfo?.type && (
                             <Tooltip
-                              title={compInfo.categories}
+                              title={compInfo.type}
                               trigger="hover"
                               destroyTooltipOnHide
                             >
                               <Tag
-                                color={getCategoryTagColor(compInfo.categories)}
+                                color={getCategoryTagColor(compInfo.type)}
                                 className="m-0 text-xs font-semibold font-mono cursor-default"
                               >
-                                {formatCategoryCode(compInfo.categories)}
+                                {formatCategoryCode(compInfo.type)}
                               </Tag>
                             </Tooltip>
                           )}

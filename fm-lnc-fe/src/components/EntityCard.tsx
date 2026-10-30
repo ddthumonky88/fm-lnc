@@ -410,15 +410,15 @@ export default function EntityCard({
           : null;
 
   const isNavigable = Boolean(
-    (onNavigate || type === EntityType.CLUB) &&
-    (data.is_virtual ||
-      (type === EntityType.NATION
-        ? (data.totalComps || data.totalChildren || 0) > 0
-        : false) ||
-      (type === EntityType.COMPETITION
-        ? (data.clubsCount || data.stats?.club || 0) > 0 || (data.awardsCount || data.stats?.award || 0) > 0
-        : false) ||
-      (type === EntityType.CLUB ? Boolean(data.id && !isSpecialCard) : false)),
+    data.is_virtual ||
+      type === EntityType.NATION ||
+      type === 'nation' ||
+      type === EntityType.COMPETITION ||
+      type === 'competition' ||
+      (type === EntityType.CLUB || type === 'club' ? Boolean(data.id && !isSpecialCard) : false) ||
+      (type === EntityType.CONFEDERATION || type === 'confederation'
+        ? (data.totalNations || 0) > 0
+        : false),
   );
 
   const handleNavigateAction = () => {
@@ -470,11 +470,17 @@ export default function EntityCard({
             id: data.id,
             title: `${data.name_sh || data.name_lg || data.name || ''} - Awards`,
           });
+        } else {
+          onNavigate({
+            level: 'CLUBS_IN_COMP',
+            id: data.id,
+            title: `${data.name_sh || data.name_lg || data.name || ''}`,
+          });
         }
       } else if (data.id) {
         router.push(`/comp/${data.id}`);
       }
-    } else if (type === EntityType.CLUB) {
+    } else if (type === EntityType.CLUB || type === 'club') {
       if (!isSpecialCard && data.id) {
         if (onNavigate) {
           onNavigate({
@@ -490,7 +496,7 @@ export default function EntityCard({
   };
 
   const renderChildButtons = () => {
-    if (type === EntityType.CONFEDERATION) {
+    if (type === EntityType.CONFEDERATION || type === 'confederation') {
       const count = data.totalNations || 0;
       if (count <= 0) return null;
 
@@ -511,11 +517,9 @@ export default function EntityCard({
       );
     }
 
-    if (type === EntityType.NATION) {
-      const count = data.totalComps !== undefined ? data.totalComps : data.totalChildren;
-
+    if (type === EntityType.NATION || type === 'nation') {
       return (
-        <Tooltip title={`Details`} trigger="hover" destroyOnHidden>
+        <Tooltip title="Chi tiết quốc gia" trigger="hover" destroyOnHidden>
           <Button
             type="text"
             shape="circle"
@@ -524,7 +528,9 @@ export default function EntityCard({
             onClick={(e) => {
               e.stopPropagation();
               (e.currentTarget as HTMLElement)?.blur();
-              if (data.id) {
+              if (onNavigate) {
+                handleNavigateAction();
+              } else if (data.id) {
                 router.push(`/nation/${data.id}`);
               } else {
                 router.push('/nation');
@@ -535,22 +541,20 @@ export default function EntityCard({
       );
     }
 
-    if (type === EntityType.COMPETITION) {
+    if (type === EntityType.COMPETITION || type === 'competition') {
       const clubsCnt = data.clubsCount ?? data.stats?.club ?? 0;
       const awardsCnt = data.awardsCount ?? data.stats?.award ?? 0;
-      const hasClubs = data.is_virtual || clubsCnt > 0;
-      const hasAwards = awardsCnt > 0;
       const childrenCnt = data.childrenCount ?? data.stats?.children ?? data.children_count ?? 0;
       const hasChildren = childrenCnt > 0;
-      if (!hasClubs && !hasAwards && !hasChildren) return null;
 
       const titleParts: string[] = [];
       if (data.is_virtual || clubsCnt > 0) {
         titleParts.push(`Clubs: ${clubsCnt}`);
       }
-      if (hasAwards) {
+      if (awardsCnt > 0) {
         titleParts.push(`Awards: ${awardsCnt}`);
       }
+      const eyeTooltip = titleParts.length > 0 ? titleParts.join(' | ') : 'Chi tiết giải đấu';
 
       return (
         <div className="flex items-center gap-0.5">
@@ -569,26 +573,46 @@ export default function EntityCard({
               />
             </Tooltip>
           )}
-          {(hasClubs || hasAwards) && (
-            <Tooltip title={titleParts.join(' | ')} trigger="hover" destroyOnHidden>
-              <Button
-                type="text"
-                shape="circle"
-                size="small"
-                icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  (e.currentTarget as HTMLElement)?.blur();
-                  if (onNavigate) {
-                    handleNavigateAction();
-                  } else if (data.id) {
-                    router.push(`/comp/${data.id}`);
-                  }
-                }}
-              />
-            </Tooltip>
-          )}
+          <Tooltip title={eyeTooltip} trigger="hover" destroyOnHidden>
+            <Button
+              type="text"
+              shape="circle"
+              size="small"
+              icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                (e.currentTarget as HTMLElement)?.blur();
+                if (onNavigate) {
+                  handleNavigateAction();
+                } else if (data.id) {
+                  router.push(`/comp/${data.id}`);
+                }
+              }}
+            />
+          </Tooltip>
         </div>
+      );
+    }
+
+    if (type === EntityType.CLUB || type === 'club') {
+      return (
+        <Tooltip title="Chi tiết câu lạc bộ" trigger="hover" destroyOnHidden>
+          <Button
+            type="text"
+            shape="circle"
+            size="small"
+            icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              (e.currentTarget as HTMLElement)?.blur();
+              if (onNavigate) {
+                handleNavigateAction();
+              } else if (data.id) {
+                router.push(`/club/${data.id}`);
+              }
+            }}
+          />
+        </Tooltip>
       );
     }
 

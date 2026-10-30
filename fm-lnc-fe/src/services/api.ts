@@ -146,30 +146,30 @@ function normalizeEntityFields(item: any): any {
   }
 
   // City region / categories
-  if (item.region !== undefined && item.categories === undefined) item.categories = item.region;
-  if (item.categories !== undefined && item.region === undefined) item.region = item.categories;
+  // if (item.region !== undefined && item.categories === undefined) item.categories = item.region;
+  // if (item.categories !== undefined && item.region === undefined) item.region = item.categories;
 
   // Competition & Stadium type / categories
-  if (item.type !== undefined && item.categories === undefined) item.categories = item.type;
-  if (item.categories !== undefined && item.type === undefined) item.type = item.categories;
-  if (item.type === undefined && item.stadium_type !== undefined) item.type = item.stadium_type;
+  // if (item.type !== undefined && item.categories === undefined) item.categories = item.type;
+  // if (item.categories !== undefined && item.type === undefined) item.type = item.categories;
+  // if (item.type === undefined && item.stadium_type !== undefined) item.type = item.stadium_type;
 
   // City & Stadium is_disabled
-  if (item.is_disabled !== undefined && item.isDisabled === undefined)
-    item.isDisabled = item.is_disabled;
-  if (item.isDisabled !== undefined && item.is_disabled === undefined)
-    item.is_disabled = item.isDisabled;
-  const isClubRecord =
-    item.name_6l !== undefined ||
-    item.comp_id !== undefined ||
-    item.is_extinct !== undefined;
-  if (!isClubRecord && item.is_disabled === undefined && item.inactive_fields !== undefined) {
-    const list = String(item.inactive_fields)
-      .split(',')
-      .map((s: string) => s.trim().toLowerCase());
-    item.is_disabled = list.includes('name');
-    item.isDisabled = item.is_disabled;
-  }
+  // if (item.is_disabled !== undefined && item.isDisabled === undefined)
+  //   item.isDisabled = item.is_disabled;
+  // if (item.isDisabled !== undefined && item.is_disabled === undefined)
+  //   item.is_disabled = item.isDisabled;
+  // const isClubRecord =
+  //   item.name_6l !== undefined ||
+  //   item.comp_id !== undefined ||
+  //   item.is_extinct !== undefined;
+  // if (!isClubRecord && item.is_disabled === undefined && item.inactive_fields !== undefined) {
+  //   const list = String(item.inactive_fields)
+  //     .split(',')
+  //     .map((s: string) => s.trim().toLowerCase());
+  //   item.is_disabled = list.includes('name');
+  //   item.isDisabled = item.is_disabled;
+  // }
 
   // Confed / nation ID aliases
   if (item.confed_id !== undefined && item.confederation_id === undefined)
@@ -186,9 +186,6 @@ function normalizeEntityFields(item: any): any {
   // Nested relations
   if (item.confederation && !item.confed) item.confed = item.confederation;
   delete item.confederation;
-  if (item.confed && item.confed_name === undefined) {
-    item.confed_name = item.confed.name;
-  }
   if (item.competition && !item.comp) item.comp = item.competition;
   delete item.competition;
 
@@ -219,36 +216,9 @@ function normalizeEntityFields(item: any): any {
   delete item.region_name;
   delete item.region_code;
 
-  // Competition stats mapping
-  if (item.stats && typeof item.stats === 'object') {
-    if (item.stats.club !== undefined && item.clubsCount === undefined) {
-      item.clubsCount = item.stats.club;
-    }
-    if (item.stats.award !== undefined && item.awardsCount === undefined) {
-      item.awardsCount = item.stats.award;
-    }
-    if (item.stats.children !== undefined && item.childrenCount === undefined) {
-      item.childrenCount = item.stats.children;
-    }
-  }
-
   // parent_comp mapping
   if (item.parent_comp !== undefined && item.parent === undefined) {
     item.parent = item.parent_comp;
-  }
-  if (item.parent !== undefined && item.parent_comp === undefined) {
-    item.parent_comp = item.parent;
-  }
-  if (item.parent_id === undefined && item.parent_comp?.id) {
-    item.parent_id = item.parent_comp.id;
-  }
-
-  // confed mapping
-  if (item.confed && item.confed_id === undefined) {
-    item.confed_id = item.confed.id;
-  }
-  if (item.confed && item.confed_name === undefined) {
-    item.confed_name = item.confed.name;
   }
 
   // is_international inference if missing
@@ -258,8 +228,7 @@ function normalizeEntityFields(item: any): any {
 
   if (item.nation) normalizeEntityFields(item.nation);
   if (item.comp) normalizeEntityFields(item.comp);
-  if (item.parent) normalizeEntityFields(item.parent);
-  if (item.parent_comp) normalizeEntityFields(item.parent_comp);
+  // if (item.parent) normalizeEntityFields(item.parent);
 
   return item;
 }
@@ -321,10 +290,7 @@ export interface NationItem {
   name_lg?: string;
   name_sh?: string;
   name_3l?: string;
-  confed_id?: string;
-  confed_name?: string;
-  confed?: ConfederationItem;
-  inactive_fields?: string | null;
+  confed?: string;
   totalChildren?: number;
   totalComps?: number;
   totalClubs?: number;
@@ -332,6 +298,7 @@ export interface NationItem {
   totalCities?: number;
   totalAwards?: number;
   stats?: EntityStats;
+  inactive_fields?: string | null;
 }
 
 export interface CompetitionItem {
@@ -342,27 +309,14 @@ export interface CompetitionItem {
   name_3l?: string;
   fg_color?: string;
   bg_color?: string;
-  confed_id?: string;
-  confed_name?: string;
-  confed?: ConfederationItem;
-  nation_id?: string;
   nation?: NationItem;
-  parent_id?: string;
   parent?: CompetitionItem | null;
-  parent_comp?: CompetitionItem | null;
-  childrenCount?: number;
   type?: string;
-  categories?: string;
-  is_international?: boolean;
   note?: string;
-  inactive_fields?: string;
-  comp?: CompetitionItem;
   is_virtual?: boolean;
   virtual_type?: string;
-  clubsCount?: number;
-  awardsCount?: number;
-  totalChildren?: number;
   stats?: EntityStats;
+  inactive_fields?: string;
 }
 
 export interface AffiliateClubInfo {
@@ -463,17 +417,42 @@ export interface StageItem {
 }
 
 export interface NationHubData {
-  nation: NationItem;
-  counts: {
+  id: string;
+  name_lg?: string;
+  name_sh?: string;
+  name_3l?: string;
+  confed?: any;
+  inactive_fields?: string | null;
+  note?: string | null;
+  stats: {
     domesticComps: number;
+    parentComps?: number;
+    comps?: number;
     independentClubs: number;
     extinctClubs?: number;
+    clubs?: number;
     allClubs: number;
     stadiums: number;
     cities: number;
     awards: number;
+    totalAwards?: number;
     regions?: number;
   };
+  counts: {
+    domesticComps: number;
+    parentComps?: number;
+    comps?: number;
+    independentClubs: number;
+    extinctClubs?: number;
+    clubs?: number;
+    allClubs: number;
+    stadiums: number;
+    cities: number;
+    awards: number;
+    totalAwards?: number;
+    regions?: number;
+  };
+  nation: NationItem;
 }
 
 const inFlightRequests = new Map<string, Promise<any>>();
@@ -834,10 +813,13 @@ export async function fetchNationHub(
   nationId: string,
   forceRefresh = false,
 ): Promise<NationHubData> {
-  return cachedFetch<NationHubData>(
+  const data = await cachedFetch<any>(
     `${getApiBase()}/hierarchy/nations/${nationId}/info`,
     forceRefresh,
   );
+  return {
+    ...data,
+  };
 }
 
 export async function fetchDomesticCompetitions(

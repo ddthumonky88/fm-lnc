@@ -153,7 +153,7 @@ export default function SubCompetitionsModal({
         width="100%"
         style={{ width: '100%', maxWidth: 'calc(100% - 20px)', margin: '0 auto' }}
         centered
-        destroyOnClose
+        destroyOnHidden
         footer={
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 pt-0.5 w-full">
             <span className="text-gray-600 text-xs">

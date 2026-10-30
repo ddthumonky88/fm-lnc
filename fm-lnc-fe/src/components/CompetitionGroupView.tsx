@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Badge, Empty, Select } from 'antd';
-import { StarOutlined, GlobalOutlined, AppstoreOutlined, FilterOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { StarOutlined, GlobalOutlined, AppstoreOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import CardGrid from './CardGrid';
 import SubCompetitionsModal from './SubCompetitionsModal';
 import { CompIcon, AwardIcon } from './EntityIcons';
@@ -333,6 +333,10 @@ export default function CompetitionGroupView({
 
   const renderToolbar = () => (
     <div className="flex flex-col gap-2.5 bg-white/90 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs mb-3">
+      {extraRight && (
+        <div className="w-full flex items-center gap-2 min-w-0">{extraRight}</div>
+      )}
+
       <div className="w-full">
         <Select
           value={selectedGroup}
@@ -342,13 +346,8 @@ export default function CompetitionGroupView({
           popupMatchSelectWidth={false}
           popupClassName="text-xs [&_.ant-select-item-option-content]:text-xs [&_.ant-select-item]:py-1"
           dropdownStyle={{ fontSize: '12px', minWidth: 230 }}
-          suffixIcon={<FilterOutlined className="text-gray-400 text-xs" />}
         />
       </div>
-
-      {extraRight && (
-        <div className="w-full flex items-center gap-2 min-w-0">{extraRight}</div>
-      )}
     </div>
   );
 

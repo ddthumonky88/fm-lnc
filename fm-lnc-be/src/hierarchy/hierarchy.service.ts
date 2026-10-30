@@ -1011,13 +1011,24 @@ export class HierarchyService {
       regions: regions || 0,
     };
 
-    const mapped = mapNation(nation, counts);
+    const confedVal =
+      typeof nation.confed === 'string'
+        ? nation.confed
+        : (nation as any).confed?.name ||
+          (nation as any).confed?.id ||
+          (nation as any).confederation?.name ||
+          (nation as any).confed_name ||
+          null;
 
     return {
-      ...mapped,
-      counts,
+      id: strId,
+      name_lg: nation.name_lg ?? null,
+      name_sh: nation.name_sh ?? null,
+      name_3l: nation.name_3l ?? null,
+      confed: confedVal,
+      inactive_fields: nation.inactive_fields ?? null,
+      note: (nation as any).note ?? null,
       stats: counts,
-      nation: mapped,
     };
   }
 

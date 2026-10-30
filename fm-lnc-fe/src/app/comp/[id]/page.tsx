@@ -145,14 +145,7 @@ function CompetitionDetailContent() {
         const hub = await fetchNationHub(targetNationId).catch(() => null);
 
         const nation = hub?.nation;
-        const confedId =
-          nation?.confed_id ||
-          nation?.confed?.id;
-        const confedName =
-          (confedId && CONFED_ID_MAP[String(confedId)]) ||
-          nation?.confed?.name ||
-          nation?.confed_name ||
-          'Confederation';
+        const confedName = nation?.confed;
         const nationName =
           nation?.name_lg ||
           nation?.name ||
@@ -230,22 +223,21 @@ function CompetitionDetailContent() {
 
       if (!compId) return;
       const info = await fetchCompetitionInfo(compId).catch(() => null);
+      console.log("Comp:", info);
 
       if (info) {
         const totalClubs = info.stats?.club ?? (info as any).clubsCount ?? 0;
         const totalAwards = info.stats?.award ?? (info as any).awardsCount ?? 0;
         const totalChildren = info.stats?.children ?? (info as any).childrenCount ?? 0;
+
         setCompInfo({
           ...info,
           clubsCount: totalClubs,
           awardsCount: totalAwards,
           childrenCount: totalChildren,
         });
-        const compTitle =
-          info.name_sh ||
-          info.name_lg ||
-          info.name ||
-          `Competition ${compId}`;
+
+        const compTitle = info.name_sh || info.name_lg || `Competition ${compId}`;
         setHeaderTitle(compTitle);
         setHeaderId(info.id);
 
@@ -280,7 +272,7 @@ function CompetitionDetailContent() {
         }
         if (nationId) {
           crumbs.push({
-            title: nationCode || nationName || 'Nation',
+            title: nationCode || nationId,
             href: `/nation/${nationId}`,
           });
         }

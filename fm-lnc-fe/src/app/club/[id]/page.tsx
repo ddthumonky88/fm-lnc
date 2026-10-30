@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Button, message, Tag, Tooltip } from 'antd';
+import { Button, message, Tooltip, Tabs, Spin } from 'antd';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -11,7 +11,6 @@ import {
   BranchesOutlined,
   InfoCircleOutlined,
   TrophyOutlined,
-  GlobalOutlined,
 } from '@ant-design/icons';
 import {
   fetchClubInfo,
@@ -22,6 +21,8 @@ import {
 } from '../../../services/api';
 import CardGrid from '../../../components/CardGrid';
 import DeleteConfirmModal from '../../../components/DeleteConfirmModal';
+import RecordDetailView from '../../../components/RecordDetailView';
+import TabIconBadge from '../../../components/TabIconBadge';
 import { ClubIcon } from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
@@ -66,7 +67,7 @@ function ClubDetailContent() {
   const [club, setClub] = useState<any | null>(null);
   const [affiliates, setAffiliates] = useState<ClubItem[]>([]);
   const [familyTeams, setFamilyTeams] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'AFFILIATES'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'INFO' | 'AFFILIATES'>('INFO');
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -95,13 +96,16 @@ function ClubDetailContent() {
         setAffiliates(affs);
 
         // Build family teams (main team + affiliates)
-        const famTeams: any[] = Array.isArray(data.familyTeams) && data.familyTeams.length > 0
-          ? data.familyTeams
-          : [
-              ...(data.affiliate_club ? [data.affiliate_club] : []),
-              data,
-              ...affs,
-            ].filter((v, idx, arr) => arr.findIndex((t) => String(t.id) === String(v.id)) === idx);
+        const famTeams: any[] =
+          Array.isArray(data.familyTeams) && data.familyTeams.length > 0
+            ? data.familyTeams
+            : [
+                ...(data.affiliate_club ? [data.affiliate_club] : []),
+                data,
+                ...affs,
+              ].filter(
+                (v, idx, arr) => arr.findIndex((t) => String(t.id) === String(v.id)) === idx,
+              );
         setFamilyTeams(famTeams);
 
         const title = data.name_sh || data.name_lg || data.name || `Club ${clubId}`;
@@ -114,12 +118,18 @@ function ClubDetailContent() {
 
         const rawConfed =
           (typeof data.confed === 'string' ? data.confed : data.confed?.name || data.confed?.id) ||
-          (typeof data.nation?.confed === 'string' ? data.nation.confed : data.nation?.confed?.name || data.nation?.confed?.id) ||
-          (typeof data.comp?.confed === 'string' ? data.comp.confed : data.comp?.confed?.name || data.comp?.confed?.id) ||
+          (typeof data.nation?.confed === 'string'
+            ? data.nation.confed
+            : data.nation?.confed?.name || data.nation?.confed?.id) ||
+          (typeof data.comp?.confed === 'string'
+            ? data.comp.confed
+            : data.comp?.confed?.name || data.comp?.confed?.id) ||
           data.confed_id ||
           data.nation?.confed_id ||
           null;
-        const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
+        const confedName = rawConfed
+          ? CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()
+          : null;
 
         // Unified breadcrumb: FM > {CONFED} > {NATION_3L} > {CLUB_ID}
         const crumbs: any[] = [
@@ -214,58 +224,55 @@ function ClubDetailContent() {
   const nationName = club?.nation?.name_lg || club?.nation?.name || club?.nation?.name_sh;
   const nationCode = club?.nation?.name_3l || club?.nation?.name_sh;
 
-  const rawConfed =
-    (typeof club?.confed === 'string' ? club.confed : club?.confed?.name || club?.confed?.id) ||
-    (typeof club?.nation?.confed === 'string' ? club.nation.confed : club?.nation?.confed?.name || club?.nation?.confed?.id) ||
-    (typeof club?.comp?.confed === 'string' ? club.comp.confed : club?.comp?.confed?.name || club?.comp?.confed?.id) ||
-    club?.confed_id ||
-    club?.nation?.confed_id ||
-    null;
-  const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
-
   const compId = club?.comp?.id || club?.comp_id;
-  const compName =
-    club?.comp?.name_sh ||
-    club?.comp?.name_lg ||
-    club?.comp?.name ||
-    (compId ? `Competition ${compId}` : null);
 
-  const parentClub = club?.affiliate_club;
+  const clubTitle = club?.name_sh || club?.name_lg || club?.name || `Club ${clubId}`;
+
+  const tabItems = useMemo(() => {
+    const list: any[] = [
+      {
+        key: 'INFO',
+        label: (
+          <div className="flex items-center gap-2">
+            <TabIconBadge
+              icon={<InfoCircleOutlined className={activeTab === 'INFO' ? 'text-white' : 'text-slate-600'} />}
+              isActive={activeTab === 'INFO'}
+            />
+            <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
+              Info
+            </span>
+          </div>
+        ),
+      },
+    ];
+
+    if (affiliatesCount > 0) {
+      list.push({
+        key: 'AFFILIATES',
+        label: (
+          <div className="flex items-center gap-2" title="Affiliates">
+            <TabIconBadge
+              icon={<BranchesOutlined className={activeTab === 'AFFILIATES' ? 'text-white' : 'text-blue-500'} />}
+              count={affiliatesCount}
+              showZero={true}
+              isActive={activeTab === 'AFFILIATES'}
+            />
+            <span className={`hidden sm:inline ${activeTab === 'AFFILIATES' ? 'font-bold' : ''}`}>
+              Affiliates
+            </span>
+          </div>
+        ),
+      });
+    }
+
+    return list;
+  }, [activeTab, affiliatesCount]);
 
   return (
     <div className="space-y-3">
-      {/* Top Title & Action Bar (Clean Liquipedia style) */}
-      <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-300">
-        <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 m-0 tracking-tight uppercase truncate">
-            {club?.name_sh || club?.name_lg || club?.name || `Club ${clubId}`}
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => openRecordModal(RecordType.CLUB, club, club?.nation_id, club?.comp_id)}
-            className="text-xs font-semibold"
-          >
-            Edit
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => setDeleteModalOpen(true)}
-            className="text-xs font-semibold"
-          >
-            Delete
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
       {loading ? (
-        <div className="bg-white border border-gray-200 rounded-lg py-20 text-center text-sm text-gray-500 flex flex-col items-center gap-3 shadow-2xs">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <span>Loading club data...</span>
+        <div className="py-20 text-center">
+          <Spin size="large" description="Loading club details..." />
         </div>
       ) : !club ? (
         <div className="bg-white border border-gray-200 rounded-lg py-20 text-center text-sm text-gray-500 shadow-2xs">
@@ -275,10 +282,59 @@ function ClubDetailContent() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
-          {/* Liquipedia Sub-team / Squad Selector Buttons */}
-          {familyTeams.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-2xs">
+          {/* Club Header Banner (Icon + 2 lines: ID + name_sh) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-4 pb-3 border-b border-gray-100 min-w-0">
+            {/* Club Logo / Icon */}
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 p-0 shadow-2xs border bg-blue-50/90 border-blue-300 text-blue-600 overflow-hidden">
+              {!logoLoadError && getClubLogoUrl(club.id) ? (
+                <img
+                  src={getClubLogoUrl(club.id)}
+                  alt={clubTitle}
+                  className="w-full h-full object-contain p-1"
+                  onError={() => setLogoLoadError(true)}
+                />
+              ) : (
+                <ClubIcon size={20} className="text-blue-500 shrink-0" />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+              {/* Dòng 1: ID pill with copy */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                {club.id !== undefined && club.id !== null && (
+                  <Tooltip title="Click to copy ID" placement="bottom">
+                    <button
+                      type="button"
+                      onClick={handleCopyId}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 border border-sky-200 font-mono text-xs font-bold transition-all cursor-pointer shadow-2xs select-none"
+                    >
+                      <span>{club.id}</span>
+                      {copiedId ? (
+                        <CheckOutlined className="text-emerald-600 text-xs" />
+                      ) : (
+                        <CopyOutlined className="text-sky-500 text-xs" />
+                      )}
+                    </button>
+                  </Tooltip>
+                )}
+              </div>
+
+              {/* Dòng 2: uppercase text club name_sh */}
+              <div className="mt-1 min-w-0">
+                <h1
+                  className="font-bold text-xs sm:text-[13px] text-slate-900 uppercase tracking-wide line-clamp-2 break-words block leading-snug m-0"
+                  title={clubTitle}
+                >
+                  {clubTitle}
+                </h1>
+              </div>
+            </div>
+          </div>
+
+          {/* Sub-team / Family Squad Selector (Light styled pills) */}
+          {familyTeams.length > 1 && (
+            <div className="flex items-center gap-1.5 flex-wrap mb-3 p-2 bg-slate-50 rounded-lg border border-slate-200">
               {familyTeams.map((team: any) => {
                 const isCurrent = String(team.id) === String(clubId);
                 const teamDisplayName = team.name_sh || team.name_lg || team.name || `Club ${team.id}`;
@@ -291,18 +347,19 @@ function ClubDetailContent() {
                         router.push(`/club/${team.id}`);
                       }
                     }}
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer shadow-2xs ${
                       isCurrent
-                        ? 'bg-[#18181c] text-white shadow-xs border-t-2 border-t-emerald-500 border-x border-b border-[#2e2e36]'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+                        ? 'bg-blue-600 text-white border border-blue-700 shadow-xs'
+                        : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                     }`}
                   >
-                    <span className={`text-xs ${isCurrent ? 'text-emerald-400 font-black' : 'text-slate-400'}`}>
-                      ►
-                    </span>
                     <span>{teamDisplayName}</span>
                     {team.is_extinct && (
-                      <span className="text-[10px] bg-red-900 text-red-200 px-1 rounded font-semibold ml-1">
+                      <span
+                        className={`text-[10px] px-1 rounded font-semibold ${
+                          isCurrent ? 'bg-blue-800 text-white' : 'bg-red-100 text-red-700'
+                        }`}
+                      >
                         EXT
                       </span>
                     )}
@@ -312,307 +369,57 @@ function ClubDetailContent() {
             </div>
           )}
 
-          {/* Liquipedia Sub-tabs Bar */}
-          <div className="flex items-center border-b border-slate-300 gap-1">
-            <button
-              type="button"
-              onClick={() => setActiveTab('OVERVIEW')}
-              className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold transition cursor-pointer border-b-2 ${
-                activeTab === 'OVERVIEW'
-                  ? 'border-red-600 text-red-600 bg-red-50/50 rounded-t'
-                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <InfoCircleOutlined />
-              <span>Overview</span>
-            </button>
+          {/* Ant Design Tabs */}
+          <Tabs
+            activeKey={activeTab}
+            onChange={(key) => setActiveTab(key as 'INFO' | 'AFFILIATES')}
+            items={tabItems}
+            className="mb-3"
+          />
 
-            {affiliatesCount > 0 && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('AFFILIATES')}
-                className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold transition cursor-pointer border-b-2 ${
-                  activeTab === 'AFFILIATES'
-                    ? 'border-red-600 text-red-600 bg-red-50/50 rounded-t'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <BranchesOutlined />
-                <span>Affiliates</span>
-                <span className="inline-flex items-center justify-center bg-red-600 text-white rounded-full text-[10px] font-bold h-4 min-w-[16px] px-1 shadow-2xs">
-                  {affiliatesCount}
-                </span>
-              </button>
-            )}
-          </div>
+          {/* Tab 1: Info (RecordDetailView) */}
+          {activeTab === 'INFO' && (
+            <div className="space-y-4">
+              <RecordDetailView
+                data={club}
+                type={EntityType.CLUB}
+                onEdit={() => openRecordModal(RecordType.CLUB, club, club?.nation_id, club?.comp_id)}
+                onNavigateConfed={(cId) => router.push(`/confed/${cId}`)}
+                onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
+                onNavigateComp={(cId) =>
+                  router.push(`/comp/${cId}${nationId ? `?nationId=${nationId}` : ''}`)
+                }
+                onNavigateClub={(cId) => router.push(`/club/${cId}`)}
+                onSwitchTab={(tab) => {
+                  if (tab === 'AFFILIATES') setActiveTab('AFFILIATES');
+                }}
+              />
 
-          {/* Tab: Overview (Pure Liquipedia Infobox, no redundant cards) */}
-          {activeTab === 'OVERVIEW' && (
-            <div className="pt-2">
-              <div className="w-full max-w-[440px] bg-[#18181c] border border-[#2e2e36] rounded-md shadow-lg overflow-hidden text-white font-sans">
-                {/* Header Banner: Red band with Club Name + Quick Action Links */}
-                <div className="bg-[#781818] text-white px-3.5 py-2 flex items-center justify-between border-b border-[#5e1212]">
-                  <span className="font-extrabold uppercase tracking-wider text-sm sm:text-base leading-tight truncate">
-                    {club.name_sh || club.name_lg || club.name}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold shrink-0 text-red-200">
-                    <button
-                      type="button"
-                      onClick={() => openRecordModal(RecordType.CLUB, club, club?.nation_id, club?.comp_id)}
-                      className="hover:text-white px-1 py-0.5 rounded transition cursor-pointer"
-                      title="Edit Club"
-                    >
-                      [e]
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopyId}
-                      className="hover:text-white px-1 py-0.5 rounded transition cursor-pointer"
-                      title="Copy UID"
-                    >
-                      [id]
-                    </button>
-                  </div>
-                </div>
-
-                {/* Logo Section */}
-                <div className="bg-[#101014] p-5 flex items-center justify-center min-h-[170px] border-b border-[#282830]">
-                  {!logoLoadError && getClubLogoUrl(club.id) ? (
-                    <img
-                      src={getClubLogoUrl(club.id)}
-                      alt={club.name_sh || club.name_lg || 'Club Logo'}
-                      className="max-h-36 sm:max-h-40 max-w-[220px] object-contain drop-shadow-md select-none transition-transform hover:scale-105"
-                      onError={() => setLogoLoadError(true)}
-                    />
-                  ) : (
-                    <div className="w-24 h-24 rounded-2xl bg-[#1c1c24] border border-[#333340] flex flex-col items-center justify-center text-slate-400 p-2 shadow-inner">
-                      <ClubIcon size={44} className="text-slate-400" />
-                      <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tight">
-                        {club.name_3l || club.name_sh?.slice(0, 3) || 'FM24'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Section Header: Team Information */}
-                <div className="bg-[#4c0d0d] text-white py-1.5 px-3 text-center text-xs font-bold uppercase tracking-wider border-b border-[#360909]">
-                  Team Information
-                </div>
-
-                {/* Key-Value Information Rows */}
-                <div className="text-xs sm:text-[13px] divide-y divide-[#26262e]">
-                  {/* Location (Nation) */}
-                  <div className="grid grid-cols-[130px_1fr] bg-[#18181c]">
-                    <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                      Location:
-                    </div>
-                    <div className="px-3 py-2 text-white flex items-center gap-2 flex-wrap">
-                      {nationId && getNationLogoUrl(nationId, nationCode) ? (
-                        <img
-                          src={getNationLogoUrl(nationId, nationCode)}
-                          alt={nationName || 'Nation'}
-                          className="w-5 h-3.5 object-cover rounded-xs shadow-2xs border border-slate-600 shrink-0"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      ) : null}
-                      {nationId ? (
-                        <a
-                          onClick={() => router.push(`/nation/${nationId}`)}
-                          className="text-blue-400 hover:text-blue-300 hover:underline font-semibold cursor-pointer"
-                        >
-                          {nationName || `Nation ${nationId}`}
-                        </a>
-                      ) : (
-                        <span className="text-slate-400 italic">None</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Region (Confederation) */}
-                  {confedName && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#141418]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        Region:
-                      </div>
-                      <div className="px-3 py-2 text-white flex items-center gap-1.5">
-                        <GlobalOutlined className="text-sky-400 text-xs" />
-                        <a
-                          onClick={() => router.push(`/confed/${confedName}`)}
-                          className="text-blue-400 hover:text-blue-300 hover:underline font-semibold cursor-pointer"
-                        >
-                          {confedName}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* League / Competition */}
-                  <div className="grid grid-cols-[130px_1fr] bg-[#18181c]">
-                    <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                      League:
-                    </div>
-                    <div className="px-3 py-2 text-white flex items-center gap-1.5 min-w-0">
-                      {compId ? (
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <TrophyOutlined className="text-amber-400 text-xs shrink-0" />
-                          <a
-                            onClick={() => router.push(`/comp/${compId}${nationId ? `?nationId=${nationId}` : ''}`)}
-                            className="text-blue-400 hover:text-blue-300 hover:underline font-semibold cursor-pointer truncate"
-                          >
-                            {compName}
-                          </a>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 italic">Independent / None</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Full Name */}
-                  {club.name_lg && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#141418]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        Full Name:
-                      </div>
-                      <div className="px-3 py-2 text-slate-200 font-medium">
-                        {club.name_lg}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Short Name */}
-                  {club.name_sh && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#18181c]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        Short Name:
-                      </div>
-                      <div className="px-3 py-2 text-slate-200 font-medium">
-                        {club.name_sh}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Six-Letter Name */}
-                  {club.name_6l && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#141418]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        6-Letter:
-                      </div>
-                      <div className="px-3 py-2 font-mono text-amber-300 font-bold">
-                        {club.name_6l}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Three-Letter Name */}
-                  {club.name_3l && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#18181c]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        3-Letter:
-                      </div>
-                      <div className="px-3 py-2 font-mono text-emerald-400 font-bold">
-                        {club.name_3l}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Parent Club (if this is an affiliate/reserve team) */}
-                  {parentClub && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#141418]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        Parent Club:
-                      </div>
-                      <div className="px-3 py-2 text-white">
-                        <a
-                          onClick={() => router.push(`/club/${parentClub.id}`)}
-                          className="text-blue-400 hover:text-blue-300 hover:underline font-semibold cursor-pointer inline-flex items-center gap-1"
-                        >
-                          <ClubIcon size={14} className="text-blue-400" />
-                          <span>{parentClub.name_sh || parentClub.name_lg || `Club ${parentClub.id}`}</span>
-                        </a>
-                        {parentClub.type && (
-                          <span className="text-[11px] text-slate-400 ml-1">
-                            ({parentClub.type})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Affiliate Teams Count */}
-                  {affiliatesCount > 0 && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#18181c]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        Affiliates:
-                      </div>
-                      <div className="px-3 py-2 text-white">
-                        <a
-                          onClick={() => setActiveTab('AFFILIATES')}
-                          className="text-blue-400 hover:text-blue-300 hover:underline font-semibold cursor-pointer"
-                        >
-                          {affiliatesCount} affiliate team{affiliatesCount > 1 ? 's' : ''}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Status */}
-                  <div className="grid grid-cols-[130px_1fr] bg-[#141418]">
-                    <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                      Status:
-                    </div>
-                    <div className="px-3 py-2">
-                      {club.is_extinct ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-950 text-red-300 border border-red-800">
-                          Extinct
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
-                          Active
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* UID */}
-                  <div className="grid grid-cols-[130px_1fr] bg-[#18181c]">
-                    <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                      UID:
-                    </div>
-                    <div className="px-3 py-2 font-mono font-bold text-sky-300 flex items-center gap-1.5">
-                      <span>{club.id}</span>
-                      <button
-                        type="button"
-                        onClick={handleCopyId}
-                        className="text-slate-400 hover:text-white transition cursor-pointer"
-                        title="Copy UID"
-                      >
-                        <CopyOutlined className="text-xs" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Note */}
-                  {club.note && (
-                    <div className="grid grid-cols-[130px_1fr] bg-[#141418]">
-                      <div className="bg-[#1e1e24] px-3 py-2 font-bold text-slate-300 text-right">
-                        Note:
-                      </div>
-                      <div className="px-3 py-2 text-slate-300 text-xs italic">
-                        {club.note}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              {/* Action buttons: Edit & Delete moved down below */}
+              <div className="w-full max-w-xl mx-auto flex items-center justify-end gap-2.5 pt-2 pb-1 border-t border-slate-100">
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => openRecordModal(RecordType.CLUB, club, club?.nation_id, club?.comp_id)}
+                  className="font-medium px-4 h-8 sm:h-9 rounded-lg bg-blue-600 hover:bg-blue-700 shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  <span>Edit</span>
+                </Button>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => setDeleteModalOpen(true)}
+                  className="font-medium px-4 h-8 sm:h-9 rounded-lg shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  <span>Delete</span>
+                </Button>
               </div>
             </div>
           )}
 
-          {/* Tab: Affiliates Grid View */}
+          {/* Tab 2: Affiliates (CardGrid) */}
           {activeTab === 'AFFILIATES' && (
-            <div className="pt-2 bg-white border border-gray-200 rounded-lg p-4 shadow-2xs">
+            <div className="pt-1">
               <CardGrid
                 items={affiliates}
                 type={EntityType.CLUB}
@@ -643,7 +450,7 @@ function ClubDetailContent() {
         onConfirm={handleDeleteClub}
         loading={isDeleting}
         title="Delete Club"
-        itemName={club?.name_lg || club?.name_sh || club?.name || `Club ${clubId}`}
+        itemName={clubTitle}
       />
     </div>
   );

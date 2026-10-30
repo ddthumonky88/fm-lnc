@@ -186,6 +186,7 @@ export default function NationDetailPage() {
     setLoading(true);
     try {
       const hub = await fetchNationHub(nationId);
+      console.log('Nation: ', hub);
       setNationHub(hub);
 
       // Fetch regions for City filter
@@ -194,11 +195,7 @@ export default function NationDetailPage() {
         .catch((err) => console.error('Failed to load regions', err));
 
       const nation = hub.nation;
-      const rawConfed =
-        (typeof nation?.confed === 'string' ? nation.confed : nation?.confed?.name || nation?.confed?.id) ||
-        nation?.confed_id ||
-        nation?.confed_name ||
-        null;
+      const rawConfed = nation?.confed || null;
       const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
       const nationCode = nation?.name_3l || nation?.name_sh;
       const nationName = nation?.name_lg || nation?.name || nation?.name_sh;

@@ -11,6 +11,7 @@ import {
   UserOutlined,
   AppstoreOutlined,
   BranchesOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons';
 import { EntityType, RecordType } from '../types';
 import {
@@ -42,34 +43,39 @@ const parseColor = (rgbStr?: string | null) => {
   return null;
 };
 
-const CONFED_NAME_MAP: Record<string, { id: string; name: string }> = {
-  CAF: { id: '1', name: 'Africa' },
-  AFRICA: { id: '1', name: 'Africa' },
-  AFC: { id: '2', name: 'Asia' },
-  ASIA: { id: '2', name: 'Asia' },
-  UEFA: { id: '3', name: 'Europe' },
-  EUROPE: { id: '3', name: 'Europe' },
-  CONCACAF: { id: '4', name: 'North America' },
-  'NORTH AMERICA': { id: '4', name: 'North America' },
-  OFC: { id: '5', name: 'Oceania' },
-  OCEANIA: { id: '5', name: 'Oceania' },
-  CONMEBOL: { id: '6', name: 'South America' },
-  'SOUTH AMERICA': { id: '6', name: 'South America' },
-  WORLD: { id: '7', name: 'World' },
-  INTERNATIONAL: { id: '7', name: 'World' },
-  FIFA: { id: '7', name: 'World' },
-  GLOBAL: { id: '7', name: 'World' },
-};
+const CONFED_LOOKUP: Record<string, { id: string; name: string }> = {
+  '1': { id: 'CAF', name: 'CAF' },
+  CAF: { id: 'CAF', name: 'CAF' },
+  AFRICA: { id: 'CAF', name: 'CAF' },
 
-const CONFED_ID_MAP: Record<string, string> = {
-  '1': 'CAF',
-  '2': 'AFC',
-  '3': 'UEFA',
-  '4': 'CONCACAF',
-  '5': 'OFC',
-  '6': 'CONMEBOL',
-  '7': 'World',
-  '8': 'EXTINCT',
+  '2': { id: 'AFC', name: 'AFC' },
+  AFC: { id: 'AFC', name: 'AFC' },
+  ASIA: { id: 'AFC', name: 'AFC' },
+
+  '3': { id: 'UEFA', name: 'UEFA' },
+  UEFA: { id: 'UEFA', name: 'UEFA' },
+  EUROPE: { id: 'UEFA', name: 'UEFA' },
+
+  '4': { id: 'CONCACAF', name: 'CONCACAF' },
+  CONCACAF: { id: 'CONCACAF', name: 'CONCACAF' },
+  'NORTH AMERICA': { id: 'CONCACAF', name: 'CONCACAF' },
+
+  '5': { id: 'OFC', name: 'OFC' },
+  OFC: { id: 'OFC', name: 'OFC' },
+  OCEANIA: { id: 'OFC', name: 'OFC' },
+
+  '6': { id: 'CONMEBOL', name: 'CONMEBOL' },
+  CONMEBOL: { id: 'CONMEBOL', name: 'CONMEBOL' },
+  'SOUTH AMERICA': { id: 'CONMEBOL', name: 'CONMEBOL' },
+
+  '7': { id: 'WORLD', name: 'World' },
+  WORLD: { id: 'WORLD', name: 'World' },
+  INTERNATIONAL: { id: 'WORLD', name: 'World' },
+  FIFA: { id: 'WORLD', name: 'World' },
+  GLOBAL: { id: 'WORLD', name: 'World' },
+
+  '8': { id: 'EXTINCT', name: 'Extinct' },
+  EXTINCT: { id: 'EXTINCT', name: 'Extinct' },
 };
 
 export interface RecordDetailViewProps {
@@ -90,6 +96,8 @@ export interface RecordDetailViewProps {
   onNavigateConfed?: (confedId: string) => void;
   onNavigateNation?: (nationId: string) => void;
   onNavigateParentComp?: (compId: string) => void;
+  onNavigateComp?: (compId: string) => void;
+  onNavigateClub?: (clubId: string) => void;
   onOpenSubComps?: () => void;
   onSwitchTab?: (tabKey: string) => void;
   onNavigateFakeComp?: (fakeCompId: string) => void;
@@ -104,6 +112,8 @@ export default function RecordDetailView({
   onNavigateConfed,
   onNavigateNation,
   onNavigateParentComp,
+  onNavigateComp,
+  onNavigateClub,
   onOpenSubComps,
   onSwitchTab,
   onNavigateFakeComp,
@@ -151,22 +161,28 @@ export default function RecordDetailView({
           (currentData.confed_id || currentData.confed || currentData.categories || currentData.type)),
     );
 
-  const rawConfedId =
-    currentData.confed?.id ||
-    currentData.confed_id;
-  const rawCat = currentData.type || currentData.categories
-    ? String(currentData.type || currentData.categories).split(',')[0].trim().toUpperCase()
-    : '';
-  const catConfed = rawCat ? CONFED_NAME_MAP[rawCat] : null;
-
-  const confedId = rawConfedId ? String(rawConfedId) : catConfed?.id || null;
-  const confedName =
-    currentData.confed?.name ||
-    (rawConfedId && CONFED_ID_MAP[String(rawConfedId)]) ||
+  const rawConfedVal =
+    (typeof currentData.confed === 'string'
+      ? currentData.confed
+      : currentData.confed?.id || currentData.confed?.name) ||
+    currentData.confed_id ||
     currentData.confed_name ||
-    catConfed?.name ||
-    rawCat ||
-    'International';
+    (typeof currentData.nation?.confed === 'string'
+      ? currentData.nation.confed
+      : currentData.nation?.confed?.id || currentData.nation?.confed?.name) ||
+    currentData.nation?.confed_id ||
+    (typeof currentData.comp?.confed === 'string'
+      ? currentData.comp.confed
+      : currentData.comp?.confed?.id || currentData.comp?.confed?.name) ||
+    null;
+
+  const confedLookupKey = rawConfedVal ? String(rawConfedVal).trim().toUpperCase() : null;
+  const resolvedConfed = confedLookupKey ? CONFED_LOOKUP[confedLookupKey] : null;
+
+  const confedId = resolvedConfed?.id || (rawConfedVal ? String(rawConfedVal) : null);
+  const confedName =
+    resolvedConfed?.name ||
+    (rawConfedVal ? String(rawConfedVal) : isInternationalComp ? 'World' : null);
 
   const nationId = isNation
     ? currentData.id
@@ -466,6 +482,41 @@ export default function RecordDetailView({
           </div>
         )}
 
+        {/* League / Competition (for Club) */}
+        {isClub && (currentData.comp || currentData.comp_id) && (
+          <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+            <span className={getLabelClass(['comp_id', 'competition_id', 'comp'], 'pt-0.5')}>
+              League:
+            </span>
+            <div
+              onClick={() => {
+                const cId = currentData.comp?.id || currentData.comp_id;
+                if (cId && onNavigateComp) {
+                  onNavigateComp(String(cId));
+                }
+              }}
+              className={`flex items-center gap-1.5 min-w-0 text-left ${
+                (currentData.comp?.id || currentData.comp_id) && onNavigateComp
+                  ? 'cursor-pointer group'
+                  : ''
+              }`}
+            >
+              <span
+                className={`font-bold text-xs sm:text-[13px] ${
+                  (currentData.comp?.id || currentData.comp_id) && onNavigateComp
+                    ? 'text-blue-600 group-hover:underline'
+                    : getValueClass(['comp_id', 'comp'])
+                } truncate`}
+              >
+                {currentData.comp?.name_sh ||
+                  currentData.comp?.name_lg ||
+                  currentData.comp?.name ||
+                  (currentData.comp_id ? `Competition ${currentData.comp_id}` : '-')}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Region (for City) */}
         {isCity && currentData.region && (
           <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
@@ -519,18 +570,28 @@ export default function RecordDetailView({
               <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
                 Affiliate Club:
               </span>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-bold text-xs sm:text-[13px] text-slate-800">
+              <div
+                onClick={() => {
+                  if (currentData.affiliate_club?.id && onNavigateClub) {
+                    onNavigateClub(String(currentData.affiliate_club.id));
+                  }
+                }}
+                className={`flex items-center gap-1.5 flex-wrap ${
+                  currentData.affiliate_club?.id && onNavigateClub ? 'cursor-pointer group' : ''
+                }`}
+              >
+                <span
+                  className={`font-bold text-xs sm:text-[13px] ${
+                    currentData.affiliate_club?.id && onNavigateClub
+                      ? 'text-blue-600 group-hover:underline'
+                      : 'text-slate-800'
+                  }`}
+                >
                   {currentData.affiliate_club?.name_lg ||
                     currentData.affiliate_club?.name_sh ||
                     currentData.affiliate_club?.name ||
                     `Club #${currentData.affiliate_club?.id}`}
                 </span>
-                {currentData.affiliate_club?.id && (
-                  <span className="text-[11px] font-mono text-slate-400">
-                    (ID: {currentData.affiliate_club?.id})
-                  </span>
-                )}
               </div>
             </div>
             {currentData.affiliate_club?.type && (
@@ -560,10 +621,19 @@ export default function RecordDetailView({
                 return (
                   <span
                     key={aff.id}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200"
+                    onClick={() => {
+                      if (aff.id && onNavigateClub) {
+                        onNavigateClub(String(aff.id));
+                      }
+                    }}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200 ${
+                      onNavigateClub ? 'cursor-pointer hover:bg-slate-200' : ''
+                    }`}
                   >
                     {affT && <span className="font-semibold text-sky-700">[{affT}]</span>}
-                    <span>{aff.name_sh || aff.name_lg || aff.name}</span>
+                    <span className={onNavigateClub ? 'hover:underline text-blue-600 font-semibold' : ''}>
+                      {aff.name_sh || aff.name_lg || aff.name}
+                    </span>
                     <span className="text-[10px] font-mono text-slate-400">({aff.id})</span>
                   </span>
                 );
