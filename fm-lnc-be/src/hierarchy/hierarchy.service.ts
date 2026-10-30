@@ -456,9 +456,21 @@ export class HierarchyService {
       if (String(filter.regionCode) === '__uncategorized__') {
         qb.andWhere('(city.region_id IS NULL OR city.region IS NULL OR TRIM(city.region) = \'\')');
       } else {
-        qb.andWhere('regionEntity.code = :regionCode', {
+        qb.andWhere(
+          `(
+            regionEntity.code = :regionCode
+            OR CAST(regionEntity.id AS TEXT) = :regionCode
+            OR city.region IN (
+              SELECT region_filter.name
+              FROM regions region_filter
+              WHERE region_filter.code = :regionCode
+                 OR CAST(region_filter.id AS TEXT) = :regionCode
+            )
+          )`,
+          {
           regionCode: String(filter.regionCode),
-        });
+          },
+        );
       }
     } else if (filter?.regionId !== undefined && filter?.regionId !== null && String(filter.regionId) !== 'all') {
       if (String(filter.regionId) === '__uncategorized__' || Number(filter.regionId) === 0) {
