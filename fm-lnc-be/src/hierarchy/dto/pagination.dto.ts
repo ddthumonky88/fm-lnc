@@ -175,6 +175,13 @@ export class CitySearchQueryDto extends PageableQueryDto {
     required: false,
   })
   regionId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Lọc theo mã Region',
+    type: String,
+    required: false,
+  })
+  regionCode?: string;
 }
 
 export class NationScopedSearchQueryDto extends PageableQueryDto {

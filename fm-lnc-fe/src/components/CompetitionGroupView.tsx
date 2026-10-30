@@ -64,110 +64,6 @@ export function getCompetitionGroup(target?: any): CompetitionCategory {
   return 'other';
 }
 
-const GROUP_PRIORITY: Record<CompetitionCategory, number> = {
-  league: 1,
-  cup: 2,
-  youth: 3,
-  other: 4,
-  extinct: 5,
-};
-
-function getLeagueTier(categoryStr: string): number {
-  const match = categoryStr.match(/league\s*\(\s*(\d+)\s*\)/i) || categoryStr.match(/\((\d+)\)/);
-  if (match) {
-    return parseInt(match[1], 10);
-  }
-  return 9999;
-}
-
-function getOtherWeight(item: any): number {
-  const id = String(item?.id || '');
-  if (
-    id === '[OTHER]' ||
-    id.startsWith('oth-') ||
-    item?.virtual_type === 'OTHER' ||
-    item?.is_virtual
-  )
-    return 2;
-  return 1;
-}
-
-function getExtinctWeight(item: any): number {
-  const id = String(item?.id || '');
-  if (
-    id === '[EXTINCT]' ||
-    id.startsWith('ext-') ||
-    item?.virtual_type === 'EXTINCT'
-  )
-    return 2;
-  return 1;
-}
-
-export function sortCompetitionsByCategory(a: any, b: any): number {
-  const groupA = getCompetitionGroup(a);
-  const groupB = getCompetitionGroup(b);
-
-  // 1. Overall Category group priority: league (1) > cup (2) > youth (3) > other (4) > extinct (5)
-  if (groupA !== groupB) {
-    return GROUP_PRIORITY[groupA] - GROUP_PRIORITY[groupB];
-  }
-
-  // 2. Within 'league': league (1) > league (2) > ...
-  if (groupA === 'league') {
-    const catA = String(a.type || a.categories || '').trim();
-    const catB = String(b.type || b.categories || '').trim();
-    const tierA = getLeagueTier(catA);
-    const tierB = getLeagueTier(catB);
-    if (tierA !== tierB) {
-      return tierA - tierB;
-    }
-    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
-    if (catComp !== 0) return catComp;
-  }
-
-  // 3. Within 'other': real competitions first, then [OTHER] Other Clubs
-  if (groupA === 'other') {
-    const weightA = getOtherWeight(a);
-    const weightB = getOtherWeight(b);
-    if (weightA !== weightB) {
-      return weightA - weightB;
-    }
-    const catA = String(a.type || a.categories || '').trim();
-    const catB = String(b.type || b.categories || '').trim();
-    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
-    if (catComp !== 0) return catComp;
-  }
-
-  // 4. Within 'extinct': real extinct comps first, then [EXTINCT] Extinct Clubs
-  if (groupA === 'extinct') {
-    const weightA = getExtinctWeight(a);
-    const weightB = getExtinctWeight(b);
-    if (weightA !== weightB) {
-      return weightA - weightB;
-    }
-    const catA = String(a.type || a.categories || '').trim();
-    const catB = String(b.type || b.categories || '').trim();
-    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
-    if (catComp !== 0) return catComp;
-  }
-
-  // 5. Within 'cup' or 'youth'
-  if (groupA === 'cup' || groupA === 'youth') {
-    const catA = String(a.type || a.categories || '').trim();
-    const catB = String(b.type || b.categories || '').trim();
-    const catComp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
-    if (catComp !== 0) return catComp;
-  }
-
-  // Fallback: alphabetical by name (name, name_lg, name_sh)
-  const nameA = a.name_lg || a.name_sh || a.name || '';
-  const nameB = b.name_lg || b.name_sh || b.name || '';
-  return String(nameA).localeCompare(String(nameB), undefined, {
-    numeric: true,
-    sensitivity: 'base',
-  });
-}
-
 interface CompetitionGroupViewProps {
   items: any[];
   loading?: boolean;
@@ -212,7 +108,7 @@ export default function CompetitionGroupView({
   };
 
   const sortedAllItems = useMemo(() => {
-    return [...visibleItems].sort(sortCompetitionsByCategory);
+    return visibleItems;
   }, [visibleItems]);
 
   const { leagueItems, cupItems, youthItems, otherItems, extinctItems } = useMemo(() => {
@@ -230,12 +126,6 @@ export default function CompetitionGroupView({
       else if (g === 'extinct') extinct.push(item);
       else other.push(item);
     });
-
-    league.sort(sortCompetitionsByCategory);
-    cup.sort(sortCompetitionsByCategory);
-    youth.sort(sortCompetitionsByCategory);
-    other.sort(sortCompetitionsByCategory);
-    extinct.sort(sortCompetitionsByCategory);
 
     return {
       leagueItems: league,

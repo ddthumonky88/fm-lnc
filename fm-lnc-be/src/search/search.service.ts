@@ -60,6 +60,7 @@ export class SearchService {
         .orWhere('c.name_sh ILIKE :q', { q: `%${term}%` })
         .orWhere('c.name_3l ILIKE :q', { q: `%${term}%` })
         .orWhere('c.id = :idVal', { idVal })
+        .orderBy('c.id', 'ASC')
         .limit(limit)
         .getMany(),
 
@@ -71,6 +72,17 @@ export class SearchService {
         .orWhere('c.name_3l ILIKE :q', { q: `%${term}%` })
         .orWhere('c.type ILIKE :q', { q: `%${term}%` })
         .orWhere('c.id = :idVal', { idVal })
+        .orderBy(
+          `CASE
+            WHEN LOWER(COALESCE(c.type, '')) LIKE '%extinct%' THEN 5
+            WHEN LOWER(COALESCE(c.type, '')) SIMILAR TO '%(youth|reserves|juvenil)%' THEN 3
+            WHEN LOWER(COALESCE(c.type, '')) LIKE '%cup%' THEN 2
+            WHEN LOWER(COALESCE(c.type, '')) SIMILAR TO '%(league|division|tier)%' THEN 1
+            ELSE 4
+          END`,
+          'ASC',
+        )
+        .addOrderBy('c.id', 'ASC')
         .limit(limit)
         .getMany(),
 
@@ -80,6 +92,8 @@ export class SearchService {
         .orWhere('n.name_sh ILIKE :q', { q: `%${term}%` })
         .orWhere('n.name_3l ILIKE :q', { q: `%${term}%` })
         .orWhere('n.id = :idVal', { idVal })
+        .orderBy('n.name_sh', 'ASC', 'NULLS LAST')
+        .addOrderBy('n.id', 'ASC')
         .limit(limit)
         .getMany(),
 
@@ -89,6 +103,7 @@ export class SearchService {
         .where('s.name ILIKE :q', { q: `%${term}%` })
         .orWhere('s.type ILIKE :q', { q: `%${term}%` })
         .orWhere('s.id = :idVal', { idVal })
+        .orderBy('s.id', 'ASC')
         .limit(limit)
         .getMany(),
 
@@ -97,6 +112,8 @@ export class SearchService {
         .leftJoinAndSelect('ci.nation', 'nation')
         .where('ci.name ILIKE :q', { q: `%${term}%` })
         .orWhere('ci.id = :idVal', { idVal })
+        .orderBy('ci.region', 'ASC', 'NULLS LAST')
+        .addOrderBy('ci.id', 'ASC')
         .limit(limit)
         .getMany(),
 
@@ -107,6 +124,7 @@ export class SearchService {
         .where('a.name_lg ILIKE :q', { q: `%${term}%` })
         .orWhere('a.name_sh ILIKE :q', { q: `%${term}%` })
         .orWhere('a.id = :idVal', { idVal })
+        .orderBy('a.id', 'ASC')
         .limit(limit)
         .getMany(),
 
@@ -117,6 +135,7 @@ export class SearchService {
         .orWhere('p.common_name ILIKE :q', { q: `%${term}%` })
         .orWhere("CONCAT(p.first_name, ' ', p.second_name) ILIKE :q", { q: `%${term}%` })
         .orWhere('p.id = :idVal', { idVal })
+        .orderBy('p.id', 'ASC')
         .limit(limit)
         .getMany(),
 
@@ -124,6 +143,7 @@ export class SearchService {
         .createQueryBuilder('st')
         .where('st.name ILIKE :q', { q: `%${term}%` })
         .orWhere('st.id = :idVal', { idVal })
+        .orderBy('st.id', 'ASC')
         .limit(limit)
         .getMany(),
     ]);

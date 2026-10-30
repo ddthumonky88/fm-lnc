@@ -76,38 +76,10 @@ export default function CityGroupView({
       }
     });
 
-    // Sort categories alphabetically, but put [OTHER] and [REMOVE] at the end
-    const getCategoryRank = (key: string): number => {
-      if (!key) return 5;
-      const upper = key.trim().toUpperCase();
-      if (upper === '[REMOVE]' || upper === 'REMOVE' || upper.includes('REMOVE')) return 6;
-      if (
-        upper === '[OTHER]' ||
-        upper === 'OTHER' ||
-        upper === '[OTHERS]' ||
-        upper === 'OTHERS' ||
-        upper.includes('OTHER')
-      )
-        return 4;
-      if (upper.startsWith('[')) return 2;
-      return 1;
-    };
-
-    const sortedKeys = Array.from(map.keys()).sort((a, b) => {
-      const rankA = getCategoryRank(a);
-      const rankB = getCategoryRank(b);
-      if (rankA !== rankB) {
-        return rankA - rankB;
-      }
-      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-    });
+    const sortedKeys = Array.from(map.keys());
 
     const resultGroups: CityCategoryGroup[] = sortedKeys.map((key) => {
-      const groupItems = (map.get(key) || []).sort((a, b) => {
-        const nameA = a.name || a.name_lg || a.name_sh || '';
-        const nameB = b.name || b.name_lg || b.name_sh || '';
-        return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
-      });
+      const groupItems = map.get(key) || [];
       return {
         key,
         label: key,
@@ -117,11 +89,6 @@ export default function CityGroupView({
     });
 
     if (uncategorizedItems.length > 0) {
-      uncategorizedItems.sort((a, b) => {
-        const nameA = a.name || a.name_lg || a.name_sh || '';
-        const nameB = b.name || b.name_lg || b.name_sh || '';
-        return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
-      });
       resultGroups.push({
         key: '__uncategorized__',
         label: 'Uncategorized',
@@ -141,41 +108,7 @@ export default function CityGroupView({
 
   // Sort all items by region (categories), with REMOVE always at the end
   const sortedAllItems = useMemo(() => {
-    const getCategoryRank = (key: string): number => {
-      if (!key) return 5;
-      const upper = key.trim().toUpperCase();
-      if (upper === '[REMOVE]' || upper === 'REMOVE' || upper.includes('REMOVE')) return 6;
-      if (
-        upper === '[OTHER]' ||
-        upper === 'OTHER' ||
-        upper === '[OTHERS]' ||
-        upper === 'OTHERS' ||
-        upper.includes('OTHER')
-      )
-        return 4;
-      if (upper.startsWith('[')) return 2;
-      return 1;
-    };
-
-    return [...items].sort((a, b) => {
-      const catA = (a.region || a.categories || '').trim();
-      const catB = (b.region || b.categories || '').trim();
-
-      const rankA = getCategoryRank(catA);
-      const rankB = getCategoryRank(catB);
-      if (rankA !== rankB) {
-        return rankA - rankB;
-      }
-
-      if (catA && catB && catA !== catB) {
-        const catCmp = catA.localeCompare(catB, undefined, { numeric: true, sensitivity: 'base' });
-        if (catCmp !== 0) return catCmp;
-      }
-
-      const nameA = a.name || a.name_lg || a.name_sh || '';
-      const nameB = b.name || b.name_lg || b.name_sh || '';
-      return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
-    });
+    return items;
   }, [items]);
 
   const regionOptions = useMemo(() => {

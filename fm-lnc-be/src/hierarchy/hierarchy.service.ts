@@ -34,6 +34,18 @@ import {
   mapConfedRef,
 } from '../common/entity-mapper';
 
+const COMPETITION_DEFAULT_SORT = ['_competitionRank,asc', 'id,asc'];
+
+function withDefaultSort<T extends { sort?: string | string[] }>(
+  filter: T | undefined,
+  defaultSort: string[],
+): T & { sort: string | string[] } {
+  return {
+    ...(filter || ({} as T)),
+    sort: filter?.sort || defaultSort,
+  };
+}
+
 @Injectable()
 export class HierarchyService {
   constructor(
@@ -137,7 +149,7 @@ export class HierarchyService {
 
     const items = raw.map((r: any) => mapCompetition(r));
 
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items, withDefaultSort(filter, COMPETITION_DEFAULT_SORT));
   }
 
   async getNationHub(nationId: string) {
@@ -221,7 +233,7 @@ export class HierarchyService {
     );
 
     if (!strNationId) {
-      return paginateAndSort(comps, filter);
+      return paginateAndSort(comps, withDefaultSort(filter, COMPETITION_DEFAULT_SORT));
     }
 
     const countsRaw = await this.clubRepo.query(
@@ -301,7 +313,10 @@ export class HierarchyService {
       virtualItems.push(virtualExtinct);
     }
 
-    return paginateAndSort([...virtualItems, ...comps], filter);
+    return paginateAndSort(
+      [...virtualItems, ...comps],
+      withDefaultSort(filter, COMPETITION_DEFAULT_SORT),
+    );
   }
 
   async searchClubs(filter: ClubSearchQueryDto) {
@@ -378,7 +393,7 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('club.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapClub), filter);
+    return paginateAndSort(items.map(mapClub), withDefaultSort(filter, ['id,asc']));
   }
 
   async getStadiums(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
@@ -410,7 +425,7 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('stadium.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapStadium), filter);
+    return paginateAndSort(items.map(mapStadium), withDefaultSort(filter, ['id,asc']));
   }
 
   async getCities(nationIdOrFilter?: any, legacyFilter?: CityFilterDto) {
@@ -433,7 +448,19 @@ export class HierarchyService {
       qb.where('city.nation_id = :nationId', { nationId: String(nationId) });
     }
 
-    if (filter?.regionId !== undefined && filter?.regionId !== null && String(filter.regionId) !== 'all') {
+    if (
+      filter?.regionCode !== undefined &&
+      filter?.regionCode !== null &&
+      String(filter.regionCode).toLowerCase() !== 'all'
+    ) {
+      if (String(filter.regionCode) === '__uncategorized__') {
+        qb.andWhere('(city.region_id IS NULL OR city.region IS NULL OR TRIM(city.region) = \'\')');
+      } else {
+        qb.andWhere('regionEntity.code = :regionCode', {
+          regionCode: String(filter.regionCode),
+        });
+      }
+    } else if (filter?.regionId !== undefined && filter?.regionId !== null && String(filter.regionId) !== 'all') {
       if (String(filter.regionId) === '__uncategorized__' || Number(filter.regionId) === 0) {
         qb.andWhere('(city.region_id IS NULL OR city.region IS NULL OR TRIM(city.region) = \'\')');
       } else {
@@ -457,7 +484,7 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('city.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapCity), filter);
+    return paginateAndSort(items.map(mapCity), withDefaultSort(filter, ['region,asc', 'id,asc']));
   }
 
   async getRegionsByNation(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
@@ -485,7 +512,7 @@ export class HierarchyService {
       );
     }
 
-    const regions = await qb.orderBy('region.name', 'ASC').getMany();
+    const regions = await qb.orderBy('region.id', 'ASC').getMany();
 
     // Query city counts per region
     let cityCountsQuery = this.cityRepo
@@ -545,7 +572,7 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('award.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapAward), filter);
+    return paginateAndSort(items.map(mapAward), withDefaultSort(filter, ['id,asc']));
   }
 
   async getAwardsByCompetition(compIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {
@@ -566,7 +593,7 @@ export class HierarchyService {
       strCompId === '[OTHER]' ||
       strCompId === '[EXTINCT]'
     ) {
-      return paginateAndSort([], filter);
+      return paginateAndSort([], withDefaultSort(filter, ['id,asc']));
     }
 
     const qb = this.awardRepo
@@ -603,7 +630,7 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('award.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapAward), filter);
+    return paginateAndSort(items.map(mapAward), withDefaultSort(filter, ['id,asc']));
   }
 
   async getCompetitionInfo(compId: string) {
@@ -774,7 +801,7 @@ export class HierarchyService {
 
     const items = raw.map((r: any) => mapCompetition(r));
 
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items, withDefaultSort(filter, COMPETITION_DEFAULT_SORT));
   }
 
   async getAllAwards(filter?: PaginationQueryDto) {
@@ -793,7 +820,7 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('award.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapAward), filter);
+    return paginateAndSort(items.map(mapAward), withDefaultSort(filter, ['id,asc']));
   }
 
   async getPlayers(queryOrFilter?: any) {
@@ -811,7 +838,7 @@ export class HierarchyService {
       );
     }
     const items = await qb.orderBy('p.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items, withDefaultSort(filter, ['id,asc']));
   }
 
   async getStages(queryOrFilter?: any) {
@@ -829,7 +856,7 @@ export class HierarchyService {
       });
     }
     const items = await qb.orderBy('s.id', 'ASC').getMany();
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items, withDefaultSort(filter, ['id,asc']));
   }
 
   async getAllNations(filterOrConfedId?: any, legacyKeyword?: string) {
@@ -893,7 +920,7 @@ export class HierarchyService {
       ),
     );
 
-    return paginateAndSort(items, filter);
+    return paginateAndSort(items, withDefaultSort(filter, ['name_sh,asc', 'id,asc']));
   }
 
   async getContinentInfo(confedId: string) {

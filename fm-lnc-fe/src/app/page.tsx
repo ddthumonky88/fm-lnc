@@ -49,9 +49,7 @@ import {
 import RecordModal from '../components/RecordModal';
 import QuickSearchModal from '../components/QuickSearchModal';
 import CardGrid from '../components/CardGrid';
-import CompetitionGroupView, {
-  sortCompetitionsByCategory,
-} from '../components/CompetitionGroupView';
+import CompetitionGroupView from '../components/CompetitionGroupView';
 import { formatCategoryCode, getCategoryTagColor } from '../components/EntityCard';
 import CityGroupView from '../components/CityGroupView';
 import TabIconBadge from '../components/TabIconBadge';
@@ -400,11 +398,9 @@ export default function LncSortitoutsiExplorer() {
     }
   };
 
-  // Filtered view data with ID ascending sorting
+  // Filtered view data (ordering is provided by the backend)
   const filteredContinents = useMemo(() => {
-    return continents
-      .filter((c) => matchRecordSearch(c, tableFilter))
-      .sort((a, b) => Number(a.id) - Number(b.id));
+    return continents.filter((c) => matchRecordSearch(c, tableFilter));
   }, [continents, tableFilter]);
 
   // Continents Table Columns definition
@@ -520,7 +516,7 @@ export default function LncSortitoutsiExplorer() {
   }, [nations]);
 
   const filteredIntComps = useMemo(() => {
-    return [...intComps].sort(sortCompetitionsByCategory);
+    return intComps;
   }, [intComps]);
 
   const filteredDetailRecords = useMemo(() => {

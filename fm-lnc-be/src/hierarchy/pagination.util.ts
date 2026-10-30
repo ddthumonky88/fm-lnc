@@ -25,6 +25,15 @@ export function parseSortCriteria(sort?: string | string[]): SortCriteria[] {
 
 function getPropertyValue(obj: any, property: string): any {
   if (!obj || !property) return undefined;
+  if (property === '_competitionRank') {
+    const id = String(obj.id || '').toLowerCase();
+    const type = String(obj.type || obj.categories || obj.category || '').toLowerCase();
+    if (id.startsWith('ext-') || type.includes('extinct')) return 5;
+    if (type.includes('youth') || type.includes('reserves') || type.includes('juvenil')) return 3;
+    if (type.includes('cup')) return 2;
+    if (type.includes('league') || type.includes('division') || type.includes('tier')) return 1;
+    return 4;
+  }
   if (obj[property] !== undefined) return obj[property];
   if (property.includes('.')) {
     return property.split('.').reduce((acc, part) => acc?.[part], obj);

@@ -51,18 +51,15 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
       setLoading(true);
       try {
         const res = await quickSearch(searchTerm);
-        // Sort each result group by ID ASC
         setResults({
-          clubs: (res.clubs || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
-          competitions: (res.competitions || []).sort(
-            (a: any, b: any) => Number(a.id) - Number(b.id),
-          ),
-          nations: (res.nations || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
-          stadiums: (res.stadiums || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
-          cities: (res.cities || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
-          awards: (res.awards || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
-          players: (res.players || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
-          stages: (res.stages || []).sort((a: any, b: any) => Number(a.id) - Number(b.id)),
+          clubs: res.clubs || [],
+          competitions: res.competitions || [],
+          nations: res.nations || [],
+          stadiums: res.stadiums || [],
+          cities: res.cities || [],
+          awards: res.awards || [],
+          players: res.players || [],
+          stages: res.stages || [],
         });
       } catch (e) {
         console.error(e);
