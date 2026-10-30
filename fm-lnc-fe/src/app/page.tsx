@@ -678,17 +678,15 @@ export default function LncSortitoutsiExplorer() {
         {/* 1. CONFEDERATIONS */}
         {!loading && currentStep.level === 'CONTINENTS' && (
           <div>
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4 pb-2 border-b border-gray-100">
-              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                <Input
-                  prefix={<SearchOutlined className="text-gray-400" />}
-                  placeholder="Filter confederations..."
-                  value={tableFilter}
-                  onChange={(e) => setTableFilter(e.target.value)}
-                  allowClear
-                  className="flex-1 sm:w-64"
-                />
-              </div>
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100 w-full">
+              <Input
+                prefix={<SearchOutlined className="text-gray-400" />}
+                placeholder="Filter confederations..."
+                value={tableFilter}
+                onChange={(e) => setTableFilter(e.target.value)}
+                allowClear
+                className="w-full"
+              />
             </div>
 
             {/* Confederation Cards - 2 cards per row */}
@@ -819,14 +817,14 @@ export default function LncSortitoutsiExplorer() {
               onDelete={handleDeleteDirect}
               emptyText="No international competitions found"
               extraRight={
-                <>
+                <div className="flex items-center gap-2 w-full">
                   <Input
                     prefix={<SearchOutlined className="text-gray-400" />}
                     placeholder="Filter competitions..."
                     value={tableFilter}
                     onChange={(e) => setTableFilter(e.target.value)}
                     allowClear
-                    className="w-48 sm:w-64"
+                    className="flex-1 min-w-0"
                   />
                   <Button
                     type="primary"
@@ -839,10 +837,8 @@ export default function LncSortitoutsiExplorer() {
                     style={{ backgroundColor: '#059669', borderColor: '#059669' }}
                     className="shrink-0"
                     title="Add International Competition"
-                  >
-                    <span className="hidden sm:inline">Add International Competition</span>
-                  </Button>
-                </>
+                  />
+                </div>
               }
             />
           </div>
@@ -909,7 +905,7 @@ export default function LncSortitoutsiExplorer() {
             })()}
 
             <div className="flex justify-end mb-4">
-              <Space.Compact className="w-full sm:w-64">
+              <Space.Compact className="w-full">
                 <Input
                   placeholder="Search countries..."
                   value={searchInput}
@@ -1014,14 +1010,14 @@ export default function LncSortitoutsiExplorer() {
                           {filteredDetailRecords.length} records)
                         </div>
 
-                        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <div className="flex items-center gap-2 w-full">
                           <Input
                             prefix={<SearchOutlined className="text-gray-400" />}
                             placeholder={`Filter ${currentNationTabObj?.label.toLowerCase() || 'records'}...`}
                             value={tableFilter}
                             onChange={(e) => setTableFilter(e.target.value)}
                             allowClear
-                            className="flex-1 sm:w-64"
+                            className="flex-1 min-w-0"
                           />
                           <Button
                             type="primary"
@@ -1033,11 +1029,7 @@ export default function LncSortitoutsiExplorer() {
                               setIsRecordModalOpen(true);
                             }}
                             title={currentNationTabObj?.addLabel || 'Add Record'}
-                          >
-                            <span className="hidden sm:inline">
-                              {currentNationTabObj?.addLabel || 'Add Record'}
-                            </span>
-                          </Button>
+                          />
                         </div>
                       </div>
                     )}
@@ -1056,8 +1048,8 @@ export default function LncSortitoutsiExplorer() {
                       emptyText="No competitions found"
                       serverPagination={serverPagination}
                       extraRight={
-                        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                          <Space.Compact className="w-48 sm:w-64">
+                        <div className="flex items-center gap-2 w-full">
+                          <Space.Compact className="flex-1 min-w-0">
                             <Input
                               placeholder="Search competitions..."
                               value={searchInput}
@@ -1083,11 +1075,7 @@ export default function LncSortitoutsiExplorer() {
                               setIsRecordModalOpen(true);
                             }}
                             title={currentNationTabObj?.addLabel || 'Add Competition'}
-                          >
-                            <span className="hidden sm:inline">
-                              {currentNationTabObj?.addLabel || 'Add Competition'}
-                            </span>
-                          </Button>
+                          />
                         </div>
                       }
                     />
@@ -1105,8 +1093,8 @@ export default function LncSortitoutsiExplorer() {
                       emptyText="No cities found"
                       serverPagination={serverPagination}
                       extraRight={
-                        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                          <Space.Compact className="w-48 sm:w-64">
+                        <div className="flex items-center gap-2 w-full">
+                          <Space.Compact className="flex-1 min-w-0">
                             <Input
                               placeholder="Search cities..."
                               value={searchInput}
@@ -1132,11 +1120,7 @@ export default function LncSortitoutsiExplorer() {
                               setIsRecordModalOpen(true);
                             }}
                             title={currentNationTabObj?.addLabel || 'Add City'}
-                          >
-                            <span className="hidden sm:inline">
-                              {currentNationTabObj?.addLabel || 'Add City'}
-                            </span>
-                          </Button>
+                          />
                         </div>
                       }
                     />
@@ -1309,7 +1293,7 @@ export default function LncSortitoutsiExplorer() {
                         value={tableFilter}
                         onChange={(e) => setTableFilter(e.target.value)}
                         allowClear
-                        className="w-48 sm:w-60"
+                        className="flex-1 min-w-0"
                       />
                       <Button
                         type="primary"
@@ -1320,16 +1304,13 @@ export default function LncSortitoutsiExplorer() {
                           setIsRecordModalOpen(true);
                         }}
                         title={currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
-                      >
-                        <span className="hidden sm:inline">
-                          {currentStep.level === 'COMP_AWARDS' ? 'Add Award' : 'Add Club'}
-                        </span>
-                      </Button>
+                        className="shrink-0"
+                      />
                     </div>
                   </div>
                 </div>
               ) : currentStep.level !== 'DOMESTIC_COMPS' && currentStep.level !== 'CITIES' ? (
-                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
+                <div className="flex flex-col gap-2.5 mb-4">
                   <div>
                     <h3 className="text-sm font-bold text-gray-700">
                       Detailed Records: {currentStep.title}
@@ -1339,14 +1320,14 @@ export default function LncSortitoutsiExplorer() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <div className="flex items-center gap-2 w-full">
                     <Input
                       prefix={<SearchOutlined className="text-gray-400" />}
                       placeholder="Filter records..."
                       value={tableFilter}
                       onChange={(e) => setTableFilter(e.target.value)}
                       allowClear
-                      className="flex-1 sm:w-64"
+                      className="flex-1 min-w-0"
                     />
                     <Button
                       type="primary"
@@ -1374,25 +1355,7 @@ export default function LncSortitoutsiExplorer() {
                                       ? 'Add City'
                                       : 'Add Record'
                       }
-                    >
-                      <span className="hidden sm:inline">
-                        {currentRecordType === RecordType.PLAYER
-                          ? 'Add Player'
-                          : currentRecordType === RecordType.STAGE
-                            ? 'Add Stage'
-                            : currentRecordType === RecordType.AWARD
-                              ? 'Add Award'
-                              : currentRecordType === RecordType.CLUB
-                                ? 'Add Club'
-                                : currentRecordType === RecordType.COMPETITION
-                                  ? 'Add Competition'
-                                  : currentRecordType === RecordType.STADIUM
-                                    ? 'Add Stadium'
-                                    : currentRecordType === RecordType.CITY
-                                      ? 'Add City'
-                                      : 'Add Record'}
-                      </span>
-                    </Button>
+                    />
                   </div>
                 </div>
               ) : null}
@@ -1411,8 +1374,8 @@ export default function LncSortitoutsiExplorer() {
                   emptyText="No competitions found"
                   serverPagination={serverPagination}
                   extraRight={
-                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                      <Space.Compact className="w-48 sm:w-64">
+                    <div className="flex items-center gap-2 w-full">
+                      <Space.Compact className="flex-1 min-w-0">
                         <Input
                           placeholder="Search competitions..."
                           value={searchInput}
@@ -1438,9 +1401,7 @@ export default function LncSortitoutsiExplorer() {
                           setIsRecordModalOpen(true);
                         }}
                         title="Add Competition"
-                      >
-                        <span className="hidden sm:inline">Add Competition</span>
-                      </Button>
+                      />
                     </div>
                   }
                 />
@@ -1458,8 +1419,8 @@ export default function LncSortitoutsiExplorer() {
                   emptyText="No cities found"
                   serverPagination={serverPagination}
                   extraRight={
-                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                      <Space.Compact className="w-48 sm:w-64">
+                    <div className="flex items-center gap-2 w-full">
+                      <Space.Compact className="flex-1 min-w-0">
                         <Input
                           placeholder="Search cities..."
                           value={searchInput}
@@ -1485,9 +1446,7 @@ export default function LncSortitoutsiExplorer() {
                           setIsRecordModalOpen(true);
                         }}
                         title="Add City"
-                      >
-                        <span className="hidden sm:inline">Add City</span>
-                      </Button>
+                      />
                     </div>
                   }
                 />

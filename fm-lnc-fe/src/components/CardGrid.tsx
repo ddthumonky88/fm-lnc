@@ -132,19 +132,14 @@ export default function CardGrid({
       </div>
 
       {totalRecords > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-5 pt-3 border-t border-gray-100 gap-2">
-          <span className="text-xs text-gray-500">
-            Showing {showingStart} - {showingEnd} of {totalRecords} records
-          </span>
+        <div className="flex flex-col items-center justify-center mt-4 pt-3 border-t border-gray-100 gap-1.5 text-center w-full">
           <Pagination
             current={currentPage}
             pageSize={currentPageSize}
             total={totalRecords}
-            pageSizeOptions={['10', '20', '30', '40', '50', '100']}
-            showSizeChanger
-            showQuickJumper
+            showSizeChanger={false}
+            showQuickJumper={false}
             size="small"
-            responsive
             onChange={(p, s) => {
               if (isServer) {
                 serverPagination!.onChange(p, s);
@@ -154,6 +149,9 @@ export default function CardGrid({
               }
             }}
           />
+          <span className="text-[11px] text-gray-400">
+            Showing {showingStart} - {showingEnd} of {totalRecords} records
+          </span>
         </div>
       )}
     </div>

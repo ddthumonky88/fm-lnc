@@ -323,7 +323,7 @@ function ConfederationDetailContent() {
             {activeTab === 'NATIONS' && (
               <div>
                 <div className="flex justify-end mb-4">
-                  <Space.Compact className="w-full sm:w-64">
+                  <Space.Compact className="w-full">
                     <Input
                       placeholder="Search countries..."
                       value={searchInput}
@@ -372,8 +372,8 @@ function ConfederationDetailContent() {
                   emptyText="No international competitions found"
                   serverPagination={serverPagination}
                   extraRight={
-                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                      <Space.Compact className="flex-1 sm:w-64">
+                    <div className="flex items-center gap-2 w-full">
+                      <Space.Compact className="flex-1 min-w-0">
                         <Input
                           placeholder="Search competitions..."
                           value={searchInput}
@@ -403,9 +403,7 @@ function ConfederationDetailContent() {
                         style={{ backgroundColor: '#059669', borderColor: '#059669' }}
                         className="shrink-0"
                         title="Add International Competition"
-                      >
-                        <span className="hidden sm:inline">Add International Competition</span>
-                      </Button>
+                      />
                     </div>
                   }
                 />

@@ -654,41 +654,35 @@ function CompetitionDetailContent() {
 
           {/* Sub Toolbar: Count, Filter, Add (only for list tabs) */}
           {activeTab !== 'INFO' && (
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
-              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                <Input
-                  prefix={<SearchOutlined className="text-gray-400" />}
-                  placeholder={activeTab === 'CLUBS' ? 'Filter clubs...' : 'Filter awards...'}
-                  value={tableFilter}
-                  onChange={(e) => setTableFilter(e.target.value)}
-                  onPressEnter={() => setDebouncedKeyword(tableFilter.trim())}
-                  allowClear
-                  className="flex-1 sm:w-60"
-                />
+            <div className="flex items-center gap-2 mb-4 w-full">
+              <Input
+                prefix={<SearchOutlined className="text-gray-400" />}
+                placeholder={activeTab === 'CLUBS' ? 'Filter clubs...' : 'Filter awards...'}
+                value={tableFilter}
+                onChange={(e) => setTableFilter(e.target.value)}
+                onPressEnter={() => setDebouncedKeyword(tableFilter.trim())}
+                allowClear
+                className="flex-1 min-w-0"
+              />
 
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => {
-                    if (activeTab === 'CLUBS') {
-                      openRecordModal(
-                        RecordType.CLUB,
-                        isVirtual ? { is_extinct: isVirtualExtinct, nation_id: nationId } : null,
-                        nationId,
-                        isVirtual ? undefined : compId,
-                      );
-                    } else {
-                      openRecordModal(RecordType.AWARD, null, nationId, compId);
-                    }
-                  }}
-                  className="bg-blue-600 shrink-0"
-                  title={activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
-                >
-                  <span className="hidden sm:inline">
-                    {activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
-                  </span>
-                </Button>
-              </div>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  if (activeTab === 'CLUBS') {
+                    openRecordModal(
+                      RecordType.CLUB,
+                      isVirtual ? { is_extinct: isVirtualExtinct, nation_id: nationId } : null,
+                      nationId,
+                      isVirtual ? undefined : compId,
+                    );
+                  } else {
+                    openRecordModal(RecordType.AWARD, null, nationId, compId);
+                  }
+                }}
+                className="bg-blue-600 shrink-0"
+                title={activeTab === 'CLUBS' ? 'Add Club' : 'Add Award'}
+              />
             </div>
           )}
 
