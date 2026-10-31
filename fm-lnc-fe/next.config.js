@@ -82,6 +82,12 @@ const nextConfig = {
         basePath: false,
         permanent: false,
       },
+      {
+        source: '/.well-known/appspecific/com.chrome.devtools.json',
+        destination: '/fm/chrome-devtools-probe',
+        basePath: false,
+        permanent: false,
+      },
     ];
   },
   async rewrites() {

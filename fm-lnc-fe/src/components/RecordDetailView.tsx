@@ -12,7 +12,6 @@ import {
   AppstoreOutlined,
   BranchesOutlined,
   TrophyOutlined,
-  RightOutlined,
 } from '@ant-design/icons';
 import { EntityType, RecordType } from '../types';
 import {
@@ -478,15 +477,14 @@ export default function RecordDetailView({
                         onNavigateConfed(String(confedId));
                       }
                     }}
-                    className={`font-bold text-xs sm:text-[13px] shrink-0 ${
+                    className={`shrink-0 rounded border px-1.5 py-0.5 font-mono text-[10px] font-bold leading-none ${
                       confedId && onNavigateConfed
-                        ? 'text-blue-600 hover:underline cursor-pointer'
-                        : getValueClass(['confed_id', 'confed'])
+                        ? 'cursor-pointer border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                        : `border-slate-200 bg-slate-50 ${getValueClass(['confed_id', 'confed'])}`
                     }`}
                   >
                     {confedName}
                   </button>
-                  <RightOutlined className="text-[9px] text-slate-400 shrink-0" />
                 </>
               )}
               {getNationLogoUrl(nationId, nationCode) ? (
