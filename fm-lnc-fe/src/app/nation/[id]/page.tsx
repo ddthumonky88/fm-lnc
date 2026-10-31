@@ -43,6 +43,7 @@ import TabIconBadge from '../../../components/TabIconBadge';
 import { EntityType, RecordType, NationTabKey, NationTabKeyValue } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { matchRecordSearch } from '../../../utils/search';
+import { buildEntityBreadcrumbs } from '../../../utils/breadcrumbs';
 
 const CONFED_ID_MAP: Record<string, string> = {
   '1': 'CAF',
@@ -222,24 +223,13 @@ export default function NationDetailPage() {
 
       setHeaderId(nation?.id);
       setHeaderTitle(nationTitle);
-      setBackHref(confedName ? `/confed/${confedName}` : '/');
-      setBreadcrumbs([
-        {
-          title: 'FM',
-          href: '/',
-        },
-        ...(confedName
-          ? [
-              {
-                title: confedName,
-                href: `/confed/${confedName}`,
-              },
-            ]
-          : []),
-        {
-          title: nationCode || nationId,
-        },
-      ]);
+      setBackHref('/home');
+      setBreadcrumbs(
+        buildEntityBreadcrumbs({
+          nationId: nation?.id || nationId,
+          nationCode: nationCode || nationId,
+        }),
+      );
       setHeaderLogo({
         url: getNationLogoUrl(nation?.id || nationId, nationCode),
         alt: nationName || `Nation ${nationId}`,
@@ -771,7 +761,7 @@ export default function NationDetailPage() {
                 regions: nationHub.stats.region,
               }}
               onEdit={() => openRecordModal(EntityType.NATION, nationHub)}
-              onNavigateConfed={(cId) => router.push(`/confed/${cId}`)}
+              onNavigateConfed={() => router.push('/home')}
               onSwitchTab={(tab) => handleSwitchTab(tab as NationTabKeyValue)}
               onNavigateFakeComp={(fakeId) => router.push(`/comp/${fakeId}`)}
             />

@@ -1,14 +1,33 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  // Keep development cache separate from production builds. Mixing `next dev`
+  // and `next build/start` in the same directory can leave stale artifacts on Windows.
+  distDir: process.env.NODE_ENV === 'development' ? '.next-dev' : '.next',
   transpilePackages: ['antd', '@ant-design/icons', '@ant-design/nextjs-registry'],
   basePath: '/fm',
+  webpack(config, { dev }) {
+    if (dev) {
+      // Polling makes HMR reliable on Windows drives where file events can be missed.
+      config.watchOptions = {
+        ...config.watchOptions,
+        aggregateTimeout: 300,
+        poll: 1000,
+      };
+    }
+    return config;
+  },
   async redirects() {
     return [
       {
         source: '/',
         destination: '/fm',
         basePath: false,
+        permanent: false,
+      },
+      {
+        source: '/',
+        destination: '/home',
         permanent: false,
       },
       {
@@ -25,13 +44,18 @@ const nextConfig = {
       },
       {
         source: '/confederation',
-        destination: '/fm',
+        destination: '/fm/home',
         basePath: false,
         permanent: true,
       },
       {
         source: '/confederation',
         destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/confed/:path*',
+        destination: '/home',
         permanent: true,
       },
       {

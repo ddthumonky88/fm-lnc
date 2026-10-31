@@ -12,6 +12,7 @@ import {
   AppstoreOutlined,
   BranchesOutlined,
   TrophyOutlined,
+  RightOutlined,
 } from '@ant-design/icons';
 import { EntityType, RecordType } from '../types';
 import {
@@ -82,6 +83,7 @@ export interface RecordDetailViewProps {
   data: any;
   type: EntityType | RecordType | string;
   showHeader?: boolean;
+  hideClubAffiliates?: boolean;
   counts?: {
     domesticComps?: number;
     stadiums?: number;
@@ -111,6 +113,7 @@ export default function RecordDetailView({
   data,
   type,
   showHeader = false,
+  hideClubAffiliates = false,
   counts,
   onEdit,
   onNavigateConfed,
@@ -400,6 +403,18 @@ export default function RecordDetailView({
               </span>
             </div>
 
+            {/* 6N */}
+            {(isClub || currentData.name_6l !== undefined) && (
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6N:</span>
+                <span
+                  className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
+                >
+                  {currentData.name_6l || '-'}
+                </span>
+              </div>
+            )}
+
             {/* 3N */}
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>
@@ -414,20 +429,8 @@ export default function RecordDetailView({
           </>
         )}
 
-        {/* 6N (Club) */}
-        {(isClub || currentData.name_6l !== undefined) && (
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6N:</span>
-            <span
-              className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
-            >
-              {currentData.name_6l || '-'}
-            </span>
-          </div>
-        )}
-
         {/* Confederation (for International Competition or Nation or Comp) */}
-        {(isInternationalComp || isNation || (!isConfed && (confedId || confedName))) && (
+        {(isInternationalComp || isNation || (!isClub && !isConfed && (confedId || confedName))) && (
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>
               Confed:
@@ -465,6 +468,27 @@ export default function RecordDetailView({
                 nationId && onNavigateNation ? 'cursor-pointer group' : ''
               }`}
             >
+              {isClub && confedName && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (confedId && onNavigateConfed) {
+                        onNavigateConfed(String(confedId));
+                      }
+                    }}
+                    className={`font-bold text-xs sm:text-[13px] shrink-0 ${
+                      confedId && onNavigateConfed
+                        ? 'text-blue-600 hover:underline cursor-pointer'
+                        : getValueClass(['confed_id', 'confed'])
+                    }`}
+                  >
+                    {confedName}
+                  </button>
+                  <RightOutlined className="text-[9px] text-slate-400 shrink-0" />
+                </>
+              )}
               {getNationLogoUrl(nationId, nationCode) ? (
                 <img
                   src={getNationLogoUrl(nationId, nationCode)}
@@ -570,7 +594,7 @@ export default function RecordDetailView({
         )}
 
         {/* Club Affiliate Info */}
-        {isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
+        {!hideClubAffiliates && isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
           <>
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
@@ -616,7 +640,7 @@ export default function RecordDetailView({
         )}
 
         {/* First Team Affiliates list */}
-        {isClub && currentData.affiliates && currentData.affiliates.length > 0 && (
+        {!hideClubAffiliates && isClub && currentData.affiliates && currentData.affiliates.length > 0 && (
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
             <span className={getLabelClass(['affiliates'], 'pt-0.5')}>
               Affiliates ({currentData.affiliates.length}):
@@ -834,10 +858,7 @@ export default function RecordDetailView({
       </div>
 
       {/* 3. Scope & Status Badges */}
-      {(currentData.is_extinct ||
-        isVirtual ||
-        currentData.is_disabled ||
-        inactiveList.length > 0) && (
+      {(currentData.is_extinct || isVirtual || currentData.is_disabled) && (
         <div className="flex items-center gap-1.5 flex-wrap">
           {currentData.is_disabled && (
             <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
@@ -855,15 +876,6 @@ export default function RecordDetailView({
                 ? 'Extinct Clubs Container'
                 : 'Independent Clubs Container'}
             </Tag>
-          )}
-          {inactiveList.length > 0 && (
-            <>
-              {inactiveList.map((f: string) => (
-                <Tag key={f} color="error" className="text-xs font-mono font-medium m-0">
-                  {f}
-                </Tag>
-              ))}
-            </>
           )}
         </div>
       )}

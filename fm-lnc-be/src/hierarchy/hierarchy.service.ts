@@ -1103,21 +1103,58 @@ export class HierarchyService {
 
     const familyClubs = await this.clubRepo.find({
       where: [{ id: rootClubId }, { affiliate_club_id: rootClubId }],
-      relations: ['competition', 'nation'],
+      relations: [
+        'nation',
+        'competition',
+        'competition.nation',
+        'competition.parent',
+        'affiliateClub',
+        'affiliateClub.nation',
+      ],
       order: { id: 'ASC' },
     });
 
-    const mapped = mapClub({
-      ...club,
-      nation: effectiveNation,
-      confed: effectiveConfed,
+    // Ensure root club is first, then other family clubs
+    const sortedFamilyClubs = [
+      ...familyClubs.filter((c) => String(c.id) === rootClubId),
+      ...familyClubs.filter((c) => String(c.id) !== rootClubId),
+    ];
+
+    const mappedFamilyTeams = sortedFamilyClubs.map((fc) => {
+      const effNation =
+        fc.nation ||
+        fc.competition?.nation ||
+        fc.affiliateClub?.nation ||
+        effectiveNation;
+      const effConfed =
+        fc.nation?.confed ||
+        fc.competition?.confed ||
+        fc.competition?.nation?.confed ||
+        fc.affiliateClub?.nation?.confed ||
+        effectiveConfed;
+      return mapClub({
+        ...fc,
+        nation: effNation,
+        confed: effConfed,
+      });
     });
+
+    const mapped =
+      mappedFamilyTeams.find((c) => String(c.id) === strId) ||
+      mapClub({
+        ...club,
+        nation: effectiveNation,
+        confed: effectiveConfed,
+      });
+
+    const affiliatesList = mappedFamilyTeams.filter((c) => String(c.id) !== strId);
 
     return {
       ...mapped,
-      affiliates: familyClubs.filter((c) => String(c.id) !== strId).map(mapClub),
-      affiliatesCount: familyClubs.filter((c) => String(c.id) !== strId).length,
-      familyTeams: familyClubs.map(mapClub),
+      affiliates: affiliatesList,
+      affiliatesCount: affiliatesList.length,
+      familyTeams: mappedFamilyTeams,
+      rootClubId,
     };
   }
 

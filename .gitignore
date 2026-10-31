@@ -13,6 +13,7 @@ dist/
 fm-lnc-be/dist/
 .next/
 fm-lnc-fe/.next/
+fm-lnc-fe/.next-dev/
 out/
 fm-lnc-fe/out/
 *.tsbuildinfo

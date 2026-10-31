@@ -243,6 +243,83 @@ body.desktop-bg {
     monospace !important;
 }
 
+/* Club family selector: parent team > selected affiliate */
+.family-team-select.ant-select-single {
+  height: 46px;
+}
+
+.family-team-select.ant-select-single .ant-select-selector {
+  padding-inline: 14px !important;
+  border-radius: 9px !important;
+  border-color: #cbd5e1 !important;
+  background: #f8fafc !important;
+  box-shadow: none !important;
+}
+
+.family-team-select.ant-select-focused .ant-select-selector,
+.family-team-select:hover .ant-select-selector {
+  border-color: #3b82f6 !important;
+}
+
+.family-team-select-dropdown .ant-select-item {
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 7px;
+}
+
+.family-team-select-dropdown .ant-select-item-option-selected {
+  background: #eff6ff !important;
+  color: #1d4ed8;
+}
+
+/* Home hub responds to the card width (including the mobile preview frame). */
+.home-hub {
+  container-type: inline-size;
+}
+
+.home-tab-short {
+  display: none;
+}
+
+@container (max-width: 560px) {
+  .home-hub-toolbar > * {
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .home-hub-tabs .ant-tabs-nav {
+    margin-bottom: 12px;
+  }
+
+  .home-hub-tabs .ant-tabs-nav-list {
+    width: 100%;
+  }
+
+  .home-hub-tabs .ant-tabs-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    margin: 0 !important;
+    padding-inline: 4px;
+  }
+
+  .home-hub-tabs .ant-tabs-tab-btn {
+    max-width: 100%;
+  }
+
+  .home-tab-label {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .home-tab-full {
+    display: none;
+  }
+
+  .home-tab-short {
+    display: inline;
+  }
+}
+
 /* ==================== MODAL STYLES (ALWAYS MOBILE FORM INSIDE FRAME) ==================== */
 /* Constrain Ant Design modals inside mobile frame when rendered there */
 #mobile-frame-root .ant-modal-root,
@@ -376,4 +453,63 @@ body.desktop-bg {
 body:has(.ant-modal-root .ant-modal-wrap:not([style*='display: none'])) .ant-tooltip {
   display: none !important;
   visibility: hidden !important;
+}
+
+/* Ant Design Tabs Wrapping: Cho phép các tab tự động xuống dòng (flex-wrap) khi tràn */
+.tabs-wrap .ant-tabs-nav {
+  margin-bottom: 12px !important;
+  width: 100% !important;
+}
+
+.tabs-wrap .ant-tabs-nav-wrap {
+  flex-wrap: wrap !important;
+  overflow: visible !important;
+  width: 100% !important;
+}
+
+.tabs-wrap .ant-tabs-nav-wrap::before,
+.tabs-wrap .ant-tabs-nav-wrap::after {
+  display: none !important;
+}
+
+.tabs-wrap .ant-tabs-nav-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  transform: none !important;
+  width: 100% !important;
+  gap: 6px 8px !important;
+}
+
+.tabs-wrap .ant-tabs-nav-operations {
+  display: none !important;
+}
+
+.tabs-wrap .ant-tabs-tab {
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease-in-out !important;
+  border: 1px solid #e2e8f0 !important;
+  background-color: #ffffff !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+}
+
+.tabs-wrap .ant-tabs-tab:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+.tabs-wrap .ant-tabs-tab-active {
+  background-color: #eff6ff !important;
+  border-color: #93c5fd !important;
+  border-bottom: 2px solid #2563eb !important;
+  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.08) !important;
+}
+
+.tabs-wrap .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1d4ed8 !important;
+}
+
+.tabs-wrap .ant-tabs-ink-bar {
+  display: none !important;
 }

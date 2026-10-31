@@ -38,6 +38,7 @@ import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
 import { formatCategoryCode, getCategoryTagColor } from '../../../components/EntityCard';
 import { matchRecordSearch } from '../../../utils/search';
+import { buildEntityBreadcrumbs } from '../../../utils/breadcrumbs';
 
 const CONFED_ID_MAP: Record<string, string> = {
   '1': 'CAF',
@@ -190,27 +191,13 @@ function CompetitionDetailContent() {
         setHeaderTitle(virtualTitle);
         setHeaderId(virtualTag);
 
-        const crumbs: any[] = [
-          {
-            title: 'FM',
-            href: '/',
-          },
-        ];
-        if (confedId) {
-          crumbs.push({
-            title: confedName,
-            href: `/confed/${confedId}`,
-          });
-        }
-        crumbs.push({
-          title: nationCode || nationName,
-          href: `/nation/${targetNationId}`,
-        });
-        crumbs.push({
-          title: String(compId),
-        });
-
-        setBreadcrumbs(crumbs);
+        setBreadcrumbs(
+          buildEntityBreadcrumbs({
+            nationId: targetNationId,
+            nationCode: nationCode || nationName,
+            entityTitle: virtualTitle,
+          }),
+        );
         setBackHref(`/nation/${targetNationId}`);
 
         setHeaderLogo({
@@ -257,39 +244,20 @@ function CompetitionDetailContent() {
           null;
         const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
 
-        // Unified breadcrumb: FM > {CONFED} > {NATION_3L} > {COMP_ID} (even for sub-comps)
-        const crumbs: any[] = [
-          {
-            title: 'FM',
-            href: '/',
-          },
-        ];
-        if (confedName) {
-          crumbs.push({
-            title: confedName,
-            href: `/confed/${confedName}`,
-          });
-        }
-        if (nationId) {
-          crumbs.push({
-            title: nationCode || nationId,
-            href: `/nation/${nationId}`,
-          });
-        }
-        crumbs.push({
-          title: String(compId),
-        });
-
-        setBreadcrumbs(crumbs);
+        setBreadcrumbs(
+          buildEntityBreadcrumbs({
+            nationId,
+            nationCode: nationCode || nationId,
+            entityTitle: info.name_sh || info.name_lg || info.name,
+          }),
+        );
         const parentId = info.parent_comp?.id || info.parent_id || info.parent?.id;
         setBackHref(
           parentId
             ? `/comp/${parentId}${nationId ? `?nationId=${nationId}` : ''}`
             : nationId
               ? `/nation/${nationId}`
-              : confedName
-                ? `/confed/${confedName}`
-                : '/',
+              : '/home',
         );
 
         if (nationId) {
@@ -840,7 +808,7 @@ function CompetitionDetailContent() {
                       )
                   : undefined
               }
-              onNavigateConfed={(cId) => router.push(`/confed/${cId}`)}
+              onNavigateConfed={() => router.push('/home')}
               onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
               onNavigateParentComp={(pId) =>
                 router.push(`/comp/${pId}${nationId ? `?nationId=${nationId}` : ''}`)

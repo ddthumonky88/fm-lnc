@@ -1210,8 +1210,7 @@ export default function RecordDetailModal({
             {/* Scope & Status Badges */}
             {(currentData.is_extinct ||
               isVirtual ||
-              ((isCity || isStadium) && currentData.is_disabled) ||
-              inactiveList.length > 0) && (
+              ((isCity || isStadium) && currentData.is_disabled)) && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 {(isCity || isStadium) && currentData.is_disabled && (
                   <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
@@ -1229,15 +1228,6 @@ export default function RecordDetailModal({
                       ? 'Extinct Clubs Container'
                       : 'Independent Clubs Container'}
                   </Tag>
-                )}
-                {inactiveList.length > 0 && (
-                  <>
-                    {inactiveList.map((f: string) => (
-                      <Tag key={f} color="error" className="text-xs font-mono font-medium m-0">
-                        {f}
-                      </Tag>
-                    ))}
-                  </>
                 )}
               </div>
             )}

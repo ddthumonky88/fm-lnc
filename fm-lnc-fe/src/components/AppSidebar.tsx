@@ -51,7 +51,6 @@ export default function AppSidebar({
   const isHierarchyActive =
     pathname === '/' ||
     pathname.startsWith('/tree') ||
-    pathname.startsWith('/confed') ||
     pathname.startsWith('/nation') ||
     pathname.startsWith('/comp');
   const isPlayersActive = pathname === '/players';
