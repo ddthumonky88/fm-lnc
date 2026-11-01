@@ -483,18 +483,37 @@ export default function RecordDetailModal({
       const n3l = (payload.name_3l || '').trim().toUpperCase();
       const nName = (payload.name || nLg || nSh || '').trim();
 
-      payload.name = nName;
-      payload.name_lg = nLg;
-      payload.name_sh = nSh;
-      payload.name_6l = n6l || null;
-      payload.name_3l = n3l || null;
-
       if (isCity || isStadium || isStage) {
+        payload.name = nName;
+        payload.name_lg = null;
+        payload.name_sh = null;
+        payload.name_6l = null;
+        payload.name_3l = null;
         if (!nName) throw new Error('Please enter Name');
       } else if (isPlayer) {
         if (!payload.first_name?.trim()) throw new Error('Please enter First Name');
         if (!payload.second_name?.trim()) throw new Error('Please enter Second Name');
+      } else if (isAward) {
+        payload.name = nLg;
+        payload.name_lg = nLg;
+        payload.name_sh = nSh;
+        payload.name_6l = null;
+        payload.name_3l = null;
+        if (!nLg) throw new Error('Please enter Long Name (LN)');
+      } else if (isClub) {
+        payload.name = nLg;
+        payload.name_lg = nLg;
+        payload.name_sh = nSh;
+        payload.name_6l = n6l || null;
+        payload.name_3l = n3l || null;
+        if (!nLg) throw new Error('Please enter Long Name (LN)');
       } else {
+        // Nation, Comp
+        payload.name = nLg;
+        payload.name_lg = nLg;
+        payload.name_sh = nSh;
+        payload.name_6l = null;
+        payload.name_3l = n3l || null;
         if (!nLg) throw new Error('Please enter Long Name (LN)');
       }
 
@@ -807,7 +826,118 @@ export default function RecordDetailModal({
                     {currentData.name || currentData.name_lg || '-'}
                   </span>
                 </div>
+              ) : isClub ? (
+                <>
+                  {/* LN */}
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
+                    <span
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={
+                        currentData.is_virtual
+                          ? '-'
+                          : currentData.name_lg || currentData.name || title
+                      }
+                    >
+                      {currentData.is_virtual
+                        ? '-'
+                        : currentData.name_lg || currentData.name || title}
+                    </span>
+                  </div>
+
+                  {/* SN */}
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
+                    <span
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={currentData.is_virtual ? '-' : currentData.name_sh || '-'}
+                    >
+                      {currentData.is_virtual ? '-' : currentData.name_sh || '-'}
+                    </span>
+                  </div>
+
+                  {/* 6N */}
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['name_6l'], 'pt-0.5')}>
+                      6N:
+                    </span>
+                    <span
+                      className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
+                    >
+                      {currentData.name_6l || '-'}
+                    </span>
+                  </div>
+
+                  {/* 3N */}
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span
+                      className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}
+                    >
+                      3N:
+                    </span>
+                    <span
+                      className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
+                    >
+                      {currentData.is_virtual
+                        ? '-'
+                        : currentData.name_3l || currentData.code || '-'}
+                    </span>
+                  </div>
+                </>
+              ) : isAward ? (
+                <>
+                  {/* LN */}
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
+                    <span
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={currentData.name_lg || currentData.name || title}
+                    >
+                      {currentData.name_lg || currentData.name || title}
+                    </span>
+                  </div>
+
+                  {/* SN */}
+                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
+                    <span
+                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
+                      title={currentData.name_sh || currentData.name || '-'}
+                    >
+                      {currentData.name_sh || currentData.name || '-'}
+                    </span>
+                  </div>
+                </>
               ) : (
+                /* Nation, Comp */
                 <>
                   {/* LN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
@@ -866,20 +996,6 @@ export default function RecordDetailModal({
                         : currentData.name_3l || nationCode || '-'}
                     </span>
                   </div>
-
-                  {/* 6N */}
-                  {(isClub || currentData.name_6l !== undefined) && (
-                    <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                      <span className={getLabelClass(['name_6l'], 'pt-0.5')}>
-                        6N:
-                      </span>
-                      <span
-                        className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
-                      >
-                        {currentData.name_6l || '-'}
-                      </span>
-                    </div>
-                  )}
                 </>
               )}
 
@@ -1339,8 +1455,117 @@ export default function RecordDetailModal({
                   </div>
                 )}
               </div>
+            ) : isAward ? (
+              /* Award Fields: name_lg, name_sh */
+              <div className="space-y-3">
+                <div>
+                  <label className={getFormLabelClass(['name_lg', 'name'])}>
+                    Long name<span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={formData.name_lg ?? ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        name_lg: e.target.value,
+                      })
+                    }
+                    placeholder="Enter long name..."
+                    className="rounded-lg"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className={getFormLabelClass(['name_sh'])}>Short name</label>
+                  <Input
+                    value={formData.name_sh ?? ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        name_sh: e.target.value,
+                      })
+                    }
+                    placeholder="Enter short name..."
+                    className="rounded-lg"
+                  />
+                </div>
+              </div>
+            ) : isClub ? (
+              /* Club Fields: name_lg, name_sh, name_6l, name_3l */
+              <div className="space-y-3">
+                <div>
+                  <label className={getFormLabelClass(['name_lg', 'name'])}>
+                    Long name<span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={formData.name_lg ?? ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        name_lg: e.target.value,
+                      })
+                    }
+                    placeholder="Enter long name..."
+                    className="rounded-lg"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={getFormLabelClass(['name_sh'])}>Short name</label>
+                  <Input
+                    value={formData.name_sh ?? ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        name_sh: e.target.value,
+                      })
+                    }
+                    placeholder="Enter short name..."
+                    className="rounded-lg"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={getFormLabelClass(['name_6l'])}>
+                      6-Letter name
+                    </label>
+                    <Input
+                      value={formData.name_6l ?? ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          name_6l: e.target.value,
+                        })
+                      }
+                      placeholder="Enter 6-letter name..."
+                      maxLength={6}
+                      className="font-mono rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className={getFormLabelClass(['name_3l', 'code'])}>
+                      3-Letter name
+                    </label>
+                    <Input
+                      value={formData.name_3l ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value.toUpperCase();
+                        setFormData({
+                          ...formData,
+                          name_3l: val,
+                        });
+                      }}
+                      placeholder="Enter 3-letter name..."
+                      maxLength={3}
+                      className="font-mono uppercase rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
             ) : (
-              /* Club / Competition / Award / Nation Fields */
+              /* Nation / Competition Fields: name_lg, name_sh, name_3l */
               <div className="space-y-3">
                 <div>
                   <label className={getFormLabelClass(['name_lg', 'name'])}>
@@ -1394,26 +1619,6 @@ export default function RecordDetailModal({
                     />
                   </div>
                 </div>
-
-                {isClub && (
-                  <div>
-                    <label className={getFormLabelClass(['name_6l'])}>
-                      6-Letter name
-                    </label>
-                    <Input
-                      value={formData.name_6l ?? ''}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          name_6l: e.target.value,
-                        })
-                      }
-                      placeholder="Enter 6-letter name..."
-                      maxLength={6}
-                      className="font-mono rounded-lg"
-                    />
-                  </div>
-                )}
               </div>
             )}
 

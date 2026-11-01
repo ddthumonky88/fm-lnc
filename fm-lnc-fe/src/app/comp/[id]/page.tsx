@@ -1,70 +1,32 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Breadcrumb, Tag, Badge, Input, Button, message, Spin, Tabs, Space, Tooltip } from 'antd';
-import {
-  SafetyOutlined,
-  StarOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  ArrowLeftOutlined,
-  TrophyOutlined,
-  CopyOutlined,
-  CheckOutlined,
-  BranchesOutlined,
-  InfoCircleOutlined,
-  EditOutlined,
-} from '@ant-design/icons';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { Button, Tag, App, Spin } from 'antd';
 import {
   fetchCompetitionInfo,
-  fetchClubsInComp,
-  fetchAwardsInComp,
-  fetchSubCompetitions,
-  fetchIndependentClubs,
-  fetchNationInfo,
-  getNationLogoUrl,
-  getConfederationLogoUrl,
   deleteRecord,
-  CompetitionItem,
-  ClubItem,
-  AwardItem,
+  getConfederationLogoUrl,
+  getNationLogoUrl,
 } from '../../../services/api';
-import CardGrid from '../../../components/CardGrid';
+import DetailBodyHeader from '../../../components/DetailBodyHeader';
+import ChildEntitiesSection from '../../../components/ChildEntitiesSection';
 import RecordDetailView from '../../../components/RecordDetailView';
-import TabIconBadge from '../../../components/TabIconBadge';
-import { CompIcon, DomesticCompIcon, ClubIcon, AwardIcon } from '../../../components/EntityIcons';
+import DeleteConfirmModal from '../../../components/DeleteConfirmModal';
+import {
+  DomesticCompIcon,
+  IntCompIcon,
+  ClubIcon,
+  AwardIcon,
+  NationIcon,
+} from '../../../components/EntityIcons';
 import { EntityType, RecordType } from '../../../types';
 import { useApp } from '../../../context/AppContext';
-import { formatCategoryCode, getCategoryTagColor } from '../../../components/EntityCard';
-import { matchRecordSearch } from '../../../utils/search';
-import { buildEntityBreadcrumbs } from '../../../utils/breadcrumbs';
-
-const CONFED_ID_MAP: Record<string, string> = {
-  '1': 'CAF',
-  '2': 'AFC',
-  '3': 'UEFA',
-  '4': 'CONCACAF',
-  '5': 'OFC',
-  '6': 'CONMEBOL',
-  '7': 'WORLD',
-  '8': 'EXTINCT',
-  CAF: 'CAF',
-  AFC: 'AFC',
-  UEFA: 'UEFA',
-  CONCACAF: 'CONCACAF',
-  OFC: 'OFC',
-  CONMEBOL: 'CONMEBOL',
-  WORLD: 'WORLD',
-  World: 'WORLD',
-  EXTINCT: 'EXTINCT',
-  Extinct: 'EXTINCT',
-};
 
 function CompetitionDetailContent() {
-  const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { message } = App.useApp();
   const {
     openRecordModal,
     setHeaderTitle,
@@ -73,775 +35,194 @@ function CompetitionDetailContent() {
     setBackHref,
     setHeaderLogo,
     refreshSignal,
+    triggerRefresh,
   } = useApp();
 
-  const rawId = decodeURIComponent(String(params?.id || ''));
-  const isVirtualExtinct =
-    rawId.toLowerCase() === 'extinct' || rawId === '[EXTINCT]' || rawId.startsWith('ext-');
-  const isVirtualOther =
-    rawId.toLowerCase() === 'other' || rawId === '[OTHER]' || rawId.startsWith('oth-');
-  const isVirtual = isVirtualExtinct || isVirtualOther;
-  const extractedNationId =
-    isVirtual && (rawId.startsWith('oth-') || rawId.startsWith('ext-'))
-      ? rawId.split('-')[1]
-      : undefined;
-  const nationIdParam = searchParams.get('nationId') || extractedNationId || undefined;
-  const compId = rawId;
+  const compId = params?.id ? decodeURIComponent(String(params.id)) : '';
 
-  const [compInfo, setCompInfo] = useState<
-    (CompetitionItem & { clubsCount: number; awardsCount: number; childrenCount?: number }) | null
-  >(null);
-  const [activeTab, setActiveTab] = useState<'CLUBS' | 'AWARDS' | 'SUB_COMPS' | 'INFO'>('INFO');
-  const [clubs, setClubs] = useState<ClubItem[]>([]);
-  const [awards, setAwards] = useState<AwardItem[]>([]);
-  const [subCompetitions, setSubCompetitions] = useState<CompetitionItem[]>([]);
-  const [tableFilter, setTableFilter] = useState('');
-  const [debouncedKeyword, setDebouncedKeyword] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  const [totalRecords, setTotalRecords] = useState(0);
+  const [compInfo, setCompInfo] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tabLoading, setTabLoading] = useState(false);
-  const [copiedId, setCopiedId] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Debounce search filter
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedKeyword(tableFilter.trim());
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [tableFilter]);
-
-  const listContainerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (listContainerRef.current) {
-      listContainerRef.current.scrollTop = 0;
-    }
-  }, [activeTab, currentPage]);
-
-  // Reset to page 1 whenever search keyword changes
-  const prevKeywordRef = useRef(debouncedKeyword);
-  useEffect(() => {
-    if (prevKeywordRef.current !== debouncedKeyword) {
-      prevKeywordRef.current = debouncedKeyword;
-      setCurrentPage(1);
-    }
-  }, [debouncedKeyword]);
-
-  const handleCopyId = (e?: React.MouseEvent) => {
-    e?.stopPropagation?.();
-    if (compId) {
-      navigator.clipboard.writeText(String(compId));
-      setCopiedId(true);
-      message.success(`Copied ID: ${compId}`);
-      setTimeout(() => setCopiedId(false), 2000);
-    }
-  };
-
-  // Load Competition info (headers, breadcrumbs, logos)
-  const loadCompInfo = useCallback(async () => {
+  const loadData = useCallback(async () => {
+    if (!compId) return;
     setLoading(true);
     try {
-      if (isVirtual) {
-        const targetNationId = nationIdParam;
-        if (!targetNationId) {
-          message.error('Nation ID is required for virtual competition');
-          setLoading(false);
-          return;
-        }
+      const data = await fetchCompetitionInfo(compId, refreshSignal > 0);
+      setCompInfo(data);
 
-        const hub = await fetchNationInfo(targetNationId).catch(() => null);
+      const title = data.name_lg || data.name || data.name_sh || `Competition ${data.id}`;
+      setHeaderTitle(title);
+      setHeaderId(data.id);
+      setBreadcrumbs([
+        { title: 'Competitions', href: '/list-comps' },
+        { title: data.name_3l ? `[${data.name_3l}] ${title}` : title },
+      ]);
+      setBackHref('/list-comps');
 
-        const nation = hub?.nation;
-        const confedName = nation?.confed;
-        const nationName =
-          nation?.name_lg ||
-          nation?.name ||
-          nation?.name_sh ||
-          'Nation';
-        const nationCode =
-          nation?.name_3l ||
-          nation?.code ||
-          nation?.name_sh;
-
-        const virtualTag = rawId.startsWith('oth-') || rawId.startsWith('ext-')
-          ? rawId
-          : isVirtualExtinct
-            ? `ext-${targetNationId}`
-            : `oth-${targetNationId}`;
-        const virtualTitle = isVirtualExtinct ? '[EXTINCT]' : '[OTHER]';
-        const virtualShort = isVirtualExtinct ? '[EXTINCT]' : '[OTHER]';
-
-        setCompInfo({
-          id: virtualTag,
-          name: virtualShort,
-          name_lg: virtualTitle,
-          name_sh: virtualShort,
-          name_3l: virtualShort,
-          nation_id: targetNationId,
-          nation_name: nationName,
-          nation_three_letter: nationCode,
-          confed_id: confedId,
-          confed: nation?.confed || (confedId ? { id: confedId, name: confedName } : undefined),
-          type: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
-          categories: isVirtualExtinct ? 'Extinct Competitions' : 'Other Competitions',
-          clubsCount: isVirtualExtinct ? hub?.stats.club.extinct || 0 : hub?.stats.club.other || 0,
-          awardsCount: 0,
-          childrenCount: 0,
-          stats: {
-            club: isVirtualExtinct ? hub?.stats.club.extinct || 0 : hub?.stats.club.other || 0,
-            award: 0,
-            children: 0,
-          },
-        } as any);
-
-        setHeaderTitle(virtualTitle);
-        setHeaderId(virtualTag);
-
-        setBreadcrumbs(
-          buildEntityBreadcrumbs({
-            nationId: targetNationId,
-            nationCode: nationCode || nationName,
-            entityTitle: virtualTitle,
-          }),
-        );
-        setBackHref(`/nation/${targetNationId}`);
-
+      const confedCode = data.confed || (data.nation?.confed as any);
+      const confedLogo = confedCode
+        ? getConfederationLogoUrl(
+            typeof confedCode === 'string' ? confedCode : confedCode?.id || confedCode?.name
+          )
+        : null;
+      if (confedLogo) {
         setHeaderLogo({
-          url: getNationLogoUrl(targetNationId, nationCode),
-          alt: nationName,
+          url: confedLogo,
+          alt: title,
           isFlag: true,
         });
-        return;
-      }
-
-      if (!compId) return;
-      const info = await fetchCompetitionInfo(compId).catch(() => null);
-      console.log("Comp:", info);
-
-      if (info) {
-        const totalClubs = info.stats?.club ?? (info as any).clubsCount ?? 0;
-        const totalAwards = info.stats?.award ?? (info as any).awardsCount ?? 0;
-        const totalChildren = info.stats?.children ?? (info as any).childrenCount ?? 0;
-
-        setCompInfo({
-          ...info,
-          clubsCount: totalClubs,
-          awardsCount: totalAwards,
-          childrenCount: totalChildren,
-        });
-
-        const compTitle = info.name_sh || info.name_lg || `Competition ${compId}`;
-        setHeaderTitle(compTitle);
-        setHeaderId(info.id);
-
-        const nationId = info.nation?.id || info.nation_id;
-        const nationName =
-          info.nation?.name_lg ||
-          info.nation?.name ||
-          info.nation?.name_sh;
-        const nationCode =
-          info.nation?.name_3l;
-
-        const rawConfed =
-          (typeof info.confed === 'string' ? info.confed : info.confed?.name || info.confed?.id) ||
-          (typeof info.nation?.confed === 'string' ? info.nation.confed : info.nation?.confed?.name || info.nation?.confed?.id) ||
-          info.confed_id ||
-          info.nation?.confed_id ||
-          null;
-        const confedName = rawConfed ? (CONFED_ID_MAP[String(rawConfed)] || String(rawConfed).toUpperCase()) : null;
-
-        setBreadcrumbs(
-          buildEntityBreadcrumbs({
-            nationId,
-            nationCode: nationCode || nationId,
-            entityTitle: info.name_sh || info.name_lg || info.name,
-          }),
-        );
-        const parentId = info.parent_comp?.id || info.parent_id || info.parent?.id;
-        setBackHref(
-          parentId
-            ? `/comp/${parentId}${nationId ? `?nationId=${nationId}` : ''}`
-            : nationId
-              ? `/nation/${nationId}`
-              : '/home',
-        );
-
-        if (nationId) {
-          setHeaderLogo({
-            url: getNationLogoUrl(nationId, nationCode),
-            alt: nationName || 'Nation',
-            isFlag: true,
-          });
-        } else if (confedId) {
-          setHeaderLogo({
-            url: getConfederationLogoUrl(confedId),
-            alt: 'Confederation',
-            isFlag: false,
-          });
-        } else {
-          setHeaderLogo(null);
-        }
       }
     } catch (err: any) {
-      console.error(err);
-      message.error(err.message || 'Failed to load competition details');
+      message.error(err.message || 'Failed to load competition info');
     } finally {
       setLoading(false);
     }
-  }, [
-    compId,
-    isVirtual,
-    isVirtualExtinct,
-    nationIdParam,
-    setHeaderTitle,
-    setHeaderId,
-    setBreadcrumbs,
-    setBackHref,
-    setHeaderLogo,
-  ]);
-
-  // Load tab records with BE pagination & keyword search
-  const loadTabData = useCallback(
-    async (
-      tab: 'CLUBS' | 'AWARDS' | 'SUB_COMPS' | 'INFO',
-      page: number,
-      size: number,
-      keyword: string,
-    ) => {
-      if (tab === 'INFO') return;
-      setTabLoading(true);
-      try {
-        if (tab === 'CLUBS') {
-          if (isVirtual) {
-            const targetNationId = nationIdParam;
-            if (!targetNationId) return;
-            const res = await fetchIndependentClubs(targetNationId, {
-              page: page - 1,
-              size,
-              keyword,
-              extinct: isVirtualExtinct,
-            });
-            const list = Array.isArray(res) ? res : (res as any)?.content || [];
-            const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
-            setClubs(list);
-            setTotalRecords(total);
-            setCompInfo((prev) => {
-              if (!prev) return prev;
-              if (!keyword) {
-                return { ...prev, clubsCount: total };
-              }
-              return prev;
-            });
-          } else if (compId) {
-            const res = await fetchClubsInComp(compId, {
-              page: page - 1,
-              size,
-              keyword,
-            });
-            const list = Array.isArray(res) ? res : (res as any)?.content || [];
-            const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
-            setClubs(list);
-            setTotalRecords(total);
-            setCompInfo((prev) => {
-              if (!prev) return prev;
-              if (!keyword) {
-                return { ...prev, clubsCount: total };
-              }
-              return prev;
-            });
-          }
-        } else if (tab === 'AWARDS' && !isVirtual && compId) {
-          const res = await fetchAwardsInComp(compId, {
-            page: page - 1,
-            size,
-            keyword,
-          });
-          const list = Array.isArray(res) ? res : (res as any)?.content || [];
-          const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
-          setAwards(list);
-          setTotalRecords(total);
-          setCompInfo((prev) => {
-            if (!prev) return prev;
-            if (!keyword) {
-              return { ...prev, awardsCount: total };
-            }
-            return prev;
-          });
-        } else if (tab === 'SUB_COMPS' && !isVirtual && compId) {
-          const res = await fetchSubCompetitions(compId, {
-            page: page - 1,
-            size,
-            keyword,
-          });
-          const list = Array.isArray(res) ? res : (res as any)?.content || [];
-          const total = (res as any)?.totalElements ?? (res as any)?.total ?? list.length;
-          setSubCompetitions(list);
-          setTotalRecords(total);
-        }
-      } catch (err: any) {
-        console.error('Failed to load tab data', err);
-        message.error(err.message || 'Failed to load list data');
-      } finally {
-        setTabLoading(false);
-      }
-    },
-    [compId, isVirtual, isVirtualExtinct, nationIdParam],
-  );
+  }, [compId, refreshSignal, setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo, message]);
 
   useEffect(() => {
-    loadCompInfo();
-  }, [compId, refreshSignal]);
+    loadData();
+  }, [loadData]);
 
-  useEffect(() => {
-    return () => {
-      setBreadcrumbs([]);
-      setBackHref(null);
-      setHeaderLogo(null);
-      setHeaderId(undefined);
-    };
-  }, [setBreadcrumbs, setBackHref, setHeaderLogo, setHeaderId]);
-
-  useEffect(() => {
-    if (activeTab === 'INFO') return;
-    loadTabData(activeTab, currentPage, pageSize, debouncedKeyword);
-  }, [loadTabData, activeTab, currentPage, pageSize, debouncedKeyword, refreshSignal]);
-
-  const handlePageChange = (newPage: number, newPageSize?: number) => {
-    if (newPageSize && newPageSize !== pageSize) {
-      setPageSize(newPageSize);
+  const handleEdit = () => {
+    if (compInfo) {
+      openRecordModal(RecordType.COMPETITION, compInfo);
     }
-    setCurrentPage(newPage);
   };
 
-  const handleTabChange = (key: string) => {
-    const nextTab = key as 'CLUBS' | 'AWARDS' | 'SUB_COMPS' | 'INFO';
-    setActiveTab(nextTab);
-    setTableFilter('');
-    setDebouncedKeyword('');
-    setCurrentPage(1);
-  };
-
-  const handleDeleteClub = async (id: string) => {
+  const handleDelete = async () => {
+    if (!compInfo) return;
+    setIsDeleting(true);
     try {
-      await deleteRecord(RecordType.CLUB, id);
-      message.success('Club deleted');
-      loadTabData('CLUBS', currentPage, pageSize, debouncedKeyword);
-      if (compId) {
-        fetchCompetitionInfo(compId, true).then((info) => {
-          if (info) setCompInfo(info);
-        });
-      }
+      await deleteRecord(RecordType.COMPETITION, String(compInfo.id));
+      message.success('Competition deleted successfully');
+      setDeleteModalOpen(false);
+      triggerRefresh();
+      router.push('/list-comps');
     } catch (err: any) {
-      message.error(err.message || 'Delete failed');
+      message.error(err.message || 'Failed to delete competition');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const handleDeleteAward = async (id: string) => {
-    try {
-      await deleteRecord(RecordType.AWARD, id);
-      message.success('Award deleted');
-      loadTabData('AWARDS', currentPage, pageSize, debouncedKeyword);
-      if (compId) {
-        fetchCompetitionInfo(compId, true).then((info) => {
-          if (info) setCompInfo(info);
-        });
-      }
-    } catch (err: any) {
-      message.error(err.message || 'Delete failed');
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Spin size="large" tip="Loading competition..." />
+      </div>
+    );
+  }
 
-  const handleDeleteSubCompetition = async (id: string) => {
-    try {
-      await deleteRecord(RecordType.COMPETITION, id);
-      message.success('Sub-competition deleted');
-      await Promise.all([
-        loadTabData('SUB_COMPS', currentPage, pageSize, debouncedKeyword),
-        loadCompInfo(),
-      ]);
-    } catch (err: any) {
-      message.error(err.message || 'Delete failed');
-    }
-  };
+  if (!compInfo) {
+    return (
+      <div className="p-8 text-center text-slate-500">
+        <p>Competition not found.</p>
+        <Button onClick={() => router.push('/list-comps')} className="mt-4">
+          Back to Competitions
+        </Button>
+      </div>
+    );
+  }
 
-  const clubsBadgeCount = debouncedKeyword
-    ? (activeTab === 'CLUBS' ? totalRecords : (compInfo?.stats?.club ?? compInfo?.clubsCount ?? 0))
-    : (compInfo?.stats?.club ?? compInfo?.clubsCount ?? totalRecords);
-
-  const awardsBadgeCount = debouncedKeyword
-    ? (activeTab === 'AWARDS' ? totalRecords : (compInfo?.stats?.award ?? compInfo?.awardsCount ?? 0))
-    : (compInfo?.stats?.award ?? compInfo?.awardsCount ?? totalRecords);
-
-  const tabItems = useMemo(() => {
-    const list: any[] = [
-      {
-        key: 'INFO',
-        label: (
-          <div className="flex items-center gap-2">
-            <TabIconBadge
-              icon={<InfoCircleOutlined className={activeTab === 'INFO' ? 'text-white' : 'text-slate-600'} />}
-              isActive={activeTab === 'INFO'}
-            />
-            <span className={activeTab === 'INFO' ? 'font-bold' : ''}>
-              Info
-            </span>
-          </div>
-        ),
-      },
-      ...(Number(compInfo?.childrenCount ?? 0) > 0
-        ? [
-            {
-              key: 'SUB_COMPS',
-              label: (
-                <div className="flex items-center gap-2" title="Sub-Competitions">
-                  <TabIconBadge
-                    icon={
-                      <BranchesOutlined
-                        className={activeTab === 'SUB_COMPS' ? 'text-white' : 'text-amber-600'}
-                      />
-                    }
-                    count={compInfo?.childrenCount ?? 0}
-                    showZero={false}
-                    isActive={activeTab === 'SUB_COMPS'}
-                  />
-                  <span
-                    className={`hidden sm:inline ${activeTab === 'SUB_COMPS' ? 'font-bold' : ''}`}
-                  >
-                    Sub-Comps
-                  </span>
-                </div>
-              ),
-            },
-          ]
-        : []),
-      {
-        key: 'CLUBS',
-        label: (
-          <div className="flex items-center gap-2" title="Clubs">
-            <TabIconBadge
-              icon={<ClubIcon size={16} className={activeTab === 'CLUBS' ? 'text-white' : 'text-blue-500'} />}
-              count={clubsBadgeCount}
-              showZero={true}
-              isActive={activeTab === 'CLUBS'}
-            />
-            <span className={`hidden sm:inline ${activeTab === 'CLUBS' ? 'font-bold' : ''}`}>
-              Clubs
-            </span>
-          </div>
-        ),
-      },
-    ];
-
-    if (!isVirtual) {
-      list.push({
-        key: 'AWARDS',
-        label: (
-          <div className="flex items-center gap-2" title="Awards">
-            <TabIconBadge
-              icon={<AwardIcon size={16} className={activeTab === 'AWARDS' ? 'text-white' : 'text-yellow-500'} />}
-              count={awardsBadgeCount}
-              showZero={true}
-              isActive={activeTab === 'AWARDS'}
-            />
-            <span className={`hidden sm:inline ${activeTab === 'AWARDS' ? 'font-bold' : ''}`}>
-              Awards
-            </span>
-          </div>
-        ),
-      });
-    }
-
-    return list;
-  }, [
-    clubsBadgeCount,
-    awardsBadgeCount,
-    activeTab,
-    isVirtual,
-    compInfo?.awardsCount,
-    compInfo?.childrenCount,
-    compInfo?.stats?.award,
-  ]);
-
-  const compTitle =
-    compInfo?.name_sh ||
-    compInfo?.name_lg ||
-    compInfo?.name ||
-    (isVirtual ? (isVirtualExtinct ? 'Extinct Clubs' : 'Other Clubs') : `Competition ${compId}`);
-  const nationId = compInfo?.nation?.id || compInfo?.nation_id || nationIdParam;
-  const nationName =
-    compInfo?.nation?.name_lg ||
-    compInfo?.nation?.name ||
-    compInfo?.nation?.name_sh;
-  const nationCode = compInfo?.nation?.name_3l;
-  const confedId = compInfo?.confed_id || compInfo?.confed?.id;
+  const nationId = compInfo.nation?.id || compInfo.nation_id;
+  const nationName = compInfo.nation?.name_lg || compInfo.nation?.name || compInfo.nation?.name_sh;
+  const isInternational = Boolean(compInfo.is_international || !nationId);
+  const compName =
+    compInfo.name_lg || compInfo.name || compInfo.name_sh || `Competition ${compInfo.id}`;
 
   return (
-    <div className="h-full flex flex-col min-h-0 bg-white">
-      {loading ? (
-        <div className="py-20 text-center">
-          <Spin size="large" description="Loading competition details..." />
-        </div>
-      ) : (
-        <div className="w-full h-full flex flex-col min-h-0 bg-white overflow-hidden">
-          <div className="shrink-0 flex-none px-3 pt-2.5 pb-2 border-b border-gray-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <Tooltip
-                title={
-                  isVirtual
-                    ? isVirtualExtinct
-                      ? 'Extinct Clubs'
-                      : 'Independent Clubs'
-                    : 'Competition'
-                }
-                placement="bottom"
-              >
-                <div
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 cursor-default p-0 shadow-2xs border ${
-                    isVirtual
-                      ? isVirtualExtinct
-                        ? 'bg-orange-50/90 border-orange-300 text-orange-600'
-                        : 'bg-blue-50/90 border-blue-300 text-blue-600'
-                      : 'bg-amber-50/90 border-amber-300 text-amber-600'
-                  }`}
-                >
-                  {isVirtual ? (
-                    <ClubIcon
-                      size={18}
-                      className={isVirtualExtinct ? 'text-orange-500' : 'text-blue-500'}
-                    />
-                  ) : (
-                    <DomesticCompIcon size={18} className="text-amber-600" />
-                  )}
-                </div>
-              </Tooltip>
+    <div className="w-full p-3 sm:p-5 space-y-4">
+      {/* 1. Title của Body: Back + Icon + (Line 1: Thẻ ID, Line 2: Name) + Actions */}
+      <DetailBodyHeader
+        onBack={() => router.push('/list-comps')}
+        id={compInfo.id}
+        name={compName}
+        code3={compInfo.name_3l}
+        icon={
+          isInternational ? (
+            <IntCompIcon size={22} className="text-purple-600" />
+          ) : (
+            <DomesticCompIcon size={22} className="text-amber-600" />
+          )
+        }
+        badgeTypeStyles={
+          isInternational
+            ? 'bg-purple-50/90 border-purple-300 text-purple-600'
+            : 'bg-amber-50/90 border-amber-300 text-amber-600'
+        }
+        extraTag={
+          <Tag color={isInternational ? 'purple' : 'gold'} className="m-0 text-xs">
+            {isInternational ? '🌍 International' : '🏆 Domestic'}
+          </Tag>
+        }
+        onEdit={handleEdit}
+        onDelete={() => setDeleteModalOpen(true)}
+      />
 
-              <div className="min-w-0 flex-1 flex flex-col justify-center">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {isVirtual ? (
-                    <Tag
-                      color={isVirtualExtinct ? 'volcano' : 'geekblue'}
-                      className="m-0 font-mono font-bold text-xs"
-                    >
-                      {isVirtualExtinct ? '[EXTINCT]' : '[OTHER]'}
-                    </Tag>
-                  ) : compId ? (
-                    <Tooltip title="Click to copy ID" placement="bottom">
-                      <button
-                        type="button"
-                        onClick={handleCopyId}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 border border-sky-200 font-mono text-xs font-bold transition-all cursor-pointer shadow-2xs select-none"
-                      >
-                        <span>{compId}</span>
-                        {copiedId ? (
-                          <CheckOutlined className="text-emerald-600 text-xs" />
-                        ) : (
-                          <CopyOutlined className="text-sky-500 text-xs" />
-                        )}
-                      </button>
-                    </Tooltip>
-                  ) : null}
+      {/* 2. Vùng thông tin: Card chi tiết thuộc tính */}
+      <div className="w-full">
+        <RecordDetailView
+          data={compInfo}
+          type={EntityType.COMPETITION}
+          showHeader={false}
+          onEdit={handleEdit}
+        />
+      </div>
 
-                </div>
+      {/* 3. Vùng các thẻ (kèm theo số lượng) con trực thuộc */}
+      <ChildEntitiesSection
+        items={[
+          {
+            key: 'clubs',
+            label: 'Clubs',
+            count: compInfo.clubsCount ?? compInfo.stats?.club ?? 0,
+            icon: <ClubIcon size={18} className="text-blue-500" />,
+            badgeStyles: 'bg-blue-50 border-blue-200 text-blue-600',
+            onClick: () => router.push(`/list-clubs?compId=${compInfo.id}`),
+          },
+          {
+            key: 'awards',
+            label: 'Awards',
+            count: compInfo.awardsCount ?? compInfo.stats?.award ?? 0,
+            icon: <AwardIcon size={18} className="text-yellow-500" />,
+            badgeStyles: 'bg-yellow-50 border-yellow-200 text-yellow-600',
+            onClick: () => router.push(`/list-awards?compId=${compInfo.id}`),
+          },
+          ...(nationId
+            ? [
+                {
+                  key: 'nation',
+                  label: `Nation (${nationName || nationId})`,
+                  count: 1,
+                  icon: <NationIcon size={18} className="text-cyan-500" />,
+                  badgeStyles: 'bg-cyan-50 border-cyan-200 text-cyan-600',
+                  onClick: () => router.push(`/nation/${nationId}`),
+                },
+              ]
+            : []),
+        ]}
+      />
 
-                <div className="mt-1 min-w-0">
-                  <div
-                    className="font-bold text-xs sm:text-[13px] text-slate-900 uppercase tracking-wide line-clamp-2 break-words block leading-snug"
-                    title={compTitle}
-                  >
-                    <span>{compTitle}</span>
-                  </div>
-                  {isVirtual && (
-                    <div className="text-xs text-slate-500 mt-0.5 font-normal normal-case">
-                      {isVirtualExtinct
-                        ? 'List of extinct clubs in this nation'
-                        : 'List of independent clubs (not assigned to a specific competition)'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* AntD Tabs (shrink-0) */}
-          <div className="shrink-0 flex-none px-3 pt-1 bg-white">
-            <Tabs
-              activeKey={activeTab}
-              onChange={(key) => handleTabChange(key)}
-              items={tabItems}
-              className="mb-0"
-            />
-          </div>
-
-          {/* Sub Toolbar: Count, Filter, Add (only for list tabs) - shrink-0 */}
-          {activeTab !== 'INFO' && (
-            <div className="shrink-0 flex-none px-3 py-2 border-b border-gray-100 bg-white flex items-center gap-2 w-full">
-              <Input
-                prefix={<SearchOutlined className="text-gray-400" />}
-                placeholder={
-                  activeTab === 'CLUBS'
-                    ? 'Filter clubs...'
-                    : activeTab === 'SUB_COMPS'
-                      ? 'Filter sub-competitions...'
-                      : 'Filter awards...'
-                }
-                value={tableFilter}
-                onChange={(e) => setTableFilter(e.target.value)}
-                onPressEnter={() => setDebouncedKeyword(tableFilter.trim())}
-                allowClear
-                className="flex-1 min-w-0"
-              />
-
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  if (activeTab === 'CLUBS') {
-                    openRecordModal(
-                      RecordType.CLUB,
-                      isVirtual ? { is_extinct: isVirtualExtinct, nation_id: nationId } : null,
-                      nationId,
-                      isVirtual ? undefined : compId,
-                    );
-                  } else if (activeTab === 'SUB_COMPS') {
-                    openRecordModal(RecordType.COMPETITION, null, nationId, compId);
-                  } else {
-                    openRecordModal(RecordType.AWARD, null, nationId, compId);
-                  }
-                }}
-                className="bg-blue-600 shrink-0"
-                title={
-                  activeTab === 'CLUBS'
-                    ? 'Add Club'
-                    : activeTab === 'SUB_COMPS'
-                      ? 'Add Sub-Competition'
-                      : 'Add Award'
-                }
-              />
-            </div>
-          )}
-
-          {/* Scrollable list content (flex-1 min-h-0) */}
-          <div
-            ref={listContainerRef}
-            className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3 py-2.5 pb-6"
-          >
-            {/* Main List */}
-          {activeTab === 'CLUBS' && (
-            <CardGrid
-              key="comp-clubs"
-              items={clubs}
-              type={EntityType.CLUB}
-              columns={4}
-              loading={tabLoading}
-              serverPagination={{
-                current: currentPage,
-                pageSize,
-                total: totalRecords,
-                onChange: handlePageChange,
-              }}
-              onEdit={(rec) =>
-                openRecordModal(RecordType.CLUB, rec, nationId, isVirtual ? undefined : compId)
-              }
-              onDelete={(rec) => handleDeleteClub(String(rec.id))}
-              emptyText={
-                isVirtual
-                  ? isVirtualExtinct
-                    ? 'No extinct clubs found in this nation'
-                    : 'No independent clubs found in this nation'
-                  : 'No clubs found in this competition'
-              }
-              defaultPageSize={20}
-            />
-          )}
-
-          {activeTab === 'AWARDS' && (
-            <CardGrid
-              key="comp-awards"
-              items={awards}
-              type={EntityType.AWARD}
-              columns={4}
-              loading={tabLoading}
-              serverPagination={{
-                current: currentPage,
-                pageSize,
-                total: totalRecords,
-                onChange: handlePageChange,
-              }}
-              onEdit={(rec) => openRecordModal(RecordType.AWARD, rec, nationId, compId)}
-              onDelete={(rec) => handleDeleteAward(String(rec.id))}
-              emptyText="No awards found in this competition"
-              defaultPageSize={20}
-            />
-          )}
-
-          {activeTab === 'SUB_COMPS' && (
-            <CardGrid
-              key="comp-sub-competitions"
-              items={subCompetitions}
-              type={EntityType.COMPETITION}
-              columns={4}
-              loading={tabLoading}
-              serverPagination={{
-                current: currentPage,
-                pageSize,
-                total: totalRecords,
-                onChange: handlePageChange,
-              }}
-              onEdit={(rec) =>
-                openRecordModal(RecordType.COMPETITION, rec, nationId, compId)
-              }
-              onDelete={(rec) => handleDeleteSubCompetition(String(rec.id))}
-              onNavigate={(step) => {
-                if (step?.id) {
-                  router.push(`/comp/${step.id}${nationId ? `?nationId=${nationId}` : ''}`);
-                }
-              }}
-              emptyText="No sub-competitions found"
-              defaultPageSize={20}
-            />
-          )}
-
-          {/* Tab: Competition Information */}
-          {activeTab === 'INFO' && compInfo && (
-            <RecordDetailView
-              data={compInfo}
-              type={
-                !compInfo.nation && !compInfo.nation_id
-                  ? 'international_competition'
-                  : RecordType.COMPETITION
-              }
-              onEdit={
-                !isVirtual
-                  ? () =>
-                      openRecordModal(
-                        RecordType.COMPETITION,
-                        compInfo,
-                        nationId,
-                        compInfo.parent_id,
-                      )
-                  : undefined
-              }
-              onNavigateConfed={() => router.push('/home')}
-              onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
-              onNavigateParentComp={(pId) =>
-                router.push(`/comp/${pId}${nationId ? `?nationId=${nationId}` : ''}`)
-              }
-              onSwitchTab={(tab) =>
-                handleTabChange(tab as 'INFO' | 'CLUBS' | 'AWARDS' | 'SUB_COMPS')
-              }
-            />
-          )}
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete competition"
+        itemName={compName}
+        loading={isDeleting}
+      />
     </div>
   );
 }
 
 export default function CompetitionDetailPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading competition...</div>}>
+    <Suspense
+      fallback={<div className="p-8 text-center text-slate-400">Loading competition...</div>}
+    >
       <CompetitionDetailContent />
     </Suspense>
   );

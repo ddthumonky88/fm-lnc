@@ -11,7 +11,12 @@ import {
   LeftOutlined,
   RightOutlined,
   SettingOutlined,
+  TrophyOutlined,
+  BankOutlined,
+  EnvironmentOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
+import { StadiumIcon } from './EntityIcons';
 
 import { HierarchyLevel } from '../types';
 
@@ -48,11 +53,21 @@ export default function AppSidebar({
   const router = useRouter();
 
   // Active check by route
-  const isHierarchyActive =
+  const isNationActive =
     pathname === '/' ||
-    pathname.startsWith('/tree') ||
-    pathname.startsWith('/nation') ||
-    pathname.startsWith('/comp');
+    pathname === '/home' ||
+    pathname.startsWith('/list-nations') ||
+    pathname.startsWith('/nation');
+  const isCompActive =
+    pathname.startsWith('/list-comps') || pathname.startsWith('/comp');
+  const isClubActive =
+    pathname.startsWith('/list-clubs') || pathname.startsWith('/club');
+  const isCityActive =
+    pathname.startsWith('/list-cities') || pathname.startsWith('/city');
+  const isStadiumActive =
+    pathname.startsWith('/list-stadiums') || pathname.startsWith('/stadium');
+  const isAwardActive =
+    pathname.startsWith('/list-awards') || pathname.startsWith('/award');
   const isPlayersActive = pathname === '/players';
   const isStagesActive = pathname === '/stages';
 
@@ -69,19 +84,68 @@ export default function AppSidebar({
 
   const navItems: NavItem[] = [
     {
-      key: 'WORLD',
-      title: 'World',
-      label: 'World',
+      key: 'NATION',
+      title: 'Nations',
+      label: 'Nations',
       icon: <GlobalOutlined className="text-base" />,
-      active: isHierarchyActive,
-      badge: undefined,
-      badgeColor: '#1d70b8',
+      active: isNationActive,
       onClick: () => {
-        if (pathname !== '/') {
-          router.push('/');
-        } else if (onNavigateLevel) {
-          onNavigateLevel(HierarchyLevel.CONTINENTS, 'Confederations');
-        }
+        router.push('/list-nations');
+        if (isMobileOpen) onCloseMobile();
+      },
+    },
+    {
+      key: 'COMP',
+      title: 'Competitions',
+      label: 'Competitions',
+      icon: <TrophyOutlined className="text-base" />,
+      active: isCompActive,
+      onClick: () => {
+        router.push('/list-comps');
+        if (isMobileOpen) onCloseMobile();
+      },
+    },
+    {
+      key: 'CLUB',
+      title: 'Clubs',
+      label: 'Clubs',
+      icon: <BankOutlined className="text-base" />,
+      active: isClubActive,
+      onClick: () => {
+        router.push('/list-clubs');
+        if (isMobileOpen) onCloseMobile();
+      },
+    },
+    {
+      key: 'CITY',
+      title: 'Cities',
+      label: 'Cities',
+      icon: <EnvironmentOutlined className="text-base" />,
+      active: isCityActive,
+      onClick: () => {
+        router.push('/list-cities');
+        if (isMobileOpen) onCloseMobile();
+      },
+    },
+    {
+      key: 'STADIUM',
+      title: 'Stadiums',
+      label: 'Stadiums',
+      icon: <StadiumIcon size={16} />,
+      active: isStadiumActive,
+      onClick: () => {
+        router.push('/list-stadiums');
+        if (isMobileOpen) onCloseMobile();
+      },
+    },
+    {
+      key: 'AWARD',
+      title: 'Awards',
+      label: 'Awards',
+      icon: <StarOutlined className="text-base" />,
+      active: isAwardActive,
+      onClick: () => {
+        router.push('/list-awards');
         if (isMobileOpen) onCloseMobile();
       },
     },

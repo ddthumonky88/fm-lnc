@@ -745,6 +745,76 @@ export async function fetchAllCompetitions(
   return fetchIntCompetitions((filter as any).confedId, filter, refresh);
 }
 
+export async function fetchCompetitionsList(
+  queryOrForceRefresh?: (CompetitionFilterQuery & { scope?: 'all' | 'domestic' | 'international' }) | boolean,
+  forceRefresh = false,
+): Promise<PaginatedList<CompetitionItem>> {
+  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
+    queryOrForceRefresh,
+    forceRefresh,
+    undefined,
+    20,
+  );
+  const scope = (filter as any).scope || 'all';
+  const confedId = (filter as any).confedId;
+  const nationId = (filter as any).nationId;
+
+  if (scope === 'international') {
+    const res: any = await fetchIntCompetitions(confedId, filter, refresh);
+    const list = Array.isArray(res) ? res : res?.content || [];
+    list.forEach((item: any) => { item.is_international = true; });
+    return res;
+  }
+
+  if (scope === 'domestic') {
+    const res: any = await fetchDomesticCompetitions(nationId || 'all', filter, refresh);
+    const list = Array.isArray(res) ? res : res?.content || [];
+    list.forEach((item: any) => { item.is_international = false; });
+    return res;
+  }
+
+  // scope === 'all':
+  if (nationId && nationId !== 'all') {
+    const res: any = await fetchDomesticCompetitions(nationId, filter, refresh);
+    const list = Array.isArray(res) ? res : res?.content || [];
+    list.forEach((item: any) => { item.is_international = false; });
+    return res;
+  }
+
+  // Query both and combine
+  const [intRes, domRes] = await Promise.all([
+    fetchIntCompetitions(confedId, { ...filter, page: 0, size: 100 }, refresh).catch(() => [] as any),
+    fetchDomesticCompetitions('all', filter, refresh).catch(() => [] as any),
+  ]);
+
+  const intList = (Array.isArray(intRes) ? intRes : (intRes as any)?.content || []).map((c: any) => ({
+    ...c,
+    is_international: true,
+  }));
+  const domList = (Array.isArray(domRes) ? domRes : (domRes as any)?.content || []).map((c: any) => ({
+    ...c,
+    is_international: false,
+  }));
+
+  const combined = [...intList, ...domList];
+  const total = (intRes?.totalElements ?? intList.length) + (domRes?.totalElements ?? domList.length);
+
+  const page = filter.page || 0;
+  const size = filter.size || 20;
+  const start = page * size;
+  const pageItems = combined.slice(start, start + size);
+
+  const result: any = pageItems;
+  result.content = pageItems;
+  result.totalElements = total;
+  result.totalPages = Math.ceil(total / size);
+  result.page = page;
+  result.size = size;
+  result.first = page === 0;
+  result.last = start + size >= total;
+  return result;
+}
+
 export async function fetchNationsByContinent(
   confedId?: string | null,
   queryOrForceRefresh?: PaginationQuery | boolean,
@@ -954,7 +1024,7 @@ export async function fetchClubsInComp(
 }
 
 export async function searchClubs(
-  query?: PaginationQuery & { nationId?: string | null; compId?: string | null },
+  query?: PaginationQuery & { nationId?: string | null; compId?: string | null; extinct?: boolean | string },
   forceRefresh = false,
 ): Promise<PaginatedList<ClubItem>> {
   const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
@@ -968,6 +1038,9 @@ export async function searchClubs(
   }
   if (query?.compId && String(query.compId).toLowerCase() !== 'all') {
     (filter as any).compId = String(query.compId);
+  }
+  if (query?.extinct !== undefined) {
+    (filter as any).extinct = query.extinct;
   }
   return cachedPost<PaginatedList<ClubItem>>(
     `${getApiBase()}/hierarchy/club/search`,

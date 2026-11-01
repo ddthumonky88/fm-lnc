@@ -105,13 +105,20 @@ export default function CardGrid({
   const isSmall =
     cardSize !== undefined
       ? cardSize === 'small'
-      : entityTypeStr === 'nation' ||
-        entityTypeStr === 'stadium' ||
-        entityTypeStr === 'city';
+      : columns === 2
+        ? true
+        : entityTypeStr === 'nation' ||
+          entityTypeStr === 'stadium' ||
+          entityTypeStr === 'city';
 
-  const gridClasses = isSmall
-    ? 'grid grid-cols-2 gap-2'
-    : 'grid grid-cols-1 gap-3';
+  const gridClasses =
+    columns === 2
+      ? 'grid grid-cols-2 gap-2.5'
+      : columns === 1
+        ? 'grid grid-cols-1 gap-3'
+        : isSmall
+          ? 'grid grid-cols-2 gap-2.5'
+          : 'grid grid-cols-1 gap-3';
 
   return (
     <div>

@@ -23046,18 +23046,18 @@
 "CITY_NAME_CHANGE"		95061150	"Gokwe"							""
 
 
-# STADIUM > [AFG] AFGHANISTAN > Stadiums
+# STADIUM > [AFG] AFGHANISTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103233		"Ghazi Stadium"							""
 
 
-# STADIUM > [ALB] ALBANIA > Stadiums
+# STADIUM > [ALB] ALBANIA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		1300002		"Stadiumi Hasim Sqepari"					""
 "STADIUM_NAME_CHANGE" 		2000001344	"Air Albania Stadium"						""
 
 
-# STADIUM > [ALG] ALGERIA > Stadiums
+# STADIUM > [ALG] ALGERIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103024		"Stade du 5 Juillet 1962"					""
 "STADIUM_NAME_CHANGE" 		105327	 	"Stade du 20 Août 1955 (Alger)"					""
@@ -23073,30 +23073,30 @@
 "STADIUM_NAME_CHANGE"		2000234628	"Stade de Douéra"						""
 
 
-# STADIUM > [ASA] AMERICAN SAMOA > Stadiums
+# STADIUM > [ASA] AMERICAN SAMOA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		148953	 	"Veterans Memorial Stadium" 					""
 "STADIUM_NAME_CHANGE" 		23210843 	"Pago Park Soccer Stadium - Pitch 1" 				""
 "STADIUM_NAME_CHANGE" 		23210844 	"Pago Park Soccer Stadium - Pitch 2" 				""
 
 
-# STADIUM > [ANG] ANGOLA > Stadiums
+# STADIUM > [ANG] ANGOLA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103025		"Estádio da Cidadela"						""
 "STADIUM_NAME_CHANGE"		12012512	"Estádio 11 de Novembro"					""
 
 
-# STADIUM > [AIA] ANGUILLA > Stadiums
+# STADIUM > [AIA] ANGUILLA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		129516	 	"AFA National Stadium"						""
 
 
-# STADIUM > [ATG] ANTIGUA & BARBUDA > Stadiums
+# STADIUM > [ATG] ANTIGUA & BARBUDA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		129516	 	"Antigua Recreation Ground"					""
 
 
-# STADIUM > [ARG] ARGENTINA > Stadiums
+# STADIUM > [ARG] ARGENTINA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102441		"Estadio Florencio Sola"					""
 "STADIUM_NAME_CHANGE"		102442		"Estadio Mario Alberto Kempes"					""
@@ -23184,7 +23184,7 @@
 "STADIUM_NAME_CHANGE"		2000215703	"Estadio Anfiteatro José Hernández"				""
 
 
-# STADIUM > [ARM] ARMENIA > Stadiums
+# STADIUM > [ARM] ARMENIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102961		"Hrazdan Stadium"						""
 "STADIUM_NAME_CHANGE"		484461		"Gyumri City Stadium"						""
@@ -23216,12 +23216,12 @@
 "STADIUM_NAME_CHANGE"		2000241489	"Sisian City Stadium"						""
 
 
-# STADIUM > [ARU] ARUBA > Stadiums
+# STADIUM > [ARU] ARUBA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103152 		"Guillermo Trinidad" 						""
 
 
-# STADIUM > [AUS] AUSTRALIA > Stadiums
+# STADIUM > [AUS] AUSTRALIA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		104456 		"Coopers Stadium" 						""
 "STADIUM_NAME_CHANGE" 		120229 		"Accor Stadium / Stadium Australia" 				""
@@ -23254,7 +23254,7 @@
 "STADIUM_NAME_CHANGE" 		2000083602 	"Etihad City Football Academy (Melbourne, 2021)" 		""
 
 
-# STADIUM > [AUT] AUSTRIA > Stadiums
+# STADIUM > [AUT] AUSTRIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1605		"Generali Arena"						""
 "STADIUM_NAME_CHANGE" 		102962 		"Ernst-Happel-Stadion" 						""
@@ -23325,7 +23325,7 @@
 "STADIUM_NAME_CHANGE"		2000218189	"Raiffeisen Arena"						""
 
 
-# STADIUM > [AZE] AZERBAIJAN > Stadiums
+# STADIUM > [AZE] AZERBAIJAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		102963 		"Tofiq Bəhramov adına Respublika Stadionu"			""
 "STADIUM_NAME_CHANGE" 		485427 		"Şämkir Olimpiya İdman Kompleksinin Stadionu"			""
@@ -23341,20 +23341,20 @@
 "STADIUM_NAME_CHANGE" 		2000098817 	"Mehdi Hüseynzadə adına Sumqayıt Şəhər Stadionu" 		""
 
 
-# STADIUM > [BAH] BAHAMAS > Stadiums
+# STADIUM > [BAH] BAHAMAS
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103153		"Thomas Robinson Stadium"					""
 "STADIUM_NAME_CHANGE"		23017986	"Grand Bahama Sports Complex"					""
 "STADIUM_NAME_CHANGE"		82062067	"Roscow A. L. Davies Soccer Field"				""
 
 
-# STADIUM > [BHR] BAHRAIN > Stadiums
+# STADIUM > [BHR] BAHRAIN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		5512117		"Bahrain National Stadium"					""
 "STADIUM_NAME_CHANGE"		5636657		"Shaikh Khalifa Sports City Stadium"				""
 
 
-# STADIUM > [BAN] BANGLADESH > Stadiums
+# STADIUM > [BAN] BANGLADESH
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103236		"Bangabandhu National Stadium"					""
 "STADIUM_NAME_CHANGE" 		1037364		"Bir Shreshtha Shaheed Shipahi Mostafa Kamal Stadium"		""
@@ -23362,12 +23362,12 @@
 "STADIUM_NAME_CHANGE" 		2000255490	"Bir Shreshtho Flight Lieutenant Matiur Rahman Stadium"		""
 
 
-# STADIUM > [BRB] BARBADOS > Stadiums
+# STADIUM > [BRB] BARBADOS
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103170		"Waterford National Stadium"					""
 
 
-# STADIUM > [BLR] BELARUS > Stadiums
+# STADIUM > [BLR] BELARUS
 #====================================================================================
 "STADIUM_NAME_CHANGE"		485807		"OSK Brestskiy"							""
 "STADIUM_NAME_CHANGE"		1300115		"Natsionalny Olimpiyskiy stadion Dinamo"			""
@@ -23375,7 +23375,7 @@
 "STADIUM_NAME_CHANGE"		17026511	"Borisov Arena"							""
 
 
-# STADIUM > [BEL] BELGIUM > Stadiums
+# STADIUM > [BEL] BELGIUM
 #====================================================================================
 "STADIUM_NAME_CHANGE"		745		"Jules Ottenstadion"						""
 "STADIUM_NAME_CHANGE"		746		"Jan Breydelstadion"						""
@@ -23421,31 +23421,31 @@
 "STADIUM_NAME_CHANGE"		2000078153	"Blankenbergse Steenweg"					""
 
 
-# STADIUM > [BLZ] BELIZE > Stadiums
+# STADIUM > [BLZ] BELIZE
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		82071473	"FFB Stadium"							""
 
 
-# STADIUM > [BEN] BENIN > Stadiums
+# STADIUM > [BEN] BENIN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103026		"Stade de l'Amitié"						""
 "STADIUM_NAME_CHANGE" 		23017929	"Stade Charles de Gaulle"					""
 "STADIUM_NAME_CHANGE" 		23017930	"Stade René Pleven d'Akpakpa"					""
 
 
-# STADIUM > [BER] BERMUDA > Stadiums
+# STADIUM > [BER] BERMUDA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103171		"Bermuda National Stadium"					""
 
 
-# STADIUM > [BHU] BHUTAN > Stadiums
+# STADIUM > [BHU] BHUTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		5626853		"Changlimithang Stadium" 					""
 "STADIUM_NAME_CHANGE" 		5633228		"Bumthang Stadium" 						""
 "STADIUM_NAME_CHANGE" 		23219588	"Changjiji Football Ground" 					""
 
 
-# STADIUM > [BOL] BOLIVIA > Stadiums
+# STADIUM > [BOL] BOLIVIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		308092		"Estadio Hernando Siles"					""
 "STADIUM_NAME_CHANGE"		308095		"Estadio Ramón Tahuichi Aguilera"				""
@@ -23517,7 +23517,7 @@
 "STADIUM_NAME_CHANGE"		2000262507	"Estadio Municipal Plurinacional"				""
 
 
-# STADIUM > [BIH] BOSNIA & HERZEGOVINA > Stadiums
+# STADIUM > [BIH] BOSNIA & HERZEGOVINA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102966		"Stadion Asim Ferhatović Hase"					""
 "STADIUM_NAME_CHANGE"		1300207		"Stadion Grbavica"						""
@@ -23563,12 +23563,12 @@
 "STADIUM_NAME_CHANGE"		2000322488	"SRC Radomir Kovačević"						""
 
 
-# STADIUM > [BOT] BOTSWANA > Stadiums
+# STADIUM > [BOT] BOTSWANA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103027 		"Botswana National Stadium" 					""
 
 
-# STADIUM > [BRA] BRAZIL > Stadiums
+# STADIUM > [BRA] BRAZIL
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102527		"Estádio Nabi Abi Chedid"					""
 "STADIUM_NAME_CHANGE"		102530		"Estádio Heriberto Hülse"					""
@@ -23625,7 +23625,7 @@
 "STADIUM_NAME_CHANGE"		19371625	"Estádio Antônio Accioly"					""
 
 
-# STADIUM > [BRU] BRUNEI > Stadiums
+# STADIUM > [BRU] BRUNEI
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1014465		"Penanjong Kem"							""
 "STADIUM_NAME_CHANGE"		1016797		"Jerudong Park Mini Stadium"					""
@@ -23647,7 +23647,7 @@
 "STADIUM_NAME_CHANGE"		23339661	"Padang JBS"							""
 
 
-# STADIUM > [BUL] BULGARIA > Stadiums
+# STADIUM > [BUL] BULGARIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102967		"Natsionalen stadion Vasil Levski"				""
 "STADIUM_NAME_CHANGE"		116148		"Stadion Balgarska Armiya"					""
@@ -23754,14 +23754,14 @@
 "STADIUM_NAME_CHANGE"		2000315475	"Stadion Lokomotiv (Stara Zagora)"				""
 
 
-# STADIUM > [BFA] BURKINA FASO > Stadiums
+# STADIUM > [BFA] BURKINA FASO
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103028	 	"Stade Dr. Issoufou Joseph Conombo" 				""
 "STADIUM_NAME_CHANGE" 		138175	 	"Stade Wobi Bobo-Dioulasso" 					""
 "STADIUM_NAME_CHANGE"		12005694	"Stade du 4 Août"						""
 
 
-# STADIUM > [CAM] CAMBODIA > Stadiums
+# STADIUM > [CAM] CAMBODIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103246		"Phnom Penh Olympic Stadium"					""
 "STADIUM_NAME_CHANGE" 		5622720 	"RCAF Stadium" 							""
@@ -23778,14 +23778,14 @@
 "STADIUM_NAME_CHANGE"		2000255287	"Morodok Techo National Stadium"				""
 
 
-# STADIUM > [CMR] CAMEROON > Stadiums
+# STADIUM > [CMR] CAMEROON
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103030		"Stade Omnisports Ahmadou Ahidjo"				""
 "STADIUM_NAME_CHANGE"		13201013	"Stade de football d’Olembe"					""
 "STADIUM_NAME_CHANGE"		31041476	"Stade de Japoma"						""
 
 
-# STADIUM > [CAN] CANADA > Stadiums
+# STADIUM > [CAN] CANADA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103142		"Olympic Stadium (Montreal)"					""
 "STADIUM_NAME_CHANGE"		133914		"Commonwealth Stadium"						""
@@ -23794,7 +23794,7 @@
 "STADIUM_NAME_CHANGE" 		20502272 	"Princess Auto Stadium" 					""
 
 
-# STADIUM > [CHI] CHILE > Stadiums
+# STADIUM > [CHI] CHILE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102989		"Estadio Nacional Julio Martínez Prádanos"			""
 "STADIUM_NAME_CHANGE"		107639		"Estadio Monumental David Arellano"				""
@@ -23845,7 +23845,7 @@
 "STADIUM_NAME_CHANGE"		2000308314	"Estadio Fiscal Antonio Ríspoli Díaz"				""
 
 
-# STADIUM > [CHN] CHINA PR > Stadiums
+# STADIUM > [CHN] CHINA PR
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103238		"Workers' Stadium"						""
 "STADIUM_NAME_CHANGE"		128034		"Yutong International Sports Centre Stadium"			""
@@ -23951,10 +23951,6 @@
 "STADIUM_NAME_CHANGE"		2000309640	"Qingdao Youth Football Stadium"				""
 "STADIUM_NAME_CHANGE"		2000312093	"Qingdao West Coast University City Sports Centre Stadium"	""
 "STADIUM_NAME_CHANGE"		2000312150	"Pingguo Stadium"						""
-
-
-# STADIUM > [CHN] CHINA PR > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		23209267 	"Henan Jianye Football Base - Pitch 1" 				""
 "STADIUM_NAME_CHANGE" 		23209268 	"Henan Jianye Football Base - Pitch 2" 				""
 "STADIUM_NAME_CHANGE" 		23242367 	"Shandong Luneng Taishan Training Base - Pitch 1" 		""
@@ -23972,7 +23968,7 @@
 "STADIUM_NAME_CHANGE" 		23469035 	"Shenglong Sports Park Football Ground - Pitch 2" 		""
 
 
-# STADIUM > [TPE] CHINESE TAIPEI > Stadiums
+# STADIUM > [TPE] CHINESE TAIPEI
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103268		"Zhongshan Soccer Stadium"					""
 "STADIUM_NAME_CHANGE"		5622990		"Taipei Municipal Stadium"					""
@@ -23998,7 +23994,7 @@
 "STADIUM_NAME_CHANGE"		2000208519	"Fu Jen Catholic University Stadium"				""
 
 
-# STADIUM > [COL] COLOMBIA > Stadiums
+# STADIUM > [COL] COLOMBIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102991		"Estadio Nemesio Camacho El Campín"				""
 "STADIUM_NAME_CHANGE"		303788		"Estadio Olímpico Pascual Guerrero"				""
@@ -24122,29 +24118,29 @@
 "STADIUM_NAME_CHANGE"		2000268152	"Estadio Municipal San Cayetano"				""
 
 
-# STADIUM > [CGO] CONGO > Stadiums
+# STADIUM > [CGO] CONGO
 #====================================================================================
 "STADIUM_NAME_CHANGE"		13167629	"Stade Municipal de Kintélé"					""
 
 
-# STADIUM > [COD] CONGO DR > Stadiums
+# STADIUM > [COD] CONGO DR
 #====================================================================================
 "STADIUM_NAME_CHANGE"		152587		"Stade des Martyrs"						""
 "STADIUM_NAME_CHANGE"		13207257	"Stade Tata Raphaël"						""
 
 
-# STADIUM > [COK] COOK ISLANDS > Stadiums
+# STADIUM > [COK] COOK ISLANDS
 #====================================================================================
 "STADIUM_NAME_CHANGE"		148955		"Tereora National Stadium"					""
 
 
-# STADIUM > [CIV] CÔTE D'IVOIRE > Stadiums
+# STADIUM > [CIV] CÔTE D'IVOIRE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103035		"Stade Félix Houphouët-Boigny"					""
 "STADIUM_NAME_CHANGE"		31041485	"Stade Olympique d'Ebimpé"					""
 
 
-# STADIUM > [CRO] CROATIA > Stadiums
+# STADIUM > [CRO] CROATIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		106752		"Gradski stadion Samobor"					""
 "STADIUM_NAME_CHANGE"		106753		"Gradski stadion Ivan Kušek-Apaš"				""
@@ -24211,12 +24207,12 @@
 "STADIUM_NAME_CHANGE"		2000002959	"Opus Arena"							""
 
 
-# STADIUM > [CUB] CUBA > Stadiums
+# STADIUM > [CUB] CUBA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		82080286	"Estadio Héroes del Mayabeque Güines"				""
 
 
-# STADIUM > [CYP] CYPRUS > Stadiums
+# STADIUM > [CYP] CYPRUS
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		692445		"Grigoris Afxentiou Stadium"					""
 "STADIUM_NAME_CHANGE" 		692448		"Makareio Stadium (Nicosia)"					""
@@ -24245,7 +24241,7 @@
 "STADIUM_NAME_CHANGE" 		2000241590	"Alphamega Stadium"						""
 
 
-# STADIUM > [CZE] CZECHIA > Stadiums
+# STADIUM > [CZE] CZECHIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		116157		"Na Litavce"							""
 "STADIUM_NAME_CHANGE" 		131290 		"Městský fotbaloký stadion Miroslava Valenty" 			""
@@ -24279,7 +24275,7 @@
 "STADIUM_NAME_CHANGE"		25054823	"Stadion v Kvapilove ulici"					""
 
 
-# STADIUM > [DEN] DENMARK > Stadiums
+# STADIUM > [DEN] DENMARK
 #====================================================================================
 "STADIUM_NAME_CHANGE"		813		"Aalborg Portland Park"						""
 "STADIUM_NAME_CHANGE"		817		"Ceres Park"							""
@@ -24323,12 +24319,12 @@
 "STADIUM_NAME_CHANGE"		2000255976	"Skovens Arena"							""
 
 
-# STADIUM > [DOM] DOMINICAN REPUBLIC > Stadiums
+# STADIUM > [DOM] DOMINICAN REPUBLIC
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		2000028564	"DV7 Complex & Academy Soccer" 					""
 
 
-# STADIUM > [ECU] ECUADOR > Stadiums
+# STADIUM > [ECU] ECUADOR
 #====================================================================================
 "STADIUM_NAME_CHANGE"		109181		"Estadio Banco del Pacífico G. Capwell"				""
 "STADIUM_NAME_CHANGE"		109183		"Estadio Olímpico Atahualpa"					""
@@ -24386,7 +24382,7 @@
 "STADIUM_NAME_CHANGE"		2000175788	"Estadio UNACH"							""
 
 
-# STADIUM > [EGY] EGYPT > Stadiums
+# STADIUM > [EGY] EGYPT
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103037		"Cairo International Stadium"					""
 "STADIUM_NAME_CHANGE"		23017664	"Mubarak International Stadium"					""
@@ -24394,14 +24390,14 @@
 "STADIUM_NAME_CHANGE"		23017671	"Borg El-Arab Stadium"						""
 
 
-# STADIUM > [SLV] EL SALVADOR > Stadiums
+# STADIUM > [SLV] EL SALVADOR
 #====================================================================================
 "STADIUM_NAME_CHANGE"		308288		"Estadio Cuscatlán"						""
 "STADIUM_NAME_CHANGE" 		8826671		"Estadio José Gregorio Martínez" 				""
 "STADIUM_NAME_CHANGE" 		87001119	"Estadio Luis Amílcar Moreno" 					""
 
 
-# STADIUM > [ENG] ENGLAND > Stadiums
+# STADIUM > [ENG] ENGLAND
 #====================================================================================
 "STADIUM_NAME_CHANGE"		600		"Vitality Stadium"						""
 "STADIUM_NAME_CHANGE"		603		"Villa Park"							""
@@ -24507,10 +24503,6 @@
 "STADIUM_NAME_CHANGE" 		74008932 	"Dunraven Brewery Field"					""
 "STADIUM_NAME_CHANGE" 		90070210	"Litherland Sports Park" 					""
 "STADIUM_NAME_CHANGE"		2000002647	"Hill Dickinson Stadium"					""
-
-
-# STADIUM > [ENG] ENGLAND > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		28086422 	"The Academy, Kirkby" 						""
 "STADIUM_NAME_CHANGE" 		28086675 	"Trafford Training Centre" 					""
 "STADIUM_NAME_CHANGE" 		28086678 	"AXA Melwood Training Centre" 					""
@@ -24518,12 +24510,12 @@
 "STADIUM_NAME_CHANGE" 		2000066052	"AXA Training Centre"						""
 
 
-# STADIUM > [EQG] EQUATORIAL GUINEA > Stadiums
+# STADIUM > [EQG] EQUATORIAL GUINEA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		13109426	"Estadio de Bata"						 ""
 
 
-# STADIUM > [ETH] ETHIOPIA > Stadiums
+# STADIUM > [ETH] ETHIOPIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		13206166	"Bahir Dar Stadium"						""
 "STADIUM_NAME_CHANGE"		2000000433	"Adey Abeba Stadium"						""
@@ -24531,12 +24523,12 @@
 "STADIUM_NAME_CHANGE"		2000234142	"Hawassa International Stadium"					""
 
 
-# STADIUM > [FIJ] FIJI > Stadiums
+# STADIUM > [FIJ] FIJI
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103185 		"HFC Bank Stadium"			 			""
 
 
-# STADIUM > [FIN] FINLAND > Stadiums
+# STADIUM > [FIN] FINLAND
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		115602 		"Bolt Arena"			 				""
 "STADIUM_NAME_CHANGE" 		129130 		"Mustapekka Arena"			 			""
@@ -24548,7 +24540,7 @@
 "STADIUM_NAME_CHANGE" 		33066518	"OmaSP Stadion"							""
 
 
-# STADIUM > [FRA] FRANCE > Stadiums
+# STADIUM > [FRA] FRANCE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		919		"Stade Abbé-Deschamps"						""
 "STADIUM_NAME_CHANGE"		921		"Stade Georges Pompidou"					""
@@ -24649,10 +24641,6 @@
 "STADIUM_NAME_CHANGE"		2000000901	"Matmut Stadium"						""
 "STADIUM_NAME_CHANGE"		2000000904	"Nouveau Stade des Costières"					""
 "STADIUM_NAME_CHANGE"		2000082997	"Stade Nemausus"						""
-
-
-# STADIUM > [FRA] FRANCE > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		48043315	"Groupama OL Training Center"	 				""
 "STADIUM_NAME_CHANGE" 		48043324	"Groupama OL Training Center (terrain CFA)"			""
 "STADIUM_NAME_CHANGE" 		48043334	"Groupama OL Académy"	 					""
@@ -24660,24 +24648,24 @@
 "STADIUM_NAME_CHANGE" 		2000300884	"Stade OM Campus - Roger Scotti"				""
 
 
-# STADIUM > [GAB] GABON > Stadiums
+# STADIUM > [GAB] GABON
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103040		"Stade Omar Bongo"						""
 "STADIUM_NAME_CHANGE"		13107339	"Stade de l'Amitié (Angondjé)"					""
 
 
-# STADIUM > [GAM] GAMBIA > Stadiums
+# STADIUM > [GAM] GAMBIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103041		"Independence Stadium"						""
 
 
-# STADIUM > [GEO] GEORGIA > Stadiums
+# STADIUM > [GEO] GEORGIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1300401		"Boris Paichadze Dinamo Arena"					""
 "STADIUM_NAME_CHANGE" 		2000007092 	"Adjarabet Arena" 						""
 
 
-# STADIUM > [GER] GERMANY > Stadiums
+# STADIUM > [GER] GERMANY
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1282		"MDCC-Arena"							""
 "STADIUM_NAME_CHANGE" 		1284 		"Rudolf-Harbig-Stadion" 					""
@@ -24760,21 +24748,17 @@
 "STADIUM_NAME_CHANGE"		91151627	"Waldstadion"							""
 "STADIUM_NAME_CHANGE"		91182657	"Stadion Karlsruhe"						""
 "STADIUM_NAME_CHANGE" 		91183670 	"Europa-Park Stadion" 						""
-
-
-# STADIUM > [GER] GERMANY > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		91150996	"BVB-Fußballpark Hohenbuschei"					""
 
 
-# STADIUM > [GHA] GHANA > Stadiums
+# STADIUM > [GHA] GHANA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103042		"Accra Sports Stadium"						""
 "STADIUM_NAME_CHANGE"		5390195		"Baba Yara Sports Stadium"					""
 "STADIUM_NAME_CHANGE"		13206009	"University Of Ghana Sports Stadium"				""
 
 
-# STADIUM > [GRE] GREECE > Stadiums
+# STADIUM > [GRE] GREECE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		114577		"Michalis Kritikopoulos Stadium"				""
 "STADIUM_NAME_CHANGE"		129655		"Trikala Municipal Stadium"					""
@@ -24804,10 +24788,6 @@
 "STADIUM_NAME_CHANGE"		36087483	"Allwyn Arena - Agia Sophia Stadium"				""
 "STADIUM_NAME_CHANGE"		2000172566	"Serafeideio Stadium"						""
 "STADIUM_NAME_CHANGE"		2000281127	"New Panathinaikos Stadium"					""
-
-
-# STADIUM > [GRE] GREECE > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		675002	 	"Thrakomakedones Training Centre"				""
 "STADIUM_NAME_CHANGE" 		675003	 	"Yiorgos Vardinogiannis - Paiania Training Centre"		""
 "STADIUM_NAME_CHANGE" 		687418	 	"Agios Ioannis Rentis Training Centre"				""
@@ -24825,18 +24805,18 @@
 "STADIUM_NAME_CHANGE" 		2000020457	"Kestrini Training Centre"					""
 
 
-# STADIUM > [GUM] GUAM > Stadiums
+# STADIUM > [GUM] GUAM
 #====================================================================================
 "STADIUM_NAME_CHANGE"		129510		"Guam National Football Stadium"				""
 
 
-# STADIUM > [GUI] GUINEA > Stadiums
+# STADIUM > [GUI] GUINEA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103044		"Stade du 28 Septembre"						""
 "STADIUM_NAME_CHANGE"		2000002080	"Stade Général Lansana Conté"					""
 
 
-# STADIUM > [HKG] HONG KONG > Stadiums
+# STADIUM > [HKG] HONG KONG
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103239		"Hong Kong Stadium"						""
 "STADIUM_NAME_CHANGE"		135456		"Mong Kok Stadium"						""
@@ -24849,10 +24829,6 @@
 "STADIUM_NAME_CHANGE"		5621529		"Tai Po Sports Ground"						""
 "STADIUM_NAME_CHANGE"		23003763	"Tseung Kwan O Sports Ground"					""
 "STADIUM_NAME_CHANGE"		23392501	"Kai Tak Stadium"						""
-
-
-# STADIUM > [HKG] HONG KONG > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		1014582 	"Happy Valley Sports Ground - Pitch 3" 				""
 "STADIUM_NAME_CHANGE" 		1014583 	"Happy Valley Sports Ground - Pitch 4" 				""
 "STADIUM_NAME_CHANGE" 		1014584 	"Happy Valley Sports Ground - Pitch 5" 				""
@@ -24881,12 +24857,12 @@
 "STADIUM_NAME_CHANGE" 		2000185326 	"Jockey Club Kitchee Centre - Pitch 2" 				""
 
 
-# STADIUM > [HON] HONDURAS > Stadiums
+# STADIUM > [HON] HONDURAS
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		7720038		"Estadio Humberto Micheletti" 					""
 
 
-# STADIUM > [HUN] HUNGARY > Stadiums
+# STADIUM > [HUN] HUNGARY
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102974		"Puskás Aréna"							""
 "STADIUM_NAME_CHANGE"		128170		"Oláh Gábor utcai Stadion"					""
@@ -24932,7 +24908,7 @@
 "STADIUM_NAME_CHANGE"		38042602	"Tiszakécskei Városi Stadion"					""
 
 
-# STADIUM > [IND] INDIA > Stadiums
+# STADIUM > [IND] INDIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103240		"Salt Lake Stadium / VYBK"					""
 "STADIUM_NAME_CHANGE"		5512134		"Jawaharlal Nehru Stadium (Chennai)"				""
@@ -24959,7 +24935,7 @@
 "STADIUM_NAME_CHANGE"		2000001576	"Kalinga Stadium"						""
 
 
-# STADIUM > [IDN] INDONESIA > Stadiums
+# STADIUM > [IDN] INDONESIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103241		"Stadion Utama Gelora Bung Karno"				""
 "STADIUM_NAME_CHANGE"		116139		"Stadion Lebak Bulus"						""
@@ -25036,7 +25012,7 @@
 "STADIUM_NAME_CHANGE"		2000219969	"Stadion Utama Riau"						""
 
 
-# STADIUM > [IRN] IR IRAN > Stadiums
+# STADIUM > [IRN] IR IRAN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103242		"Azadi Stadium"							""
 "STADIUM_NAME_CHANGE"		135289		"Hafezieh Stadium"						""
@@ -25089,14 +25065,14 @@
 "STADIUM_NAME_CHANGE"		2000256686	"Shohadaye Mes Rafsanjan Stadium"				""
 
 
-# STADIUM > [IRQ] IRAQ > Stadiums
+# STADIUM > [IRQ] IRAQ
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103243		"Al-Sha'ab International Stadium"				""
 "STADIUM_NAME_CHANGE"		145721		"Franso Hariri Stadium"						""
 "STADIUM_NAME_CHANGE"		23321811	"Basra International Stadium"					""
 
 
-# STADIUM > [IRL] IRELAND > Stadiums
+# STADIUM > [IRL] IRELAND
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		1300923 	"Hunky Dorys Park"						""
 "STADIUM_NAME_CHANGE"		52029709	"Aviva Stadium"							""
@@ -25104,7 +25080,7 @@
 "STADIUM_NAME_CHANGE" 		2000073572 	"Mounthawk Park - Pitch II"					""
 
 
-# STADIUM > [ISR] ISRAEL > Stadiums
+# STADIUM > [ISR] ISRAEL
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		102975		"Ramat-Gan Stadium"						""
 "STADIUM_NAME_CHANGE" 		1300655		"Teddy Stadium"							""
@@ -25116,7 +25092,7 @@
 "STADIUM_NAME_CHANGE" 		42029405	"Netanya Stadium"						""
 
 
-# STADIUM > [ITA] ITALY > Stadiums
+# STADIUM > [ITA] ITALY
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1160		"Stadio del Conero"						""
 "STADIUM_NAME_CHANGE"		1162		"Stadio Cino e Lillo Del Duca"					""
@@ -25184,10 +25160,6 @@
 "STADIUM_NAME_CHANGE"		43156644	"Stadio Sterlino"						""
 "STADIUM_NAME_CHANGE"		43210657	"Stadio del Littorio"						""
 "STADIUM_NAME_CHANGE"		43358366	"Unipol Domus"							""
-
-
-# STADIUM > [ITA] ITALY > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		43006435	"Centro Sportivo Mario Gavagnin-Sinibaldo Nocini"		""
 "STADIUM_NAME_CHANGE" 		43156062	"Campo Agostino Di Bartolomei"					""
 "STADIUM_NAME_CHANGE" 		43156126	"BPER Centro Sportivo Angelo Moratti"				""
@@ -25197,7 +25169,7 @@
 "STADIUM_NAME_CHANGE" 		2000120629 	"Palermo City Football Academy" 				""
 
 
-# STADIUM > [JPN] JAPAN > Stadiums
+# STADIUM > [JPN] JAPAN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102564		"Lemon Gas Stadium Hiratsuka"					""
 "STADIUM_NAME_CHANGE"		102565		"Za Oripri Stadium"						""
@@ -25290,10 +25262,6 @@
 "STADIUM_NAME_CHANGE"		2000296803	"Kanazawa Go Go Curry Stadium"					""
 "STADIUM_NAME_CHANGE"		2000296804	"New Paloma Mizuho Stadium"					""
 "STADIUM_NAME_CHANGE"		2000296805	"Edion Peace Wing Hiroshima"					""
-
-
-# STADIUM > [JPN] JAPAN > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		1037590 	"Marina South Field - Pitch 1" 					""
 "STADIUM_NAME_CHANGE" 		1037591 	"Marina South Field - Pitch 2" 					""
 "STADIUM_NAME_CHANGE" 		45008869 	"Yasugawa Rekishi Park Soccer Stadium - Pitch A" 		""
@@ -25363,12 +25331,12 @@
 "STADIUM_NAME_CHANGE" 		2000071296 	"Kamisu Seaside Sports Park Soccer Ground - Pitch B" 		""
 
 
-# STADIUM > [JOR] JORDAN > Stadiums
+# STADIUM > [JOR] JORDAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103245	 	"Amman International Stadium" 					""
 
 
-# STADIUM > [KAZ] KAZAKHSTAN > Stadiums
+# STADIUM > [KAZ] KAZAKHSTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		484605	 	"Gani Muratbaeva"	 					""
 "STADIUM_NAME_CHANGE" 		484607	 	"Qajimuqan Muñaytpasov"	 					""
@@ -25376,12 +25344,12 @@
 "STADIUM_NAME_CHANGE" 		59093239 	"Shakhter-Bolat"	 					""
 
 
-# STADIUM > [KEN] KENYA > Stadiums
+# STADIUM > [KEN] KENYA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		23017864	"Safaricom Stadium Kasarani at MISC"				""
 
 
-# STADIUM > [PRK] KOREA DPR > Stadiums
+# STADIUM > [PRK] KOREA DPR
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103248		"Rungrado 1st of May Stadium"					""
 "STADIUM_NAME_CHANGE"		5623080		"Kim Il-Sung Stadium"						""
@@ -25389,7 +25357,7 @@
 "STADIUM_NAME_CHANGE" 		23446898 	"Pyongyang City Stadium" 					""
 
 
-# STADIUM > [KOR] KOREA REPUBLIC > Stadiums
+# STADIUM > [KOR] KOREA REPUBLIC
 #====================================================================================
 "STADIUM_NAME_CHANGE"		134628		"Busan Gudeok Stadium"						""
 "STADIUM_NAME_CHANGE"		134629		"Suwon Sports Complex"						""
@@ -25457,21 +25425,13 @@
 "STADIUM_NAME_CHANGE"		2000036056	"Gwangju Football Stadium"					""
 "STADIUM_NAME_CHANGE"		2000100693	"Geoje Stadium"							""
 "STADIUM_NAME_CHANGE"		2000105054	"Gimcheon Stadium"						""
-
-
-# STADIUM > [KOR] KOREA REPUBLIC > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		5708124		"Yongin FC Training Stadium"					""
 "STADIUM_NAME_CHANGE" 		66026674	"Hwaseong Training Stadium"					""
 
 
-# STADIUM > [KUW] KUWAIT > Stadiums
+# STADIUM > [KUW] KUWAIT
 #====================================================================================
 "STADIUM_NAME_CHANGE"		23017678	"Jaber Al-Ahmad International Stadium"				""
-
-
-# STADIUM > [KUW] KUWAIT > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		23219580 	"Al-Arabi Training Centre - Pitch 1" 				""
 "STADIUM_NAME_CHANGE" 		23219581 	"Al-Arabi Training Centre - Pitch 2" 				""
 "STADIUM_NAME_CHANGE" 		23219583 	"Al-Kuwait Training Centre - Pitch 1" 				""
@@ -25507,7 +25467,7 @@
 "STADIUM_NAME_CHANGE" 		23219621 	"Al-Qadsia Training Centre - Pitch 3" 				""
 
 
-# STADIUM > [KGZ] KYRGYZSTAN > Stadiums
+# STADIUM > [KGZ] KYRGYZSTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103251 		"Dolen Omurzakov Stadium" 					""
 "STADIUM_NAME_CHANGE" 		485429 		"Abdygany Radzhapov Stadion" 					""
@@ -25550,36 +25510,36 @@
 "STADIUM_NAME_CHANGE"		2000310253	"Kara-Debe Stadion"						""
 
 
-# STADIUM > [LAO] LAOS > Stadiums
+# STADIUM > [LAO] LAOS
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		23103788 	"Lao National Stadium KM16" 					""
 "STADIUM_NAME_CHANGE" 		23393856 	"Army Stadium KM5"	 					""
 "STADIUM_NAME_CHANGE" 		2000263043 	"Luang Namtha Stadium"	 					""
 
 
-# STADIUM > [LBN] LEBANON > Stadiums
+# STADIUM > [LBN] LEBANON
 #====================================================================================
 "STADIUM_NAME_CHANGE"		128275		"Camille Chamoun Sports City Stadium"				""
 
 
-# STADIUM > [LBY] LIBYA > Stadiums
+# STADIUM > [LBY] LIBYA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103079		"Tripoli International Stadium"					""
 "STADIUM_NAME_CHANGE"		23017836	"March 28 Stadium"						""
 
 
-# STADIUM > [MAC] MACAU > Stadiums
+# STADIUM > [MAC] MACAU
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103254		"Centro Desportivo Olímpico"					""
 
 
-# STADIUM > [MWI] MALAWI > Stadiums
+# STADIUM > [MWI] MALAWI
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103081		"Kamuzu Stadium"						""
 "STADIUM_NAME_CHANGE"		13200799	"Bingu Stadium"							""
 
 
-# STADIUM > [MAS] MALAYSIA > Stadiums
+# STADIUM > [MAS] MALAYSIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103255		"Stadium Shah Alam"						""
 "STADIUM_NAME_CHANGE" 		135350 		"Stadium Likas" 						""
@@ -25680,23 +25640,23 @@
 "STADIUM_NAME_CHANGE" 		2000262675 	"Stadium Miri" 							""
 
 
-# STADIUM > [MDV] MALDIVES > Stadiums
+# STADIUM > [MDV] MALDIVES
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103257	 	"Galolhu Rasmee Dhandu National Stadium" 			""
 "STADIUM_NAME_CHANGE" 		23162999 	"Mále Sports Complex (Ekuveni)"					""
 
 
-# STADIUM > [MLI] MALI > Stadiums
+# STADIUM > [MLI] MALI
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103082		"Stade du 26 Mars"						""
 
 
-# STADIUM > [MLT] MALTA > Stadiums
+# STADIUM > [MLT] MALTA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		47042846 	"Kerċem Ajax Arkafort Stadium" 					""
 
 
-# STADIUM > [MEX] MEXICO > Stadiums
+# STADIUM > [MEX] MEXICO
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103143		"Estadio Banorte Azteca"					""
 "STADIUM_NAME_CHANGE"		104467		"Estadio Olímpico Universitario"				""
@@ -25719,13 +25679,13 @@
 "STADIUM_NAME_CHANGE" 		2000023815 	"Estadio de Mazatlán" 						""
 
 
-# STADIUM > [MNG] MONGOLIA > Stadiums
+# STADIUM > [MNG] MONGOLIA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		129506 		"National Sports Stadium (Ulaanbaatar)" 			""
 "STADIUM_NAME_CHANGE" 		23147671 	"MFF Football Centre"	 					""
 
 
-# STADIUM > [MNE] MONTENEGRO > Stadiums
+# STADIUM > [MNE] MONTENEGRO
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		5742999 	"Stadion pod Bogavskim brdom"	 				""
 "STADIUM_NAME_CHANGE" 		5757091 	"Olimpik - Velika Plaža"	 				""
@@ -25734,7 +25694,7 @@
 "STADIUM_NAME_CHANGE" 		62198544 	"DG Arena"	 						""
 
 
-# STADIUM > [MAR] MOROCCO > Stadiums
+# STADIUM > [MAR] MOROCCO
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103085		"Stade Mohammed V"						""
 "STADIUM_NAME_CHANGE"		105304		"Habib Bouakeul"						""
@@ -25746,19 +25706,19 @@
 "STADIUM_NAME_CHANGE" 		13201012	"Grand Stade de Casablanca"	 				""
 
 
-# STADIUM > [MOZ] MOZAMBIQUE > Stadiums
+# STADIUM > [MOZ] MOZAMBIQUE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103086		"Estádio da Machava"						""
 "STADIUM_NAME_CHANGE"		13103080	"Estádio Nacional do Zimpeto"					""
 
 
-# STADIUM > [MYA] MYANMAR > Stadiums
+# STADIUM > [MYA] MYANMAR
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103258		"Bogyoke Aung San Stadium"					""
 "STADIUM_NAME_CHANGE"		1037320		"Thuwunna Stadium"						""
 
 
-# STADIUM > [NED] NETHERLANDS > Stadiums
+# STADIUM > [NED] NETHERLANDS
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1417		"Johan Cruijff ArenA"						""
 "STADIUM_NAME_CHANGE"		1419		"Cambuur Stadion"						""
@@ -25804,7 +25764,7 @@
 "STADIUM_NAME_CHANGE" 		2000004782 	"Gemeentelijk Sportpark Lewenburg" 				""
 
 
-# STADIUM > [NEP] NEPAL > Stadiums
+# STADIUM > [NEP] NEPAL
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103259		"Dasharath Rangasala Stadium" 					""
 "STADIUM_NAME_CHANGE" 		134895		"Sano Gaucharan Stadium" 					""
@@ -25813,25 +25773,25 @@
 "STADIUM_NAME_CHANGE" 		23340317 	"Shahid Rangasala Stadium" 					""
 
 
-# STADIUM > [NCL] NEW CALEDONIA > Stadiums
+# STADIUM > [NCL] NEW CALEDONIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		129534		"Stade Edouard-Pentecost"					""
 
 
-# STADIUM > [NZL] NEW ZEALAND > Stadiums
+# STADIUM > [NZL] NEW ZEALAND
 #====================================================================================
 "STADIUM_NAME_CHANGE"		23209916	"United Sports Centre"						""
 "STADIUM_NAME_CHANGE"		23228558	"Eden Park"							""
 
 
-# STADIUM > [NGA] NIGERIA > Stadiums
+# STADIUM > [NGA] NIGERIA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		103089		"National Stadium (Lagos)" 					""
 "STADIUM_NAME_CHANGE"		105373		"New Jos International Stadium"					""
 "STADIUM_NAME_CHANGE"		5410184		"Moshood Abiola National Stadium"				""
 
 
-# STADIUM > [MKD] NORTH MACEDONIA > Stadiums
+# STADIUM > [MKD] NORTH MACEDONIA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		116200 		"Stadion Goce Delčev" 						""
 "STADIUM_NAME_CHANGE" 		116202 		"Stadion Čair" 							""
@@ -25839,13 +25799,13 @@
 "STADIUM_NAME_CHANGE" 		62037969 	"Stadion Kukuš" 						""
 
 
-# STADIUM > [NIR] NORTHERN IRELAND > Stadiums
+# STADIUM > [NIR] NORTHERN IRELAND
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		116321 		"Belfast Loughshore Hotel Arena" 				""
 "STADIUM_NAME_CHANGE" 		1300908 	"The Ryan McBride Brandywell Stadium" 				""
 
 
-# STADIUM > [NOR] NORWAY > Stadiums
+# STADIUM > [NOR] NORWAY
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		2014 		"Jesperudjordet Kunstgress" 					""
 "STADIUM_NAME_CHANGE"		117250		"Ullevaal Stadion"						""
@@ -25894,37 +25854,37 @@
 "STADIUM_NAME_CHANGE" 		53161105 	"Kaldbakkenfeltet Kunstgress 2" 				""
 
 
-# STADIUM > [OMA] OMAN > Stadiums
+# STADIUM > [OMA] OMAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		2000003560	"Sultan Qaboos Sports Complex" 					""
 "STADIUM_NAME_CHANGE" 		2000003560	"Bahla Sports Complex" 						""
 
 
-# STADIUM > [PAK] PAKISTAN > Stadiums
+# STADIUM > [PAK] PAKISTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		5626956		"Punjab Stadium"						""
 "STADIUM_NAME_CHANGE"		5626957		"Jinnah Sports Stadium"						""
 "STADIUM_NAME_CHANGE"		23087422	"Gaddafi Stadium"						""
 
 
-# STADIUM > [PLE] PALESTINE > Stadiums
+# STADIUM > [PLE] PALESTINE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		42019773	"Faisal Al-Husseini International Stadium"			""
 
 
-# STADIUM > [PAN] PANAMA > Stadiums
+# STADIUM > [PAN] PANAMA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		308273		"Estadio Rommel Fernández Gutiérrez"				""
 "STADIUM_NAME_CHANGE" 		2000061287	"Estadio Universidad Latina"					""
 
 
-# STADIUM > [PNG] PAPUA NEW GUINEA > Stadiums
+# STADIUM > [PNG] PAPUA NEW GUINEA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103187		"Sir Hubert Murray Stadium"					""
 "STADIUM_NAME_CHANGE"		23211715	"PNG Football Stadium"						""
 
 
-# STADIUM > [PAR] PARAGUAY > Stadiums
+# STADIUM > [PAR] PARAGUAY
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102925		"Estadio Osvaldo Domínguez Dibb"				""
 "STADIUM_NAME_CHANGE"		102995		"Estadio Defensores del Chaco"					""
@@ -25966,7 +25926,7 @@
 "STADIUM_NAME_CHANGE"		2000322998	"Estadio Villa Alegre"						""
 
 
-# STADIUM > [PER] PERU > Stadiums
+# STADIUM > [PER] PERU
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102997		"Estadio Nacional del Peru"					""
 "STADIUM_NAME_CHANGE"		303806		"Estadio Alejandro Villanueva"					""
@@ -26083,12 +26043,12 @@
 "STADIUM_NAME_CHANGE"		2000022926	"Estadio Municipal de Macusani"					""
 
 
-# STADIUM > [PHI] PHILIPPINES > Stadiums
+# STADIUM > [PHI] PHILIPPINES
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103262		"Rizal Memorial Stadium"					""
 
 
-# STADIUM > [POL] POLAND > Stadiums
+# STADIUM > [POL] POLAND
 #====================================================================================
 "STADIUM_NAME_CHANGE"		106871		"Orlen Stadion im. Kazimierza Górskiego"			""
 "STADIUM_NAME_CHANGE" 		129586 		"Stadion Respect Energy"					""
@@ -26137,10 +26097,6 @@
 "STADIUM_NAME_CHANGE"		2000000047	"ArcelorMittal Park"						""
 "STADIUM_NAME_CHANGE"		2000128166	"Arena Katowice"						""
 "STADIUM_NAME_CHANGE"		2000153670	"Itaka Arena"							""
-
-
-# STADIUM > [POL] POLAND > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE"		96043109	"Centrum Piłkarskie PTAK - Synthetic Pitch"			""
 "STADIUM_NAME_CHANGE"		96043110	"Powstańców Chocieszyńskich - Training Pitch"			""
 "STADIUM_NAME_CHANGE"		96043274	"Jarocin Sport - Synthetic Pitch"				""
@@ -26173,7 +26129,7 @@
 "STADIUM_NAME_CHANGE"		2000237524	"Bułgarska - Training Pitch"					""
 
 
-# STADIUM > [POR] PORTUGAL > Stadiums
+# STADIUM > [POR] PORTUGAL
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1457		"Estádio do Bessa Século XXI"					""
 "STADIUM_NAME_CHANGE"		1458		"Estádio D. Afonso Henriques"					""
@@ -26240,17 +26196,13 @@
 "STADIUM_NAME_CHANGE" 		55056830	"Benfica Campus"						""
 "STADIUM_NAME_CHANGE"		55058747	"Campo Domingos Carrilho Patalino"				""
 "STADIUM_NAME_CHANGE"		89051487	"Estádio das Antas"						""
-
-
-# STADIUM > [POR] PORTUGAL > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		2000067523	"Academia Cristiano Ronaldo"					""
 "STADIUM_NAME_CHANGE" 		2000067524	"Academia Cristiano Ronaldo - Campo 2"				""
 "STADIUM_NAME_CHANGE" 		2000067529	"Benfica Campus - Campo 2"					""
 "STADIUM_NAME_CHANGE" 		2000067530	"Benfica Campus - Campo 3"					""
 
 
-# STADIUM > [QAT] QATAR > Stadiums
+# STADIUM > [QAT] QATAR
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103263		"Khalifa International Stadium"					""
 "STADIUM_NAME_CHANGE"		5622853		"Suheim bin Hamad Stadium"					""
@@ -26275,14 +26227,14 @@
 "STADIUM_NAME_CHANGE"		2000038147	"Stadium 974"							""
 
 
-# STADIUM > [ROU] ROMANIA > Stadiums
+# STADIUM > [ROU] ROMANIA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		1300948		"Rapid-Giuleşti" 						""
 "STADIUM_NAME_CHANGE"		57069488	"Arena Națională"						""
 "STADIUM_NAME_CHANGE" 		57138418	"Central-Academia Gheorghe Hagi"				""
 
 
-# STADIUM > [RUS] RUSSIA > Stadiums
+# STADIUM > [RUS] RUSSIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		130565		"Trade Unions Central Stadium"					""
 "STADIUM_NAME_CHANGE"		130569		"Arsenal Stadium (Tula)"					""
@@ -26330,22 +26282,18 @@
 "STADIUM_NAME_CHANGE"		58066611	"Mordovia Arena"						""
 "STADIUM_NAME_CHANGE"		58066612	"Rostov Arena"							""
 "STADIUM_NAME_CHANGE"		2000013199	"Kristall Stadium"						""
-
-
-# STADIUM > [RUS] RUSSIA > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		58115405	"Akademia Spartak"						""
 "STADIUM_NAME_CHANGE" 		58125048 	"Anji Arena - Pitch 3" 						""
 "STADIUM_NAME_CHANGE" 		58125049 	"Anji Arena - Pitch 2" 						""
 "STADIUM_NAME_CHANGE" 		58125178	"Bazhovia Training Ground"					""
 
 
-# STADIUM > [SAM] SAMOA > Stadiums
+# STADIUM > [SAM] SAMOA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103190		"Apia Stadium"							""
 
 
-# STADIUM > [KSA] SAUDI ARABIA > Stadiums
+# STADIUM > [KSA] SAUDI ARABIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		136608		"King Fahd Sports City Stadium"					""
 "STADIUM_NAME_CHANGE"		1025799		"Al-Rawdhah Club Stadium"					""
@@ -26390,7 +26338,7 @@
 "STADIUM_NAME_CHANGE"		2000325888	"Aramco Stadium"						""
 
 
-# STADIUM > [SCO] SCOTLAND > Stadiums
+# STADIUM > [SCO] SCOTLAND
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102578		"Pittodrie Stadium"						""
 "STADIUM_NAME_CHANGE"		102613		"Recreation Park"						""
@@ -26440,13 +26388,13 @@
 "STADIUM_NAME_CHANGE"		2000112014	"Broomfield Park"						""
 
 
-# STADIUM > [SEN] SENEGAL > Stadiums
+# STADIUM > [SEN] SENEGAL
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103092		"Stade Léopold Sédar Senghor"					""
 "STADIUM_NAME_CHANGE"		2000085676	"Stade Olympique Diamniadio"					""
 
 
-# STADIUM > [SRB] SERBIA > Stadiums
+# STADIUM > [SRB] SERBIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		120781		"Stadion Čika Dača"						""
 "STADIUM_NAME_CHANGE"		131116		"Gradski stadion Subotica"					""
@@ -26508,12 +26456,12 @@
 "STADIUM_NAME_CHANGE" 		2000028210	"Pomoćni teren stadiona Rajko Mitić"	 			""
 
 
-# STADIUM > [SLE] SIERRA LEONE > Stadiums
+# STADIUM > [SLE] SIERRA LEONE
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		85006356	"National Stadium (Freetown)"					""
 
 
-# STADIUM > [SGP] SINGAPORE > Stadiums
+# STADIUM > [SGP] SINGAPORE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103237		"Stadium Negara Hassanal Bolkiah"				""
 "STADIUM_NAME_CHANGE"		103265		"Singapore National Stadium"					""
@@ -26525,7 +26473,7 @@
 "STADIUM_NAME_CHANGE"		23295788	"Town Square at Our Tampines Hub"				""
 
 
-# STADIUM > [SVK] SLOVAKIA > Stadiums
+# STADIUM > [SVK] SLOVAKIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		976183		"Mestský štadión Púchov"					""
 "STADIUM_NAME_CHANGE"		1301159		"MOL Arena"							""
@@ -26575,7 +26523,7 @@
 "STADIUM_NAME_CHANGE"		2000312402	"Futbal Tatran Aréna"						""
 
 
-# STADIUM > [SVN] SLOVENIA > Stadiums
+# STADIUM > [SVN] SLOVENIA
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		128653 		"Stadion Domžale" 						""
 "STADIUM_NAME_CHANGE" 		140740 		"Športni center Kranj" 						""
@@ -26596,12 +26544,12 @@
 "STADIUM_NAME_CHANGE" 		64019294 	"Nogometni stadion Brežice" 					""
 
 
-# STADIUM > [SOL] SOLOMON ISLANDS > Stadiums
+# STADIUM > [SOL] SOLOMON ISLANDS
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103188		"Lawson Tama Stadium"						""
 
 
-# STADIUM > [RSA] SOUTH AFRICA > Stadiums
+# STADIUM > [RSA] SOUTH AFRICA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		104481		"Ellis Park Stadium"						""
 "STADIUM_NAME_CHANGE"		104482		"Orlando Stadium"						""
@@ -26620,7 +26568,7 @@
 "STADIUM_NAME_CHANGE"		65005421	"Nelson Mandela Bay Stadium"					""
 
 
-# STADIUM > [ESP] SPAIN > Stadiums
+# STADIUM > [ESP] SPAIN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1006		"Estadio Carlos Belmonte"					""
 "STADIUM_NAME_CHANGE"		1007		"Estadio Municipal Juan Rojas"					""
@@ -26706,10 +26654,6 @@
 "STADIUM_NAME_CHANGE" 		67212882 	"Estadi Nacional d'Andorra"					""
 "STADIUM_NAME_CHANGE"		67259104	"Estadio Ciudad de Málaga"					""
 "STADIUM_NAME_CHANGE"		2000003978	"Mini Estadi"							""
-
-
-# STADIUM > [ESP] SPAIN > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		1055 		"Ciudad Real Madrid Florentino Pérez" 				""
 "STADIUM_NAME_CHANGE" 		108999 		"Instalaciones de Lezama Campo 2"		 		""
 "STADIUM_NAME_CHANGE" 		67016694	"Ciudad Cívitas Deportiva Atlético de Madrid" 			""
@@ -26723,18 +26667,18 @@
 "STADIUM_NAME_CHANGE" 		2000338767	"Instalaciones de Lezama Campo 8" 				""
 
 
-# STADIUM > [SUD] SUDAN > Stadiums
+# STADIUM > [SUD] SUDAN
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		105346 		"Al-Merrikh Stadium" 						""
 
 
-# STADIUM > [SRI] SRI LANKA > Stadiums
+# STADIUM > [SRI] SRI LANKA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103266		"Sugathadasa Stadium"						""
 "STADIUM_NAME_CHANGE"		23401864	"Colombo Racecourse Sports Complex"				""
 
 
-# STADIUM > [SWE] SWEDEN > Stadiums
+# STADIUM > [SWE] SWEDEN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1082		"Råsunda"							""
 "STADIUM_NAME_CHANGE"		1087		"Stora Valla"							""
@@ -26775,7 +26719,7 @@
 "STADIUM_NAME_CHANGE"		93070906	"Olympia (Helsingborg, 2017)"					""
 
 
-# STADIUM > [SUI] SWITZERLAND > Stadiums
+# STADIUM > [SUI] SWITZERLAND
 #====================================================================================
 "STADIUM_NAME_CHANGE"		129503		"Rheinpark Stadion"						""
 "STADIUM_NAME_CHANGE"		1301214		"Stadio di Cornaredo"						""
@@ -26811,20 +26755,20 @@
 "STADIUM_NAME_CHANGE"		2000257324	"Arena Sportiva Lugano"						""
 
 
-# STADIUM > [SYR] SYRIA > Stadiums
+# STADIUM > [SYR] SYRIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103267		"Abbassyeen Stadium"						""
 "STADIUM_NAME_CHANGE"		23098938	"Aleppo International Stadium"					""
 "STADIUM_NAME_CHANGE"		2000001016	"Latakia Sports City Stadium"					""
 
 
-# STADIUM > [TAH] TAHITI > Stadiums
+# STADIUM > [TAH] TAHITI
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103189		"Stade Olympique"						""
 "STADIUM_NAME_CHANGE"		34015501	"Stade Pater Te Hono Nui"					""
 
 
-# STADIUM > [TJK] TAJIKISTAN > Stadiums
+# STADIUM > [TJK] TAJIKISTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103269		"Republican Central Stadium"					""
 "STADIUM_NAME_CHANGE"		484470		"Istiqlol Stadium"						""
@@ -26860,13 +26804,13 @@
 "STADIUM_NAME_CHANGE"		2000241650	"Istaravshan Arena"						""
 
 
-# STADIUM > [TAN] TANZANIA > Stadiums
+# STADIUM > [TAN] TANZANIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		12010711	"Benjamin Mkapa National Stadium"				""
 "STADIUM_NAME_CHANGE"		13200800	"Dodoma Stadium"						""
 
 
-# STADIUM > [THA] THAILAND > Stadiums
+# STADIUM > [THA] THAILAND
 #====================================================================================
 "STADIUM_NAME_CHANGE"		134907		"PAT Stadium"							""
 "STADIUM_NAME_CHANGE"		134927		"700th Anniversary Stadium"					""
@@ -26921,38 +26865,34 @@
 "STADIUM_NAME_CHANGE" 		2000002654 	"Thai National Sports University Stadium"			""
 "STADIUM_NAME_CHANGE"		2000002660	"Kanchanaburi Provincial Stadium"				""
 "STADIUM_NAME_CHANGE"		2000072179	"Pitchaya Stadium"						""
-
-
-# STADIUM > [THA] THAILAND > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		23402308 	"Nong Chok National Football Center - Pitch 1" 			""
 "STADIUM_NAME_CHANGE" 		23402309 	"Nong Chok National Football Center - Pitch 2" 			""
 
 
-# STADIUM > [TLS] TIMOR-LESTE > Stadiums
+# STADIUM > [TLS] TIMOR-LESTE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		5626838		"Estádio Nacional de Timor-Leste"				""
 "STADIUM_NAME_CHANGE" 		5629190		"Estádio Nobel de la Paz" 					""
 "STADIUM_NAME_CHANGE"		23397055	"Estádio Timor Soul"						""
 
 
-# STADIUM > [TGA] TONGA > Stadiums
+# STADIUM > [TGA] TONGA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		148956		"Teufaiva Sport Stadium"					""
 
 
-# STADIUM > [TCA] TURKS & CAICOS ISLANDS > Stadiums
+# STADIUM > [TCA] TURKS & CAICOS ISLANDS
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		151980 		"TCIFA National Academy" 					""
 
 
-# STADIUM > [TUN] TUNISIA > Stadiums
+# STADIUM > [TUN] TUNISIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		5390001		"Stade Olympique d'El Menzah"					""
 "STADIUM_NAME_CHANGE"		7601512		"Stade Olympique Hammadi Agrebi"				""
 
 
-# STADIUM > [TUR] TURKIYE > Stadiums
+# STADIUM > [TUR] TURKIYE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		130385		"İzmir Atatürk Stadyumu"					""
 "STADIUM_NAME_CHANGE"		130386		"Bayrampaşa Çetin Emeç Stadyumu"				""
@@ -27043,10 +26983,6 @@
 "STADIUM_NAME_CHANGE"		2000054228	"Çorum Şehir Stadyumu"						""
 "STADIUM_NAME_CHANGE"		2000054236	"Erzincan 13 Şubat Şehir Stadyumu"				""
 "STADIUM_NAME_CHANGE"		2000080513	"Mustafa Kemal Atatürk Stadyumu"				""
-
-
-# STADIUM > [TUR] TURKIYE > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		70023731 	"Seyrantepe Şilbe 1 Nolu Sentetik Sahası" 			""
 "STADIUM_NAME_CHANGE" 		70036293 	"Kayseri Atatürk Spor Kompleksi Yan Açık Saha" 			""
 "STADIUM_NAME_CHANGE" 		70087017 	"Seyrantepe 2. Sahası" 						""
@@ -27057,7 +26993,7 @@
 "STADIUM_NAME_CHANGE" 		2000086069 	"Erzincan Mustakil Atletizm Pisti Sahası" 			""
 
 
-# STADIUM > [TKM] TURKMENISTAN > Stadiums
+# STADIUM > [TKM] TURKMENISTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103271		"Central Stadiony"						""
 "STADIUM_NAME_CHANGE"		483065		"Aşgabat Olimpiýa Stadiony"					""
@@ -27078,7 +27014,7 @@
 "STADIUM_NAME_CHANGE"		2000035555	"Mary Sport Toplumy"						""
 
 
-# STADIUM > [UAE] UAE > Stadiums
+# STADIUM > [UAE] UAE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103272		"Zayed Sports City Stadium"					""
 "STADIUM_NAME_CHANGE"		135437		"Baniyas Stadium"						""
@@ -27106,10 +27042,6 @@
 "STADIUM_NAME_CHANGE"		23237513	"Sharjah Stadium"						""
 "STADIUM_NAME_CHANGE" 		23237514 	"Al-Hamriyah Stadium" 						""
 "STADIUM_NAME_CHANGE" 		2000174003	"Al-Mamzar Stadium" 						""
-
-
-# STADIUM > [UAE] UAE > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		2000171526 	"Sheikh Zayed Cricket Stadium - Pitch 1" 			""
 "STADIUM_NAME_CHANGE" 		2000171675 	"The Sevens - Pitch 4" 						""
 "STADIUM_NAME_CHANGE" 		2000171676 	"The Sevens - Pitch 2" 						""
@@ -27118,19 +27050,19 @@
 "STADIUM_NAME_CHANGE" 		2000174145	"Emirates Club Training Pitch 1"				""
 
 
-# STADIUM > [UGA] UGANDA > Stadiums
+# STADIUM > [UGA] UGANDA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103102		"Mandela National Stadium"					""
 
 
-# STADIUM > [UKR] UKRAINE > Stadiums
+# STADIUM > [UKR] UKRAINE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		484978		"Metalist"							""
 "STADIUM_NAME_CHANGE"		1301278		"NSC Olympiyskyi"						""
 "STADIUM_NAME_CHANGE"		71006964	"Donbas Arena"							""
 
 
-# STADIUM > [URU] URUGUAY > Stadiums
+# STADIUM > [URU] URUGUAY
 #====================================================================================
 "STADIUM_NAME_CHANGE"		102999		"Estadio Centenario"						""
 "STADIUM_NAME_CHANGE"		104437		"Estadio Monumental Luis Tróccoli"				""
@@ -27156,15 +27088,11 @@
 "STADIUM_NAME_CHANGE"		78018994	"Estadio Municipal Centro Empleados de Comercio"		""
 "STADIUM_NAME_CHANGE"		78070678	"Estadio Campeón del Siglo"					""
 "STADIUM_NAME_CHANGE"		78075015	"Estadio Luis Köster"						""
-
-
-# STADIUM > [URU] URUGUAY > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		2000114769 	"City Football Academy (Montevideo)" 				""
 "STADIUM_NAME_CHANGE"		2000312952	"Ciudad Deportiva Paysandú FC"					""
 
 
-# STADIUM > [USA] USA > Stadiums
+# STADIUM > [USA] USA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		1356		"RFK Stadium"							""
 "STADIUM_NAME_CHANGE"		1357		"Ohio Stadium"							""
@@ -27256,15 +27184,11 @@
 "STADIUM_NAME_CHANGE"		2000152097	"Protective Stadium"						""
 "STADIUM_NAME_CHANGE"		2000206866	"Energizer Park"						""
 "STADIUM_NAME_CHANGE"		2000259717	"Snapdragon Stadium"						""
-
-
-# STADIUM > [USA] USA > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		981371 		"EAS Training Center" 						""
 "STADIUM_NAME_CHANGE" 		72023926 	"Houston Sports Park" 						""
 
 
-# STADIUM > [UZB] UZBEKISTAN > Stadiums
+# STADIUM > [UZB] UZBEKISTAN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103273		"Paxtakor Markaziy Stadioni"					""
 "STADIUM_NAME_CHANGE"		485425		"Do'stlik Stadioni"						""
@@ -27340,23 +27264,19 @@
 "STADIUM_NAME_CHANGE"		2000241689	"BO'FM Stadioni"						""
 "STADIUM_NAME_CHANGE"		2000267315	"Kimyogar Stadioni"						""
 "STADIUM_NAME_CHANGE"		2000270247	"ROPSTTM Stadioni"						""
-
-
-# STADIUM > [UZB] UZBEKISTAN > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE"		2000241662	"QR BO'FA maydoni"						""
 "STADIUM_NAME_CHANGE"		2000241663	"Toshkent FMM maydoni"						""
 "STADIUM_NAME_CHANGE"		2000241665	"Bunyodkor Akademiyasi 1-Maydon"				""
 "STADIUM_NAME_CHANGE"		2000241674	"Markaziy stadioni zaxira maydoni"				""
 
 
-# STADIUM > [VAN] VANUATU > Stadiums
+# STADIUM > [VAN] VANUATU
 #====================================================================================
 "STADIUM_NAME_CHANGE"		148957		"Korman Stadium"						""
 "STADIUM_NAME_CHANGE"		23209461	"Port Vila Municipal Stadium"					""
 
 
-# STADIUM > [VEN] VENEZUELA > Stadiums
+# STADIUM > [VEN] VENEZUELA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103001		"Estadio Olímpico de la UCV"					""
 "STADIUM_NAME_CHANGE"		109193		"Estadio Guillermo Soto Rosa"					""
@@ -27400,7 +27320,7 @@
 "STADIUM_NAME_CHANGE"		86068469	"Polideportivo UCAT"						""
 
 
-# STADIUM > [VIE] VIETNAM > Stadiums
+# STADIUM > [VIE] VIETNAM
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103274		"T&T Arena Hanoi"						""
 "STADIUM_NAME_CHANGE" 		1011980		"Thanh Long Stadium"						""
@@ -27496,36 +27416,32 @@
 "STADIUM_NAME_CHANGE" 		2000076319	"Tam Dao Stadium"						""
 "STADIUM_NAME_CHANGE" 		2000076322	"Tu Son Stadium"						""
 "STADIUM_NAME_CHANGE" 		2000183309	"Hoa Binh Stadium"						""
-
-
-# STADIUM > [VIE] VIETNAM > Training Pitch
-#====================================================================================
 "STADIUM_NAME_CHANGE" 		8550671		"VINACOMIN Traning Centre"					""
 "STADIUM_NAME_CHANGE" 		23050153	"Tuyen Son Training Centre"					""
 "STADIUM_NAME_CHANGE" 		2000076320	"Vietnam Youth Football Training Centre"			""
 
 
-# STADIUM > [WAL] WALES > Stadiums
+# STADIUM > [WAL] WALES
 #====================================================================================
 "STADIUM_NAME_CHANGE" 		684 		"Loadlok Community Stadium" 					""
 "STADIUM_NAME_CHANGE" 		102984 		"Principality Stadium" 						""
 "STADIUM_NAME_CHANGE" 		353077 		"Maes Eilian" 							""
 
 
-# STADIUM > [YEM] YEMEN > Stadiums
+# STADIUM > [YEM] YEMEN
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103275		"Al-Thawra Sports City Stadium"					""
 "STADIUM_NAME_CHANGE"		1038146		"May 22 Stadium (Aden)"						""
 "STADIUM_NAME_CHANGE"		23160218	"May 22 Stadium (Ibb)"						""
 
 
-# STADIUM > [ZAM] ZAMBIA > Stadiums
+# STADIUM > [ZAM] ZAMBIA
 #====================================================================================
 "STADIUM_NAME_CHANGE"		13112646	"Levy Mwanawasa Stadium"					""
 "STADIUM_NAME_CHANGE"		13112647	"National Heroes Stadium"					""
 
 
-# STADIUM > [ZIM] ZIMBABWE > Stadiums
+# STADIUM > [ZIM] ZIMBABWE
 #====================================================================================
 "STADIUM_NAME_CHANGE"		103105		"National Sports Stadium (Harare)"				""
 "STADIUM_NAME_CHANGE"		23017683	"Barbourfields Stadium"						""

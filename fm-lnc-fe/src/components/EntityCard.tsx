@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag, Button, Tooltip, Popconfirm, App } from 'antd';
+import { Tag, Button, Tooltip, Popconfirm, Dropdown, App } from 'antd';
 import {
   SafetyOutlined,
   EditOutlined,
@@ -14,10 +14,11 @@ import {
   CopyOutlined,
   CheckOutlined,
   InfoCircleOutlined,
+  EllipsisOutlined,
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
-import { getConfederationLogoUrl, getFifaFlagUrl } from '../services/api';
+import { getConfederationLogoUrl, getNationLogoUrl } from '../services/api';
 import RecordDetailModal from './RecordDetailModal';
 import {
   NationIcon,
@@ -147,24 +148,6 @@ export function getCategoryTagColor(
   if (isRedFn && isRedFn(categoryStr)) return 'error';
   return 'default';
 }
-
-const parseColorInfo = (rgbStr?: string | null) => {
-  if (!rgbStr || typeof rgbStr !== 'string') return null;
-  const parts = rgbStr.trim().split(/\s+/).map(Number);
-  if (parts.length >= 3 && parts.every((n) => !isNaN(n) && n >= 0 && n <= 255)) {
-    const [r, g, b] = parts;
-    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-    const contrast = yiq >= 128 ? '#1e293b' : '#ffffff';
-    return {
-      css: `rgb(${r}, ${g}, ${b})`,
-      hex,
-      rgb: `rgb(${r}, ${g}, ${b})`,
-      contrast,
-    };
-  }
-  return null;
-};
 
 export default function EntityCard({
   type,
@@ -365,8 +348,6 @@ export default function EntityCard({
       EntityType.CLUB,
     ].includes(type as any) ||
     'name_3l' in data;
-  const fgInfo = parseColorInfo(data.fg_color);
-  const bgInfo = parseColorInfo(data.bg_color);
 
   const inactiveList = (data.inactive_fields || '')
     .split(',')
@@ -388,26 +369,6 @@ export default function EntityCard({
   const isTitleInactive =
     isInactive('name_lg') || isInactive('name');
 
-  const nationInfo =
-    type === EntityType.NATION
-      ? {
-          id: data.id,
-          code: data.name_3l,
-          name: data.name_lg || data.name_sh || data.name,
-        }
-      : data.nation
-        ? {
-            id: data.nation.id,
-            code: data.nation.name_3l || data.nation.code,
-            name: data.nation.name_lg || data.nation.name_sh || data.nation.name,
-          }
-        : data.nation_id || data.country_id
-          ? {
-              id: data.nation_id || data.country_id,
-              code: data.nation?.name_3l,
-              name: data.nation?.name_lg || data.nation?.name,
-            }
-          : null;
 
   const isNavigable = Boolean(
     data.is_virtual ||
@@ -416,6 +377,9 @@ export default function EntityCard({
       type === EntityType.COMPETITION ||
       type === 'competition' ||
       (type === EntityType.CLUB || type === 'club' ? Boolean(data.id && !isSpecialCard) : false) ||
+      (type === EntityType.CITY || type === 'city' ? Boolean(data.id) : false) ||
+      (type === EntityType.STADIUM || type === 'stadium' ? Boolean(data.id) : false) ||
+      (type === EntityType.AWARD || type === 'award' ? Boolean(data.id) : false) ||
       (type === EntityType.CONFEDERATION || type === 'confederation'
         ? (data.totalNations || 0) > 0
         : false),
@@ -492,132 +456,98 @@ export default function EntityCard({
           router.push(`/club/${data.id}`);
         }
       }
+    } else if (type === EntityType.CITY || type === 'city') {
+      if (data.id) {
+        if (onNavigate) {
+          onNavigate({ type: 'city', id: data.id, title: data.name_lg || data.name || '' });
+        } else {
+          router.push(`/city/${data.id}`);
+        }
+      }
+    } else if (type === EntityType.STADIUM || type === 'stadium') {
+      if (data.id) {
+        if (onNavigate) {
+          onNavigate({ type: 'stadium', id: data.id, title: data.name || '' });
+        } else {
+          router.push(`/stadium/${data.id}`);
+        }
+      }
+    } else if (type === EntityType.AWARD || type === 'award') {
+      if (data.id) {
+        if (onNavigate) {
+          onNavigate({ type: 'award', id: data.id, title: data.name_lg || data.name || '' });
+        } else {
+          router.push(`/award/${data.id}`);
+        }
+      }
     }
   };
 
-  const renderChildButtons = () => {
-    if (type === EntityType.CONFEDERATION || type === 'confederation') {
-      const count = data.totalNations || 0;
-      if (count <= 0) return null;
-
-      return (
-        <Tooltip title={`Nations: ${count}`} trigger="hover" destroyOnHidden>
-          <Button
-            type="text"
-            shape="circle"
-            size="small"
-            icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              (e.currentTarget as HTMLElement)?.blur();
-              router.push(data.id ? `/nation?confedId=${data.id}` : '/nation');
-            }}
-          />
-        </Tooltip>
-      );
-    }
-
-    if (type === EntityType.NATION || type === 'nation') {
-      return (
-        <Tooltip title="Chi tiết quốc gia" trigger="hover" destroyOnHidden>
-          <Button
-            type="text"
-            shape="circle"
-            size="small"
-            icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              (e.currentTarget as HTMLElement)?.blur();
-              if (onNavigate) {
-                handleNavigateAction();
-              } else if (data.id) {
-                router.push(`/nation/${data.id}`);
-              } else {
-                router.push('/nation');
-              }
-            }}
-          />
-        </Tooltip>
-      );
-    }
-
-    if (type === EntityType.COMPETITION || type === 'competition') {
-      const clubsCnt = data.clubsCount ?? data.stats?.club ?? 0;
-      const awardsCnt = data.awardsCount ?? data.stats?.award ?? 0;
-      const childrenCnt = data.childrenCount ?? data.stats?.children ?? data.children_count ?? 0;
-      const hasChildren = childrenCnt > 0;
-
-      const titleParts: string[] = [];
-      if (data.is_virtual || clubsCnt > 0) {
-        titleParts.push(`Clubs: ${clubsCnt}`);
-      }
-      if (awardsCnt > 0) {
-        titleParts.push(`Awards: ${awardsCnt}`);
-      }
-      const eyeTooltip = titleParts.length > 0 ? titleParts.join(' | ') : 'Chi tiết giải đấu';
-
-      return (
-        <div className="flex items-center gap-0.5">
-          {hasChildren && (
-            <Tooltip title={`Sub-Competitions (${childrenCnt})`} trigger="hover" destroyOnHidden>
-              <Button
-                type="text"
-                shape="circle"
-                size="small"
-                icon={<BranchesOutlined style={{ color: '#d97706', fontSize: 13 }} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  (e.currentTarget as HTMLElement)?.blur();
-                  onViewChildren?.(data);
-                }}
-              />
-            </Tooltip>
-          )}
-          <Tooltip title={eyeTooltip} trigger="hover" destroyOnHidden>
-            <Button
-              type="text"
-              shape="circle"
-              size="small"
-              icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-              onClick={(e) => {
-                e.stopPropagation();
-                (e.currentTarget as HTMLElement)?.blur();
-                if (onNavigate) {
-                  handleNavigateAction();
-                } else if (data.id) {
-                  router.push(`/comp/${data.id}`);
-                }
-              }}
-            />
-          </Tooltip>
-        </div>
-      );
-    }
-
-    if (type === EntityType.CLUB || type === 'club') {
-      return (
-        <Tooltip title="Chi tiết câu lạc bộ" trigger="hover" destroyOnHidden>
-          <Button
-            type="text"
-            shape="circle"
-            size="small"
-            icon={<EyeOutlined style={{ color: '#1677ff', fontSize: 13 }} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              (e.currentTarget as HTMLElement)?.blur();
-              if (onNavigate) {
-                handleNavigateAction();
-              } else if (data.id) {
-                router.push(`/club/${data.id}`);
-              }
-            }}
-          />
-        </Tooltip>
-      );
-    }
-
-    return null;
-  };
+  const actionMenuItems: any[] = [
+    {
+      key: 'navigate',
+      icon: <EyeOutlined className="text-blue-600" />,
+      label: 'Xem chi tiết',
+      onClick: (e: any) => {
+        e?.domEvent?.stopPropagation();
+        handleNavigateAction();
+      },
+    },
+    ...(!isSpecialCard
+      ? [
+          {
+            key: 'info',
+            icon: <InfoCircleOutlined className="text-sky-500" />,
+            label: 'Thông tin nhanh (Modal)',
+            onClick: (e: any) => {
+              e?.domEvent?.stopPropagation();
+              setModalMode('view');
+              setIsInfoOpen(true);
+            },
+          },
+        ]
+      : []),
+    ...(data.childrenCount || data.children_count
+      ? [
+          {
+            key: 'subcomps',
+            icon: <BranchesOutlined className="text-amber-500" />,
+            label: `Giải đấu phụ (${data.childrenCount || data.children_count})`,
+            onClick: (e: any) => {
+              e?.domEvent?.stopPropagation();
+              onViewChildren?.(data);
+            },
+          },
+        ]
+      : []),
+    ...(onEdit
+      ? [
+          {
+            key: 'edit',
+            icon: <EditOutlined className="text-emerald-600" />,
+            label: 'Chỉnh sửa',
+            onClick: (e: any) => {
+              e?.domEvent?.stopPropagation();
+              onEdit(data);
+            },
+          },
+        ]
+      : []),
+    ...(onDelete
+      ? [
+          {
+            key: 'delete',
+            icon: <DeleteOutlined className="text-red-500" />,
+            label: 'Xóa',
+            danger: true,
+            onClick: (e: any) => {
+              e?.domEvent?.stopPropagation();
+              onDelete(data);
+            },
+          },
+        ]
+      : []),
+  ];
 
   return (
     <>
@@ -636,15 +566,9 @@ export default function EntityCard({
         }`}
       >
         <div>
-          {/* Top Header Bar: [Thẻ ID], 2 thẻ màu, [Disabled Tag] */}
-          {((data.id !== undefined && data.id !== null && data.id !== '') ||
-            bgInfo ||
-            fgInfo ||
-            data.is_disabled ||
-            data.isDisabled) && (
-            <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-blue-200/60 min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                {/* Thẻ ID chuyển lên header (thay thế thẻ flag) */}
+          {/* Top Header Bar: chỉ gồm [Thẻ ID] và [btn 3 chấm] */}
+          <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-blue-200/60 min-w-0">
+            <div className="flex items-center min-w-0">
                 {data.id !== undefined && data.id !== null && data.id !== '' && (
                   <div onClick={(e) => e.stopPropagation()} className="flex items-center shrink-0">
                     {isSpecialCard ? (
@@ -709,69 +633,32 @@ export default function EntityCard({
                     )}
                   </div>
                 )}
-
-                {/* 2 thẻ màu */}
-                {(bgInfo || fgInfo) && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1 shrink-0"
-                  >
-                    {bgInfo && (
-                      <Tooltip
-                        title={
-                          <div className="text-center font-mono text-xs py-0.5">
-                            <div className="font-bold text-sky-300">Background Color</div>
-                            <div>{bgInfo.hex}</div>
-                            <div>{bgInfo.rgb}</div>
-                          </div>
-                        }
-                      >
-                        <span
-                          className="inline-block w-5 h-5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
-                          style={{
-                            backgroundColor: bgInfo.css,
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                    {fgInfo && (
-                      <Tooltip
-                        title={
-                          <div className="text-center font-mono text-xs py-0.5">
-                            <div className="font-bold text-sky-300">Foreground Color</div>
-                            <div>{fgInfo.hex}</div>
-                            <div>{fgInfo.rgb}</div>
-                          </div>
-                        }
-                      >
-                        <span
-                          className="inline-block w-5 h-5 rounded border border-black/20 shadow-xs cursor-pointer hover:scale-110 transition-transform"
-                          style={{
-                            backgroundColor: fgInfo.css,
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1.5 ml-auto shrink-0 min-w-0">
-                {(data.is_disabled || data.isDisabled) && (
-                  <Tag
-                    style={{
-                      border: '1px solid #f87171',
-                      color: '#dc2626',
-                      backgroundColor: '#fef2f2',
-                    }}
-                    className="m-0 text-[10px] font-semibold shrink-0 py-0 px-1 leading-tight shadow-2xs"
-                  >
-                    Disabled
-                  </Tag>
-                )}
-              </div>
             </div>
-          )}
+            <div className="flex items-center ml-auto shrink-0">
+              <Dropdown
+                menu={{ items: actionMenuItems }}
+                trigger={['click']}
+                placement="bottomRight"
+              >
+                <Button
+                  type="text"
+                  shape="circle"
+                  size="small"
+                  icon={
+                    <EllipsisOutlined
+                      style={{ fontSize: 16 }}
+                      className="text-slate-500 hover:text-blue-600 transition-colors"
+                    />
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    (e.currentTarget as HTMLElement)?.blur();
+                  }}
+                  className="w-6 h-6 flex items-center justify-center hover:bg-blue-100/70 rounded-full cursor-pointer"
+                />
+              </Dropdown>
+            </div>
+          </div>
 
           {/* Fields List formatted as [label]: [value] (1:3 ratio) with support for custom values or type-based defaults */}
           {(() => {
@@ -1004,37 +891,32 @@ export default function EntityCard({
             };
 
             const renderedFields: EntityCardField[] = values || getDefaultFields();
-            const bodyHeightClass = isSmall
-              ? 'h-[105px]'
-              : is2Line
-                ? entityTypeStr === 'club'
-                  ? 'h-[200px]'
-                  : entityTypeStr === 'player'
-                    ? 'h-[130px]'
-                    : 'h-[170px]'
-                : entityTypeStr === 'club'
-                  ? 'h-[160px]'
-                  : entityTypeStr === 'player'
-                    ? 'h-[95px]'
-                    : 'h-[120px]';
+            const bodyMinHeightClass =
+              entityTypeStr === 'nation' || entityTypeStr === 'city'
+                ? 'min-h-[140px]'
+                : entityTypeStr === 'stadium'
+                  ? 'min-h-[90px]'
+                  : entityTypeStr === 'club'
+                    ? 'min-h-[160px]'
+                    : 'min-h-[120px]';
 
             return (
-              /* Fields List: Small card and Large card (2-line) stack label and value; Large card (1-line) uses 1:4 ratio */
+              /* Fields List: Stack label on top of value for small/2-column cards; 1-line (1:3 ratio) for large */
               <div
-                className={`space-y-1 mb-1 text-xs ${bodyHeightClass} overflow-hidden flex flex-col justify-start`}
+                className={`flex flex-col gap-2 mb-1 text-xs ${bodyMinHeightClass} justify-start`}
               >
                 {renderedFields.map((field, idx) => {
                   const isNode = React.isValidElement(field.value);
 
-                  // 2 Line layout (Small card OR Large card with 2-line style)
+                  // 2 Line layout (Small card / 2 columns / 2-line style)
                   if (isSmall || is2Line) {
                     return (
-                      <div key={idx} className="flex flex-col gap-0.5 min-w-0">
+                      <div key={idx} className="flex flex-col min-w-0">
                         <span
-                          className={`text-[10px] sm:text-[10.5px] select-none leading-none whitespace-nowrap uppercase tracking-wider block ${
+                          className={`text-[11px] font-semibold select-none leading-none mb-1 tracking-wider block ${
                             field.isInactive
                               ? 'text-red-600 font-semibold'
-                              : 'text-gray-400 font-medium'
+                              : 'text-slate-400'
                           }`}
                         >
                           {field.label}
@@ -1044,22 +926,9 @@ export default function EntityCard({
                             field.value
                           ) : (
                             <span
-                              className={`font-bold text-xs leading-[16px] break-words min-w-0 block ${
-                                field.lineClamp ? `line-clamp-${field.lineClamp}` : 'truncate'
-                              } ${
-                                field.isInactive || field.isRed ? 'text-red-600' : 'text-gray-800'
+                              className={`font-bold text-xs sm:text-[13px] leading-snug whitespace-normal break-words min-w-0 block ${
+                                field.isInactive || field.isRed ? 'text-red-600' : 'text-slate-900'
                               }`}
-                              style={
-                                field.lineClamp
-                                  ? {
-                                      display: '-webkit-box',
-                                      WebkitLineClamp: field.lineClamp,
-                                      WebkitBoxOrient: 'vertical',
-                                      overflow: 'hidden',
-                                      wordBreak: 'break-word',
-                                    }
-                                  : undefined
-                              }
                               title={
                                 field.title ||
                                 (typeof field.value === 'string' ? field.value : undefined)
@@ -1073,48 +942,29 @@ export default function EntityCard({
                     );
                   }
 
-                  // Large Card: 1:4 ratio (grid-cols-5: label 1 col, value 4 cols)
+                  // 1-Line layout: [LN:] [Value] (Tỉ lệ label : value = 1 : 3, khoảng cách dòng đều nhau)
                   return (
                     <div
                       key={idx}
-                      className={`grid grid-cols-5 gap-1.5 min-w-0 ${
-                        field.align === 'start'
-                          ? 'items-start'
-                          : field.align === 'center'
-                            ? 'items-center'
-                            : 'items-baseline'
-                      }`}
+                      className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-2.5 min-w-0"
                     >
                       <span
-                        className={`col-span-1 text-xs select-none leading-none whitespace-nowrap ${
+                        className={`text-xs font-semibold select-none leading-snug truncate ${
                           field.isInactive
-                            ? 'text-red-600 font-normal'
-                            : 'text-gray-400 font-medium'
-                        } ${field.align === 'start' ? 'pt-0.5' : ''}`}
+                            ? 'text-red-600 font-semibold'
+                            : 'text-slate-400'
+                        }`}
                       >
                         {field.label}
                       </span>
-                      <div className="col-span-4 min-w-0">
+                      <div className="min-w-0">
                         {isNode ? (
                           field.value
                         ) : (
                           <span
-                            className={`font-bold text-xs sm:text-[13px] leading-[17px] sm:leading-[18px] break-words min-w-0 block ${
-                              field.lineClamp ? `line-clamp-${field.lineClamp}` : 'truncate'
-                            } ${
-                              field.isInactive || field.isRed ? 'text-red-600' : 'text-gray-800'
+                            className={`font-bold text-xs sm:text-[13px] leading-snug whitespace-normal break-words min-w-0 block ${
+                              field.isInactive || field.isRed ? 'text-red-600' : 'text-slate-800'
                             }`}
-                            style={
-                              field.lineClamp
-                                ? {
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: field.lineClamp,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    wordBreak: 'break-word',
-                                  }
-                                : undefined
-                            }
                             title={
                               field.title ||
                               (typeof field.value === 'string' ? field.value : undefined)
@@ -1132,29 +982,6 @@ export default function EntityCard({
           })()}
         </div>
 
-        {/* Card Footer: Action Buttons (Eye, Info) */}
-        {(Boolean(renderChildButtons()) || !isSpecialCard) && (
-          <div className="pt-1 mt-auto border-t border-blue-200/60 flex items-center justify-end gap-1">
-            {renderChildButtons()}
-
-            {!isSpecialCard && (
-              <Tooltip title="Chi tiết" trigger="hover" destroyOnHidden>
-                <Button
-                  type="text"
-                  shape="circle"
-                  size="small"
-                  icon={<InfoCircleOutlined style={{ color: '#0ea5e9', fontSize: 13 }} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    (e.currentTarget as HTMLElement)?.blur();
-                    setModalMode('view');
-                    setIsInfoOpen(true);
-                  }}
-                />
-              </Tooltip>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Unified Record Detail + Edit Modal */}

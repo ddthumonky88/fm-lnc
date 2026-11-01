@@ -294,17 +294,17 @@ export default function SettingsModal({ open, onClose, onRefreshData }: Settings
                       {[
                         {
                           key: 'cityNation',
-                          label: 'FM24 - City & Nation.lnc',
+                          label: lncStatus?.files?.cityNation?.name || 'fm24_geography.lnc',
                           file: lncStatus?.files?.cityNation,
                         },
                         {
                           key: 'clubStadium',
-                          label: 'FM24 - Club & Stadium.lnc',
+                          label: lncStatus?.files?.clubStadium?.name || 'fm24_club.lnc',
                           file: lncStatus?.files?.clubStadium,
                         },
                         {
                           key: 'compOther',
-                          label: 'FM24 - Competition & Other.lnc',
+                          label: lncStatus?.files?.compOther?.name || 'fm24_competition_other.lnc',
                           file: lncStatus?.files?.compOther,
                         },
                       ].map((item) => (

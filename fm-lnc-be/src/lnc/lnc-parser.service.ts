@@ -3,6 +3,18 @@ import { DataSource } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 
+function resolveLncFile(dir: string, names: string[]): { path: string; name: string } {
+  for (const name of names) {
+    const p = path.resolve(dir, name);
+    if (fs.existsSync(p)) return { path: p, name };
+  }
+  return { path: path.resolve(dir, names[0]), name: names[0] };
+}
+
+const CITY_NAT_NAMES = ['fm24_geography.lnc', 'FM24 - Geography.lnc', 'FM24 - City & Nation.lnc'];
+const CLUB_STAD_NAMES = ['fm24_club.lnc', 'FM24 - Club.lnc', 'FM24 - Club & Stadium.lnc'];
+const COMP_OTHER_NAMES = ['fm24_competition_other.lnc', 'FM24 - Competition & Other.lnc'];
+
 @Injectable()
 export class LncParserService {
   private readonly logger = new Logger(LncParserService.name);
@@ -30,11 +42,13 @@ export class LncParserService {
     ].filter(Boolean) as string[];
 
     for (const candidate of candidates) {
-      if (fs.existsSync(path.resolve(candidate, 'FM24 - City & Nation.lnc'))) {
-        return candidate;
-      }
-      if (fs.existsSync(path.resolve(candidate, '..', 'FM24 - City & Nation.lnc'))) {
-        return path.resolve(candidate, '..');
+      for (const name of CITY_NAT_NAMES) {
+        if (fs.existsSync(path.resolve(candidate, name))) {
+          return candidate;
+        }
+        if (fs.existsSync(path.resolve(candidate, '..', name))) {
+          return path.resolve(candidate, '..');
+        }
       }
     }
     return this.customBaseDir || path.resolve(process.cwd(), 'data');
@@ -43,9 +57,9 @@ export class LncParserService {
   checkLncFiles(dirToCheck?: string) {
     const dir = dirToCheck || this.getBaseDir();
     const exists = fs.existsSync(dir);
-    const fileCityNat = path.resolve(dir, 'FM24 - City & Nation.lnc');
-    const fileClubStadium = path.resolve(dir, 'FM24 - Club & Stadium.lnc');
-    const fileCompOther = path.resolve(dir, 'FM24 - Competition & Other.lnc');
+    const resCityNat = resolveLncFile(dir, CITY_NAT_NAMES);
+    const resClubStadium = resolveLncFile(dir, CLUB_STAD_NAMES);
+    const resCompOther = resolveLncFile(dir, COMP_OTHER_NAMES);
 
     const getFileInfo = (fPath: string, name: string) => {
       const fileExists = fs.existsSync(fPath);
@@ -62,9 +76,9 @@ export class LncParserService {
     };
 
     const files = {
-      cityNation: getFileInfo(fileCityNat, 'FM24 - City & Nation.lnc'),
-      clubStadium: getFileInfo(fileClubStadium, 'FM24 - Club & Stadium.lnc'),
-      compOther: getFileInfo(fileCompOther, 'FM24 - Competition & Other.lnc'),
+      cityNation: getFileInfo(resCityNat.path, resCityNat.name),
+      clubStadium: getFileInfo(resClubStadium.path, resClubStadium.name),
+      compOther: getFileInfo(resCompOther.path, resCompOther.name),
     };
 
     const allFilesFound = files.cityNation.exists && files.clubStadium.exists && files.compOther.exists;
@@ -82,12 +96,16 @@ export class LncParserService {
 
     this.logger.log(`Starting parse & seed from: ${dir}`);
 
-    const fileCityNat = path.resolve(dir, 'FM24 - City & Nation.lnc');
-    const fileClubStadium = path.resolve(dir, 'FM24 - Club & Stadium.lnc');
-    const fileCompOther = path.resolve(dir, 'FM24 - Competition & Other.lnc');
+    const resCityNat = resolveLncFile(dir, CITY_NAT_NAMES);
+    const resClubStadium = resolveLncFile(dir, CLUB_STAD_NAMES);
+    const resCompOther = resolveLncFile(dir, COMP_OTHER_NAMES);
+
+    const fileCityNat = resCityNat.path;
+    const fileClubStadium = resClubStadium.path;
+    const fileCompOther = resCompOther.path;
 
     if (!fs.existsSync(fileCityNat) || !fs.existsSync(fileClubStadium) || !fs.existsSync(fileCompOther)) {
-      throw new Error(`One or more .lnc files missing in directory "${dir}".`);
+      throw new Error(`One or more .lnc files missing in directory "${dir}". Looked for:\n- ${fileCityNat}\n- ${fileClubStadium}\n- ${fileCompOther}`);
     }
 
     const queryRunner = this.dataSource.createQueryRunner();

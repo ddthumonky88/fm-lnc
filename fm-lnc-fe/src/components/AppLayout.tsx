@@ -180,7 +180,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             headerLogo={headerLogo}
           />
 
-          <main className="flex-1 w-full min-h-0 p-0 overflow-hidden flex flex-col bg-white">
+          <main className="flex-1 w-full min-h-0 overflow-y-auto mobile-frame-scroll flex flex-col bg-white">
             {children}
           </main>
         </div>

@@ -360,9 +360,19 @@ export default function RecordDetailView({
 
       {/* 2. Primary Details Card */}
       <div className="bg-sky-50/70 border border-sky-200/80 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
-        {isConfed ? (
+        {isCity || isStadium ? (
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+            <span className={getLabelClass('name', 'pt-0.5')}>Name:</span>
+            <span
+              className={`font-bold text-xs sm:text-[13px] ${getValueClass('name', 'text-slate-900')} line-clamp-3 break-words text-left`}
+              title={currentData.name || title || '-'}
+            >
+              {currentData.name || title || '-'}
+            </span>
+          </div>
+        ) : isConfed ? (
           <>
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass('name', 'pt-0.5')}>Name:</span>
               <span
                 className="font-bold text-xs sm:text-[13px] text-slate-900 line-clamp-3 break-words text-left"
@@ -371,17 +381,41 @@ export default function RecordDetailView({
                 {currentData.name || '-'}
               </span>
             </div>
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass('id', 'pt-0.5')}>ID:</span>
               <span className="font-mono font-bold text-xs sm:text-[13px] text-slate-800 break-words text-left">
                 {currentData.id || '-'}
               </span>
             </div>
           </>
-        ) : (
+        ) : isAward ? (
           <>
             {/* LN */}
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
+              <span
+                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                title={currentData.name_lg || currentData.name || title}
+              >
+                {currentData.name_lg || currentData.name || title}
+              </span>
+            </div>
+
+            {/* SN */}
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
+              <span
+                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+                title={currentData.name_sh || currentData.name || '-'}
+              >
+                {currentData.name_sh || currentData.name || '-'}
+              </span>
+            </div>
+          </>
+        ) : isClub ? (
+          <>
+            {/* LN */}
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
               <span
                 className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
@@ -392,7 +426,7 @@ export default function RecordDetailView({
             </div>
 
             {/* SN */}
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
               <span
                 className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
@@ -403,19 +437,54 @@ export default function RecordDetailView({
             </div>
 
             {/* 6N */}
-            {(isClub || currentData.name_6l !== undefined) && (
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6N:</span>
-                <span
-                  className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
-                >
-                  {currentData.name_6l || '-'}
-                </span>
-              </div>
-            )}
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6N:</span>
+              <span
+                className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
+              >
+                {currentData.name_6l || '-'}
+              </span>
+            </div>
 
             {/* 3N */}
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>
+                3N:
+              </span>
+              <span
+                className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
+              >
+                {isVirtual ? '-' : currentData.name_3l || currentData.code || '-'}
+              </span>
+            </div>
+          </>
+        ) : (
+          /* Nation, Comp (default) */
+          <>
+            {/* LN */}
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
+              <span
+                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                title={isVirtual ? '-' : currentData.name_lg || currentData.name || title}
+              >
+                {isVirtual ? '-' : currentData.name_lg || currentData.name || title}
+              </span>
+            </div>
+
+            {/* SN */}
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+              <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
+              <span
+                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+                title={isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
+              >
+                {isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
+              </span>
+            </div>
+
+            {/* 3N */}
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
               <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>
                 3N:
               </span>
@@ -749,24 +818,6 @@ export default function RecordDetailView({
             >
               {counts?.totalIntComps ?? currentData.totalIntComps ?? 0}
             </span>
-          </div>
-        )}
-
-        {/* Type / Categories */}
-        {(currentData.type || currentData.categories) && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
-            <span className={getLabelClass(['type', 'categories', 'category'], 'pt-0.5')}>
-              Type:
-            </span>
-            <div className="flex items-center gap-1 flex-wrap text-left">
-              {String(currentData.type || currentData.categories)
-                .split(',')
-                .map((cat: string, idx: number) => (
-                  <Tag color="cyan" key={idx} className="m-0 text-xs font-medium">
-                    {cat.trim()}
-                  </Tag>
-                ))}
-            </div>
           </div>
         )}
 

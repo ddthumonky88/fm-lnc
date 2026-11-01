@@ -257,9 +257,17 @@ export class LncService {
     const dir = baseDir || process.env.LNC_FILES_DIR || path.resolve(__dirname, '../../..');
     this.logger.log(`Importing .lnc files from directory: ${dir}`);
 
-    const fileCityNation = path.join(dir, 'FM24 - City & Nation.lnc');
-    const fileClubStadium = path.join(dir, 'FM24 - Club & Stadium.lnc');
-    const fileCompOther = path.join(dir, 'FM24 - Competition & Other.lnc');
+    const resolveLnc = (names: string[]) => {
+      for (const name of names) {
+        const p = path.join(dir, name);
+        if (fs.existsSync(p)) return p;
+      }
+      return path.join(dir, names[0]);
+    };
+
+    const fileCityNation = resolveLnc(['fm24_geography.lnc', 'FM24 - Geography.lnc', 'FM24 - City & Nation.lnc']);
+    const fileClubStadium = resolveLnc(['fm24_club.lnc', 'FM24 - Club.lnc', 'FM24 - Club & Stadium.lnc']);
+    const fileCompOther = resolveLnc(['fm24_competition_other.lnc', 'FM24 - Competition & Other.lnc']);
 
     if (!fs.existsSync(fileCityNation) || !fs.existsSync(fileClubStadium) || !fs.existsSync(fileCompOther)) {
       throw new Error(
