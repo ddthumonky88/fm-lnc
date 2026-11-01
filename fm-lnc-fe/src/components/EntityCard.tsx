@@ -1005,7 +1005,7 @@ export default function EntityCard({
 
             const renderedFields: EntityCardField[] = values || getDefaultFields();
             const bodyHeightClass = isSmall
-              ? 'h-[160px]'
+              ? 'h-[105px]'
               : is2Line
                 ? entityTypeStr === 'club'
                   ? 'h-[200px]'

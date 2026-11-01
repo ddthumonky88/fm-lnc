@@ -112,6 +112,13 @@ function CompetitionDetailContent() {
     return () => clearTimeout(timer);
   }, [tableFilter]);
 
+  const listContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (listContainerRef.current) {
+      listContainerRef.current.scrollTop = 0;
+    }
+  }, [activeTab, currentPage]);
+
   // Reset to page 1 whenever search keyword changes
   const prevKeywordRef = useRef(debouncedKeyword);
   useEffect(() => {
@@ -570,14 +577,14 @@ function CompetitionDetailContent() {
   const confedId = compInfo?.confed_id || compInfo?.confed?.id;
 
   return (
-    <div className="space-y-3">
+    <div className="h-full flex flex-col min-h-0 bg-white">
       {loading ? (
         <div className="py-20 text-center">
           <Spin size="large" description="Loading competition details..." />
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-2xs">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+        <div className="w-full h-full flex flex-col min-h-0 bg-white overflow-hidden">
+          <div className="shrink-0 flex-none px-3 pt-2.5 pb-2 border-b border-gray-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
               <Tooltip
                 title={
@@ -656,17 +663,19 @@ function CompetitionDetailContent() {
             </div>
           </div>
 
-          {/* AntD Tabs */}
-          <Tabs
-            activeKey={activeTab}
-            onChange={(key) => handleTabChange(key)}
-            items={tabItems}
-            className="mb-3"
-          />
+          {/* AntD Tabs (shrink-0) */}
+          <div className="shrink-0 flex-none px-3 pt-1 bg-white">
+            <Tabs
+              activeKey={activeTab}
+              onChange={(key) => handleTabChange(key)}
+              items={tabItems}
+              className="mb-0"
+            />
+          </div>
 
-          {/* Sub Toolbar: Count, Filter, Add (only for list tabs) */}
+          {/* Sub Toolbar: Count, Filter, Add (only for list tabs) - shrink-0 */}
           {activeTab !== 'INFO' && (
-            <div className="flex items-center gap-2 mb-4 w-full">
+            <div className="shrink-0 flex-none px-3 py-2 border-b border-gray-100 bg-white flex items-center gap-2 w-full">
               <Input
                 prefix={<SearchOutlined className="text-gray-400" />}
                 placeholder={
@@ -712,7 +721,12 @@ function CompetitionDetailContent() {
             </div>
           )}
 
-          {/* Main List */}
+          {/* Scrollable list content (flex-1 min-h-0) */}
+          <div
+            ref={listContainerRef}
+            className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3 py-2.5 pb-6"
+          >
+            {/* Main List */}
           {activeTab === 'CLUBS' && (
             <CardGrid
               key="comp-clubs"
@@ -818,9 +832,9 @@ function CompetitionDetailContent() {
               }
             />
           )}
+          </div>
         </div>
       )}
-
     </div>
   );
 }

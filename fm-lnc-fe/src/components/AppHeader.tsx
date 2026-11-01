@@ -228,7 +228,7 @@ export default function AppHeader({
   ];
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all">
+    <header className="shrink-0 flex-none sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all">
       {/* Main Header Row */}
       <div className="h-14 px-2.5 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-3">
         {/* Left Section: Mobile Hamburger (always shown, no desktop sidebar toggle) */}

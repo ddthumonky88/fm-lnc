@@ -118,6 +118,13 @@ export default function NationDetailPage() {
   const [searchInput, setSearchInput] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [copiedId, setCopiedId] = useState(false);
+  const listContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (listContainerRef.current) {
+      listContainerRef.current.scrollTop = 0;
+    }
+  }, [activeTab, currentPage]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -518,15 +525,15 @@ export default function NationDetailPage() {
   const nationLongName = nationHub?.name_lg || `Nation ${nationId}`;
 
   return (
-    <div className="space-y-3">
+    <div className="h-full flex flex-col min-h-0 bg-white">
       {loading ? (
         <div className="py-20 text-center">
           <Spin size="large" description="Loading nation details..." />
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-2xs">
-          {/* Nation Info Banner */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+        <div className="w-full h-full flex flex-col min-h-0 bg-white overflow-hidden">
+          {/* Nation Info Banner (shrink-0) */}
+          <div className="shrink-0 flex-none px-3 pt-2.5 pb-2 border-b border-gray-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div className="flex items-center gap-3">
               {getNationLogoUrl(nationId, nationHub?.name_3l) ? (
                 <img
@@ -563,16 +570,23 @@ export default function NationDetailPage() {
             </div>
           </div>
 
-          {/* AntD Tabs */}
-          <Tabs
-            activeKey={activeTab}
-            onChange={(key) => handleSwitchTab(key as any)}
-            items={tabItems}
-            className="mb-3"
-          />
+          {/* AntD Tabs (shrink-0) */}
+          <div className="shrink-0 flex-none px-3 pt-1 border-b border-gray-100 bg-white">
+            <Tabs
+              activeKey={activeTab}
+              onChange={(key) => handleSwitchTab(key as any)}
+              items={tabItems}
+              className="mb-0"
+            />
+          </div>
 
-          {/* Tab 1: Domestic Competitions */}
-          {activeTab === NationTabKey.DOMESTIC_COMPS && (
+          {/* Scrollable Tab Content Container */}
+          <div
+            ref={listContainerRef}
+            className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3 py-2.5 pb-6"
+          >
+            {/* Tab 1: Domestic Competitions */}
+            {activeTab === NationTabKey.DOMESTIC_COMPS && (
             <CompetitionGroupView
               items={filteredRecords}
               loading={tabLoading}
@@ -615,7 +629,7 @@ export default function NationDetailPage() {
           {/* Tab 2: Stadiums */}
           {activeTab === NationTabKey.STADIUMS && (
             <div>
-              <div className="flex items-center gap-2 mb-3 w-full">
+              <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md py-1 flex items-center gap-2 mb-3 w-full">
                 <Space.Compact className="flex-1 min-w-0">
                   <Input
                     placeholder="Search stadiums..."
@@ -702,7 +716,7 @@ export default function NationDetailPage() {
           {/* Tab 4: Awards */}
           {activeTab === NationTabKey.AWARDS && (
             <div>
-              <div className="flex items-center gap-2 mb-3 w-full">
+              <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md py-1 flex items-center gap-2 mb-3 w-full">
                 <Space.Compact className="flex-1 min-w-0">
                   <Input
                     placeholder="Search awards..."
@@ -766,6 +780,7 @@ export default function NationDetailPage() {
               onNavigateFakeComp={(fakeId) => router.push(`/comp/${fakeId}`)}
             />
           )}
+          </div>
         </div>
       )}
     </div>

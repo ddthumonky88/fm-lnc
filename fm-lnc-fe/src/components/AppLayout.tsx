@@ -146,7 +146,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       refreshSignal={refreshSignal}
       triggerRefresh={triggerRefresh}
     >
-      <div className="relative flex flex-col h-screen bg-[#f3f4f6] text-[#333333] font-sans antialiased overflow-hidden">
+      <div className="relative flex flex-col h-full w-full bg-[#f3f4f6] text-[#333333] font-sans antialiased overflow-hidden">
         {/* Mobile Drawer Overlay (sidebar as drawer only) */}
         <AppSidebar
           collapsed={sidebarCollapsed}
@@ -161,7 +161,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         />
 
         {/* Main Content Column */}
-        <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
+        <div className="flex flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden">
           <AppHeader
             collapsed={sidebarCollapsed}
             onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -180,7 +180,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             headerLogo={headerLogo}
           />
 
-          <main className="flex-1 w-full min-h-0 px-3 py-3 pb-24 overflow-y-auto mobile-frame-scroll">
+          <main className="flex-1 w-full min-h-0 p-0 overflow-hidden flex flex-col bg-white">
             {children}
           </main>
         </div>

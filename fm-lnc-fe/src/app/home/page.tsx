@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { App, Input, Select, Tabs } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
@@ -123,103 +123,120 @@ export default function HomePage() {
     },
   };
 
+  const listContainerRef = useRef<HTMLDivElement>(null);
+
   const submitSearch = (value: string) => {
     setSearch(value);
     setKeyword(value.trim());
     setPage(1);
   };
 
+  useEffect(() => {
+    if (listContainerRef.current) {
+      listContainerRef.current.scrollTop = 0;
+    }
+  }, [activeTab, page]);
+
   return (
-    <div className="space-y-4">
-      <div className="home-hub rounded-lg border border-gray-200 bg-white p-3 shadow-2xs sm:p-5">
-        <div className="home-hub-toolbar mb-4 flex flex-wrap gap-3">
-          <Select
-            value={selectedConfed}
-            options={confedOptions}
-            onChange={(value) => {
-              setSelectedConfed(value);
-              setPage(1);
-            }}
-            className="family-team-select min-w-[220px] flex-1"
-            popupMatchSelectWidth
-          />
-          <div className="min-w-[220px] flex-1 self-center">
-            <Input.Search
-              value={search}
-              allowClear
-              placeholder={activeTab === 'NATIONS' ? 'Search countries...' : 'Search competitions...'}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                if (!event.target.value && keyword) submitSearch('');
+    <div className="h-full flex flex-col min-h-0 bg-white">
+      <div className="home-hub w-full h-full flex flex-col min-h-0 bg-white overflow-hidden">
+        {/* Fixed Top Section: Confederation select, Search & Tabs */}
+        <div className="shrink-0 flex-none px-3 pt-2 pb-0 border-b border-gray-100 bg-white">
+          <div className="home-hub-toolbar mb-2 flex items-center gap-2">
+            <Select
+              value={selectedConfed}
+              options={confedOptions}
+              onChange={(value) => {
+                setSelectedConfed(value);
+                setPage(1);
               }}
-              onSearch={submitSearch}
-              className="w-full"
+              className="family-team-select w-36 sm:w-44 shrink-0"
+              popupMatchSelectWidth={false}
             />
+            <div className="flex-1 min-w-0">
+              <Input.Search
+                value={search}
+                allowClear
+                placeholder={activeTab === 'NATIONS' ? 'Search countries...' : 'Search competitions...'}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  if (!event.target.value && keyword) submitSearch('');
+                }}
+                onSearch={submitSearch}
+                className="w-full"
+              />
+            </div>
           </div>
+
+          <Tabs
+            activeKey={activeTab}
+            onChange={(key) => {
+              setActiveTab(key as HomeTab);
+              setPage(1);
+              setSearch('');
+              setKeyword('');
+            }}
+            items={[
+              {
+                key: 'NATIONS',
+                label: (
+                  <div className="flex items-center gap-2">
+                    <TabIconBadge
+                      icon={<NationIcon size={16} className={activeTab === 'NATIONS' ? 'text-white' : 'text-cyan-600'} />}
+                      isActive={activeTab === 'NATIONS'}
+                    />
+                    <span className={`home-tab-label ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}>
+                      Countries
+                    </span>
+                  </div>
+                ),
+              },
+              {
+                key: 'INT_COMPETITIONS',
+                label: (
+                  <div className="flex items-center gap-2">
+                    <TabIconBadge
+                      icon={<IntCompIcon size={16} className={activeTab === 'INT_COMPETITIONS' ? 'text-white' : 'text-purple-600'} />}
+                      isActive={activeTab === 'INT_COMPETITIONS'}
+                    />
+                    <span className={`home-tab-label ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}>
+                      <span className="home-tab-full">International Competitions</span>
+                      <span className="home-tab-short">Competitions</span>
+                    </span>
+                  </div>
+                ),
+              },
+            ]}
+            className="home-hub-tabs mb-0"
+          />
         </div>
 
-        <Tabs
-          activeKey={activeTab}
-          onChange={(key) => {
-            setActiveTab(key as HomeTab);
-            setPage(1);
-            setSearch('');
-            setKeyword('');
-          }}
-          items={[
-            {
-              key: 'NATIONS',
-              label: (
-                <div className="flex items-center gap-2">
-                  <TabIconBadge
-                    icon={<NationIcon size={16} className={activeTab === 'NATIONS' ? 'text-white' : 'text-cyan-600'} />}
-                    isActive={activeTab === 'NATIONS'}
-                  />
-                  <span className={`home-tab-label ${activeTab === 'NATIONS' ? 'font-semibold' : ''}`}>
-                    Countries
-                  </span>
-                </div>
-              ),
-            },
-            {
-              key: 'INT_COMPETITIONS',
-              label: (
-                <div className="flex items-center gap-2">
-                  <TabIconBadge
-                    icon={<IntCompIcon size={16} className={activeTab === 'INT_COMPETITIONS' ? 'text-white' : 'text-purple-600'} />}
-                    isActive={activeTab === 'INT_COMPETITIONS'}
-                  />
-                  <span className={`home-tab-label ${activeTab === 'INT_COMPETITIONS' ? 'font-semibold' : ''}`}>
-                    <span className="home-tab-full">International Competitions</span>
-                    <span className="home-tab-short">Competitions</span>
-                  </span>
-                </div>
-              ),
-            },
-          ]}
-          className="home-hub-tabs"
-        />
-
-        {activeTab === 'NATIONS' ? (
-          <CardGrid
-            items={nations}
-            type={EntityType.NATION}
-            cardSize="small"
-            loading={loading}
-            serverPagination={pagination}
-            onNavigate={(step) => step.id && router.push(`/nation/${step.id}`)}
-            emptyText="No countries found"
-            defaultPageSize={20}
-          />
-        ) : (
-          <CompetitionGroupView
-            items={competitions}
-            loading={loading}
-            serverPagination={pagination}
-            onNavigate={(step) => step.id && router.push(`/comp/${step.id}`)}
-            emptyText="No international competitions found"
-          />
-        )}
+        {/* Scrollable list content */}
+        <div
+          ref={listContainerRef}
+          className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3 py-2.5 pb-6"
+        >
+          {activeTab === 'NATIONS' ? (
+            <CardGrid
+              items={nations}
+              type={EntityType.NATION}
+              cardSize="small"
+              loading={loading}
+              serverPagination={pagination}
+              onNavigate={(step) => step.id && router.push(`/nation/${step.id}`)}
+              emptyText="No countries found"
+              defaultPageSize={20}
+            />
+          ) : (
+            <CompetitionGroupView
+              items={competitions}
+              loading={loading}
+              serverPagination={pagination}
+              onNavigate={(step) => step.id && router.push(`/comp/${step.id}`)}
+              emptyText="No international competitions found"
+            />
+          )}
+        </div>
       </div>
     </div>
   );

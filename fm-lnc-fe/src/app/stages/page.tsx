@@ -169,9 +169,9 @@ export default function StagesPage() {
   );
 
   return (
-    <div>
-      {/* Ribbon Header */}
-      <div className="bg-[#e2f0fd] rounded-t-lg border border-[#cbe4fa] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2 shadow-2xs">
+    <div className="h-full flex flex-col min-h-0 bg-white">
+      {/* Ribbon Header (shrink-0) */}
+      <div className="shrink-0 flex-none bg-[#e2f0fd] px-3 sm:px-4 py-2 border-b border-[#cbe4fa] flex items-center justify-between gap-2 shadow-2xs">
         <div className="flex items-center gap-2">
           <FlagOutlined className="text-rose-600 text-sm" />
           <span className="font-bold text-[#1e3a8a] text-xs sm:text-sm">Tournament Stages</span>
@@ -195,9 +195,9 @@ export default function StagesPage() {
       </div>
 
       {/* Main Container */}
-      <div className="bg-white border border-[#cbe4fa] border-t-0 rounded-b-lg p-3 sm:p-5 shadow-sm min-h-[480px]">
-        {/* Filter bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4 pb-2 border-b border-gray-100">
+      <div className="w-full flex-1 min-h-0 flex flex-col bg-white overflow-hidden">
+        {/* Filter bar (shrink-0) */}
+        <div className="shrink-0 flex-none px-3 py-2 border-b border-gray-100 bg-white flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
           <div className="text-xs text-gray-500">
             Total: <strong className="text-gray-800">{total}</strong> tournament stages
           </div>
@@ -214,8 +214,8 @@ export default function StagesPage() {
           </div>
         </div>
 
-        {/* Mobile Vertical Cards - 1 card per row */}
-        <div>
+        {/* Mobile Vertical Cards - Scrollable */}
+        <div className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3 py-2.5 pb-6">
           <div className="grid grid-cols-1 gap-3">
             {stages.length === 0 ? (
               <div className="py-12 text-center text-gray-400 text-xs italic">

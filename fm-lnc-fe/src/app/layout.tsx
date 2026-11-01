@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
             }}
           >
-            <App>
+            <App className="h-full w-full">
               {/* Desktop: center content in a mobile-phone frame */}
               <div className="mobile-frame-wrapper">
                 <div className="mobile-frame" id="mobile-frame-root">

@@ -222,7 +222,7 @@ export default function CompetitionGroupView({
   }
 
   const renderToolbar = () => (
-    <div className="flex flex-col gap-2.5 bg-white/90 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200/80 shadow-xs mb-3">
+    <div className="sticky top-0 z-10 flex flex-col gap-2 bg-white/95 backdrop-blur-md p-2 rounded-xl border border-gray-200/80 shadow-xs mb-3">
       {extraRight && (
         <div className="w-full flex items-center gap-2 min-w-0">{extraRight}</div>
       )}

@@ -6,17 +6,6 @@ const nextConfig = {
   distDir: process.env.NODE_ENV === 'development' ? '.next-dev' : '.next',
   transpilePackages: ['antd', '@ant-design/icons', '@ant-design/nextjs-registry'],
   basePath: '/fm',
-  webpack(config, { dev }) {
-    if (dev) {
-      // Polling makes HMR reliable on Windows drives where file events can be missed.
-      config.watchOptions = {
-        ...config.watchOptions,
-        aggregateTimeout: 300,
-        poll: 1000,
-      };
-    }
-    return config;
-  },
   async redirects() {
     return [
       {
