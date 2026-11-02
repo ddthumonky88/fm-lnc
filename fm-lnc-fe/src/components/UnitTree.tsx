@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Tree, Input } from 'antd';
+import { Tree, Input, Spin } from 'antd';
 import { DownOutlined, RightOutlined, CheckOutlined } from '@ant-design/icons';
-import { NationItem, CompetitionItem, fetchDomesticCompetitions } from '../services/api';
+import { NationItem, CompetitionItem, fetchDomesticCompetitions, fetchUnitTree, UnitTreeNode } from '../services/api';
 import type { DataNode } from 'antd/es/tree';
 
 
@@ -37,6 +37,33 @@ export const CONFEDERATION_META: Record<
   EXTINCT: { name: 'Quốc gia lịch sử / Giải thể', icon: '🏛️', order: 7 },
 };
 
+function getExpandedKeysForSelectedKey(nodes: UnitTreeNode[], targetKey: string): React.Key[] {
+  const keys: React.Key[] = [];
+  function traverse(list: UnitTreeNode[], path: React.Key[]): boolean {
+    for (const node of list) {
+      const match =
+        String(node.key) === String(targetKey) ||
+        (targetKey.startsWith('nation_') && String(node.key) === targetKey.replace('nation_', '')) ||
+        (node.key === `nation_${targetKey}`) ||
+        (targetKey.startsWith('comp_') && String(node.key) === targetKey) ||
+        (targetKey.startsWith('oth_') && String(node.key) === targetKey) ||
+        (targetKey.startsWith('ext_') && String(node.key) === targetKey);
+      if (match) {
+        keys.push(...path);
+        return true;
+      }
+      if (node.children && node.children.length > 0) {
+        if (traverse(node.children, [...path, node.key])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  traverse(nodes, []);
+  return keys;
+}
+
 export default function UnitTree({
   mode,
   nations = [],
@@ -55,6 +82,29 @@ export default function UnitTree({
 
   const [keyword, setKeyword] = useState('');
   const [nationCompsCache, setNationCompsCache] = useState<Record<string, CompetitionItem[]>>({});
+  const [apiTreeData, setApiTreeData] = useState<UnitTreeNode[] | null>(null);
+  const [loadingTree, setLoadingTree] = useState<boolean>(false);
+
+  // Gọi API lấy cấu trúc cây đơn vị theo currentMode
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingTree(true);
+    fetchUnitTree(currentMode)
+      .then((data) => {
+        if (isMounted && Array.isArray(data)) {
+          setApiTreeData(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Lỗi khi tải cây đơn vị từ API, fallback sang tính toán cục bộ:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingTree(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [currentMode]);
 
   // Tự động mở rộng nhánh khi có selectedKey
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>(() => {
@@ -93,6 +143,17 @@ export default function UnitTree({
   });
   const [autoExpandParent, setAutoExpandParent] = useState(true);
 
+  // Khi apiTreeData tải xong hoặc selectedKey thay đổi: tự động tìm nhánh cha và mở rộng
+  useEffect(() => {
+    if (apiTreeData && apiTreeData.length > 0 && selectedKey && selectedKey !== 'all') {
+      const keys = getExpandedKeysForSelectedKey(apiTreeData, selectedKey);
+      if (keys.length > 0) {
+        setExpandedKeys((prev) => Array.from(new Set([...prev, ...keys])));
+        setAutoExpandParent(true);
+      }
+    }
+  }, [apiTreeData, selectedKey]);
+
   // Pre-load comps cho nation đã chọn khi mở modal ở màn club
   useEffect(() => {
     if (currentMode === 'club' && selectedKey && selectedKey !== 'all') {
@@ -118,7 +179,27 @@ export default function UnitTree({
     }
   }, [currentMode, selectedKey, nationCompsCache]);
 
-  // Handler load data bất đồng bộ cho Cấp 3 màn club
+  // Khi apiTreeData load xong, tự động tìm và expand các node cha của selectedKey nếu có
+  useEffect(() => {
+    if (apiTreeData && selectedKey && selectedKey !== 'all') {
+      const findParents = (nodes: any[], target: string, parents: React.Key[] = []): React.Key[] | null => {
+        for (const n of nodes) {
+          if (String(n.key) === target) return parents;
+          if (n.children && n.children.length > 0) {
+            const res = findParents(n.children, target, [...parents, n.key]);
+            if (res) return res;
+          }
+        }
+        return null;
+      };
+      const parents = findParents(apiTreeData, String(selectedKey));
+      if (parents && parents.length > 0) {
+        setExpandedKeys((prev) => Array.from(new Set([...prev, ...parents])));
+      }
+    }
+  }, [apiTreeData, selectedKey]);
+
+  // Handler load data bất đồng bộ cho Cấp 3 màn club (khi dùng local fallback)
   const handleLoadData = (treeNode: any) => {
     return new Promise<void>((resolve) => {
       if (currentMode !== 'club' || treeNode.level !== 2) {
@@ -156,6 +237,10 @@ export default function UnitTree({
 
   // Xây dựng cây đơn vị
   const rawTreeData: DataNode[] = useMemo(() => {
+    // Nếu API đã trả về cấu trúc cây trực tiếp => ưu tiên sử dụng
+    if (apiTreeData && apiTreeData.length > 0) {
+      return apiTreeData as unknown as DataNode[];
+    }
     // ==========================================
     // 1. MÀN NATION: Cấp 1 duy nhất [ALL, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA, EXTINCT]
     // ==========================================
@@ -445,7 +530,7 @@ export default function UnitTree({
     });
 
     return nodes;
-  }, [currentMode, nations, showAllOption, allowSelectConfed, nationCompsCache]);
+  }, [apiTreeData, currentMode, nations, showAllOption, allowSelectConfed, nationCompsCache]);
 
   // Lọc cây theo từ khóa tìm kiếm
   const filteredTreeData = useMemo(() => {
@@ -509,10 +594,10 @@ export default function UnitTree({
       return;
     }
 
-    // Nếu ở màn club click vào nation: tự động mở rộng và tải Cấp 3
+    // Nếu ở màn club click vào nation: tự động mở rộng (và tải Cấp 3 nếu dùng local fallback)
     if (currentMode === 'club' && key.startsWith('nation_')) {
       const nid = key.replace('nation_', '');
-      if (nid && nationCompsCache[nid] === undefined) {
+      if (!apiTreeData && nid && nationCompsCache[nid] === undefined) {
         fetchDomesticCompetitions(nid, { size: 100 })
           .then((res: any) => {
             const list = Array.isArray(res) ? res : res?.content || [];
@@ -546,29 +631,35 @@ export default function UnitTree({
 
       {/* Khung hiển thị Cây đơn vị */}
       <div
-        style={{ maxHeight: height }}
-        className="overflow-y-auto mobile-frame-scroll border border-slate-200 rounded-lg p-1 bg-white"
+        style={{ maxHeight: height, minHeight: 120 }}
+        className="overflow-y-auto mobile-frame-scroll border border-slate-200 rounded-lg p-1 bg-white relative"
       >
-        <Tree
-          blockNode
-          showLine={{ showLeafIcon: false }}
-          treeData={filteredTreeData}
-          loadData={currentMode === 'club' ? handleLoadData : undefined}
-          selectedKeys={selectedKey ? [selectedKey] : []}
-          expandedKeys={expandedKeys}
-          autoExpandParent={autoExpandParent}
-          onExpand={(keys) => {
-            setExpandedKeys(keys);
-            setAutoExpandParent(false);
-          }}
-          onSelect={handleSelect}
-          switcherIcon={(props: any) =>
-            props.isLeaf ? null : props.expanded ? (
-              <DownOutlined className="text-[10px] text-slate-500" />
-            ) : (
-              <RightOutlined className="text-[10px] text-slate-500" />
-            )
-          }
+        {loadingTree && !apiTreeData && nations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-xs">
+            <Spin size="small" className="mb-2" />
+            <span>Đang tải cây đơn vị...</span>
+          </div>
+        ) : (
+          <Tree
+            blockNode
+            showLine={{ showLeafIcon: false }}
+            treeData={filteredTreeData}
+            loadData={currentMode === 'club' && !apiTreeData ? handleLoadData : undefined}
+            selectedKeys={selectedKey ? [selectedKey] : []}
+            expandedKeys={expandedKeys}
+            autoExpandParent={autoExpandParent}
+            onExpand={(keys) => {
+              setExpandedKeys(keys);
+              setAutoExpandParent(false);
+            }}
+            onSelect={handleSelect}
+            switcherIcon={(props: any) =>
+              props.isLeaf ? null : props.expanded ? (
+                <DownOutlined className="text-[10px] text-slate-500" />
+              ) : (
+                <RightOutlined className="text-[10px] text-slate-500" />
+              )
+            }
           titleRender={(node: any) => {
             const isSelected = Boolean(selectedKey && String(selectedKey) === String(node.key));
             const isLevel1 = node.level === 1;
@@ -623,6 +714,7 @@ export default function UnitTree({
           }}
           className="unit-tree-directory text-xs"
         />
+        )}
       </div>
     </div>
   );

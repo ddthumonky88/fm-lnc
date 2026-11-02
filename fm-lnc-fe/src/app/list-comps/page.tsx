@@ -7,10 +7,9 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import CardGrid from '../../components/CardGrid';
 import { CompIcon } from '../../components/EntityIcons';
 import ListPageFilterBar from '../../components/ListPageFilterBar';
-import NationTreeSelect, { getNationDisplayName } from '../../components/NationTreeSelect';
 import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
-import { fetchCompetitionsList, fetchAllNations, CompetitionItem, NationItem } from '../../services/api';
+import { fetchCompetitionsList, fetchUnitTree, findNationInTree, CompetitionItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
 
 const CONFEDERATIONS = [
@@ -44,7 +43,7 @@ function ListCompsContent() {
   const [tempConfed, setTempConfed] = useState<string>(initialConfed);
   const [tempNation, setTempNation] = useState<string>(initialNationId);
 
-  const [nationsList, setNationsList] = useState<NationItem[]>([]);
+  const [treeNodes, setTreeNodes] = useState<UnitTreeNode[]>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [debouncedKeyword, setDebouncedKeyword] = useState<string>('');
   const [competitions, setCompetitions] = useState<CompetitionItem[]>([]);
@@ -55,12 +54,13 @@ function ListCompsContent() {
 
   const listContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load nation options
+  // Load cấu trúc cây đơn vị
   useEffect(() => {
-    fetchAllNations({ size: 300 })
-      .then((res: any) => {
-        const list = Array.isArray(res) ? res : res.content || [];
-        setNationsList(list);
+    fetchUnitTree('comp')
+      .then((nodes) => {
+        if (Array.isArray(nodes)) {
+          setTreeNodes(nodes);
+        }
       })
       .catch(() => {});
   }, []);
@@ -149,16 +149,11 @@ function ListCompsContent() {
     }
     levels.push('International');
   } else if (selectedNation !== 'all') {
-    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
-    let confed = selectedConfed !== 'all' ? selectedConfed : '';
-    if (!confed && nation) {
-      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
-      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
-      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
-    }
+    const nationNode = findNationInTree(treeNodes, selectedNation);
+    let confed = selectedConfed !== 'all' ? selectedConfed : (nationNode?.confed || '');
     if (confed) levels.push(confed);
-    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
-    levels.push(nation3l || getNationDisplayName(nationsList, selectedNation));
+    const nation3l = nationNode?.code3 ? `[${nationNode.code3}] ${nationNode.shortName || nationNode.title}` : (nationNode?.shortName || nationNode?.title || selectedNation);
+    levels.push(nation3l);
   } else if (selectedConfed !== 'all') {
     levels.push(selectedConfed);
   }
@@ -193,11 +188,15 @@ function ListCompsContent() {
       setTempConfed(confedCode);
       setTempNation('all');
     } else {
-      const nation = nodeData?.nationData;
-      let confedCode = 'all';
-      if (nation) {
+      let confedCode = nodeData?.confed || 'all';
+      if (confedCode === 'all' && nodeData?.nationData) {
+        const nation = nodeData.nationData;
         if (typeof nation.confed === 'string') confedCode = nation.confed.toUpperCase();
         else if (nation.confed?.code) confedCode = nation.confed.code.toUpperCase();
+      }
+      if (confedCode === 'all') {
+        const nationNode = findNationInTree(treeNodes, key);
+        if (nationNode?.confed) confedCode = nationNode.confed.toUpperCase();
       }
       setTempScope('domestic');
       setTempConfed(confedCode);
@@ -303,7 +302,6 @@ function ListCompsContent() {
           <UnitTree
             mode="comp"
             allowSelectConfed={true}
-            nations={nationsList}
             selectedKey={
               tempNation !== 'all'
                 ? tempNation

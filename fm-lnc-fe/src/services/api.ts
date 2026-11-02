@@ -8,32 +8,15 @@ export function getApiBase(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
-  return 'https://fm-lnc-backend.onrender.com/api';
-}
-
-export function getLocalApiBase(): string {
-  if (typeof window !== 'undefined') {
-    const customLocal = localStorage.getItem('custom_local_api_base');
-    if (customLocal) return customLocal;
-  }
-  if (process.env.NEXT_PUBLIC_LOCAL_API_URL) {
-    return process.env.NEXT_PUBLIC_LOCAL_API_URL;
-  }
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
-    return `http://${host}:3001/api`;
-  }
   return 'http://127.0.0.1:3001/api';
 }
 
+export function getLocalApiBase(): string {
+  return getApiBase();
+}
+
 export function setCustomLocalApiBase(url: string | null) {
-  if (typeof window !== 'undefined') {
-    if (url) {
-      localStorage.setItem('custom_local_api_base', url);
-    } else {
-      localStorage.removeItem('custom_local_api_base');
-    }
-  }
+  setCustomApiBase(url);
 }
 
 export function setCustomApiBase(url: string | null) {
@@ -695,6 +678,65 @@ export async function fetchContinents(
   return fetchListConfederations(queryOrForceRefresh, maybeForceRefresh) as Promise<
     PaginatedList<ConfederationItem>
   >;
+}
+
+export interface UnitTreeNode {
+  key: string;
+  title: string;
+  selectable?: boolean;
+  isLeaf?: boolean;
+  level: number;
+  className?: string;
+  code3?: string;
+  shortName?: string;
+  noTag?: boolean;
+  isInternational?: boolean;
+  isOther?: boolean;
+  isExtinct?: boolean;
+  confed?: string;
+  nationId?: string;
+  children?: UnitTreeNode[];
+}
+
+export async function fetchUnitTree(
+  type: string,
+  forceRefresh = false,
+): Promise<UnitTreeNode[]> {
+  return cachedFetch<UnitTreeNode[]>(
+    `${getApiBase()}/hierarchy/tree?type=${encodeURIComponent(type)}`,
+    forceRefresh,
+  );
+}
+
+export function findNodeInTree(
+  nodes: UnitTreeNode[] | null | undefined,
+  key: string,
+): UnitTreeNode | null {
+  if (!nodes || !key) return null;
+  for (const node of nodes) {
+    if (String(node.key) === String(key)) return node;
+    if (node.children && node.children.length > 0) {
+      const found = findNodeInTree(node.children, key);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+export function findNationInTree(
+  nodes: UnitTreeNode[] | null | undefined,
+  nationId: string,
+): UnitTreeNode | null {
+  if (!nodes || !nationId || nationId === 'all') return null;
+  const target = String(nationId);
+  for (const node of nodes) {
+    if (String(node.key) === target || node.key === `nation_${target}`) return node;
+    if (node.children && node.children.length > 0) {
+      const found = findNationInTree(node.children, nationId);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 export async function fetchAllNations(
@@ -1370,13 +1412,13 @@ export const ENABLE_IMAGE_LOGOS = false;
 
 export function getConfederationLogoUrl(id: string): string {
   if (!ENABLE_IMAGE_LOGOS) return '';
-  return `${getLocalApiBase()}/logos/confederation/${id}`;
+  return `${getApiBase()}/logos/confederation/${id}`;
 }
 
 export function getNationLogoUrl(id: string, code?: string): string {
   if (!ENABLE_IMAGE_LOGOS) return '';
   const query = code ? `?code=${encodeURIComponent(code)}` : '';
-  return `${getLocalApiBase()}/logos/nation/${id}${query}`;
+  return `${getApiBase()}/logos/nation/${id}${query}`;
 }
 
 /**
@@ -1390,12 +1432,12 @@ export function getFifaFlagUrl(code?: string | null): string {
 
 export function getCompetitionLogoUrl(id: string | number): string {
   if (!ENABLE_IMAGE_LOGOS) return '';
-  return `${getLocalApiBase()}/logos/competition/${id}`;
+  return `${getApiBase()}/logos/competition/${id}`;
 }
 
 export function getClubLogoUrl(id: string | number): string {
   if (!ENABLE_IMAGE_LOGOS) return '';
-  return `${getLocalApiBase()}/logos/club/${id}`;
+  return `${getApiBase()}/logos/club/${id}`;
 }
 
 export interface AppPathsConfig {
@@ -1433,7 +1475,7 @@ export interface ConfigStatusResponse {
 }
 
 export async function fetchAppConfig(): Promise<ConfigStatusResponse> {
-  const res = await fetch(`${getLocalApiBase()}/config`, {
+  const res = await fetch(`${getApiBase()}/config`, {
     cache: 'no-store',
   });
   return parseApiResponse<ConfigStatusResponse>(
@@ -1445,7 +1487,7 @@ export async function fetchAppConfig(): Promise<ConfigStatusResponse> {
 export async function updateAppConfig(
   config: Partial<AppPathsConfig>,
 ): Promise<ConfigStatusResponse> {
-  const res = await fetch(`${getLocalApiBase()}/config`, {
+  const res = await fetch(`${getApiBase()}/config`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(config),
@@ -1454,7 +1496,7 @@ export async function updateAppConfig(
 }
 
 export async function testDirectoryPath(targetPath: string) {
-  const res = await fetch(`${getLocalApiBase()}/config/test`, {
+  const res = await fetch(`${getApiBase()}/config/test`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: targetPath }),
@@ -1464,14 +1506,14 @@ export async function testDirectoryPath(targetPath: string) {
 
 export async function syncLncFromConfig() {
   clearApiCache();
-  const res = await fetch(`${getLocalApiBase()}/config/sync`, {
+  const res = await fetch(`${getApiBase()}/config/sync`, {
     method: 'POST',
   });
   return parseApiResponse(res, 'Đồng bộ LNC local thất bại');
 }
 
 export async function reloadLogosFromConfig() {
-  const res = await fetch(`${getLocalApiBase()}/config/reload-logos`, {
+  const res = await fetch(`${getApiBase()}/config/reload-logos`, {
     method: 'POST',
   });
   return parseApiResponse(res, 'Quét lại logo local thất bại');
@@ -1489,7 +1531,7 @@ export async function uploadLncFiles(files: { name: string; content: string }[])
 
 export async function syncLocalLncToProd(): Promise<{ success: boolean; message: string }> {
   clearApiCache();
-  const exportRes = await fetch(`${getLocalApiBase()}/lnc/export`);
+  const exportRes = await fetch(`${getApiBase()}/lnc/export`);
   if (!exportRes.ok) {
     throw new Error('Không thể đọc dữ liệu LNC từ backend local');
   }

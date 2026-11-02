@@ -7,10 +7,9 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import CardGrid from '../../components/CardGrid';
 import { ClubIcon } from '../../components/EntityIcons';
 import ListPageFilterBar from '../../components/ListPageFilterBar';
-import { getNationDisplayName } from '../../components/NationTreeSelect';
 import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
-import { searchClubs, fetchAllNations, fetchCompetitionInfo, ClubItem, NationItem } from '../../services/api';
+import { searchClubs, fetchUnitTree, findNationInTree, fetchCompetitionInfo, ClubItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
 
 function ListClubsContent() {
@@ -34,7 +33,7 @@ function ListClubsContent() {
   const [tempCompId, setTempCompId] = useState<string | undefined>(initialCompId);
   const [tempCompName, setTempCompName] = useState<string>('');
 
-  const [nationsList, setNationsList] = useState<NationItem[]>([]);
+  const [treeNodes, setTreeNodes] = useState<UnitTreeNode[]>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [debouncedKeyword, setDebouncedKeyword] = useState<string>('');
   const [clubs, setClubs] = useState<ClubItem[]>([]);
@@ -45,12 +44,13 @@ function ListClubsContent() {
 
   const listContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load nation options
+  // Load cấu trúc cây đơn vị
   useEffect(() => {
-    fetchAllNations({ size: 300 })
-      .then((res: any) => {
-        const list = Array.isArray(res) ? res : res.content || [];
-        setNationsList(list);
+    fetchUnitTree('club')
+      .then((nodes) => {
+        if (Array.isArray(nodes)) {
+          setTreeNodes(nodes);
+        }
       })
       .catch(() => {});
   }, []);
@@ -154,23 +154,12 @@ function ListClubsContent() {
   // Filter summary: {confed} > {nation_3letter} > {comp_short_name}
   const levels: string[] = [];
   if (selectedNation !== 'all') {
-    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
-    let confed = '';
-    if (nation) {
-      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
-      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
-      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
-    }
-    // Cấp 1: {confed}
-    if (confed) levels.push(confed);
+    const nationNode = findNationInTree(treeNodes, selectedNation);
+    if (nationNode?.confed) levels.push(nationNode.confed);
 
     // Cấp 2: {nation_3letter}
-    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
-    if (nation3l) {
-      levels.push(nation3l);
-    } else {
-      levels.push(getNationDisplayName(nationsList, selectedNation));
-    }
+    const nation3l = nationNode?.code3 ? `[${nationNode.code3}] ${nationNode.shortName || nationNode.title}` : (nationNode?.shortName || nationNode?.title || selectedNation);
+    levels.push(nation3l);
 
     // Cấp 3: {comp_short_name}
     if (selectedCompId) {
@@ -358,7 +347,6 @@ function ListClubsContent() {
         <div className="py-1">
           <UnitTree
             mode="club"
-            nations={nationsList}
             selectedKey={
               tempCompId
                 ? tempCompId.startsWith('oth-')

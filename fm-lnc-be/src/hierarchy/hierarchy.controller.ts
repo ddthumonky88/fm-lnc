@@ -40,6 +40,28 @@ export class HierarchyController {
     return this.hierarchyService.getListConfederations();
   }
 
+  @ApiOperation({ summary: 'Lấy cấu trúc Cây đơn vị (Unit Tree) cho các màn hình' })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    description: 'Loại màn hình: comp | club | city | stadium | nation | award',
+    enum: ['comp', 'club', 'city', 'stadium', 'nation', 'award'],
+  })
+  @ApiOkResponse({
+    description: 'Cấu trúc cây đơn vị theo đúng phân cấp từng màn hình',
+  })
+  @Get('tree')
+  getUnitTree(@Query('type') type?: string) {
+    return this.hierarchyService.getUnitTree(type);
+  }
+
+  @ApiOperation({ summary: 'Lấy cấu trúc Cây đơn vị (Unit Tree alias)' })
+  @ApiExcludeEndpoint()
+  @Get('unit-tree')
+  getUnitTreeAlias(@Query('type') type?: string) {
+    return this.hierarchyService.getUnitTree(type);
+  }
+
   @ApiOperation({ summary: 'Tìm kiếm quốc gia có phân trang và lọc theo liên đoàn' })
   @ApiBody({ type: SearchFilterDto, required: false })
   @ApiOkResponse({

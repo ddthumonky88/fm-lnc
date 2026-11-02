@@ -7,10 +7,9 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import CardGrid from '../../components/CardGrid';
 import { AwardIcon } from '../../components/EntityIcons';
 import ListPageFilterBar from '../../components/ListPageFilterBar';
-import { getNationDisplayName } from '../../components/NationTreeSelect';
 import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
-import { fetchAwards, fetchAwardsInComp, fetchAllNations, AwardItem, NationItem } from '../../services/api';
+import { fetchAwards, fetchAwardsInComp, fetchUnitTree, findNationInTree, AwardItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
 
 function ListAwardsContent() {
@@ -30,7 +29,7 @@ function ListAwardsContent() {
   const [tempNation, setTempNation] = useState<string>(initialNationId);
   const [tempCompId, setTempCompId] = useState<string | undefined>(initialCompId);
 
-  const [nationsList, setNationsList] = useState<NationItem[]>([]);
+  const [treeNodes, setTreeNodes] = useState<UnitTreeNode[]>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [debouncedKeyword, setDebouncedKeyword] = useState<string>('');
   const [awards, setAwards] = useState<AwardItem[]>([]);
@@ -41,12 +40,13 @@ function ListAwardsContent() {
 
   const listContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load nation options
+  // Load cấu trúc cây đơn vị
   useEffect(() => {
-    fetchAllNations({ size: 300 })
-      .then((res: any) => {
-        const list = Array.isArray(res) ? res : res.content || [];
-        setNationsList(list);
+    fetchUnitTree('award')
+      .then((nodes) => {
+        if (Array.isArray(nodes)) {
+          setTreeNodes(nodes);
+        }
       })
       .catch(() => {});
   }, []);
@@ -134,16 +134,14 @@ function ListAwardsContent() {
   // Filter summary: cấp 1 > cấp 2 > cấp 3
   const levels: string[] = [];
   if (selectedNation !== 'all') {
-    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
-    let confed = '';
-    if (nation) {
-      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
-      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
-      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
+    const nationNode = findNationInTree(treeNodes, selectedNation);
+    if (nationNode) {
+      if (nationNode.confed) levels.push(nationNode.confed);
+      const nation3l = nationNode.code3 ? `[${nationNode.code3}] ${nationNode.shortName || nationNode.title}` : (nationNode.shortName || nationNode.title);
+      levels.push(nation3l);
+    } else {
+      levels.push(selectedNation);
     }
-    if (confed) levels.push(confed);
-    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
-    levels.push(nation3l || getNationDisplayName(nationsList, selectedNation));
     if (selectedCompId) levels.push(`Comp: ${selectedCompId}`);
   } else if (selectedCompId) {
     levels.push(`Comp: ${selectedCompId}`);
@@ -286,7 +284,7 @@ function ListAwardsContent() {
           {/* Cây đơn vị */}
           <div>
             <UnitTree
-              nations={nationsList}
+              mode="award"
               selectedKey={tempNation}
               onSelectNode={(val) => handlePickNation(val)}
               allOptionLabel="Tất cả quốc gia (All Nations)"

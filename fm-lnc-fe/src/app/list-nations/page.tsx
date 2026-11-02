@@ -9,7 +9,7 @@ import { NationIcon } from '../../components/EntityIcons';
 import ListPageFilterBar from '../../components/ListPageFilterBar';
 import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
-import { fetchNationsByContinent, fetchAllNations, NationItem } from '../../services/api';
+import { fetchNationsByContinent, NationItem } from '../../services/api';
 import { EntityType } from '../../types';
 
 interface ConfedOption {
@@ -48,16 +48,6 @@ function ListNationsContent() {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [total, setTotal] = useState<number>(0);
-  const [allNations, setAllNations] = useState<NationItem[]>([]);
-
-  useEffect(() => {
-    fetchAllNations({ size: 300 })
-      .then((res: any) => {
-        const list = Array.isArray(res) ? res : res.content || [];
-        setAllNations(list);
-      })
-      .catch(() => {});
-  }, []);
 
   const listContainerRef = useRef<HTMLDivElement>(null);
 
@@ -228,8 +218,8 @@ function ListNationsContent() {
       >
         <div className="py-1">
           <UnitTree
+            mode="nation"
             confedOnly
-            nations={allNations}
             selectedKey={tempConfed}
             onSelectNode={(val) => handlePickConfed(val)}
             allOptionLabel="Tất cả Liên đoàn (All)"

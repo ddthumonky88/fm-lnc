@@ -36,6 +36,26 @@ import {
 
 const COMPETITION_DEFAULT_SORT = ['_competitionRank,asc', 'id,asc'];
 
+export interface UnitTreeNode {
+  key: string;
+  title: string;
+  selectable?: boolean;
+  isLeaf?: boolean;
+  level: number;
+  className?: string;
+  code3?: string;
+  shortName?: string;
+  noTag?: boolean;
+  isInternational?: boolean;
+  isOther?: boolean;
+  isExtinct?: boolean;
+  confed?: string;
+  nationId?: string;
+  nationData?: any;
+  compData?: any;
+  children?: UnitTreeNode[];
+}
+
 function withDefaultSort<T extends { sort?: string | string[] }>(
   filter: T | undefined,
   defaultSort: string[],
@@ -1263,6 +1283,293 @@ export class HierarchyService {
       default:
         throw new BadRequestException(`Info not supported for entity type: ${type}`);
     }
+  }
+
+  async getUnitTree(type?: string): Promise<UnitTreeNode[]> {
+    const mode = (type || 'default').toLowerCase();
+    const ORDERED_CONFED_CODES = ['AFC', 'CAF', 'CONCACAF', 'CONMEBOL', 'OFC', 'UEFA'];
+
+    // 1. MÀN NATION: Cấp 1 duy nhất [ALL, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA, EXTINCT]
+    if (mode === 'nation') {
+      const nodes: UnitTreeNode[] = [
+        {
+          key: 'all',
+          title: 'ALL',
+          isLeaf: true,
+          level: 1,
+          selectable: true,
+          className: 'tree-node-level-1',
+        },
+      ];
+
+      const confedCodes = [...ORDERED_CONFED_CODES, 'EXTINCT'];
+      confedCodes.forEach((code) => {
+        nodes.push({
+          key: code,
+          title: code,
+          isLeaf: true,
+          level: 1,
+          selectable: true,
+          className: 'tree-node-level-1',
+        });
+      });
+      return nodes;
+    }
+
+    // Lấy danh sách quốc gia từ DB
+    const nationsRaw = await this.nationRepo.query(`
+      SELECT id, name_lg, name_sh, name_3l, confed
+      FROM nations
+      ORDER BY COALESCE(name_sh, name_lg) ASC;
+    `);
+
+    // Nhóm quốc gia theo confederation
+    const groups: Record<string, any[]> = {};
+    ORDERED_CONFED_CODES.forEach((code) => {
+      groups[code] = [];
+    });
+
+    nationsRaw.forEach((n: any) => {
+      const rawConfed = String(n.confed || '').trim();
+      const confedKey = normalizeConfed(rawConfed) || rawConfed.toUpperCase();
+      if (groups[confedKey]) {
+        groups[confedKey].push(n);
+      }
+    });
+
+    ORDERED_CONFED_CODES.forEach((code) => {
+      groups[code].sort((a: any, b: any) => {
+        const nameA = a.name_sh || a.name_lg || '';
+        const nameB = b.name_sh || b.name_lg || '';
+        return nameA.localeCompare(nameB);
+      });
+    });
+
+    // 2. MÀN COMP:
+    // Cấp 1: [ALL, WORLD, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA]
+    // Cấp 2 (trừ ALL, WORLD): [International, ...[list nation theo châu lục]]
+    if (mode === 'comp' || mode === 'competition') {
+      const nodes: UnitTreeNode[] = [
+        {
+          key: 'all',
+          title: 'ALL',
+          isLeaf: true,
+          level: 1,
+          selectable: true,
+          className: 'tree-node-level-1',
+        },
+        {
+          key: 'confed_WORLD',
+          title: 'WORLD',
+          isLeaf: true,
+          level: 1,
+          selectable: true,
+          className: 'tree-node-level-1',
+        },
+      ];
+
+      ORDERED_CONFED_CODES.forEach((confedKey) => {
+        const list = groups[confedKey] || [];
+        nodes.push({
+          key: `confed_${confedKey}`,
+          title: confedKey,
+          level: 1,
+          selectable: true,
+          className: 'tree-node-level-1',
+          children: [
+            {
+              key: `intl_${confedKey}`,
+              title: 'International',
+              isLeaf: true,
+              level: 2,
+              selectable: true,
+              className: 'tree-node-level-2',
+              shortName: 'International',
+              noTag: true,
+              isInternational: true,
+              confed: confedKey,
+            },
+            ...list.map((n: any) => {
+              const code = (n.name_3l || '---').toUpperCase();
+              const shortName = n.name_sh || n.name_lg || '';
+              return {
+                key: String(n.id),
+                title: `${code} ${shortName}`,
+                isLeaf: true,
+                level: 2,
+                selectable: true,
+                className: 'tree-node-level-2',
+                code3: code,
+                shortName: shortName,
+                confed: confedKey,
+                nationData: n,
+              };
+            }),
+          ],
+        });
+      });
+
+      return nodes;
+    }
+
+    // 3. MÀN CLUB:
+    // Cấp 1: [ALL, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA]
+    // Cấp 2: (trừ ALL): [list nation theo châu lục]
+    // Cấp 3: [...[list comp có club theo nation], Other, Extinct]
+    if (mode === 'club') {
+      const compsRaw = await this.compRepo.query(`
+        SELECT DISTINCT c.id, c.name_lg, c.name_sh, c.name_3l, c.nation_id
+        FROM competitions c
+        INNER JOIN clubs cl ON cl.comp_id = c.id
+        WHERE c.nation_id IS NOT NULL
+          AND (c.parent_id IS NULL OR c.parent_id = '');
+      `);
+
+      compsRaw.sort((a: any, b: any) => {
+        const nameA = a.name_sh || a.name_lg || '';
+        const nameB = b.name_sh || b.name_lg || '';
+        return nameA.localeCompare(nameB);
+      });
+
+      const compsByNation: Record<string, any[]> = {};
+      compsRaw.forEach((c: any) => {
+        const nid = String(c.nation_id);
+        if (!compsByNation[nid]) {
+          compsByNation[nid] = [];
+        }
+        compsByNation[nid].push(c);
+      });
+
+      const nodes: UnitTreeNode[] = [
+        {
+          key: 'all',
+          title: 'ALL',
+          isLeaf: true,
+          level: 1,
+          selectable: true,
+          className: 'tree-node-level-1',
+        },
+      ];
+
+      ORDERED_CONFED_CODES.forEach((confedKey) => {
+        const list = groups[confedKey] || [];
+        nodes.push({
+          key: `confed_${confedKey}`,
+          title: confedKey,
+          level: 1,
+          selectable: false,
+          className: 'tree-node-level-1',
+          children: list.map((n: any) => {
+            const nationId = String(n.id);
+            const code = (n.name_3l || '---').toUpperCase();
+            const shortName = n.name_sh || n.name_lg || '';
+            const nationComps = compsByNation[nationId] || [];
+
+            const compChildren: UnitTreeNode[] = [
+              ...nationComps.map((c: any) => {
+                const cCode = (c.name_3l || 'CMP').toUpperCase();
+                const cShortName = c.name_sh || c.name_lg || '';
+                return {
+                  key: `comp_${c.id}`,
+                  title: `${cCode} ${cShortName}`,
+                  isLeaf: true,
+                  level: 3,
+                  selectable: true,
+                  className: 'tree-node-level-3',
+                  code3: cCode,
+                  shortName: cShortName,
+                  nationId: nationId,
+                  compData: c,
+                };
+              }),
+              {
+                key: `oth_${nationId}`,
+                title: 'Other',
+                isLeaf: true,
+                level: 3,
+                selectable: true,
+                className: 'tree-node-level-3',
+                shortName: 'Other',
+                noTag: true,
+                isOther: true,
+                nationId: nationId,
+              },
+              {
+                key: `ext_${nationId}`,
+                title: 'Extinct',
+                isLeaf: true,
+                level: 3,
+                selectable: true,
+                className: 'tree-node-level-3',
+                shortName: 'Extinct',
+                noTag: true,
+                isExtinct: true,
+                nationId: nationId,
+              },
+            ];
+
+            return {
+              key: `nation_${nationId}`,
+              title: `${code} ${shortName}`,
+              isLeaf: false,
+              level: 2,
+              selectable: true,
+              className: 'tree-node-level-2',
+              code3: code,
+              shortName: shortName,
+              confed: confedKey,
+              nationData: n,
+              children: compChildren,
+            };
+          }),
+        });
+      });
+
+      return nodes;
+    }
+
+    // 4. MÀN CITY, STADIUM, AWARD (VÀ DEFAULT):
+    // Cấp 1: [ALL, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA]
+    // Cấp 2 (trừ ALL): [list nation theo châu lục]
+    const nodes: UnitTreeNode[] = [
+      {
+        key: 'all',
+        title: 'ALL',
+        isLeaf: true,
+        level: 1,
+        selectable: true,
+        className: 'tree-node-level-1',
+      },
+    ];
+
+    ORDERED_CONFED_CODES.forEach((confedKey) => {
+      const list = groups[confedKey] || [];
+      nodes.push({
+        key: `confed_${confedKey}`,
+        title: confedKey,
+        level: 1,
+        selectable: false,
+        className: 'tree-node-level-1',
+        children: list.map((n: any) => {
+          const code = (n.name_3l || '---').toUpperCase();
+          const shortName = n.name_sh || n.name_lg || '';
+          return {
+            key: String(n.id),
+            title: `${code} ${shortName}`,
+            isLeaf: true,
+            level: 2,
+            selectable: true,
+            className: 'tree-node-level-2',
+            code3: code,
+            shortName: shortName,
+            confed: confedKey,
+            nationData: n,
+          };
+        }),
+      });
+    });
+
+    return nodes;
   }
 }
 

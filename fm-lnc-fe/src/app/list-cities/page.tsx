@@ -7,10 +7,9 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import CardGrid from '../../components/CardGrid';
 import { CityIcon } from '../../components/EntityIcons';
 import ListPageFilterBar from '../../components/ListPageFilterBar';
-import { getNationDisplayName } from '../../components/NationTreeSelect';
 import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
-import { fetchCities, fetchAllNations, CityItem, NationItem } from '../../services/api';
+import { fetchCities, fetchUnitTree, findNationInTree, CityItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
 
 function ListCitiesContent() {
@@ -27,7 +26,7 @@ function ListCitiesContent() {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [tempNation, setTempNation] = useState<string>(initialNationId);
 
-  const [nationsList, setNationsList] = useState<NationItem[]>([]);
+  const [treeNodes, setTreeNodes] = useState<UnitTreeNode[]>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [debouncedKeyword, setDebouncedKeyword] = useState<string>('');
 
@@ -39,12 +38,13 @@ function ListCitiesContent() {
 
   const listContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load nation options
+  // Load cấu trúc cây đơn vị
   useEffect(() => {
-    fetchAllNations({ size: 300 })
-      .then((res: any) => {
-        const list = Array.isArray(res) ? res : res.content || [];
-        setNationsList(list);
+    fetchUnitTree('city')
+      .then((nodes) => {
+        if (Array.isArray(nodes)) {
+          setTreeNodes(nodes);
+        }
       })
       .catch(() => {});
   }, []);
@@ -113,16 +113,15 @@ function ListCitiesContent() {
 
   let filterSummary = 'Tất cả quốc gia';
   if (selectedNation !== 'all') {
-    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
-    let confed = '';
-    if (nation) {
-      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
-      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
-      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
+    const nationNode = findNationInTree(treeNodes, selectedNation);
+    if (nationNode) {
+      const confed = nationNode.confed ? `${nationNode.confed} > ` : '';
+      const nation3l = nationNode.code3 ? `[${nationNode.code3}] ` : '';
+      const name = nationNode.shortName || nationNode.title || selectedNation;
+      filterSummary = `${confed}${nation3l}${name}`;
+    } else {
+      filterSummary = selectedNation;
     }
-    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
-    const nationDisplay = nation3l || getNationDisplayName(nationsList, selectedNation);
-    filterSummary = confed ? `${confed} > ${nationDisplay}` : nationDisplay;
   }
 
   const hasActiveCustomFilter = selectedNation !== 'all';
@@ -229,7 +228,7 @@ function ListCitiesContent() {
       >
         <div className="py-1">
           <UnitTree
-            nations={nationsList}
+            mode="city"
             selectedKey={tempNation}
             onSelectNode={(val) => handlePickNation(val)}
             allOptionLabel="Tất cả quốc gia (All Nations)"
