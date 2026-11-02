@@ -79,14 +79,20 @@ fm-lnc/
 ├── fm-lnc-fe/                    # Next.js 14 Web Application
 │   ├── src/app/
 │   │   ├── page.tsx              # Dashboard tổng quan: Châu lục, Giải quốc tế & Điều hướng
+│   │   ├── list-nations/         # Danh sách Quốc gia kèm bộ lọc Châu lục & Tìm kiếm
+│   │   ├── list-comps/           # Danh sách Giải đấu kèm Cây đơn vị phân cấp & Bộ lọc Quốc gia/Châu lục
+│   │   ├── list-clubs/           # Danh sách Câu lạc bộ (hỗ trợ lọc theo Cây đơn vị: Châu lục > Quốc gia > Giải đấu)
+│   │   ├── list-cities/          # Danh sách Thành phố (hỗ trợ Cây đơn vị, highlight & dồn [REMOVE] xuống cuối)
+│   │   ├── list-stadiums/        # Danh sách Sân vận động kèm Cây đơn vị theo Quốc gia
+│   │   ├── list-awards/          # Danh sách Danh hiệu & Giải thưởng kèm Cây đơn vị
 │   │   ├── confederation/[id]/   # Chi tiết Liên đoàn châu lục & danh sách quốc gia trực thuộc
 │   │   ├── nation/[id]/          # Giao diện Hub Quốc gia: Giải đấu, CLB, Sân vận động, Thành phố, Khu vực, Giải thưởng
 │   │   ├── comp/[id]/            # Giao diện chi tiết Giải đấu: Giải con & Danh sách CLB
 │   │   ├── players/              # Danh sách & tìm kiếm Cầu thủ, Huấn luyện viên, Nhân sự
 │   │   ├── stages/               # Danh sách & tìm kiếm Giai đoạn / Vòng đấu
 │   │   └── layout.tsx            # Root layout bọc AppLayout & Ant Design ConfigProvider
-│   ├── src/components/           # UI Components (AppHeader, AppSidebar, EntityCard, CardGrid, Modals, Drawers)
-│   ├── src/services/api.ts       # API client kết nối Cloud / Local, cache layer & normalizers
+│   ├── src/components/           # UI Components (UnitTree, ListPageFilterBar, EntityCard, CardGrid, Modals, Drawers)
+│   ├── src/services/api.ts       # API client kết nối Backend, cache layer & normalizers
 │   └── package.json
 ├── render.yaml                   # Cấu hình Blueprint tự động triển khai Render.com
 ├── AGENTS.md                     # Quy định làm việc dành cho AI / Agent
@@ -184,14 +190,19 @@ Hệ thống được thiết kế theo cấu trúc tổ chức thực tế củ
    npm install
    ```
 
-2. Tạo tệp `.env.local` trong `fm-lnc-fe/`:
-   ```env
-   # API Backend Production trên Render (hoặc trỏ tới local nếu chạy offline)
-   NEXT_PUBLIC_API_URL=https://fm-lnc-backend.onrender.com/api
-
-   # API Backend Localhost (phục vụ đọc logo, ảnh & tệp lnc trực tiếp từ máy)
-   NEXT_PUBLIC_LOCAL_API_URL=http://127.0.0.1:3001/api
-   ```
+2. Cấu hình biến môi trường:
+   Hệ thống sử dụng một biến môi trường duy nhất `NEXT_PUBLIC_API_URL` để kết nối API Backend. Tùy thuộc vào môi trường phát triển hoặc triển khai, tạo tệp tương ứng trong `fm-lnc-fe/`:
+   
+   - **Môi trường phát triển (`.env.development` hoặc `.env.local`)**:
+     ```env
+     # Kết nối Backend Localhost
+     NEXT_PUBLIC_API_URL=http://127.0.0.1:3001/api
+     ```
+   - **Môi trường Production (`.env.production`)**:
+     ```env
+     # Kết nối Backend Production trên Render
+     NEXT_PUBLIC_API_URL=https://fm-lnc-backend.onrender.com/api
+     ```
 
 3. Khởi động Frontend:
    ```bash
@@ -698,6 +709,14 @@ CREATE TABLE IF NOT EXISTS stages (
 
 Prefix: `/api/hierarchy`
 
+#### 0. Cây đơn vị phân cấp (Unit Tree API)
+- **`GET /api/hierarchy/unit-tree?type={type}`** (Alias: `GET /api/hierarchy/tree?type={type}`)
+  - Cung cấp cấu trúc cây đơn vị (Tree Data) tối ưu theo từng màn hình danh sách:
+    - `type=nation`: Cấp 1 duy nhất gồm `[ALL, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA, EXTINCT]`.
+    - `type=comp` (hoặc `competition`): Cấp 1 `[ALL, WORLD, AFC...]`, Cấp 2 `[International, ...nations]`.
+    - `type=club`: Cấp 1 Confederations, Cấp 2 Nations, Cấp 3 Competitions (kèm `Other`, `Extinct`).
+    - `type=city`, `stadium`, `award`: Cấp 1 Confederations, Cấp 2 Nations.
+
 #### 1. Liên đoàn Châu lục & Quốc gia
 - **`GET /api/hierarchy/list-confederations`**
   - Trả về danh sách 7 liên đoàn châu lục kèm số lượng quốc gia (`nations`) và giải quốc tế (`intComps`).
@@ -710,7 +729,7 @@ Prefix: `/api/hierarchy`
 - **`POST /api/hierarchy/int-competitions/search?confedId={id}&page=0&size=20&sort=name%2Casc`**
   - Tìm kiếm giải đấu quốc tế cấp cha (`parent_id IS NULL`) của châu lục/toàn cầu.
 - **`POST /api/hierarchy/domestic-competitions/search?nationId={id}&page=0&size=20&sort=name%2Casc`**
-  - Danh sách giải quốc nội cấp cha của quốc gia. Tự động sinh 2 giải ảo `oth-{id}` (Other Clubs) và `ext-{id}` (Extinct Clubs) kèm số lượng CLB tương ứng.
+  - Danh sách giải quốc nội cấp cha của quốc gia (chỉ bao gồm các giải đấu chính thức, đã loại bỏ thẻ ảo).
 - **`POST /api/hierarchy/competitions/:id/sub-competitions?page=0&size=20&sort=name%2Casc`**
   - Danh sách giải đấu con / vòng loại / phân hạng trực thuộc giải cha `{id}` (`parent_id = :id`).
 
@@ -727,6 +746,8 @@ Prefix: `/api/hierarchy`
   - Danh sách khu vực (regions) trong một quốc gia kèm số lượng thành phố tương ứng.
 - **`POST /api/hierarchy/cities/search?nationId={nationId}&regionId={regionId}&category={cat}&page=0&size=20&sort=name%2Casc`**
   - Tìm kiếm thành phố theo quốc gia và lọc theo phân vùng khu vực.
+  - **Sắp xếp đặc biệt**: Các thành phố thuộc nhóm `[REMOVE]` (`region = '[REMOVE]'` hoặc bắt đầu bằng `[REMOVE]`) luôn tự động được dồn xuống cuối danh sách (ở các trang cuối) thông qua ranking ưu tiên `_cityRemoveRank,asc`.
+  - **Giao diện Frontend**: Thẻ city thuộc nhóm `[REMOVE]` được hiển thị với tone nền đỏ (`bg-red-50/70 border-red-200/80`), ID tag viền đỏ, và chuỗi `"[REMOVE]"` được thay thế bằng biểu tượng icon `(x)` (`CloseCircleOutlined`).
 - **`POST /api/hierarchy/stadiums/search?nationId={nationId}&page=0&size=20&sort=name%2Casc`**
   - Tìm kiếm sân vận động và sân tập theo quốc gia.
 - **`POST /api/hierarchy/awards/search?nationId={nationId}&compId={compId}&page=0&size=20&sort=name%2Casc`**
