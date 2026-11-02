@@ -75,7 +75,7 @@ export default function UnitTree({
   confedOnly = false,
   includeExtinct,
   className = '',
-  height = 360,
+  height = 440,
 }: UnitTreeProps) {
   const currentMode = mode || (confedOnly ? 'nation' : 'default');
   const isNationScreen = currentMode === 'nation' || (includeExtinct ?? confedOnly);
@@ -629,9 +629,9 @@ export default function UnitTree({
         className="w-full"
       />
 
-      {/* Khung hiển thị Cây đơn vị */}
+      {/* Khung hiển thị Cây đơn vị (chiều cao cố định) */}
       <div
-        style={{ maxHeight: height, minHeight: 120 }}
+        style={{ height, minHeight: height, maxHeight: height }}
         className="overflow-y-auto mobile-frame-scroll border border-slate-200 rounded-lg p-1 bg-white relative"
       >
         {loadingTree && !apiTreeData && nations.length === 0 ? (

@@ -212,9 +212,9 @@ function ListNationsContent() {
             Áp dụng
           </Button>,
         ]}
-        width={460}
+        width={480}
         centered
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="py-1">
           <UnitTree

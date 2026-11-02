@@ -116,9 +116,8 @@ function ListStadiumsContent() {
     const nationNode = findNationInTree(treeNodes, selectedNation);
     if (nationNode) {
       const confed = nationNode.confed ? `${nationNode.confed} > ` : '';
-      const nation3l = nationNode.code3 ? `[${nationNode.code3}] ` : '';
       const name = nationNode.shortName || nationNode.title || selectedNation;
-      filterSummary = `${confed}${nation3l}${name}`;
+      filterSummary = `${confed}${name}`;
     } else {
       filterSummary = selectedNation;
     }
@@ -222,9 +221,9 @@ function ListStadiumsContent() {
             Áp dụng
           </Button>,
         ]}
-        width={460}
+        width={480}
         centered
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="py-1">
           <UnitTree

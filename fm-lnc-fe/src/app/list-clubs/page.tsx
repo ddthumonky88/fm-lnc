@@ -151,26 +151,29 @@ function ListClubsContent() {
     loadClubs();
   }, [loadClubs]);
 
-  // Filter summary: {confed} > {nation_3letter} > {comp_short_name}
+  // Filter summary:
+  // - Nếu chỉ chọn quốc gia: {confed} > {nation_short_name}
+  // - Nếu có chọn giải đấu: {confed} > {nation_3letter} > {comp_name}
   const levels: string[] = [];
   if (selectedNation !== 'all') {
     const nationNode = findNationInTree(treeNodes, selectedNation);
     if (nationNode?.confed) levels.push(nationNode.confed);
 
-    // Cấp 2: {nation_3letter}
-    const nation3l = nationNode?.code3 ? `[${nationNode.code3}] ${nationNode.shortName || nationNode.title}` : (nationNode?.shortName || nationNode?.title || selectedNation);
-    levels.push(nation3l);
-
-    // Cấp 3: {comp_short_name}
     if (selectedCompId) {
-      if (selectedCompId.startsWith('oth-')) {
-        levels.push('Other');
-      } else if (selectedCompId.startsWith('ext-')) {
-        levels.push('Extinct');
-      } else {
-        levels.push(selectedCompName || `Comp: ${selectedCompId}`);
-      }
+      // Có giải đấu: dùng {nation_3letter} và {comp_name}
+      const nation3l = nationNode?.code3 || selectedNation;
+      levels.push(nation3l);
+
+      let compName = selectedCompName;
+      if (selectedCompId.startsWith('oth-')) compName = 'Other';
+      else if (selectedCompId.startsWith('ext-')) compName = 'Extinct';
+      else if (!compName) compName = `Comp: ${selectedCompId}`;
+      levels.push(compName);
     } else {
+      // Chỉ có quốc gia: dùng {nation_short_name}
+      const nationName = nationNode?.shortName || nationNode?.title || selectedNation;
+      levels.push(nationName);
+
       if (extinctFilter === 'active') {
         levels.push('Hoạt động');
       } else if (extinctFilter === 'extinct') {
@@ -179,13 +182,11 @@ function ListClubsContent() {
     }
   } else {
     if (selectedCompId) {
-      if (selectedCompId.startsWith('oth-')) {
-        levels.push('Other');
-      } else if (selectedCompId.startsWith('ext-')) {
-        levels.push('Extinct');
-      } else {
-        levels.push(selectedCompName || `Comp: ${selectedCompId}`);
-      }
+      let compName = selectedCompName;
+      if (selectedCompId.startsWith('oth-')) compName = 'Other';
+      else if (selectedCompId.startsWith('ext-')) compName = 'Extinct';
+      else if (!compName) compName = `Comp: ${selectedCompId}`;
+      levels.push(compName);
     } else if (extinctFilter === 'active') {
       levels.push('Hoạt động');
     } else if (extinctFilter === 'extinct') {
@@ -340,9 +341,9 @@ function ListClubsContent() {
             Áp dụng
           </Button>,
         ]}
-        width={460}
+        width={480}
         centered
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="py-1">
           <UnitTree
@@ -359,7 +360,6 @@ function ListClubsContent() {
                 : 'all'
             }
             onSelectNode={handleSelectTreeNode}
-            height={340}
           />
         </div>
       </Modal>

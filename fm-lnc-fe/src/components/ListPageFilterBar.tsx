@@ -31,8 +31,42 @@ export default function ListPageFilterBar({
   hasActiveCustomFilter = false,
   onClick,
 }: ListPageFilterBarProps) {
+  // Tách và hiển thị breadcrumb phân cấp thoáng, đẹp mắt khi filter có nhiều cấp (phân cách bằng ' > ')
+  const renderSummaryContent = () => {
+    if (typeof filterSummary === 'string' && filterSummary.includes(' > ')) {
+      const parts = filterSummary.split(' > ');
+      return (
+        <span className="inline-flex items-center gap-1.5 text-sm truncate">
+          {parts.map((part, idx) => (
+            <React.Fragment key={idx}>
+              <span
+                className={
+                  idx === parts.length - 1
+                    ? 'font-semibold text-slate-900'
+                    : 'font-medium text-slate-600'
+                }
+              >
+                {part}
+              </span>
+              {idx < parts.length - 1 && (
+                <span className="text-slate-400 font-normal text-xs select-none px-0.5">
+                  &gt;
+                </span>
+              )}
+            </React.Fragment>
+          ))}
+        </span>
+      );
+    }
+    return (
+      <span className="text-sm font-semibold text-slate-800 truncate">
+        {filterSummary}
+      </span>
+    );
+  };
+
   return (
-    <div className="flex items-center gap-2.5 w-full">
+    <div className="flex items-center gap-3 w-full">
       {/* 1. Icon đại diện page (vuông bên trái) */}
       <div
         className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-2xs transition-all ${iconBoxClassName}`}
@@ -53,9 +87,7 @@ export default function ListPageFilterBar({
               {filterPrefix}
             </span>
           ) : null}
-          <span className="text-sm font-semibold text-slate-800 truncate">
-            {filterSummary}
-          </span>
+          {renderSummaryContent()}
           {badgeCount !== undefined ? (
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200/60 shrink-0">
               {badgeCount}
@@ -63,9 +95,9 @@ export default function ListPageFilterBar({
           ) : null}
         </div>
 
-        <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-blue-600 transition-colors ml-2 shrink-0">
+        <div className="flex items-center gap-2.5 text-slate-400 group-hover:text-blue-600 transition-colors ml-3 shrink-0">
           {hasActiveCustomFilter && (
-            <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
           )}
           <DownOutlined className="text-xs" />
         </div>

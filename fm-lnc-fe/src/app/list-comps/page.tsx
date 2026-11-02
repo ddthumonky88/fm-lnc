@@ -152,8 +152,8 @@ function ListCompsContent() {
     const nationNode = findNationInTree(treeNodes, selectedNation);
     let confed = selectedConfed !== 'all' ? selectedConfed : (nationNode?.confed || '');
     if (confed) levels.push(confed);
-    const nation3l = nationNode?.code3 ? `[${nationNode.code3}] ${nationNode.shortName || nationNode.title}` : (nationNode?.shortName || nationNode?.title || selectedNation);
-    levels.push(nation3l);
+    const nationName = nationNode?.shortName || nationNode?.title || selectedNation;
+    levels.push(nationName);
   } else if (selectedConfed !== 'all') {
     levels.push(selectedConfed);
   }
@@ -294,9 +294,9 @@ function ListCompsContent() {
             Áp dụng
           </Button>,
         ]}
-        width={460}
+        width={480}
         centered
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="py-1">
           <UnitTree
@@ -314,7 +314,6 @@ function ListCompsContent() {
                 : 'all'
             }
             onSelectNode={handleSelectTreeNode}
-            height={340}
           />
         </div>
       </Modal>

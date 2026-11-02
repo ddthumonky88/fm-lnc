@@ -131,18 +131,22 @@ function ListAwardsContent() {
     loadAwards();
   }, [loadAwards]);
 
-  // Filter summary: cấp 1 > cấp 2 > cấp 3
+  // Filter summary:
+  // - Nếu chỉ chọn quốc gia: {confed} > {nation_short_name}
+  // - Nếu có chọn giải đấu: {confed} > {nation_3letter} > {comp_name}
   const levels: string[] = [];
   if (selectedNation !== 'all') {
     const nationNode = findNationInTree(treeNodes, selectedNation);
-    if (nationNode) {
-      if (nationNode.confed) levels.push(nationNode.confed);
-      const nation3l = nationNode.code3 ? `[${nationNode.code3}] ${nationNode.shortName || nationNode.title}` : (nationNode.shortName || nationNode.title);
+    if (nationNode?.confed) levels.push(nationNode.confed);
+
+    if (selectedCompId) {
+      const nation3l = nationNode?.code3 || selectedNation;
       levels.push(nation3l);
+      levels.push(`Comp: ${selectedCompId}`);
     } else {
-      levels.push(selectedNation);
+      const nationName = nationNode?.shortName || nationNode?.title || selectedNation;
+      levels.push(nationName);
     }
-    if (selectedCompId) levels.push(`Comp: ${selectedCompId}`);
   } else if (selectedCompId) {
     levels.push(`Comp: ${selectedCompId}`);
   }
@@ -254,9 +258,9 @@ function ListAwardsContent() {
             Áp dụng
           </Button>,
         ]}
-        width={460}
+        width={480}
         centered
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="py-2 space-y-3">
           {/* Filter theo Comp nếu có */}
