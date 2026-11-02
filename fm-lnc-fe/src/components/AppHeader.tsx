@@ -121,12 +121,6 @@ export default function AppHeader({
       label: 'Add Person',
       onClick: () => onQuickAdd(RecordType.PLAYER),
     },
-    {
-      key: RecordType.STAGE,
-      icon: <FlagOutlined className="text-rose-500" />,
-      label: 'Add Stage',
-      onClick: () => onQuickAdd(RecordType.STAGE),
-    },
   ];
 
   // Combined Header Action Items (Export, Sync, Refresh, Quick Add)
@@ -231,17 +225,47 @@ export default function AppHeader({
     <header className="shrink-0 flex-none sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all">
       {/* Main Header Row */}
       <div className="h-14 px-2.5 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-3">
-        {/* Left Section: Mobile Hamburger (always shown, no desktop sidebar toggle) */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {/* Mobile/Desktop Hamburger Button */}
+        {/* Left Section: Mobile/Desktop Toggle & Brand Logo */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Hamburger / Collapse Button */}
           <button
             type="button"
-            onClick={onToggleMobileMenu}
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+                onToggleSidebar();
+              } else {
+                onToggleMobileMenu();
+              }
+            }}
             className="flex items-center justify-center w-8 h-8 rounded text-slate-700 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
-            aria-label="Open Navigation Menu"
+            aria-label="Toggle Navigation"
+            title="Toggle Menu (Sidebar)"
           >
             <MenuOutlined className="text-base" />
           </button>
+
+          {/* Brand Logo & Title on Desktop Header */}
+          <div
+            onClick={() => router.push('/home')}
+            className="hidden sm:flex items-center gap-2 cursor-pointer select-none group mr-1"
+          >
+            <img
+              src="/fm/icons/icon-192.png"
+              alt="FM24 LNC"
+              className="w-7 h-7 object-contain rounded-lg shadow-2xs group-hover:scale-105 transition-transform"
+              onError={(e) => {
+                if (!e.currentTarget.src.endsWith('/icons/icon-192.png')) {
+                  e.currentTarget.src = '/icons/icon-192.png';
+                }
+              }}
+            />
+            <span className="font-bold text-sm text-slate-800 tracking-tight group-hover:text-blue-600 transition-colors">
+              FM24 LNC
+            </span>
+            <span className="text-[10px] font-bold uppercase px-1.5 py-0.2 bg-blue-50 text-blue-600 border border-blue-200 rounded">
+              24.3
+            </span>
+          </div>
         </div>
 
         {/* Center Section: Quick Search Bar */}

@@ -8,4 +8,3 @@ export * from './stadium.entity';
 export * from './award.entity';
 export * from './region.entity';
 export * from './person.entity';
-export * from './stage.entity';

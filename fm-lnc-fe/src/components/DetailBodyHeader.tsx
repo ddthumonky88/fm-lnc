@@ -78,17 +78,34 @@ export default function DetailBodyHeader({
 
   return (
     <div className={`flex items-center gap-2.5 sm:gap-3 min-w-0 px-0.5 py-1 ${className}`}>
-      {/* Back button */}
-      <Button
-        icon={<ArrowLeftOutlined />}
-        onClick={onBack}
-        shape="circle"
-        size="middle"
-        className="shrink-0 text-slate-600 hover:text-slate-900 border-slate-200"
-      />
-
-      {/* Entity icon / logo */}
-      {logoUrl ? (
+      {/* Merged Back button + Entity icon/logo */}
+      {onBack ? (
+        <Tooltip title="Quay lại danh sách" placement="bottom">
+          <button
+            type="button"
+            onClick={onBack}
+            className={`group flex items-center gap-2 h-10 sm:h-11 px-2.5 sm:px-3 rounded-xl border transition-all cursor-pointer shadow-2xs hover:shadow-xs hover:scale-[1.02] active:scale-[0.98] shrink-0 ${
+              badgeTypeStyles || 'bg-slate-50 border-slate-200 text-slate-700'
+            }`}
+          >
+            <ArrowLeftOutlined className="text-xs transition-transform group-hover:-translate-x-0.5 opacity-70 group-hover:opacity-100" />
+            <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shrink-0">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={name}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                icon
+              )}
+            </div>
+          </button>
+        </Tooltip>
+      ) : logoUrl ? (
         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 shrink-0 flex items-center justify-center p-0.5">
           <img
             src={logoUrl}

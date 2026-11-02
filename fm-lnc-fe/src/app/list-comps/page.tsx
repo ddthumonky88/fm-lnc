@@ -181,21 +181,23 @@ function ListCompsContent() {
   };
 
   const handleSelectTreeNode = (key: string, nodeData?: any) => {
-    if (key === 'all') {
+    const lk = key.toLowerCase();
+    const confedKeys = ['afc', 'caf', 'concacaf', 'conmebol', 'ofc', 'uefa'];
+    if (lk === 'all') {
       setTempScope('all');
       setTempConfed('all');
       setTempNation('all');
-    } else if (key === 'confed_WORLD') {
+    } else if (lk === 'confed_world' || lk === 'world') {
       setTempScope('international');
       setTempConfed('WORLD');
       setTempNation('all');
-    } else if (key.startsWith('intl_')) {
-      const confedCode = key.replace('intl_', '');
+    } else if (lk.startsWith('intl_')) {
+      const confedCode = key.replace(/^intl_/i, '').toUpperCase();
       setTempScope('international');
       setTempConfed(confedCode);
       setTempNation('all');
-    } else if (key.startsWith('confed_')) {
-      const confedCode = key.replace('confed_', '');
+    } else if (key.startsWith('confed_') || confedKeys.includes(lk)) {
+      const confedCode = key.replace('confed_', '').toUpperCase();
       setTempScope('all');
       setTempConfed(confedCode);
       setTempNation('all');
@@ -216,6 +218,56 @@ function ListCompsContent() {
     }
   };
 
+  const currentTreeSelectedKey =
+    selectedNation !== 'all'
+      ? selectedNation
+      : selectedConfed === 'WORLD'
+      ? 'world'
+      : scope === 'international' && selectedConfed !== 'all'
+      ? `intl_${selectedConfed.toLowerCase()}`
+      : selectedConfed !== 'all'
+      ? selectedConfed.toLowerCase()
+      : 'all';
+
+  const applyFilterDirectly = (key: string, nodeData?: any) => {
+    const lk = key.toLowerCase();
+    const confedKeys = ['afc', 'caf', 'concacaf', 'conmebol', 'ofc', 'uefa'];
+    if (lk === 'all') {
+      setScope('all');
+      setSelectedConfed('all');
+      setSelectedNation('all');
+    } else if (lk === 'confed_world' || lk === 'world') {
+      setScope('international');
+      setSelectedConfed('WORLD');
+      setSelectedNation('all');
+    } else if (lk.startsWith('intl_')) {
+      const confedCode = key.replace(/^intl_/i, '').toUpperCase();
+      setScope('international');
+      setSelectedConfed(confedCode);
+      setSelectedNation('all');
+    } else if (key.startsWith('confed_') || confedKeys.includes(lk)) {
+      const confedCode = key.replace('confed_', '').toUpperCase();
+      setScope('all');
+      setSelectedConfed(confedCode);
+      setSelectedNation('all');
+    } else {
+      let confedCode = nodeData?.confed || 'all';
+      if (confedCode === 'all' && nodeData?.nationData) {
+        const nation = nodeData.nationData;
+        if (typeof nation.confed === 'string') confedCode = nation.confed.toUpperCase();
+        else if (nation.confed?.code) confedCode = nation.confed.code.toUpperCase();
+      }
+      if (confedCode === 'all') {
+        const nationNode = findNationInTree(treeNodes, key);
+        if (nationNode?.confed) confedCode = nationNode.confed.toUpperCase();
+      }
+      setScope('domestic');
+      setSelectedConfed(confedCode);
+      setSelectedNation(key);
+    }
+    setPage(1);
+  };
+
   const handleResetModal = () => {
     setTempScope('all');
     setTempConfed('all');
@@ -231,56 +283,93 @@ function ListCompsContent() {
   };
 
   return (
-    <div className="h-full flex flex-col min-h-0 bg-white">
-      {/* 1. Fixed Top Toolbar */}
-      <div className="shrink-0 flex-none px-3.5 pt-3 pb-2.5 border-b border-slate-100 bg-white space-y-2.5">
-        {/* Layer 1: Thanh Search trên cùng (không bọc trong khung) */}
-        <Input
-          size="large"
-          placeholder="Search..."
-          allowClear
-          prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
-        />
+    <div className="h-full w-full flex min-h-0 bg-slate-100/70 p-3 sm:p-4 gap-3 sm:gap-4 overflow-hidden">
+      {/* 1. KHU VỰC FILTER: Khung đóng viền riêng biệt bên trái */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 xl:w-80 shrink-0 bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden h-full">
+        {/* Filter Header */}
+        <div className="h-12 px-3.5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-md bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-xs">
+              <CompIcon size={14} />
+            </span>
+            <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
+              Cây đơn vị
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => applyFilterDirectly('all')}
+            className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+          >
+            Đặt lại
+          </button>
+        </div>
 
-        {/* Layer 2: [Icon đại diện page] [Thanh select filter] */}
-        <ListPageFilterBar
-          pageIcon={<CompIcon size={20} />}
-          iconBoxClassName="bg-amber-50 text-amber-600 border-amber-200/80"
-          filterSummary={filterSummary}
-          hasActiveCustomFilter={hasActiveCustomFilter}
-          onClick={handleOpenModal}
-        />
-      </div>
+        {/* Filter Body: UnitTree chiếm trọn chiều cao */}
+        <div className="flex-1 min-h-0 h-full p-2.5 flex flex-col overflow-hidden">
+          <UnitTree
+            mode="comp"
+            height="100%"
+            selectedKey={currentTreeSelectedKey}
+            onSelectNode={(key, node) => applyFilterDirectly(key, node)}
+            allOptionLabel="Tất cả Châu lục / Toàn cầu (All)"
+          />
+        </div>
+      </aside>
 
-      {/* 2. Danh sách cuộn mượt */}
-      <div
-        ref={listContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3.5 py-3 pb-8"
-      >
-        <CardGrid
-          items={competitions}
-          type={EntityType.COMPETITION}
-          loading={loading}
-          cardSize="large"
-          onNavigate={(record) => {
-            if (record?.id) {
-              router.push(`/comp/${record.id}`);
-            }
-          }}
-          serverPagination={{
-            current: page,
-            pageSize,
-            total,
-            onChange: (p, ps) => {
-              setPage(p);
-              setPageSize(ps);
-            },
-          }}
-          emptyText="Không tìm thấy giải đấu nào phù hợp"
-        />
+      {/* 2. KHU VỰC BÊN PHẢI: Search + Vùng Danh Sách */}
+      <div className="flex-1 min-w-0 min-h-0 h-full flex flex-col gap-3 overflow-hidden">
+        {/* Khung Search trên cùng */}
+        <div className="shrink-0 flex-none bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs">
+          <Input
+            size="large"
+            placeholder="Search..."
+            allowClear
+            prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
+          />
+
+          {/* Mobile Filter Bar (Chỉ hiển thị trên mobile < md) */}
+          <div className="md:hidden mt-2">
+            <ListPageFilterBar
+              pageIcon={<CompIcon size={20} />}
+              iconBoxClassName="bg-amber-50 text-amber-600 border-amber-200/80"
+              filterSummary={filterSummary}
+              hasActiveCustomFilter={hasActiveCustomFilter}
+              onClick={handleOpenModal}
+            />
+          </div>
+        </div>
+
+        {/* Khung Vùng danh sách bên dưới */}
+        <div className="flex-1 min-h-0 h-full bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+          <CardGrid
+            items={competitions}
+            type={EntityType.COMPETITION}
+            loading={loading}
+            containerRef={listContainerRef}
+            cardSize="large"
+            largeStyle="2-line"
+            cardStyle="2-line"
+            onNavigate={(record) => {
+              if (record?.id) {
+                router.push(`/comp/${record.id}`);
+              }
+            }}
+            serverPagination={{
+              current: page,
+              pageSize,
+              total,
+              onChange: (p, ps) => {
+                setPage(p);
+                setPageSize(ps);
+              },
+            }}
+            emptyText="Không tìm thấy giải đấu nào phù hợp"
+          />
+        </div>
       </div>
 
       {/* 3. Modal bộ lọc Giải đấu */}
@@ -318,11 +407,11 @@ function ListCompsContent() {
               tempNation !== 'all'
                 ? tempNation
                 : tempConfed === 'WORLD'
-                ? 'confed_WORLD'
+                ? 'world'
                 : tempScope === 'international' && tempConfed !== 'all'
-                ? `intl_${tempConfed}`
+                ? `intl_${tempConfed.toLowerCase()}`
                 : tempConfed !== 'all'
-                ? `confed_${tempConfed}`
+                ? tempConfed.toLowerCase()
                 : 'all'
             }
             onSelectNode={handleSelectTreeNode}

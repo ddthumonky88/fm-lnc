@@ -8,7 +8,6 @@ import {
   City,
   Award,
   Person,
-  Stage,
 } from '../entities';
 import { SearchService } from './search.service';
 import { SearchController } from './search.controller';
@@ -23,7 +22,6 @@ import { SearchController } from './search.controller';
       City,
       Award,
       Person,
-      Stage,
     ]),
   ],
   providers: [SearchService],

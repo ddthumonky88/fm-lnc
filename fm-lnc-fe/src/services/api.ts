@@ -404,11 +404,6 @@ export interface PlayerItem {
   second_name: string;
 }
 
-export interface StageItem {
-  id: string;
-  name: string;
-}
-
 export interface NationInfoData {
   id: string;
   name_lg?: string;
@@ -1067,7 +1062,12 @@ export async function fetchClubsInComp(
 }
 
 export async function searchClubs(
-  query?: PaginationQuery & { nationId?: string | null; compId?: string | null; extinct?: boolean | string },
+  query?: PaginationQuery & {
+    nationId?: string | null;
+    compId?: string | null;
+    confedId?: string | null;
+    extinct?: boolean | string;
+  },
   forceRefresh = false,
 ): Promise<PaginatedList<ClubItem>> {
   const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
@@ -1076,6 +1076,9 @@ export async function searchClubs(
     undefined,
     20,
   );
+  if (query?.confedId && String(query.confedId).toLowerCase() !== 'all') {
+    (filter as any).confedId = String(query.confedId);
+  }
   if (query?.nationId && String(query.nationId).toLowerCase() !== 'all') {
     (filter as any).nationId = String(query.nationId);
   }
@@ -1197,7 +1200,7 @@ export async function fetchSubCompetitions(
 
 export async function fetchStadiums(
   nationId: string,
-  queryOrForceRefresh?: PaginationQuery | boolean,
+  queryOrForceRefresh?: (PaginationQuery & { confedId?: string }) | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<StadiumItem>> {
   const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
@@ -1209,6 +1212,9 @@ export async function fetchStadiums(
   if (nationId && String(nationId).toLowerCase() !== 'all') {
     (filter as any).nationId = String(nationId);
   }
+  if ((queryOrForceRefresh as any)?.confedId) {
+    (filter as any).confedId = (queryOrForceRefresh as any).confedId;
+  }
   return cachedPost<PaginatedList<StadiumItem>>(
     `${getApiBase()}/hierarchy/stadiums/search`,
     filter,
@@ -1218,7 +1224,7 @@ export async function fetchStadiums(
 
 export async function fetchCities(
   nationId: string,
-  queryOrForceRefresh?: CityFilterQuery | boolean,
+  queryOrForceRefresh?: (CityFilterQuery & { confedId?: string }) | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<CityItem>> {
   const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
@@ -1229,6 +1235,9 @@ export async function fetchCities(
   );
   if (nationId && String(nationId).toLowerCase() !== 'all') {
     (filter as any).nationId = String(nationId);
+  }
+  if ((queryOrForceRefresh as any)?.confedId) {
+    (filter as any).confedId = (queryOrForceRefresh as any).confedId;
   }
   return cachedPost<PaginatedList<CityItem>>(
     `${getApiBase()}/hierarchy/cities/search`,
@@ -1274,8 +1283,8 @@ export async function fetchClubAffiliates(
 }
 
 export async function fetchAwards(
-  nationId: string,
-  queryOrForceRefresh?: PaginationQuery | boolean,
+  nationId: string | null,
+  queryOrForceRefresh?: (PaginationQuery & { confedId?: string }) | boolean,
   forceRefresh = false,
 ): Promise<PaginatedList<AwardItem>> {
   const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
@@ -1286,6 +1295,9 @@ export async function fetchAwards(
   );
   if (nationId && String(nationId).toLowerCase() !== 'all') {
     (filter as any).nationId = String(nationId);
+  }
+  if ((queryOrForceRefresh as any)?.confedId) {
+    (filter as any).confedId = (queryOrForceRefresh as any).confedId;
   }
   return cachedPost<PaginatedList<AwardItem>>(
     `${getApiBase()}/hierarchy/awards/search`,
@@ -1343,19 +1355,6 @@ export async function fetchPlayers(
     filter,
     refresh,
   );
-}
-
-export async function fetchStages(
-  queryOrFilter?: PaginationQuery | string | boolean,
-  forceRefresh = false,
-): Promise<PaginatedList<StageItem>> {
-  const { filter, forceRefresh: refresh } = normalizeFilterAndRefresh(
-    queryOrFilter,
-    forceRefresh,
-    'keyword',
-    20,
-  );
-  return cachedPost<PaginatedList<StageItem>>(`${getApiBase()}/hierarchy/stages`, filter, refresh);
 }
 
 export async function quickSearch(query: string, limit = 20) {

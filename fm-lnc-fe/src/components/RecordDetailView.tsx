@@ -7,11 +7,8 @@ import {
   CheckOutlined,
   EditOutlined,
   InfoCircleOutlined,
-  EnvironmentOutlined,
   UserOutlined,
   AppstoreOutlined,
-  BranchesOutlined,
-  TrophyOutlined,
 } from '@ant-design/icons';
 import { EntityType, RecordType } from '../types';
 import {
@@ -83,6 +80,7 @@ export interface RecordDetailViewProps {
   type: EntityType | RecordType | string;
   showHeader?: boolean;
   hideClubAffiliates?: boolean;
+  section?: 'all' | 'identity' | 'attributes';
   counts?: {
     domesticComps?: number;
     stadiums?: number;
@@ -113,6 +111,7 @@ export default function RecordDetailView({
   type,
   showHeader = false,
   hideClubAffiliates = false,
+  section = 'all',
   counts,
   onEdit,
   onNavigateConfed,
@@ -137,11 +136,7 @@ export default function RecordDetailView({
   const isClub = type === EntityType.CLUB;
   const isNation = type === EntityType.NATION;
   const isConfed = type === EntityType.CONFEDERATION;
-  const isStage = type === EntityType.STAGE;
   const isAward = type === EntityType.AWARD;
-  const statsClub = currentData.stats?.club;
-  const statsClubCount =
-    statsClub && typeof statsClub === 'object' ? statsClub.total : statsClub;
 
   const isVirtual = Boolean(
     currentData.is_virtual ||
@@ -165,7 +160,8 @@ export default function RecordDetailView({
     Boolean(
       currentData.is_international ||
         type === 'international_competition' ||
-        (!currentData.nation_id && !currentData.nation &&
+        (!currentData.nation_id &&
+          !currentData.nation &&
           (currentData.confed_id || currentData.confed || currentData.categories || currentData.type)),
     );
 
@@ -221,8 +217,8 @@ export default function RecordDetailView({
   const getLabelClass = (field?: string | string[], extraClass: string = '') => {
     const inactive = field ? isFieldInactive(field) : false;
     return `${
-      inactive ? 'text-red-600 font-normal' : 'text-slate-400 font-semibold'
-    } text-xs shrink-0 select-none whitespace-nowrap leading-tight ${extraClass}`;
+      inactive ? 'text-red-500 font-medium' : 'text-slate-400 font-normal'
+    } text-[10px] shrink-0 select-none whitespace-nowrap leading-tight uppercase ${extraClass}`;
   };
 
   const getValueClass = (field?: string | string[], defaultClass: string = 'text-slate-800') => {
@@ -241,22 +237,21 @@ export default function RecordDetailView({
     if (isCity) return 'City';
     if (isAward) return 'Award';
     if (isPlayer) return 'Person';
-    if (isStage) return 'Stage';
     return String(type).toUpperCase();
   };
 
   const getTypeBadgeStyles = () => {
-    if (isInternationalComp) return 'bg-purple-50/90 border-purple-300 text-purple-600';
-    if (isComp) return 'bg-amber-50/90 border-amber-300 text-amber-600';
-    if (isClub) return 'bg-blue-50/90 border-blue-300 text-blue-600';
-    if (isNation) return 'bg-cyan-50/90 border-cyan-300 text-cyan-600';
-    if (isConfed) return 'bg-indigo-50/90 border-indigo-300 text-indigo-600';
-    if (isPlayer) return 'bg-purple-50/90 border-purple-300 text-purple-600';
-    if (isStadium) return 'bg-emerald-50/90 border-emerald-300 text-emerald-600';
-    if (isCity) return 'bg-sky-50/90 border-sky-300 text-sky-600';
-    if (isAward) return 'bg-yellow-50/90 border-yellow-400 text-yellow-600';
-    if (isVirtual) return 'bg-orange-50/90 border-orange-300 text-orange-600';
-    return 'bg-slate-50/90 border-slate-300 text-slate-600';
+    if (isInternationalComp) return 'bg-purple-50 border-purple-200 text-purple-700';
+    if (isComp) return 'bg-amber-50 border-amber-200 text-amber-700';
+    if (isClub) return 'bg-blue-50 border-blue-200 text-blue-700';
+    if (isNation) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
+    if (isConfed) return 'bg-indigo-50 border-indigo-200 text-indigo-700';
+    if (isPlayer) return 'bg-purple-50 border-purple-200 text-purple-700';
+    if (isStadium) return 'bg-emerald-50 border-emerald-200 text-emerald-700';
+    if (isCity) return 'bg-sky-50 border-sky-200 text-sky-700';
+    if (isAward) return 'bg-yellow-50 border-yellow-300 text-yellow-700';
+    if (isVirtual) return 'bg-orange-50 border-orange-200 text-orange-700';
+    return 'bg-slate-50 border-slate-200 text-slate-700';
   };
 
   const getTypeIcon = (size = 18) => {
@@ -298,646 +293,645 @@ export default function RecordDetailView({
   const bgInfo = parseColor(currentData.bg_color);
   const fgInfo = parseColor(currentData.fg_color);
 
-  return (
-    <div className="w-full max-w-xl mx-auto py-2 space-y-3">
-      {/* 1. Header Card (Optional) */}
-      {showHeader && (
-        <div className="bg-white border border-slate-200/90 rounded-xl p-3 sm:p-3.5 shadow-2xs flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <Tooltip title={getTypeLabel()} placement="bottom">
-              <div
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 cursor-default p-0 shadow-2xs border ${getTypeBadgeStyles()}`}
-              >
-                {getTypeIcon(18)}
-              </div>
-            </Tooltip>
+  // 1. Header Card (Optional)
+  const renderHeader = () => (
+    <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <Tooltip title={getTypeLabel()} placement="bottom">
+          <div
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 cursor-default p-0 shadow-2xs border ${getTypeBadgeStyles()}`}
+          >
+            {getTypeIcon(18)}
+          </div>
+        </Tooltip>
 
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              {/* Dòng 1: ID pill with copy */}
-              <div className="flex items-center gap-2">
-                {currentData.id !== undefined && currentData.id !== null && (
-                  <Tooltip title="Click to copy ID" placement="bottom">
-                    <button
-                      type="button"
-                      onClick={handleCopyId}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 border border-sky-200 font-mono text-xs font-bold transition-all cursor-pointer shadow-2xs select-none"
-                    >
-                      <span>{currentData.id}</span>
-                      {copied ? (
-                        <CheckOutlined className="text-emerald-600 text-xs" />
-                      ) : (
-                        <CopyOutlined className="text-sky-500 text-xs" />
-                      )}
-                    </button>
-                  </Tooltip>
-                )}
-              </div>
-
-              {/* Dòng 2: uppercase title */}
-              <div className="mt-1 min-w-0">
-                <div
-                  className="font-bold text-xs sm:text-[13px] text-slate-900 uppercase tracking-wide line-clamp-2 break-words block leading-snug"
-                  title={title}
+        <div className="min-w-0 flex-1 flex flex-col justify-center">
+          <div className="flex items-center gap-2">
+            {currentData.id !== undefined && currentData.id !== null && (
+              <Tooltip title="Click to copy ID" placement="bottom">
+                <button
+                  type="button"
+                  onClick={handleCopyId}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-800 border border-sky-200 font-mono text-xs font-bold transition-all cursor-pointer shadow-2xs select-none"
                 >
-                  <span>{title}</span>
-                </div>
-              </div>
-            </div>
+                  <span>{currentData.id}</span>
+                  {copied ? (
+                    <CheckOutlined className="text-emerald-600 text-xs" />
+                  ) : (
+                    <CopyOutlined className="text-sky-500 text-xs" />
+                  )}
+                </button>
+              </Tooltip>
+            )}
           </div>
 
-          {onEdit && (
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={onEdit}
-              className="font-medium px-3.5 h-8 sm:h-9 rounded-lg bg-blue-600 hover:bg-blue-700 shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+          <div className="mt-1 min-w-0">
+            <div
+              className="font-bold text-xs sm:text-[13px] text-slate-900 uppercase tracking-wide line-clamp-2 break-words block leading-snug"
+              title={title}
             >
-              <span>Edit</span>
-            </Button>
-          )}
+              <span>{title}</span>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
 
-      {/* 2. Primary Details Card */}
-      <div className="bg-sky-50/70 border border-sky-200/80 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
-        {isCity || isStadium ? (
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('name', 'pt-0.5')}>Name:</span>
+      {onEdit && (
+        <Button
+          type="primary"
+          icon={<EditOutlined />}
+          onClick={onEdit}
+          className="font-medium px-3.5 h-8 sm:h-9 rounded-lg bg-blue-600 hover:bg-blue-700 shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <span>Edit</span>
+        </Button>
+      )}
+    </div>
+  );
+
+  // 2. Section 1: THÔNG TIN ĐỊNH DANH (Names & Hierarchy)
+  const renderIdentity = () => (
+    <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-2.5">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
+        <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider">
+          THÔNG TIN ĐỊNH DANH
+        </span>
+      </div>
+
+      {isCity || isStadium ? (
+        <>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass('name', 'pt-0.5')}>NAME:</span>
             <span
-              className={`font-bold text-xs sm:text-[13px] ${getValueClass('name', 'text-slate-900')} line-clamp-3 break-words text-left`}
+              className={`font-bold text-[12px] ${getValueClass('name', 'text-slate-900')} line-clamp-3 break-words text-left`}
               title={currentData.name || title || '-'}
             >
               {currentData.name || title || '-'}
             </span>
           </div>
-        ) : isConfed ? (
-          <>
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass('name', 'pt-0.5')}>Name:</span>
-              <span
-                className="font-bold text-xs sm:text-[13px] text-slate-900 line-clamp-3 break-words text-left"
-                title={currentData.name || '-'}
-              >
-                {currentData.name || '-'}
-              </span>
-            </div>
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass('id', 'pt-0.5')}>ID:</span>
-              <span className="font-mono font-bold text-xs sm:text-[13px] text-slate-800 break-words text-left">
-                {currentData.id || '-'}
-              </span>
-            </div>
-          </>
-        ) : isAward ? (
-          <>
-            {/* LN */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
-                title={currentData.name_lg || currentData.name || title}
-              >
-                {currentData.name_lg || currentData.name || title}
-              </span>
-            </div>
 
-            {/* SN */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
-                title={currentData.name_sh || currentData.name || '-'}
-              >
-                {currentData.name_sh || currentData.name || '-'}
-              </span>
-            </div>
-          </>
-        ) : isClub ? (
-          <>
-            {/* LN */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
-                title={isVirtual ? '-' : currentData.name_lg || currentData.name || title}
-              >
-                {isVirtual ? '-' : currentData.name_lg || currentData.name || title}
-              </span>
-            </div>
-
-            {/* SN */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
-                title={isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
-              >
-                {isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
-              </span>
-            </div>
-
-            {/* 6N */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6N:</span>
-              <span
-                className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
-              >
-                {currentData.name_6l || '-'}
-              </span>
-            </div>
-
-            {/* 3N */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>
-                3N:
-              </span>
-              <span
-                className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
-              >
-                {isVirtual ? '-' : currentData.name_3l || currentData.code || '-'}
-              </span>
-            </div>
-          </>
-        ) : (
-          /* Nation, Comp (default) */
-          <>
-            {/* LN */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
-                title={isVirtual ? '-' : currentData.name_lg || currentData.name || title}
-              >
-                {isVirtual ? '-' : currentData.name_lg || currentData.name || title}
-              </span>
-            </div>
-
-            {/* SN */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
-                title={isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
-              >
-                {isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
-              </span>
-            </div>
-
-            {/* 3N */}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>
-                3N:
-              </span>
-              <span
-                className={`font-sans font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
-              >
-                {isVirtual ? '-' : currentData.name_3l || nationCode || '-'}
-              </span>
-            </div>
-          </>
-        )}
-
-        {/* Confederation (for International Competition or Nation or Comp) */}
-        {(isInternationalComp || isNation || (!isClub && !isConfed && (confedId || confedName))) && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>
-              Confed:
-            </span>
-            <span
-              onClick={() => {
-                if (confedId && onNavigateConfed) {
-                  onNavigateConfed(String(confedId));
-                }
-              }}
-              className={`font-bold text-xs sm:text-[13px] ${
-                confedId && onNavigateConfed
-                  ? 'text-blue-600 hover:underline cursor-pointer'
-                  : getValueClass(['confed_id', 'confed'])
-              } break-words text-left`}
-            >
-              {confedName || '-'}
-            </span>
-          </div>
-        )}
-
-        {/* Associated Nation */}
-        {!isNation && !isInternationalComp && !isConfed && nationId && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
-              Nation:
-            </span>
-            <div
-              onClick={() => {
-                if (nationId && onNavigateNation) {
-                  onNavigateNation(String(nationId));
-                }
-              }}
-              className={`flex items-center gap-1.5 min-w-0 text-left ${
-                nationId && onNavigateNation ? 'cursor-pointer group' : ''
-              }`}
-            >
-              {isClub && confedName && (
-                <>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (confedId && onNavigateConfed) {
-                        onNavigateConfed(String(confedId));
-                      }
-                    }}
-                    className={`shrink-0 rounded border px-1.5 py-0.5 font-mono text-[10px] font-bold leading-none ${
-                      confedId && onNavigateConfed
-                        ? 'cursor-pointer border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                        : `border-slate-200 bg-slate-50 ${getValueClass(['confed_id', 'confed'])}`
-                    }`}
-                  >
-                    {confedName}
-                  </button>
-                </>
-              )}
-              {getNationLogoUrl(nationId, nationCode) ? (
-                <img
-                  src={getNationLogoUrl(nationId, nationCode)}
-                  alt={nationName || 'Nation'}
-                  className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : null}
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${
-                  nationId && onNavigateNation
-                    ? 'text-blue-600 group-hover:underline'
-                    : getValueClass(['nation_id', 'country_id', 'nation'])
-                } truncate`}
-              >
-                {nationName}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* League / Competition (for Club) */}
-        {isClub && (currentData.comp || currentData.comp_id) && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['comp_id', 'competition_id', 'comp'], 'pt-0.5')}>
-              League:
-            </span>
-            <div
-              onClick={() => {
-                const cId = currentData.comp?.id || currentData.comp_id;
-                if (cId && onNavigateComp) {
-                  onNavigateComp(String(cId));
-                }
-              }}
-              className={`flex items-center gap-1.5 min-w-0 text-left ${
-                (currentData.comp?.id || currentData.comp_id) && onNavigateComp
-                  ? 'cursor-pointer group'
-                  : ''
-              }`}
-            >
-              <span
-                className={`font-bold text-xs sm:text-[13px] ${
-                  (currentData.comp?.id || currentData.comp_id) && onNavigateComp
-                    ? 'text-blue-600 group-hover:underline'
-                    : getValueClass(['comp_id', 'comp'])
-                } truncate`}
-              >
-                {currentData.comp?.name_sh ||
-                  currentData.comp?.name_lg ||
-                  currentData.comp?.name ||
-                  (currentData.comp_id ? `Competition ${currentData.comp_id}` : '-')}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Region (for City) */}
-        {isCity && currentData.region && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('region', 'pt-0.5')}>Region:</span>
-            <span
-              className={`font-bold text-xs sm:text-[13px] ${getValueClass('region', 'text-sky-800')} break-words text-left`}
-            >
-              {String(currentData.region).replace(/^\[[^\]]+\]\s*/, '').trim()}
-            </span>
-          </div>
-        )}
-
-        {/* Parent Competition (for Competitions) */}
-        {isComp &&
-          (currentData.parent_comp ||
-            currentData.parent ||
-            currentData.parent_id ||
-            isFieldInactive(['parent_comp', 'parent_id', 'parent'])) && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['parent_comp', 'parent_id', 'parent'], 'pt-0.5')}>Parent Comp:</span>
-            <span
-              onClick={() => {
-                const pId = currentData.parent_comp?.id || currentData.parent?.id || currentData.parent_id;
-                if (pId && onNavigateParentComp) {
-                  onNavigateParentComp(String(pId));
-                }
-              }}
-              className={`font-bold text-xs sm:text-[13px] ${
-                (currentData.parent_comp?.id || currentData.parent?.id || currentData.parent_id) && onNavigateParentComp
-                  ? 'text-blue-600 hover:underline cursor-pointer'
-                  : getValueClass(['parent_comp', 'parent_id', 'parent'])
-              } line-clamp-3 break-words text-left`}
-            >
-              {(() => {
-                const p = currentData.parent_comp || currentData.parent;
-                if (p) {
-                  const pName = p.name_lg || p.name_sh || p.name;
-                  const p3l = p.name_3l ? `[${p.name_3l}] ` : '';
-                  return `${p3l}${pName || p.id}`;
-                }
-                return currentData.parent_id ? `${currentData.parent_id}` : '-';
-              })()}
-            </span>
-          </div>
-        )}
-
-        {/* Club Affiliate Info */}
-        {!hideClubAffiliates && isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
-          <>
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
-                Affiliate Club:
+          {/* Associated Nation for City/Stadium */}
+          {nationId && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+              <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
+                NATION:
               </span>
               <div
                 onClick={() => {
-                  if (currentData.affiliate_club?.id && onNavigateClub) {
-                    onNavigateClub(String(currentData.affiliate_club.id));
-                  }
+                  if (nationId && onNavigateNation) onNavigateNation(String(nationId));
                 }}
-                className={`flex items-center gap-1.5 flex-wrap ${
-                  currentData.affiliate_club?.id && onNavigateClub ? 'cursor-pointer group' : ''
+                className={`flex items-center gap-1.5 min-w-0 text-left ${
+                  nationId && onNavigateNation ? 'cursor-pointer group' : ''
                 }`}
               >
+                {getNationLogoUrl(nationId, nationCode) ? (
+                  <img
+                    src={getNationLogoUrl(nationId, nationCode)}
+                    alt={nationName || 'Nation'}
+                    className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
                 <span
-                  className={`font-bold text-xs sm:text-[13px] ${
-                    currentData.affiliate_club?.id && onNavigateClub
+                  className={`font-bold text-[12px] ${
+                    nationId && onNavigateNation
                       ? 'text-blue-600 group-hover:underline'
-                      : 'text-slate-800'
-                  }`}
+                      : getValueClass(['nation_id', 'country_id', 'nation'])
+                  } truncate`}
                 >
-                  {currentData.affiliate_club?.name_lg ||
-                    currentData.affiliate_club?.name_sh ||
-                    currentData.affiliate_club?.name ||
-                    `Club #${currentData.affiliate_club?.id}`}
+                  {nationName || nationId}
                 </span>
               </div>
             </div>
-            {currentData.affiliate_club?.type && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
-                  Affiliate Type:
+          )}
+
+          {/* City for Stadium */}
+          {isStadium && (currentData.city?.name || currentData.city_name || currentData.city_id) && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+              <span className={getLabelClass('city', 'pt-0.5')}>CITY:</span>
+              <span className="font-bold text-[12px] text-slate-800 break-words text-left">
+                {currentData.city?.name || currentData.city_name || currentData.city_id}
+              </span>
+            </div>
+          )}
+
+          {/* Region for City */}
+          {isCity && currentData.region && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+              <span className={getLabelClass('region', 'pt-0.5')}>REGION:</span>
+              <span
+                className={`font-bold text-[12px] ${getValueClass('region', 'text-sky-800')} break-words text-left`}
+              >
+                {String(currentData.region).replace(/^\[[^\]]+\]\s*/, '').trim()}
+              </span>
+            </div>
+          )}
+        </>
+      ) : isConfed ? (
+        <>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass('name', 'pt-0.5')}>NAME:</span>
+            <span
+              className="font-bold text-[12px] text-slate-900 line-clamp-3 break-words text-left"
+              title={currentData.name || '-'}
+            >
+              {currentData.name || '-'}
+            </span>
+          </div>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+            <span className={getLabelClass('id', 'pt-0.5')}>ID:</span>
+            <span className="font-mono font-bold text-[12px] text-slate-800 break-words text-left">
+              {currentData.id || '-'}
+            </span>
+          </div>
+        </>
+      ) : isAward ? (
+        <>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
+            <span
+              className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+              title={currentData.name_lg || currentData.name || title}
+            >
+              {currentData.name_lg || currentData.name || title}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
+            <span
+              className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+              title={currentData.name_sh || currentData.name || '-'}
+            >
+              {currentData.name_sh || currentData.name || '-'}
+            </span>
+          </div>
+
+          {confedName && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+              <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>CONFED:</span>
+              <span className="font-bold text-[12px] text-slate-800 break-words text-left">
+                {confedName}
+              </span>
+            </div>
+          )}
+
+          {nationId && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+              <span className={getLabelClass(['nation_id', 'nation'], 'pt-0.5')}>NATION:</span>
+              <span className="font-bold text-[12px] text-slate-800 break-words text-left">
+                {nationName || nationId}
+              </span>
+            </div>
+          )}
+        </>
+      ) : isClub ? (
+        <>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
+            <span
+              className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+              title={isVirtual ? '-' : currentData.name_lg || currentData.name || title}
+            >
+              {isVirtual ? '-' : currentData.name_lg || currentData.name || title}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
+            <span
+              className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+              title={isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
+            >
+              {isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6L-NAME:</span>
+            <span
+              className={`font-sans font-bold text-[12px] ${getValueClass(['name_6l'])} break-words text-left`}
+            >
+              {currentData.name_6l || '-'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>3L-NAME:</span>
+            <span
+              className={`font-sans font-bold text-[12px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
+            >
+              {isVirtual ? '-' : currentData.name_3l || currentData.code || '-'}
+            </span>
+          </div>
+
+          {confedName && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+              <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>CONFED:</span>
+              <span
+                onClick={() => {
+                  if (confedId && onNavigateConfed) onNavigateConfed(String(confedId));
+                }}
+                className={`font-bold text-[12px] ${
+                  confedId && onNavigateConfed
+                    ? 'text-blue-600 hover:underline cursor-pointer'
+                    : getValueClass(['confed_id', 'confed'])
+                } break-words text-left`}
+              >
+                {confedName}
+              </span>
+            </div>
+          )}
+
+          {nationId && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+              <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
+                NATION:
+              </span>
+              <div
+                onClick={() => {
+                  if (nationId && onNavigateNation) onNavigateNation(String(nationId));
+                }}
+                className={`flex items-center gap-1.5 min-w-0 text-left ${
+                  nationId && onNavigateNation ? 'cursor-pointer group' : ''
+                }`}
+              >
+                {getNationLogoUrl(nationId, nationCode) ? (
+                  <img
+                    src={getNationLogoUrl(nationId, nationCode)}
+                    alt={nationName || 'Nation'}
+                    className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <span
+                  className={`font-bold text-[12px] ${
+                    nationId && onNavigateNation
+                      ? 'text-blue-600 group-hover:underline'
+                      : getValueClass(['nation_id', 'country_id', 'nation'])
+                  } truncate`}
+                >
+                  {nationName}
                 </span>
-                <div>
-                  <span className="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
-                    {currentData.affiliate_club.type}
-                  </span>
-                </div>
+              </div>
+            </div>
+          )}
+
+          {(currentData.comp || currentData.comp_id) && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+              <span className={getLabelClass(['comp_id', 'competition_id', 'comp'], 'pt-0.5')}>
+                LEAGUE:
+              </span>
+              <div
+                onClick={() => {
+                  const cId = currentData.comp?.id || currentData.comp_id;
+                  if (cId && onNavigateComp) onNavigateComp(String(cId));
+                }}
+                className={`flex items-center gap-1.5 min-w-0 text-left ${
+                  (currentData.comp?.id || currentData.comp_id) && onNavigateComp
+                    ? 'cursor-pointer group'
+                    : ''
+                }`}
+              >
+                <span
+                  className={`font-bold text-[12px] ${
+                    (currentData.comp?.id || currentData.comp_id) && onNavigateComp
+                      ? 'text-blue-600 group-hover:underline'
+                      : getValueClass(['comp_id', 'comp'])
+                  } truncate`}
+                >
+                  {currentData.comp?.name_sh ||
+                    currentData.comp?.name_lg ||
+                    currentData.comp?.name ||
+                    (currentData.comp_id ? `Competition ${currentData.comp_id}` : '-')}
+                </span>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        /* Nation or Competition (default) */
+        <>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
+            <span
+              className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+              title={isVirtual ? '-' : currentData.name_lg || currentData.name || title}
+            >
+              {isVirtual ? '-' : currentData.name_lg || currentData.name || title}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
+            <span
+              className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+              title={isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
+            >
+              {isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>3L-NAME:</span>
+            <span
+              className={`font-sans font-bold text-[12px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
+            >
+              {isVirtual ? '-' : currentData.name_3l || nationCode || '-'}
+            </span>
+          </div>
+
+          {/* Confederation */}
+          {(isInternationalComp || isNation || (!isClub && !isConfed && (confedId || confedName))) && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+              <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>CONFED:</span>
+              <span
+                onClick={() => {
+                  if (confedId && onNavigateConfed) onNavigateConfed(String(confedId));
+                }}
+                className={`font-bold text-[12px] ${
+                  confedId && onNavigateConfed
+                    ? 'text-blue-600 hover:underline cursor-pointer'
+                    : getValueClass(['confed_id', 'confed'])
+                } break-words text-left`}
+              >
+                {confedName || '-'}
+              </span>
+            </div>
+          )}
+
+          {/* Nation (for Competition) */}
+          {!isNation && !isInternationalComp && !isConfed && nationId && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+              <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
+                NATION:
+              </span>
+              <div
+                onClick={() => {
+                  if (nationId && onNavigateNation) onNavigateNation(String(nationId));
+                }}
+                className={`flex items-center gap-1.5 min-w-0 text-left ${
+                  nationId && onNavigateNation ? 'cursor-pointer group' : ''
+                }`}
+              >
+                {getNationLogoUrl(nationId, nationCode) ? (
+                  <img
+                    src={getNationLogoUrl(nationId, nationCode)}
+                    alt={nationName || 'Nation'}
+                    className="w-4 h-3 object-cover rounded-2xs border border-slate-200 shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <span
+                  className={`font-bold text-[12px] ${
+                    nationId && onNavigateNation
+                      ? 'text-blue-600 group-hover:underline'
+                      : getValueClass(['nation_id', 'country_id', 'nation'])
+                  } truncate`}
+                >
+                  {nationName}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Parent Competition (for Competitions) */}
+          {isComp &&
+            (currentData.parent_comp ||
+              currentData.parent ||
+              currentData.parent_id ||
+              isFieldInactive(['parent_comp', 'parent_id', 'parent'])) && (
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+                <span className={getLabelClass(['parent_comp', 'parent_id', 'parent'], 'pt-0.5')}>
+                  PARENT COMP:
+                </span>
+                <span
+                  onClick={() => {
+                    const pId =
+                      currentData.parent_comp?.id ||
+                      currentData.parent?.id ||
+                      currentData.parent_id;
+                    if (pId && onNavigateParentComp) onNavigateParentComp(String(pId));
+                  }}
+                  className={`font-bold text-[12px] ${
+                    (currentData.parent_comp?.id ||
+                      currentData.parent?.id ||
+                      currentData.parent_id) &&
+                    onNavigateParentComp
+                      ? 'text-blue-600 hover:underline cursor-pointer'
+                      : getValueClass(['parent_comp', 'parent_id', 'parent'])
+                  } line-clamp-3 break-words text-left`}
+                >
+                  {(() => {
+                    const p = currentData.parent_comp || currentData.parent;
+                    if (p) {
+                      const pName = p.name_lg || p.name_sh || p.name;
+                      const p3l = p.name_3l ? `[${p.name_3l}] ` : '';
+                      return `${p3l}${pName || p.id}`;
+                    }
+                    return currentData.parent_id ? `${currentData.parent_id}` : '-';
+                  })()}
+                </span>
               </div>
             )}
-          </>
-        )}
+        </>
+      )}
+    </div>
+  );
 
-        {/* First Team Affiliates list */}
-        {!hideClubAffiliates && isClub && currentData.affiliates && currentData.affiliates.length > 0 && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['affiliates'], 'pt-0.5')}>
-              Affiliates ({currentData.affiliates.length}):
-            </span>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {currentData.affiliates.map((aff: any) => {
-                const affT = aff.affiliate_club?.type;
-                return (
-                  <span
-                    key={aff.id}
-                    onClick={() => {
-                      if (aff.id && onNavigateClub) {
-                        onNavigateClub(String(aff.id));
-                      }
-                    }}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200 ${
-                      onNavigateClub ? 'cursor-pointer hover:bg-slate-200' : ''
-                    }`}
-                  >
-                    {affT && <span className="font-semibold text-sky-700">[{affT}]</span>}
-                    <span className={onNavigateClub ? 'hover:underline text-blue-600 font-semibold' : ''}>
-                      {aff.name_sh || aff.name_lg || aff.name}
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400">({aff.id})</span>
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Total Competitions for Nation */}
-        {(currentData.totalComps !== undefined || counts?.domesticComps !== undefined) && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('competitions', 'pt-0.5')}>Competitions:</span>
-            <span
-              onClick={() => onSwitchTab?.('DOMESTIC_COMPS')}
-              className={`font-bold text-xs sm:text-[13px] text-amber-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts?.domesticComps ?? currentData.totalComps ?? 0}
-              {currentData.stats?.comps?.total !== undefined && (
-                <span className="font-normal text-slate-500">
-                  {' '}(total: {currentData.stats.comps.total})
-                </span>
-              )}
-            </span>
-          </div>
-        )}
-
-        {/* Stadiums for Nation */}
-        {counts?.stadiums !== undefined && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('stadiums', 'pt-0.5')}>Stadiums:</span>
-            <span
-              onClick={() => onSwitchTab?.('STADIUMS')}
-              className={`font-bold text-xs sm:text-[13px] text-emerald-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts.stadiums}
-            </span>
-          </div>
-        )}
-
-        {/* Cities for Nation */}
-        {counts?.cities !== undefined && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('cities', 'pt-0.5')}>Cities:</span>
-            <span
-              onClick={() => onSwitchTab?.('CITIES')}
-              className={`font-bold text-xs sm:text-[13px] text-sky-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts.cities}
-            </span>
-          </div>
-        )}
-
-        {/* Total Nations (Confed) */}
-        {(currentData.totalNations !== undefined || counts?.totalNations !== undefined) && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass('nations', 'pt-0.5')}>Nations:</span>
-            <span
-              onClick={() => onSwitchTab?.('NATIONS')}
-              className={`font-bold text-xs sm:text-[13px] text-cyan-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts?.totalNations ?? currentData.totalNations ?? 0}
-            </span>
-          </div>
-        )}
-
-        {/* Total International Competitions (Confed) */}
-        {(currentData.totalIntComps !== undefined || counts?.totalIntComps !== undefined) && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-            <span className={getLabelClass(['int_competitions', 'int_comps'], 'pt-0.5')}>
-              Int Comps:
-            </span>
-            <span
-              onClick={() => onSwitchTab?.('INT_COMPETITIONS')}
-              className={`font-bold text-xs sm:text-[13px] text-purple-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts?.totalIntComps ?? currentData.totalIntComps ?? 0}
-            </span>
-          </div>
-        )}
-
-        {/* BG Color Row */}
-        {bgInfo && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
-            <span
-              className={getLabelClass(['bg_color', 'background_color'], 'pt-0.5')}
-              title="Background Color"
-            >
-              BG:
-            </span>
-            <div className="flex items-center gap-2 min-w-0 text-left">
-              <Tooltip title={`Hex: ${bgInfo.hex}`}>
-                <span
-                  className="inline-block w-4 h-4 rounded border border-black/20 shadow-2xs shrink-0 cursor-pointer"
-                  style={{ backgroundColor: bgInfo.css }}
-                />
-              </Tooltip>
-              <span
-                className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['bg_color', 'background_color'])}`}
-              >
-                {currentData.bg_color}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* FG Color Row */}
-        {fgInfo && (
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
-            <span
-              className={getLabelClass(['fg_color', 'foreground_color'], 'pt-0.5')}
-              title="Foreground Color"
-            >
-              FG:
-            </span>
-            <div className="flex items-center gap-2 min-w-0 text-left">
-              <Tooltip title={`Hex: ${fgInfo.hex}`}>
-                <span
-                  className="inline-block w-4 h-4 rounded border border-black/20 shadow-2xs shrink-0 cursor-pointer"
-                  style={{ backgroundColor: fgInfo.css }}
-                />
-              </Tooltip>
-              <span
-                className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['fg_color', 'foreground_color'])}`}
-              >
-                {currentData.fg_color}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Clubs Count - Hidden for International Competitions */}
-        {!isInternationalComp &&
-          (statsClubCount ?? currentData.clubsCount) !== undefined && (
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-              <span className={getLabelClass(['clubs', 'club_id'], 'pt-0.5')}>Clubs:</span>
-              <span
-                onClick={() => onSwitchTab?.('CLUBS')}
-                className={`font-bold text-xs sm:text-[13px] text-blue-700 text-left ${
-                  onSwitchTab ? 'cursor-pointer hover:underline' : ''
-                }`}
-              >
-                {statsClubCount ?? currentData.clubsCount}
-              </span>
-            </div>
-          )}
-
-        {/* Awards Count */}
-        {(currentData.stats?.award !== undefined ||
-          currentData.awardsCount !== undefined ||
-          counts?.awards !== undefined) && (
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
-            <span className={getLabelClass('awards', 'pt-0.5')}>Awards:</span>
-            <span
-              onClick={() => onSwitchTab?.('AWARDS')}
-              className={`font-bold text-xs sm:text-[13px] text-yellow-700 text-left ${
-                onSwitchTab ? 'cursor-pointer hover:underline' : ''
-              }`}
-            >
-              {counts?.awards ?? currentData.stats?.award ?? currentData.awardsCount ?? 0}
-            </span>
-          </div>
-        )}
-
+  // 3. Section 2: THUỘC TÍNH & MÀU SẮC (Attributes & Colors)
+  const renderAttributes = () => (
+    <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-2.5">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
+        <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider">
+          {isCity || isStadium ? 'THUỘC TÍNH CHI TIẾT' : 'THUỘC TÍNH & MÀU SẮC'}
+        </span>
       </div>
 
-      {/* 3. Scope & Status Badges */}
-      {(currentData.is_extinct || isVirtual || currentData.is_disabled) && (
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {currentData.is_disabled && (
-            <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
-              Disabled in .lnc
-            </Tag>
-          )}
-          {currentData.is_extinct && (
-            <Tag color="red" className="m-0 text-xs font-medium py-0.5 px-2">
-              Extinct Club
-            </Tag>
-          )}
-          {isVirtual && (
-            <Tag color="orange" className="m-0 text-xs font-medium py-0.5 px-2">
-              {isVirtualExtinct
-                ? 'Extinct Clubs Container'
-                : 'Independent Clubs Container'}
-            </Tag>
-          )}
+      {/* Type Row */}
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+        <span className={getLabelClass('type', 'pt-0.5')}>TYPE:</span>
+        <div className="flex items-center gap-1.5 flex-wrap text-left">
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border ${getTypeBadgeStyles()}`}
+          >
+            {getTypeLabel()}
+          </span>
+        </div>
+      </div>
+
+      {/* BG Color Row */}
+      {bgInfo && (
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+          <span
+            className={getLabelClass(['bg_color', 'background_color'], 'pt-0.5')}
+            title="Background Color"
+          >
+            BG:
+          </span>
+          <div className="flex items-center gap-2 min-w-0 text-left">
+            <Tooltip title={`Hex: ${bgInfo.hex}`}>
+              <span
+                className="inline-block w-4 h-4 rounded border border-black/20 shadow-2xs shrink-0 cursor-pointer"
+                style={{ backgroundColor: bgInfo.css }}
+              />
+            </Tooltip>
+            <span
+              className={`font-mono font-bold text-[12px] ${getValueClass(['bg_color', 'background_color'])}`}
+            >
+              {currentData.bg_color}
+            </span>
+          </div>
         </div>
       )}
 
-      {/* 4. Notes Card */}
-      {currentData.note && (
-        <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-3 flex items-start gap-2.5 text-xs text-slate-700">
-          <InfoCircleOutlined className="text-sky-500 mt-0.5 shrink-0" />
-          <div className="min-w-0 flex-1">
-            <span className="font-bold text-slate-800 block mb-0.5">Note:</span>
-            <p className="italic text-slate-600 break-words m-0">{currentData.note}</p>
+      {/* FG Color Row */}
+      {fgInfo && (
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+          <span
+            className={getLabelClass(['fg_color', 'foreground_color'], 'pt-0.5')}
+            title="Foreground Color"
+          >
+            FG:
+          </span>
+          <div className="flex items-center gap-2 min-w-0 text-left">
+            <Tooltip title={`Hex: ${fgInfo.hex}`}>
+              <span
+                className="inline-block w-4 h-4 rounded border border-black/20 shadow-2xs shrink-0 cursor-pointer"
+                style={{ backgroundColor: fgInfo.css }}
+              />
+            </Tooltip>
+            <span
+              className={`font-mono font-bold text-[12px] ${getValueClass(['fg_color', 'foreground_color'])}`}
+            >
+              {currentData.fg_color}
+            </span>
           </div>
         </div>
+      )}
+
+      {/* Stadium Capacity */}
+      {isStadium && (currentData.capacity || currentData.seating_capacity) && (
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+          <span className={getLabelClass('capacity', 'pt-0.5')}>CAPACITY:</span>
+          <span className="font-bold text-[12px] text-slate-800 font-mono text-left">
+            {Number(currentData.capacity || currentData.seating_capacity).toLocaleString()} chỗ
+          </span>
+        </div>
+      )}
+
+      {/* Club Affiliate Info */}
+      {!hideClubAffiliates && isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
+        <>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+            <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
+              AFFILIATE CLUB:
+            </span>
+            <div
+              onClick={() => {
+                if (currentData.affiliate_club?.id && onNavigateClub) {
+                  onNavigateClub(String(currentData.affiliate_club.id));
+                }
+              }}
+              className={`flex items-center gap-1.5 flex-wrap ${
+                currentData.affiliate_club?.id && onNavigateClub ? 'cursor-pointer group' : ''
+              }`}
+            >
+              <span
+                className={`font-bold text-[12px] ${
+                  currentData.affiliate_club?.id && onNavigateClub
+                    ? 'text-blue-600 group-hover:underline'
+                    : 'text-slate-800'
+                }`}
+              >
+                {currentData.affiliate_club?.name_lg ||
+                  currentData.affiliate_club?.name_sh ||
+                  currentData.affiliate_club?.name ||
+                  `Club #${currentData.affiliate_club?.id}`}
+              </span>
+            </div>
+          </div>
+          {currentData.affiliate_club?.type && (
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
+              <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
+                AFFILIATE TYPE:
+              </span>
+              <div>
+                <span className="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                  {currentData.affiliate_club.type}
+                </span>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Status Row */}
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+        <span className={getLabelClass('status', 'pt-0.5')}>STATUS:</span>
+        <div className="flex items-center gap-1.5 flex-wrap text-left">
+          {currentData.is_disabled ? (
+            <Tag color="red" className="m-0 text-[11px] font-medium py-0.5 px-2">
+              Disabled in .lnc
+            </Tag>
+          ) : currentData.is_extinct ? (
+            <Tag color="red" className="m-0 text-[11px] font-medium py-0.5 px-2">
+              Extinct
+            </Tag>
+          ) : isVirtual ? (
+            <Tag color="orange" className="m-0 text-[11px] font-medium py-0.5 px-2">
+              {isVirtualExtinct ? 'Extinct Container' : 'Independent Container'}
+            </Tag>
+          ) : (
+            <Tag color="green" className="m-0 text-[11px] font-medium py-0.5 px-2">
+              Active
+            </Tag>
+          )}
+        </div>
+      </div>
+
+      {/* Inactive Fields Warning */}
+      {inactiveList.length > 0 && (
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
+          <span className="text-[10px] font-normal text-red-500 uppercase pt-0.5">INACTIVE:</span>
+          <span className="text-[11px] font-medium text-red-600 break-words text-left">
+            {inactiveList.join(', ')}
+          </span>
+        </div>
+      )}
+
+      {/* Notes Row if present */}
+      {currentData.note && (
+        <div className="mt-2 bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 flex items-start gap-2 text-xs text-slate-700">
+          <InfoCircleOutlined className="text-sky-500 mt-0.5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <span className="font-semibold text-slate-700 block mb-0.5 text-[10px] uppercase">Ghi chú:</span>
+            <p className="italic text-slate-600 break-words m-0 text-[11px]">{currentData.note}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="w-full space-y-4">
+      {/* Optional Header Card */}
+      {showHeader && renderHeader()}
+
+      {/* Render requested section or all */}
+      {section === 'identity' && renderIdentity()}
+      {section === 'attributes' && renderAttributes()}
+      {section === 'all' && (
+        <>
+          {renderIdentity()}
+          {renderAttributes()}
+        </>
       )}
     </div>
   );

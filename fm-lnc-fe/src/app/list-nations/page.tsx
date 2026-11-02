@@ -19,7 +19,7 @@ interface ConfedOption {
 }
 
 const CONFEDERATIONS: ConfedOption[] = [
-  { value: 'all', code: 'ALL', icon: '🌍' },
+  { value: 'all', code: 'Tất cả liên đoàn', icon: '🌍' },
   { value: 'UEFA', code: 'UEFA', icon: '🌍' },
   { value: 'AFC', code: 'AFC', icon: '🌏' },
   { value: 'CAF', code: 'CAF', icon: '🌍' },
@@ -35,7 +35,7 @@ function ListNationsContent() {
   const { message } = App.useApp();
   const { setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo, refreshSignal } = useApp();
 
-  const initialConfed = searchParams.get('confedId') || 'UEFA';
+  const initialConfed = searchParams.get('confedId') || 'all';
 
   const [selectedConfed, setSelectedConfed] = useState<string>(initialConfed);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -113,7 +113,9 @@ function ListNationsContent() {
     loadNations();
   }, [loadNations]);
 
-  const currentConfedObj = CONFEDERATIONS.find((c) => c.value === selectedConfed) || CONFEDERATIONS[1];
+  const currentConfedObj =
+    CONFEDERATIONS.find((c) => c.value.toLowerCase() === selectedConfed.toLowerCase()) ||
+    CONFEDERATIONS[0];
   const filterSummary = currentConfedObj.code;
 
   const handleOpenModal = () => {
@@ -123,11 +125,11 @@ function ListNationsContent() {
 
   // Chọn option trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handlePickConfed = (val: string) => {
-    setTempConfed(val);
+    setTempConfed(val === 'all' ? 'all' : val.toUpperCase());
   };
 
   const handleResetModal = () => {
-    setTempConfed('UEFA');
+    setTempConfed('all');
   };
 
   const handleApplyModal = () => {
@@ -137,56 +139,97 @@ function ListNationsContent() {
   };
 
   return (
-    <div className="h-full flex flex-col min-h-0 bg-white">
-      {/* 1. Fixed Top Toolbar: Search + Filter Bar theo Wireframe */}
-      <div className="shrink-0 flex-none px-3.5 pt-3 pb-2.5 border-b border-slate-100 bg-white space-y-2.5">
-        {/* Layer 1: Thanh Search trên cùng (không bọc trong khung) */}
-        <Input
-          size="large"
-          placeholder="Search..."
-          allowClear
-          prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
-        />
+    <div className="h-full w-full flex min-h-0 bg-slate-100/70 p-3 sm:p-4 gap-3 sm:gap-4 overflow-hidden">
+      {/* 1. KHU VỰC FILTER: Khung đóng viền riêng biệt bên trái */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 xl:w-80 shrink-0 bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden h-full">
+        {/* Filter Header */}
+        <div className="h-12 px-3.5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center text-xs">
+              <NationIcon size={14} />
+            </span>
+            <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
+              Cây đơn vị
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedConfed('all');
+              setPage(1);
+            }}
+            className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+          >
+            Đặt lại
+          </button>
+        </div>
 
-        {/* Layer 2: [Icon đại diện page] [Thanh select filter] */}
-        <ListPageFilterBar
-          pageIcon={<NationIcon size={20} />}
-          iconBoxClassName="bg-blue-50 text-blue-600 border-blue-200/80"
-          filterSummary={filterSummary}
-          hasActiveCustomFilter={selectedConfed !== 'UEFA'}
-          onClick={handleOpenModal}
-        />
-      </div>
+        {/* Filter Body: UnitTree chiếm trọn chiều cao */}
+        <div className="flex-1 min-h-0 h-full p-2.5 flex flex-col overflow-hidden">
+          <UnitTree
+            mode="nation"
+            confedOnly
+            height="100%"
+            selectedKey={selectedConfed}
+            onSelectNode={(val) => {
+              setSelectedConfed(val === 'all' ? 'all' : val.toUpperCase());
+              setPage(1);
+            }}
+            allOptionLabel="Tất cả Liên đoàn (All)"
+          />
+        </div>
+      </aside>
 
-      {/* 2. Danh sách cuộn mượt */}
-      <div
-        ref={listContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3.5 py-3 pb-8"
-      >
-        <CardGrid
-          items={nations}
-          type={EntityType.NATION}
-          loading={loading}
-          columns={2}
-          onNavigate={(record) => {
-            if (record?.id) {
-              router.push(`/nation/${record.id}`);
-            }
-          }}
-          serverPagination={{
-            current: page,
-            pageSize,
-            total,
-            onChange: (p, ps) => {
-              setPage(p);
-              setPageSize(ps);
-            },
-          }}
-          emptyText="Không tìm thấy quốc gia nào phù hợp"
-        />
+      {/* 2. KHU VỰC BÊN PHẢI: Search + Vùng Danh Sách */}
+      <div className="flex-1 min-w-0 min-h-0 h-full flex flex-col gap-3 overflow-hidden">
+        {/* Khung Search trên cùng */}
+        <div className="shrink-0 flex-none bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs">
+          <Input
+            size="large"
+            placeholder="Search..."
+            allowClear
+            prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
+          />
+
+          {/* Mobile Filter Bar (Chỉ hiển thị trên mobile < md) */}
+          <div className="md:hidden mt-2">
+            <ListPageFilterBar
+              pageIcon={<NationIcon size={20} />}
+              iconBoxClassName="bg-blue-50 text-blue-600 border-blue-200/80"
+              filterSummary={filterSummary}
+              hasActiveCustomFilter={selectedConfed !== 'all'}
+              onClick={handleOpenModal}
+            />
+          </div>
+        </div>
+
+        {/* Khung Vùng danh sách bên dưới */}
+        <div className="flex-1 min-h-0 h-full bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+          <CardGrid
+            items={nations}
+            type={EntityType.NATION}
+            loading={loading}
+            containerRef={listContainerRef}
+            onNavigate={(record) => {
+              if (record?.id) {
+                router.push(`/nation/${record.id}`);
+              }
+            }}
+            serverPagination={{
+              current: page,
+              pageSize,
+              total,
+              onChange: (p, ps) => {
+                setPage(p);
+                setPageSize(ps);
+              },
+            }}
+            emptyText="Không tìm thấy quốc gia nào phù hợp"
+          />
+        </div>
       </div>
 
       {/* 3. Modal bộ lọc Cây đơn vị */}

@@ -915,35 +915,6 @@ export class HierarchyController {
     return this.hierarchyService.getPlayers({ ...query, ...body });
   }
 
-  @ApiOperation({ summary: 'Lấy danh sách Stages' })
-  @ApiBody({ type: SearchFilterDto, required: false })
-  @ApiOkResponse({
-    description: 'Danh sách giai đoạn/vòng đấu',
-    schema: {
-      type: 'object',
-      example: {
-        content: [
-          {
-            id: 'string',
-            name: 'string',
-          },
-        ],
-        page: 0,
-        size: 0,
-        totalElements: 0,
-        totalPages: 0,
-        hasPrevious: true,
-        hasNext: true,
-        first: true,
-        last: true,
-      },
-    },
-  })
-  @Post('stages')
-  getStages(@Query() query?: PageableQueryDto, @Body() body?: SearchFilterDto) {
-    return this.hierarchyService.getStages({ ...query, ...body });
-  }
-
   @ApiOperation({ summary: 'Lấy tất cả Awards' })
   @ApiBody({ type: SearchFilterDto, required: false })
   @ApiOkResponse({

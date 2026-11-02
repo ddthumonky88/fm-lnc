@@ -9,7 +9,6 @@ import {
   Stadium,
   Award,
   Person,
-  Stage,
   Region,
   normalizeConfed,
 } from '../entities';
@@ -92,7 +91,6 @@ export enum RecordType {
   AWARD = 'award',
   PERSON = 'person',
   PLAYER = 'player',
-  STAGE = 'stage',
   REGION = 'region',
 }
 
@@ -106,7 +104,6 @@ export class RecordsService {
     @InjectRepository(Stadium) private stadiumRepo: Repository<Stadium>,
     @InjectRepository(Award) private awardRepo: Repository<Award>,
     @InjectRepository(Person) private personRepo: Repository<Person>,
-    @InjectRepository(Stage) private stageRepo: Repository<Stage>,
     @InjectRepository(Region) private regionRepo: Repository<Region>,
   ) {}
 
@@ -135,9 +132,6 @@ export class RecordsService {
       case RecordType.PLAYER:
       case 'player':
         return this.personRepo;
-      case RecordType.STAGE:
-      case 'stage':
-        return this.stageRepo;
       case RecordType.REGION:
       case 'region':
       case 'regions':

@@ -20,10 +20,12 @@ function ListStadiumsContent() {
 
   const initialNationId = searchParams.get('nationId') || 'all';
 
+  const [selectedConfed, setSelectedConfed] = useState<string>('all');
   const [selectedNation, setSelectedNation] = useState<string>(initialNationId);
 
   // Modal temporary state
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [tempConfed, setTempConfed] = useState<string>('all');
   const [tempNation, setTempNation] = useState<string>(initialNationId);
 
   const [treeNodes, setTreeNodes] = useState<UnitTreeNode[]>([]);
@@ -86,10 +88,11 @@ function ListStadiumsContent() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const natParam = selectedNation === 'all' ? 'all' : selectedNation;
+      const natParam = selectedNation === 'all' ? null : selectedNation;
       const res = await fetchStadiums(
         natParam,
         {
+          confedId: selectedConfed !== 'all' ? selectedConfed : undefined,
           page: page - 1,
           size: pageSize,
           keyword: debouncedKeyword,
@@ -105,97 +108,180 @@ function ListStadiumsContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedNation, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, selectedNation, page, pageSize, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  let filterSummary = 'Tất cả quốc gia';
+  let filterSummary = 'Tất cả sân vận động';
   if (selectedNation !== 'all') {
     const nationNode = findNationInTree(treeNodes, selectedNation);
     if (nationNode) {
-      const confed = nationNode.confed ? `${nationNode.confed} > ` : '';
+      const levels: string[] = [];
+      const confed = selectedConfed !== 'all' ? selectedConfed : nationNode.confed;
+      if (confed) levels.push(confed);
       const name = nationNode.shortName || nationNode.title || selectedNation;
-      filterSummary = `${confed}${name}`;
+      levels.push(name);
+      filterSummary = levels.join(' > ');
     } else {
       filterSummary = selectedNation;
     }
+  } else if (selectedConfed !== 'all') {
+    filterSummary = selectedConfed;
   }
 
-  const hasActiveCustomFilter = selectedNation !== 'all';
+  const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all';
 
   const handleOpenModal = () => {
+    setTempConfed(selectedConfed);
     setTempNation(selectedNation);
     setModalOpen(true);
   };
 
+  const confedKeys = ['afc', 'caf', 'concacaf', 'conmebol', 'ofc', 'uefa'];
+
   // Chọn option trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handlePickNation = (val: string) => {
-    setTempNation(val);
+    const lk = val.toLowerCase();
+    if (val === 'all') {
+      setTempConfed('all');
+      setTempNation('all');
+    } else if (val.startsWith('confed_') || confedKeys.includes(lk)) {
+      const confedCode = val.replace('confed_', '').toUpperCase();
+      setTempConfed(confedCode);
+      setTempNation('all');
+    } else {
+      setTempNation(val);
+      const nationNode = findNationInTree(treeNodes, val);
+      if (nationNode?.confed) setTempConfed(nationNode.confed);
+    }
+  };
+
+  const handleSelectDirectly = (val: string) => {
+    const lk = val.toLowerCase();
+    if (val === 'all') {
+      setSelectedConfed('all');
+      setSelectedNation('all');
+    } else if (val.startsWith('confed_') || confedKeys.includes(lk)) {
+      const confedCode = val.replace('confed_', '').toUpperCase();
+      setSelectedConfed(confedCode);
+      setSelectedNation('all');
+    } else {
+      setSelectedNation(val);
+      const nationNode = findNationInTree(treeNodes, val);
+      if (nationNode?.confed) setSelectedConfed(nationNode.confed);
+    }
+    setPage(1);
   };
 
   const handleResetModal = () => {
+    setTempConfed('all');
     setTempNation('all');
   };
 
   const handleApplyModal = () => {
+    setSelectedConfed(tempConfed);
     setSelectedNation(tempNation);
     setPage(1);
     setModalOpen(false);
   };
 
+  const currentTreeSelectedKey =
+    selectedNation !== 'all'
+      ? selectedNation
+      : selectedConfed !== 'all'
+      ? selectedConfed.toLowerCase()
+      : 'all';
+
   return (
-    <div className="h-full flex flex-col min-h-0 bg-white">
-      {/* 1. Fixed Top Toolbar */}
-      <div className="shrink-0 flex-none px-3.5 pt-3 pb-2.5 border-b border-slate-100 bg-white space-y-2.5">
-        {/* Layer 1: Thanh Search trên cùng (không bọc trong khung) */}
-        <Input
-          size="large"
-          placeholder="Search..."
-          allowClear
-          prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
-        />
+    <div className="h-full w-full flex min-h-0 bg-slate-100/70 p-3 sm:p-4 gap-3 sm:gap-4 overflow-hidden">
+      {/* 1. KHU VỰC FILTER: Khung đóng viền riêng biệt bên trái */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 xl:w-80 shrink-0 bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden h-full">
+        {/* Filter Header */}
+        <div className="h-12 px-3.5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-md bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-xs">
+              <StadiumIcon size={14} />
+            </span>
+            <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
+              Cây đơn vị
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedNation('all');
+              setPage(1);
+            }}
+            className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+          >
+            Đặt lại
+          </button>
+        </div>
 
-        {/* Layer 2: [Icon đại diện page] [Thanh select filter] */}
-        <ListPageFilterBar
-          pageIcon={<StadiumIcon size={20} />}
-          iconBoxClassName="bg-amber-50 text-amber-600 border-amber-200/80"
-          filterSummary={filterSummary}
-          hasActiveCustomFilter={hasActiveCustomFilter}
-          onClick={handleOpenModal}
-        />
-      </div>
+        {/* Filter Body: UnitTree chiếm trọn chiều cao */}
+        <div className="flex-1 min-h-0 h-full p-2.5 flex flex-col overflow-hidden">
+          <UnitTree
+            mode="stadium"
+            height="100%"
+            selectedKey={currentTreeSelectedKey}
+            onSelectNode={handleSelectDirectly}
+            allOptionLabel="Tất cả Sân vận động (All)"
+          />
+        </div>
+      </aside>
 
-      {/* 2. Danh sách cuộn mượt */}
-      <div
-        ref={listContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3.5 py-3 pb-8"
-      >
-        <CardGrid
-          items={stadiums}
-          type={EntityType.STADIUM}
-          loading={loading}
-          columns={2}
-          onNavigate={(record) => {
-            if (record?.id) {
-              router.push(`/stadium/${record.id}`);
-            }
-          }}
-          serverPagination={{
-            current: page,
-            pageSize,
-            total,
-            onChange: (p, ps) => {
-              setPage(p);
-              setPageSize(ps);
-            },
-          }}
-          emptyText="Không tìm thấy sân vận động nào phù hợp"
-        />
+      {/* 2. KHU VỰC BÊN PHẢI: Search + Vùng Danh Sách */}
+      <div className="flex-1 min-w-0 min-h-0 h-full flex flex-col gap-3 overflow-hidden">
+        {/* Khung Search trên cùng */}
+        <div className="shrink-0 flex-none bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs">
+          <Input
+            size="large"
+            placeholder="Search..."
+            allowClear
+            prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
+          />
+
+          {/* Mobile Filter Bar (Chỉ hiển thị trên mobile < md) */}
+          <div className="md:hidden mt-2">
+            <ListPageFilterBar
+              pageIcon={<StadiumIcon size={20} />}
+              iconBoxClassName="bg-amber-50 text-amber-600 border-amber-200/80"
+              filterSummary={filterSummary}
+              hasActiveCustomFilter={hasActiveCustomFilter}
+              onClick={handleOpenModal}
+            />
+          </div>
+        </div>
+
+        {/* Khung Vùng danh sách bên dưới */}
+        <div className="flex-1 min-h-0 h-full bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+          <CardGrid
+            items={stadiums}
+            type={EntityType.STADIUM}
+            loading={loading}
+            containerRef={listContainerRef}
+            onNavigate={(record) => {
+              if (record?.id) {
+                router.push(`/stadium/${record.id}`);
+              }
+            }}
+            serverPagination={{
+              current: page,
+              pageSize,
+              total,
+              onChange: (p, ps) => {
+                setPage(p);
+                setPageSize(ps);
+              },
+            }}
+            emptyText="Không tìm thấy sân vận động nào phù hợp"
+          />
+        </div>
       </div>
 
       {/* 3. Modal bộ lọc Cây đơn vị */}
@@ -228,7 +314,7 @@ function ListStadiumsContent() {
         <div className="py-1">
           <UnitTree
             mode="stadium"
-            selectedKey={tempNation}
+            selectedKey={tempNation !== 'all' ? tempNation : tempConfed !== 'all' ? tempConfed.toLowerCase() : 'all'}
             onSelectNode={(val) => handlePickNation(val)}
             allOptionLabel="Tất cả quốc gia (All Nations)"
           />

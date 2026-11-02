@@ -133,77 +133,56 @@ function CompetitionDetailContent() {
     compInfo.name_lg || compInfo.name || compInfo.name_sh || `Competition ${compInfo.id}`;
 
   return (
-    <div className="w-full p-3 sm:p-5 space-y-4">
-      {/* 1. Title của Body: Back + Icon + (Line 1: Thẻ ID, Line 2: Name) + Actions */}
-      <DetailBodyHeader
-        onBack={() => router.push('/list-comps')}
-        id={compInfo.id}
-        name={compName}
-        code3={compInfo.name_3l}
-        icon={
-          isInternational ? (
-            <IntCompIcon size={22} className="text-purple-600" />
-          ) : (
-            <DomesticCompIcon size={22} className="text-amber-600" />
-          )
-        }
-        badgeTypeStyles={
-          isInternational
-            ? 'bg-purple-50/90 border-purple-300 text-purple-600'
-            : 'bg-amber-50/90 border-amber-300 text-amber-600'
-        }
-        extraTag={
-          <Tag color={isInternational ? 'purple' : 'gold'} className="m-0 text-xs">
-            {isInternational ? '🌍 International' : '🏆 Domestic'}
-          </Tag>
-        }
-        onEdit={handleEdit}
-        onDelete={() => setDeleteModalOpen(true)}
-      />
-
-      {/* 2. Vùng thông tin: Card chi tiết thuộc tính */}
-      <div className="w-full">
-        <RecordDetailView
-          data={compInfo}
-          type={EntityType.COMPETITION}
-          showHeader={false}
+    <div className="w-full h-full overflow-y-auto bg-slate-100/70 p-3 sm:p-4 lg:p-5 space-y-4">
+      {/* 1. Title của Body */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs">
+        <DetailBodyHeader
+          onBack={() => router.push('/list-comps')}
+          id={compInfo.id}
+          name={compName}
+          code3={compInfo.name_3l}
+          icon={
+            isInternational ? (
+              <IntCompIcon size={22} className="text-purple-600" />
+            ) : (
+              <DomesticCompIcon size={22} className="text-amber-600" />
+            )
+          }
+          badgeTypeStyles={
+            isInternational
+              ? 'bg-purple-50 border-purple-200 text-purple-700'
+              : 'bg-amber-50 border-amber-200 text-amber-700'
+          }
+          extraTag={
+            <Tag color={isInternational ? 'purple' : 'gold'} className="m-0 text-xs font-semibold">
+              {isInternational ? '🌍 International' : '🏆 Domestic'}
+            </Tag>
+          }
           onEdit={handleEdit}
+          onDelete={() => setDeleteModalOpen(true)}
         />
       </div>
 
-      {/* 3. Vùng các thẻ (kèm theo số lượng) con trực thuộc */}
-      <ChildEntitiesSection
-        items={[
-          {
-            key: 'clubs',
-            label: 'Clubs',
-            count: compInfo.clubsCount ?? compInfo.stats?.club ?? 0,
-            icon: <ClubIcon size={18} className="text-blue-500" />,
-            badgeStyles: 'bg-blue-50 border-blue-200 text-blue-600',
-            onClick: () => router.push(`/list-clubs?compId=${compInfo.id}`),
-          },
-          {
-            key: 'awards',
-            label: 'Awards',
-            count: compInfo.awardsCount ?? compInfo.stats?.award ?? 0,
-            icon: <AwardIcon size={18} className="text-yellow-500" />,
-            badgeStyles: 'bg-yellow-50 border-yellow-200 text-yellow-600',
-            onClick: () => router.push(`/list-awards?compId=${compInfo.id}`),
-          },
-          ...(nationId
-            ? [
-                {
-                  key: 'nation',
-                  label: `Nation (${nationName || nationId})`,
-                  count: 1,
-                  icon: <NationIcon size={18} className="text-cyan-500" />,
-                  badgeStyles: 'bg-cyan-50 border-cyan-200 text-cyan-600',
-                  onClick: () => router.push(`/nation/${nationId}`),
-                },
-              ]
-            : []),
-        ]}
-      />
+      {/* 2. Layout 2 cột theo Wireframe: Trái là Vùng thông tin, Phải là ??? (tạm thời để trống, đóng khung) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
+        {/* Vùng thông tin (bên trái) */}
+        <div className="lg:col-span-5 xl:col-span-4 min-w-0 space-y-4">
+          <RecordDetailView
+            data={compInfo}
+            type={EntityType.COMPETITION}
+            showHeader={false}
+            onEdit={handleEdit}
+            onNavigateConfed={() => router.push('/list-comps')}
+            onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
+            onNavigateParentComp={(pId) => router.push(`/comp/${pId}`)}
+          />
+        </div>
+
+        {/* Khung bên phải để trống hoàn toàn */}
+        <div className="lg:col-span-7 xl:col-span-8 min-w-0">
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs min-h-[500px]" />
+        </div>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmModal

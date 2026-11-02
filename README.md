@@ -78,9 +78,10 @@ fm-lnc/
 │   └── package.json
 ├── fm-lnc-fe/                    # Next.js 14 Web Application
 │   ├── src/app/
-│   │   ├── page.tsx              # Dashboard tổng quan: Châu lục, Giải quốc tế & Điều hướng
-│   │   ├── list-nations/         # Danh sách Quốc gia kèm bộ lọc Châu lục & Tìm kiếm
-│   │   ├── list-comps/           # Danh sách Giải đấu kèm Cây đơn vị phân cấp & Bộ lọc Quốc gia/Châu lục
+│   │   ├── page.tsx              # Root redirect về màn hình /home
+│   │   ├── home/                 # Màn hình Home: Danh sách các Card Menu điều hướng các thực thể
+│   │   ├── list-nations/         # Danh sách Quốc gia (mặc định All, hỗ trợ lọc theo Liên đoàn)
+│   │   ├── list-comps/           # Danh sách Giải đấu (mặc định All, kèm Cây đơn vị phân cấp & Bộ lọc Quốc gia/Châu lục)
 │   │   ├── list-clubs/           # Danh sách Câu lạc bộ (hỗ trợ lọc theo Cây đơn vị: Châu lục > Quốc gia > Giải đấu)
 │   │   ├── list-cities/          # Danh sách Thành phố (hỗ trợ Cây đơn vị, highlight & dồn [REMOVE] xuống cuối)
 │   │   ├── list-stadiums/        # Danh sách Sân vận động kèm Cây đơn vị theo Quốc gia

@@ -114,7 +114,6 @@ export default function RecordDetailModal({
   const isClub = type === EntityType.CLUB;
   const isNation = type === EntityType.NATION;
   const isConfed = type === EntityType.CONFEDERATION;
-  const isStage = type === EntityType.STAGE;
   const isAward = type === EntityType.AWARD;
   const isRegion = type === EntityType.REGION;
   const { message } = App.useApp();
@@ -310,8 +309,8 @@ export default function RecordDetailModal({
   const getLabelClass = (field?: string | string[], extraClass: string = '') => {
     const inactive = field ? isFieldInactive(field) : false;
     return `${
-      inactive ? 'text-red-600 font-normal' : 'text-slate-400 font-semibold'
-    } text-xs shrink-0 select-none whitespace-nowrap leading-tight ${extraClass}`;
+      inactive ? 'text-red-500 font-medium' : 'text-slate-400 font-normal'
+    } text-[10px] shrink-0 select-none whitespace-nowrap leading-tight uppercase ${extraClass}`;
   };
 
   const getValueClass = (field?: string | string[], defaultClass: string = 'text-slate-800') => {
@@ -387,7 +386,6 @@ export default function RecordDetailModal({
     if (isCity) return 'City';
     if (isAward) return 'Award';
     if (isPlayer) return 'Person';
-    if (isStage) return 'Stage';
     return String(type).toUpperCase();
   };
 
@@ -455,7 +453,6 @@ export default function RecordDetailModal({
     if (isCity) return RecordType.CITY;
     if (isAward) return RecordType.AWARD;
     if (isPlayer) return RecordType.PLAYER;
-    if (isStage) return RecordType.STAGE;
     return RecordType.COMPETITION;
   };
 
@@ -483,7 +480,7 @@ export default function RecordDetailModal({
       const n3l = (payload.name_3l || '').trim().toUpperCase();
       const nName = (payload.name || nLg || nSh || '').trim();
 
-      if (isCity || isStadium || isStage) {
+      if (isCity || isStadium) {
         payload.name = nName;
         payload.name_lg = null;
         payload.name_sh = null;
@@ -781,18 +778,18 @@ export default function RecordDetailModal({
               {isPlayer ? (
                 <>
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass('first_name', 'pt-0.5')}>FN:</span>
+                    <span className={getLabelClass('first_name', 'pt-0.5')}>F-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass('first_name')} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass('first_name')} line-clamp-3 break-words text-left`}
                     >
                       {currentData.first_name || '-'}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass('second_name', 'pt-0.5')}>SN:</span>
+                    <span className={getLabelClass('second_name', 'pt-0.5')}>S-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass('second_name')} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass('second_name')} line-clamp-3 break-words text-left`}
                     >
                       {currentData.second_name || '-'}
                     </span>
@@ -800,20 +797,20 @@ export default function RecordDetailModal({
 
                   {currentData.common_name && (
                     <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                      <span className={getLabelClass('common_name', 'pt-0.5')}>CN:</span>
+                      <span className={getLabelClass('common_name', 'pt-0.5')}>C-NAME:</span>
                       <span
-                        className={`font-bold text-xs sm:text-[13px] ${getValueClass('common_name', 'text-purple-700')} italic line-clamp-3 break-words text-left`}
+                        className={`font-bold text-[12px] ${getValueClass('common_name', 'text-purple-700')} italic line-clamp-3 break-words text-left`}
                       >
                         {currentData.common_name}
                       </span>
                     </div>
                   )}
                 </>
-              ) : isCity || isStadium || isStage ? (
+              ) : isCity || isStadium ? (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                  <span className={getLabelClass(['name', 'name_lg'], 'pt-0.5')}>Name:</span>
+                  <span className={getLabelClass(['name', 'name_lg'], 'pt-0.5')}>NAME:</span>
                   <span
-                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name', 'name_lg'])} line-clamp-3 break-words text-left`}
+                    className={`font-bold text-[12px] ${getValueClass(['name', 'name_lg'])} line-clamp-3 break-words text-left`}
                     style={{
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
@@ -830,9 +827,9 @@ export default function RecordDetailModal({
                 <>
                   {/* LN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
+                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -854,9 +851,9 @@ export default function RecordDetailModal({
 
                   {/* SN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
+                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -873,10 +870,10 @@ export default function RecordDetailModal({
                   {/* 6N */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['name_6l'], 'pt-0.5')}>
-                      6N:
+                      6L-NAME:
                     </span>
                     <span
-                      className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_6l'])} break-words text-left`}
+                      className={`font-mono font-bold text-[12px] ${getValueClass(['name_6l'])} break-words text-left`}
                     >
                       {currentData.name_6l || '-'}
                     </span>
@@ -887,10 +884,10 @@ export default function RecordDetailModal({
                     <span
                       className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}
                     >
-                      3N:
+                      3L-NAME:
                     </span>
                     <span
-                      className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
+                      className={`font-mono font-bold text-[12px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
                     >
                       {currentData.is_virtual
                         ? '-'
@@ -902,9 +899,9 @@ export default function RecordDetailModal({
                 <>
                   {/* LN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
+                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -920,9 +917,9 @@ export default function RecordDetailModal({
 
                   {/* SN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
+                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -941,9 +938,9 @@ export default function RecordDetailModal({
                 <>
                   {/* LN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>LN:</span>
+                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -965,9 +962,9 @@ export default function RecordDetailModal({
 
                   {/* SN */}
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>SN:</span>
+                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
                     <span
-                      className={`font-bold text-xs sm:text-[13px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
+                      className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -986,10 +983,10 @@ export default function RecordDetailModal({
                     <span
                       className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}
                     >
-                      3N:
+                      3L-NAME:
                     </span>
                     <span
-                      className={`font-mono font-bold text-xs sm:text-[13px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
+                      className={`font-mono font-bold text-[12px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
                     >
                       {currentData.is_virtual
                         ? '-'
@@ -1003,10 +1000,10 @@ export default function RecordDetailModal({
               {isInternationalComp && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90 last:border-b-0 last:pb-0">
                   <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>
-                    Confed:
+                    CONFED:
                   </span>
                   <span
-                    className={`font-bold text-xs sm:text-[13px] ${getValueClass(['confed_id', 'confed'])} break-words text-left`}
+                    className={`font-bold text-[12px] ${getValueClass(['confed_id', 'confed'])} break-words text-left`}
                   >
                     {confedName}
                   </span>
@@ -1017,7 +1014,7 @@ export default function RecordDetailModal({
               {!isNation && !isInternationalComp && nationId && (
                 <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                   <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
-                    Nation:
+                    NATION:
                   </span>
                   <div className="flex items-center gap-1.5 min-w-0 text-left">
                     {getNationLogoUrl(nationId, nationCode) ? (
@@ -1420,8 +1417,8 @@ export default function RecordDetailModal({
                   />
                 </div>
               </div>
-            ) : isCity || isStadium || isStage ? (
-              /* Name for Stadium, City, Stage */
+            ) : isCity || isStadium ? (
+              /* Name for Stadium, City */
               <div className="space-y-3">
                 <div>
                   <label className={getFormLabelClass('name')}>

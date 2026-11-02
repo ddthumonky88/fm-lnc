@@ -128,57 +128,37 @@ function AwardDetailContent() {
   const awardName = awardInfo.name_lg || awardInfo.name || awardInfo.name_sh || `Award ${awardInfo.id}`;
 
   return (
-    <div className="w-full p-3 sm:p-5 space-y-4">
-      {/* 1. Title của Body: Back + Icon + (Line 1: Thẻ ID, Line 2: Name) + Actions */}
-      <DetailBodyHeader
-        onBack={() => router.push('/list-awards')}
-        id={awardInfo.id}
-        name={awardName}
-        icon={<AwardIcon size={22} className="text-yellow-600" />}
-        badgeTypeStyles="bg-yellow-50/90 border-yellow-400 text-yellow-600"
-        onEdit={handleEdit}
-        onDelete={() => setDeleteModalOpen(true)}
-      />
-
-      {/* 2. Vùng thông tin: Card chi tiết thuộc tính */}
-      <div className="w-full">
-        <RecordDetailView
-          data={awardInfo}
-          type={EntityType.AWARD}
-          showHeader={false}
+    <div className="w-full h-full overflow-y-auto bg-slate-100/70 p-3 sm:p-4 lg:p-5 space-y-4">
+      {/* 1. Title của Body */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs">
+        <DetailBodyHeader
+          onBack={() => router.push('/list-awards')}
+          id={awardInfo.id}
+          name={awardName}
+          icon={<AwardIcon size={22} className="text-yellow-600" />}
+          badgeTypeStyles="bg-yellow-50 border-yellow-300 text-yellow-700"
           onEdit={handleEdit}
+          onDelete={() => setDeleteModalOpen(true)}
         />
       </div>
 
-      {/* 3. Vùng các thẻ (kèm theo số lượng) con trực thuộc */}
-      <ChildEntitiesSection
-        items={[
-          ...(compId
-            ? [
-                {
-                  key: 'comp',
-                  label: `Competition (${compName || compId})`,
-                  count: 1,
-                  icon: <DomesticCompIcon size={18} className="text-amber-500" />,
-                  badgeStyles: 'bg-amber-50 border-amber-200 text-amber-600',
-                  onClick: () => router.push(`/comp/${compId}`),
-                },
-              ]
-            : []),
-          ...(nationId
-            ? [
-                {
-                  key: 'nation',
-                  label: `Nation (${nationName || nationId})`,
-                  count: 1,
-                  icon: <NationIcon size={18} className="text-cyan-500" />,
-                  badgeStyles: 'bg-cyan-50 border-cyan-200 text-cyan-600',
-                  onClick: () => router.push(`/nation/${nationId}`),
-                },
-              ]
-            : []),
-        ]}
-      />
+      {/* 2. Layout 2 cột theo Wireframe: Trái là Vùng thông tin, Phải là ??? (tạm thời để trống, đóng khung) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
+        {/* Vùng thông tin (bên trái) */}
+        <div className="lg:col-span-5 xl:col-span-4 min-w-0 space-y-4">
+          <RecordDetailView
+            data={awardInfo}
+            type={EntityType.AWARD}
+            showHeader={false}
+            onEdit={handleEdit}
+          />
+        </div>
+
+        {/* Khung bên phải để trống hoàn toàn */}
+        <div className="lg:col-span-7 xl:col-span-8 min-w-0">
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs min-h-[500px]" />
+        </div>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmModal

@@ -23,6 +23,23 @@ export interface UnitTreeProps {
 
 export const ORDERED_CONFED_CODES = ['AFC', 'CAF', 'CONCACAF', 'CONMEBOL', 'OFC', 'UEFA'];
 
+export const CONFED_DISPLAY_NAMES: Record<string, string> = {
+  AFC: 'Asia',
+  CAF: 'Africa',
+  CONCACAF: 'North America',
+  CONMEBOL: 'South America',
+  OFC: 'Oceania',
+  UEFA: 'Europe',
+  WORLD: 'World',
+  EXTINCT: 'Extinct',
+};
+
+export function getConfedTitle(code: string): string {
+  const upper = String(code || '').trim().toUpperCase();
+  const name = CONFED_DISPLAY_NAMES[upper];
+  return name ? `[${upper}] ${name}` : upper;
+}
+
 export const CONFEDERATION_META: Record<
   string,
   { name: string; icon: string; order: number }
@@ -71,7 +88,7 @@ export default function UnitTree({
   onSelectNode,
   showAllOption = true,
   allOptionLabel = 'ALL',
-  allowSelectConfed = false,
+  allowSelectConfed = true,
   confedOnly = false,
   includeExtinct,
   className = '',
@@ -125,17 +142,21 @@ export default function UnitTree({
         const targetNation = nations.find((n) => String(n.id) === String(targetNationId));
         if (targetNation) {
           let ck = '';
-          if (typeof targetNation.confed === 'string') ck = targetNation.confed.toUpperCase();
-          else if (targetNation.confed?.code) ck = targetNation.confed.code.toUpperCase();
-          else if (targetNation.confed_id) ck = String(targetNation.confed_id).toUpperCase();
-          if (ck) keys.push(`confed_${ck}`);
+          if (typeof targetNation.confed === 'string') ck = targetNation.confed.toLowerCase();
+          else if (targetNation.confed?.code) ck = targetNation.confed.code.toLowerCase();
+          else if (targetNation.confed_id) ck = String(targetNation.confed_id).toLowerCase();
+          if (ck) {
+            keys.push(ck);
+            keys.push(`confed_${ck.toUpperCase()}`);
+          }
         }
         if (currentMode === 'club') {
           keys.push(`nation_${targetNationId}`);
         }
       } else if (selectedKey.startsWith('intl_')) {
-        const ck = selectedKey.replace('intl_', '');
-        keys.push(`confed_${ck}`);
+        const ck = selectedKey.replace('intl_', '').toLowerCase();
+        keys.push(ck);
+        keys.push(`confed_${ck.toUpperCase()}`);
       }
       return keys;
     }
@@ -250,6 +271,9 @@ export default function UnitTree({
         nodes.push({
           key: 'all',
           title: 'ALL',
+          code3: 'ALL',
+          shortName: '',
+          noTag: false,
           isLeaf: true,
           className: 'tree-node-level-1',
           level: 1,
@@ -258,12 +282,16 @@ export default function UnitTree({
 
       const confedCodes = [...ORDERED_CONFED_CODES, 'EXTINCT'];
       confedCodes.forEach((code) => {
+        const isExt = code === 'EXTINCT';
         nodes.push({
-          key: code,
-          title: code,
+          key: code.toLowerCase(),
+          title: isExt ? '[EXT] Extinct' : getConfedTitle(code),
+          code3: isExt ? 'EXT' : code,
+          shortName: CONFED_DISPLAY_NAMES[code] || code,
           isLeaf: true,
           className: 'tree-node-level-1',
           level: 1,
+          isExtinct: isExt,
         } as any);
       });
       return nodes;
@@ -303,6 +331,8 @@ export default function UnitTree({
         nodes.push({
           key: 'all',
           title: 'ALL',
+          shortName: 'ALL',
+          noTag: true,
           isLeaf: true,
           className: 'tree-node-level-1',
           level: 1,
@@ -311,8 +341,10 @@ export default function UnitTree({
 
       // Cấp 1: WORLD (không có cấp 2)
       nodes.push({
-        key: 'confed_WORLD',
-        title: 'WORLD',
+        key: 'world',
+        title: '[WORLD] World',
+        code3: 'WORLD',
+        shortName: 'World',
         isLeaf: true,
         className: 'tree-node-level-1',
         level: 1,
@@ -328,22 +360,25 @@ export default function UnitTree({
         });
 
         nodes.push({
-          key: `confed_${confedKey}`,
-          title: confedKey,
+          key: confedKey.toLowerCase(),
+          title: getConfedTitle(confedKey),
+          code3: confedKey,
+          shortName: CONFED_DISPLAY_NAMES[confedKey] || confedKey,
           selectable: allowSelectConfed,
           className: 'tree-node-level-1',
           level: 1,
           children: [
-            // Cấp 2 mục 1: International (không có thẻ tag phía trước)
+            // Cấp 2 mục 1: International
             {
-              key: `intl_${confedKey}`,
-              title: 'International',
+              key: `intl_${confedKey.toLowerCase()}`,
+              title: '[INT] International',
               isLeaf: true,
               selectable: true,
               className: 'tree-node-level-2',
               level: 2,
+              code3: 'INT',
               shortName: 'International',
-              noTag: true,
+              noTag: false,
               isInternational: true,
               confed: confedKey,
             },
@@ -397,9 +432,11 @@ export default function UnitTree({
         });
 
         nodes.push({
-          key: `confed_${confedKey}`,
-          title: confedKey,
-          selectable: false,
+          key: confedKey.toLowerCase(),
+          title: getConfedTitle(confedKey),
+          code3: confedKey,
+          shortName: CONFED_DISPLAY_NAMES[confedKey] || confedKey,
+          selectable: true,
           className: 'tree-node-level-1',
           level: 1,
           children: sortedNations.map((n) => {
@@ -438,25 +475,27 @@ export default function UnitTree({
                 } as any)),
                 {
                   key: `oth_${nationId}`,
-                  title: 'Other',
+                  title: '[OTH] Other',
                   isLeaf: true,
                   selectable: true,
                   className: 'tree-node-level-3',
                   level: 3,
+                  code3: 'OTH',
                   shortName: 'Other',
-                  noTag: true,
+                  noTag: false,
                   nationId: nationId,
                   isOther: true,
                 } as any,
                 {
                   key: `ext_${nationId}`,
-                  title: 'Extinct',
+                  title: '[EXT] Extinct',
                   isLeaf: true,
                   selectable: true,
                   className: 'tree-node-level-3',
                   level: 3,
+                  code3: 'EXT',
                   shortName: 'Extinct',
-                  noTag: true,
+                  noTag: false,
                   nationId: nationId,
                   isExtinct: true,
                 } as any,
@@ -473,6 +512,7 @@ export default function UnitTree({
               nationData: n,
               code3: code,
               shortName: shortName,
+              confed: confedKey,
               children: compChildren,
             };
           }),
@@ -491,6 +531,9 @@ export default function UnitTree({
       nodes.push({
         key: 'all',
         title: 'ALL',
+        code3: 'ALL',
+        shortName: '',
+        noTag: false,
         isLeaf: true,
         className: 'tree-node-level-1',
         level: 1,
@@ -506,9 +549,11 @@ export default function UnitTree({
       });
 
       nodes.push({
-        key: `confed_${confedKey}`,
-        title: confedKey,
-        selectable: allowSelectConfed,
+        key: confedKey.toLowerCase(),
+        title: getConfedTitle(confedKey),
+        code3: confedKey,
+        shortName: CONFED_DISPLAY_NAMES[confedKey] || confedKey,
+        selectable: true,
         className: 'tree-node-level-1',
         level: 1,
         children: sortedNations.map((n) => {
@@ -524,6 +569,7 @@ export default function UnitTree({
             nationData: n,
             code3: code,
             shortName: shortName,
+            confed: confedKey,
           };
         }),
       } as any);
@@ -583,18 +629,21 @@ export default function UnitTree({
   };
 
   const handleSelect = (selectedKeys: React.Key[], info: any) => {
-    if (!selectedKeys || selectedKeys.length === 0) return;
-    const key = String(selectedKeys[0]);
+    const key = String(selectedKeys && selectedKeys.length > 0 ? selectedKeys[0] : info?.node?.key || '');
+    if (!key) return;
 
-    // Nếu click vào confed node mà không cho chọn confed: chỉ mở/đóng nhánh
-    if (key.startsWith('confed_') && !allowSelectConfed) {
-      setExpandedKeys((prev) =>
-        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-      );
-      return;
+    const lk = key.toLowerCase();
+    const isConfed =
+      key.startsWith('confed_') ||
+      ORDERED_CONFED_CODES.map((c) => c.toLowerCase()).includes(lk) ||
+      ORDERED_CONFED_CODES.includes(key.toUpperCase());
+
+    // Tự động mở rộng nhánh khi người dùng chọn mục có nhánh con
+    if (isConfed || key.startsWith('nation_') || (info?.node?.children && info.node.children.length > 0)) {
+      setExpandedKeys((prev) => (prev.includes(key) ? prev : [...prev, key]));
     }
 
-    // Nếu ở màn club click vào nation: tự động mở rộng (và tải Cấp 3 nếu dùng local fallback)
+    // Nếu ở màn club click vào nation: tự động tải Cấp 3 nếu dùng local fallback
     if (currentMode === 'club' && key.startsWith('nation_')) {
       const nid = key.replace('nation_', '');
       if (!apiTreeData && nid && nationCompsCache[nid] === undefined) {
@@ -611,28 +660,33 @@ export default function UnitTree({
           })
           .catch(() => {});
       }
-      setExpandedKeys((prev) => (prev.includes(key) ? prev : [...prev, key]));
     }
 
     onSelectNode(key, info.node);
   };
 
-  return (
-    <div className={`flex flex-col space-y-2.5 ${className}`}>
-      {/* Ô tìm kiếm đơn vị chuẩn theo hình mẫu */}
-      <Input.Search
-        placeholder="Search"
-        value={keyword}
-        onChange={handleSearchChange}
-        onSearch={(val) => setKeyword(val)}
-        allowClear
-        className="w-full"
-      />
+  const isFullHeight = height === '100%' || height === 'full';
 
-      {/* Khung hiển thị Cây đơn vị (chiều cao cố định) */}
+  return (
+    <div className={`flex flex-col min-h-0 ${isFullHeight ? 'h-full flex-1' : 'space-y-2.5'} ${className}`}>
+      {/* Ô tìm kiếm đơn vị chuẩn theo hình mẫu */}
+      <div className="shrink-0 mb-2">
+        <Input.Search
+          placeholder="Search"
+          value={keyword}
+          onChange={handleSearchChange}
+          onSearch={(val) => setKeyword(val)}
+          allowClear
+          className="w-full"
+        />
+      </div>
+
+      {/* Khung hiển thị Cây đơn vị */}
       <div
-        style={{ height, minHeight: height, maxHeight: height }}
-        className="overflow-y-auto mobile-frame-scroll border border-slate-200 rounded-lg p-1 bg-white relative"
+        style={isFullHeight ? undefined : { height, minHeight: height, maxHeight: height }}
+        className={`overflow-y-auto mobile-frame-scroll border border-slate-200/80 rounded-lg p-1 bg-white relative ${
+          isFullHeight ? 'flex-1 min-h-0 h-full' : ''
+        }`}
       >
         {loadingTree && !apiTreeData && nations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-xs">
@@ -641,11 +695,16 @@ export default function UnitTree({
           </div>
         ) : (
           <Tree
+            virtual={false}
             blockNode
             showLine={{ showLeafIcon: false }}
             treeData={filteredTreeData}
             loadData={currentMode === 'club' && !apiTreeData ? handleLoadData : undefined}
-            selectedKeys={selectedKey ? [selectedKey] : []}
+            selectedKeys={
+              selectedKey
+                ? [selectedKey, selectedKey.toLowerCase(), selectedKey.toUpperCase()]
+                : []
+            }
             expandedKeys={expandedKeys}
             autoExpandParent={autoExpandParent}
             onExpand={(keys) => {
@@ -661,53 +720,126 @@ export default function UnitTree({
               )
             }
           titleRender={(node: any) => {
-            const isSelected = Boolean(selectedKey && String(selectedKey) === String(node.key));
+            const isSelected = Boolean(
+              selectedKey &&
+                (String(selectedKey) === String(node.key) ||
+                  (node.level === 1 && String(selectedKey).toLowerCase() === String(node.key).toLowerCase()))
+            );
             const isLevel1 = node.level === 1;
 
-            if (!isLevel1) {
-              const code3 = node.code3 || node.nationData?.name_3l || '';
-              const shortName = node.shortName || node.nationData?.name_sh || node.nationData?.name || '';
-              const hideTag = Boolean(
-                node.noTag ||
-                node.isInternational ||
-                node.isOther ||
-                node.isExtinct ||
-                String(node.key).startsWith('intl_') ||
-                String(node.key).startsWith('oth_') ||
-                String(node.key).startsWith('ext_')
-              );
+            // Extract tag and text
+            let tag = node.code3 || '';
+            let text = node.shortName || '';
 
-              return (
-                <span className="flex items-center justify-between w-full min-w-0 pr-1 select-none text-xs">
-                  <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
-                    {!hideTag && code3 && (
-                      <span
-                        className={`inline-flex items-center justify-center px-1 py-0.5 rounded text-[10px] font-mono font-medium tracking-wider flex-shrink-0 border leading-none ${
-                          isSelected
-                            ? 'bg-blue-100 text-blue-700 border-blue-300'
-                            : 'bg-slate-100 text-slate-600 border-slate-200'
-                        }`}
-                      >
-                        {code3}
-                      </span>
-                    )}
-                    <span className={`truncate ${isSelected ? 'font-medium text-blue-700' : ''}`}>
-                      {shortName}
-                    </span>
-                  </span>
-                  {isSelected && (
-                    <CheckOutlined className="text-blue-600 text-xs shrink-0 ml-auto pl-2" />
-                  )}
-                </span>
-              );
+            // If tag/text not explicitly provided, extract from "[TAG] Text" pattern
+            if (!tag && typeof node.title === 'string') {
+              const match = node.title.match(/^\[([A-Za-z0-9_-]+)\]\s*(.*)$/);
+              if (match) {
+                tag = match[1];
+                text = match[2];
+              }
             }
 
-            // Level 1: ALL, WORLD, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA, EXTINCT
+            if (!text) {
+              text = node.shortName || node.nationData?.name_sh || node.nationData?.name || node.title || '';
+            }
+
+            const isAll = Boolean(
+              String(node.key).toLowerCase() === 'all' ||
+              tag === 'ALL' ||
+              text === 'ALL' ||
+              node.title === 'ALL'
+            );
+
+            const isIntl = Boolean(
+              !isAll && (
+                node.isInternational ||
+                String(node.key).startsWith('intl_') ||
+                tag === 'INT' ||
+                text === 'International'
+              )
+            );
+
+            const isOth = Boolean(
+              !isAll && (
+                node.isOther ||
+                String(node.key).startsWith('oth_') ||
+                tag === 'OTH' ||
+                text === 'Other'
+              )
+            );
+
+            const isExt = Boolean(
+              !isAll && (
+                node.isExtinct ||
+                String(node.key).startsWith('ext_') ||
+                String(node.key) === 'extinct' ||
+                tag === 'EXT' ||
+                tag === 'EXTINCT' ||
+                text === 'Extinct'
+              )
+            );
+
+            if (isAll) {
+              tag = 'ALL';
+              text = '';
+            } else if (isIntl) {
+              tag = 'INT';
+              text = 'International';
+            } else if (isOth) {
+              tag = 'OTH';
+              text = 'Other';
+            } else if (isExt) {
+              tag = 'EXT';
+              text = 'Extinct';
+            }
+
+            const isSpecial = isAll || isIntl || isOth || isExt;
+
+            const hideTag = Boolean(
+              !isSpecial && (node.noTag || !tag)
+            );
+
+            let tagColorClass = isSelected
+              ? 'bg-blue-100 text-blue-700 border-blue-300'
+              : 'bg-slate-100 text-slate-600 border-slate-200';
+
+            if (isAll) {
+              tagColorClass = isSelected
+                ? 'bg-amber-100 text-amber-800 border-amber-400 font-bold ring-1 ring-amber-300'
+                : 'bg-amber-50 text-amber-700 border-amber-300 font-semibold';
+            } else if (isIntl) {
+              tagColorClass = isSelected
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-400 font-semibold'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-300';
+            } else if (isOth) {
+              tagColorClass = isSelected
+                ? 'bg-orange-100 text-orange-800 border-orange-400 font-semibold'
+                : 'bg-orange-50 text-orange-700 border-orange-300';
+            } else if (isExt) {
+              tagColorClass = isSelected
+                ? 'bg-red-100 text-red-800 border-red-400 font-semibold'
+                : 'bg-red-50 text-red-700 border-red-300';
+            }
+
             return (
-              <span className="flex items-center justify-between w-full min-w-0 pr-1 select-none text-xs font-semibold">
-                <span className={`truncate ${isSelected ? 'text-blue-700' : ''}`}>{node.title}</span>
+              <span className={`flex items-center justify-between w-full min-w-0 pr-1 select-none text-xs ${isLevel1 ? 'font-semibold' : ''}`}>
+                <span className="inline-flex items-center gap-1.5 min-w-0 flex-1">
+                  {!hideTag && tag && (
+                    <span
+                      className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-mono tracking-wider flex-shrink-0 border leading-none ${tagColorClass}`}
+                    >
+                      {tag}
+                    </span>
+                  )}
+                  {text ? (
+                    <span className={`whitespace-normal break-words leading-tight ${isSelected ? 'font-semibold text-blue-700' : ''}`}>
+                      {text}
+                    </span>
+                  ) : null}
+                </span>
                 {isSelected && (
-                  <CheckOutlined className="text-blue-600 text-xs shrink-0 ml-auto pl-2" />
+                  <CheckOutlined className="text-blue-600 text-xs shrink-0 ml-auto pl-1.5 mt-0.5" />
                 )}
               </span>
             );

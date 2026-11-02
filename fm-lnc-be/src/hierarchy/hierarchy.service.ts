@@ -9,7 +9,6 @@ import {
   City,
   Award,
   Person,
-  Stage,
   Region,
 } from '../entities';
 import { normalizeConfed, CONFEDERATION_LIST } from '../entities/confederation.entity';
@@ -35,6 +34,23 @@ import {
 } from '../common/entity-mapper';
 
 const COMPETITION_DEFAULT_SORT = ['_competitionRank,asc', 'id,asc'];
+
+export const CONFED_DISPLAY_NAMES: Record<string, string> = {
+  AFC: 'Asia',
+  CAF: 'Africa',
+  CONCACAF: 'North America',
+  CONMEBOL: 'South America',
+  OFC: 'Oceania',
+  UEFA: 'Europe',
+  WORLD: 'World',
+  EXTINCT: 'Extinct',
+};
+
+export function getConfedTitle(code: string): string {
+  const upper = String(code || '').trim().toUpperCase();
+  const name = CONFED_DISPLAY_NAMES[upper];
+  return name ? `[${upper}] ${name}` : upper;
+}
 
 export interface UnitTreeNode {
   key: string;
@@ -76,7 +92,6 @@ export class HierarchyService {
     @InjectRepository(City) private cityRepo: Repository<City>,
     @InjectRepository(Award) private awardRepo: Repository<Award>,
     @InjectRepository(Person) private personRepo: Repository<Person>,
-    @InjectRepository(Stage) private stageRepo: Repository<Stage>,
     @InjectRepository(Region) private regionRepo: Repository<Region>,
   ) {}
 
@@ -316,6 +331,11 @@ export class HierarchyService {
       }
       if (nationId) {
         qb.andWhere('club.nation_id = :nationId', { nationId });
+      } else {
+        const confed = (filter as any)?.confed || (filter as any)?.confedId;
+        if (confed && String(confed).toLowerCase() !== 'all') {
+          qb.andWhere('nation.confed = :confed', { confed: normalizeConfed(confed) });
+        }
       }
     }
 
@@ -349,6 +369,11 @@ export class HierarchyService {
 
     if (nationId && String(nationId).toLowerCase() !== 'all') {
       qb.where('stadium.nation_id = :nationId', { nationId: String(nationId) });
+    } else {
+      const confed = (filter as any)?.confed || (filter as any)?.confedId;
+      if (confed && String(confed).toLowerCase() !== 'all') {
+        qb.where('nation.confed = :confed', { confed: normalizeConfed(confed) });
+      }
     }
 
     const searchKey = (filter?.keyword || '').trim();
@@ -382,6 +407,11 @@ export class HierarchyService {
 
     if (nationId && String(nationId).toLowerCase() !== 'all') {
       qb.where('city.nation_id = :nationId', { nationId: String(nationId) });
+    } else {
+      const confed = (filter as any)?.confed || (filter as any)?.confedId;
+      if (confed && String(confed).toLowerCase() !== 'all') {
+        qb.where('nation.confed = :confed', { confed: normalizeConfed(confed) });
+      }
     }
 
     if (
@@ -517,6 +547,11 @@ export class HierarchyService {
 
     if (nationId && String(nationId).toLowerCase() !== 'all') {
       qb.andWhere('award.nation_id = :nationId', { nationId: String(nationId) });
+    } else {
+      const confed = (filter as any)?.confed || (filter as any)?.confedId;
+      if (confed && String(confed).toLowerCase() !== 'all') {
+        qb.andWhere('nation.confed = :confed', { confed: normalizeConfed(confed) });
+      }
     }
 
     const searchKey = (filter?.keyword || '').trim();
@@ -795,24 +830,6 @@ export class HierarchyService {
       );
     }
     const items = await qb.orderBy('p.id', 'ASC').getMany();
-    return paginateAndSort(items, withDefaultSort(filter, ['id,asc']));
-  }
-
-  async getStages(queryOrFilter?: any) {
-    const filter =
-      typeof queryOrFilter === 'object' && queryOrFilter !== null
-        ? queryOrFilter
-        : { keyword: queryOrFilter };
-    const query = filter.keyword;
-    const qb = this.stageRepo.createQueryBuilder('s');
-    if (query && String(query).trim()) {
-      const term = String(query).trim();
-      qb.where('s.name ILIKE :q OR s.id = :term', {
-        q: `%${term}%`,
-        term,
-      });
-    }
-    const items = await qb.orderBy('s.id', 'ASC').getMany();
     return paginateAndSort(items, withDefaultSort(filter, ['id,asc']));
   }
 
@@ -1220,6 +1237,9 @@ export class HierarchyService {
         {
           key: 'all',
           title: 'ALL',
+          code3: 'ALL',
+          shortName: '',
+          noTag: false,
           isLeaf: true,
           level: 1,
           selectable: true,
@@ -1229,13 +1249,17 @@ export class HierarchyService {
 
       const confedCodes = [...ORDERED_CONFED_CODES, 'EXTINCT'];
       confedCodes.forEach((code) => {
+        const isExt = code === 'EXTINCT';
         nodes.push({
-          key: code,
-          title: code,
+          key: code.toLowerCase(),
+          title: isExt ? '[EXT] Extinct' : getConfedTitle(code),
+          code3: isExt ? 'EXT' : code,
+          shortName: CONFED_DISPLAY_NAMES[code] || code,
           isLeaf: true,
           level: 1,
           selectable: true,
           className: 'tree-node-level-1',
+          isExtinct: isExt,
         });
       });
       return nodes;
@@ -1278,14 +1302,19 @@ export class HierarchyService {
         {
           key: 'all',
           title: 'ALL',
+          code3: 'ALL',
+          shortName: '',
+          noTag: false,
           isLeaf: true,
           level: 1,
           selectable: true,
           className: 'tree-node-level-1',
         },
         {
-          key: 'confed_WORLD',
-          title: 'WORLD',
+          key: 'world',
+          title: '[WORLD] World',
+          code3: 'WORLD',
+          shortName: 'World',
           isLeaf: true,
           level: 1,
           selectable: true,
@@ -1296,21 +1325,24 @@ export class HierarchyService {
       ORDERED_CONFED_CODES.forEach((confedKey) => {
         const list = groups[confedKey] || [];
         nodes.push({
-          key: `confed_${confedKey}`,
-          title: confedKey,
+          key: confedKey.toLowerCase(),
+          title: getConfedTitle(confedKey),
+          code3: confedKey,
+          shortName: CONFED_DISPLAY_NAMES[confedKey] || confedKey,
           level: 1,
           selectable: true,
           className: 'tree-node-level-1',
           children: [
             {
-              key: `intl_${confedKey}`,
-              title: 'International',
+              key: `intl_${confedKey.toLowerCase()}`,
+              title: '[INT] International',
               isLeaf: true,
               level: 2,
               selectable: true,
               className: 'tree-node-level-2',
+              code3: 'INT',
               shortName: 'International',
-              noTag: true,
+              noTag: false,
               isInternational: true,
               confed: confedKey,
             },
@@ -1369,6 +1401,9 @@ export class HierarchyService {
         {
           key: 'all',
           title: 'ALL',
+          code3: 'ALL',
+          shortName: '',
+          noTag: false,
           isLeaf: true,
           level: 1,
           selectable: true,
@@ -1379,10 +1414,12 @@ export class HierarchyService {
       ORDERED_CONFED_CODES.forEach((confedKey) => {
         const list = groups[confedKey] || [];
         nodes.push({
-          key: `confed_${confedKey}`,
-          title: confedKey,
+          key: confedKey.toLowerCase(),
+          title: getConfedTitle(confedKey),
+          code3: confedKey,
+          shortName: CONFED_DISPLAY_NAMES[confedKey] || confedKey,
           level: 1,
-          selectable: false,
+          selectable: true,
           className: 'tree-node-level-1',
           children: list.map((n: any) => {
             const nationId = String(n.id);
@@ -1409,25 +1446,27 @@ export class HierarchyService {
               }),
               {
                 key: `oth_${nationId}`,
-                title: 'Other',
+                title: '[OTH] Other',
                 isLeaf: true,
                 level: 3,
                 selectable: true,
                 className: 'tree-node-level-3',
+                code3: 'OTH',
                 shortName: 'Other',
-                noTag: true,
+                noTag: false,
                 isOther: true,
                 nationId: nationId,
               },
               {
                 key: `ext_${nationId}`,
-                title: 'Extinct',
+                title: '[EXT] Extinct',
                 isLeaf: true,
                 level: 3,
                 selectable: true,
                 className: 'tree-node-level-3',
+                code3: 'EXT',
                 shortName: 'Extinct',
-                noTag: true,
+                noTag: false,
                 isExtinct: true,
                 nationId: nationId,
               },
@@ -1460,6 +1499,9 @@ export class HierarchyService {
       {
         key: 'all',
         title: 'ALL',
+        code3: 'ALL',
+        shortName: '',
+        noTag: false,
         isLeaf: true,
         level: 1,
         selectable: true,
@@ -1470,10 +1512,12 @@ export class HierarchyService {
     ORDERED_CONFED_CODES.forEach((confedKey) => {
       const list = groups[confedKey] || [];
       nodes.push({
-        key: `confed_${confedKey}`,
-        title: confedKey,
+        key: confedKey.toLowerCase(),
+        title: getConfedTitle(confedKey),
+        code3: confedKey,
+        shortName: CONFED_DISPLAY_NAMES[confedKey] || confedKey,
         level: 1,
-        selectable: false,
+        selectable: true,
         className: 'tree-node-level-1',
         children: list.map((n: any) => {
           const code = (n.name_3l || '---').toUpperCase();

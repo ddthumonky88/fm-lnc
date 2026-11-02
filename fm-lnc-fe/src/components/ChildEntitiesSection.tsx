@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Badge, Tooltip } from 'antd';
+import { RightOutlined } from '@ant-design/icons';
 
 export interface ChildEntityItem {
   key: string;
@@ -14,11 +14,13 @@ export interface ChildEntityItem {
 }
 
 export interface ChildEntitiesSectionProps {
+  title?: string;
   items: ChildEntityItem[];
   className?: string;
 }
 
 export default function ChildEntitiesSection({
+  title = 'THỰC THỂ TRỰC THUỘC',
   items,
   className = '',
 }: ChildEntitiesSectionProps) {
@@ -26,48 +28,65 @@ export default function ChildEntitiesSection({
 
   return (
     <div
-      className={`bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm ${className}`}
+      className={`bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs space-y-3 ${className}`}
     >
-      {/* Mỗi mục chỉ gồm ô icon + badge số lượng (giống footer cũ của EntityCard); nhãn hiện khi hover */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+        <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider">
+          {title}
+        </span>
+        <span className="text-xs font-semibold text-slate-500">
+          {items.length} mục
+        </span>
+      </div>
+
+      <div className="space-y-2.5">
         {items.map((item) => {
-          const count = item.count ?? 0;
+          const rawCount = item.count ?? 0;
+          const countNum = typeof rawCount === 'number' ? rawCount : Number(rawCount) || 0;
+          const isClickable = Boolean(item.onClick && !item.disabled);
+
           return (
-            <Tooltip key={item.key} title={`${item.label}: ${count}`} destroyOnHidden>
-              <Badge
-                count={count}
-                showZero
-                overflowCount={99999}
-                offset={[3, -3]}
-                style={{
-                  backgroundColor: '#ef4444',
-                  color: '#ffffff',
-                  fontWeight: 'bold',
-                  fontSize: '10px',
-                  height: '17px',
-                  minWidth: '17px',
-                  lineHeight: '17px',
-                  padding: '0 4px',
-                  boxShadow: '0 0 0 1.5px #ffffff',
-                }}
-              >
-                <button
-                  type="button"
-                  disabled={item.disabled}
-                  onClick={item.disabled ? undefined : item.onClick}
-                  aria-label={`${item.label}: ${count}`}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-all ${
-                    item.badgeStyles || 'bg-white border-slate-200 text-slate-600'
-                  } ${
-                    item.disabled
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'cursor-pointer hover:shadow-sm hover:scale-105'
-                  }`}
+            <div
+              key={item.key}
+              onClick={isClickable ? item.onClick : undefined}
+              className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
+                isClickable
+                  ? 'border-slate-200/80 bg-slate-50/60 hover:bg-blue-50/50 hover:border-blue-300 cursor-pointer group shadow-2xs'
+                  : 'border-slate-200/60 bg-slate-50/30 opacity-70 cursor-default'
+              }`}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center border shrink-0 transition-transform ${
+                    isClickable ? 'group-hover:scale-105' : ''
+                  } ${item.badgeStyles || 'bg-white border-slate-200 text-slate-600'}`}
                 >
                   {item.icon}
-                </button>
-              </Badge>
-            </Tooltip>
+                </span>
+                <span
+                  className={`text-xs font-semibold truncate ${
+                    isClickable ? 'text-slate-800 group-hover:text-blue-600' : 'text-slate-600'
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 ml-3">
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold leading-normal border ${
+                    countNum > 0
+                      ? 'bg-blue-50 text-blue-700 border-blue-200 font-mono'
+                      : 'bg-slate-100 text-slate-400 border-slate-200 font-mono'
+                  }`}
+                >
+                  {countNum.toLocaleString()}
+                </span>
+                {isClickable && (
+                  <RightOutlined className="text-[10px] text-slate-300 group-hover:text-blue-500 transition-colors" />
+                )}
+              </div>
+            </div>
           );
         })}
       </div>

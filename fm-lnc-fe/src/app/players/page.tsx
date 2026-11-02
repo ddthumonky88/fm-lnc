@@ -182,66 +182,61 @@ export default function PlayersPage() {
   );
 
   return (
-    <div>
-      {/* Ribbon Header */}
-      <div className="bg-[#e2f0fd] rounded-t-lg border border-[#cbe4fa] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2 shadow-2xs">
-        <div className="flex items-center gap-2">
-          <UserOutlined className="text-blue-600 text-sm" />
-          <span className="font-bold text-[#1e3a8a] text-xs sm:text-sm">Person</span>
-          <Tag color="blue" className="m-0 font-bold text-xs">
-            {total} records
-          </Tag>
+    <div className="h-full w-full flex flex-col bg-slate-100/70 p-3 sm:p-4 gap-3 overflow-hidden">
+      {/* Top Header & Search Card */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs shrink-0 flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center text-sm shadow-2xs">
+            <UserOutlined />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm text-slate-800">Person</span>
+              <Tag color="purple" className="m-0 font-bold text-xs">
+                {total.toLocaleString()} records
+              </Tag>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 flex-1 sm:flex-initial justify-end">
+          <Input
+            prefix={<SearchOutlined className="text-slate-400 mr-1" />}
+            placeholder="Search person by name, ID..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            allowClear
+            className="w-full sm:w-72 bg-slate-50 hover:bg-white focus:bg-white rounded-xl border border-slate-200 py-1.5 px-3 shadow-2xs"
+          />
+
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            size="small"
             onClick={() => openRecordModal(RecordType.PLAYER)}
-            className="bg-blue-600 hover:bg-blue-700 font-medium"
-            title="Add Person"
+            className="bg-blue-600 hover:bg-blue-700 font-medium rounded-xl h-9 shadow-2xs shrink-0"
           >
             <span className="hidden sm:inline">Add Person</span>
           </Button>
         </div>
       </div>
 
-      {/* Main Container */}
-      <div className="bg-white border border-[#cbe4fa] border-t-0 rounded-b-lg p-3 sm:p-5 shadow-sm min-h-[480px]">
-        {/* Filter bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4 pb-2 border-b border-gray-100">
-          <div className="text-xs text-gray-500">
-            Total: <strong className="text-gray-800">{total}</strong> persons
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-            <Input
-              prefix={<SearchOutlined className="text-gray-400" />}
-              placeholder="Filter person by name, ID..."
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-              allowClear
-              className="flex-1 sm:w-72"
-            />
-          </div>
-        </div>
-
-        {/* Mobile Vertical Cards - 1 card per row */}
-        <div>
-          <div className="grid grid-cols-1 gap-3">
+      {/* Main List Card Container */}
+      <div className="flex-1 min-h-0 bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+        {/* Scrollable Cards Area */}
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {players.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 text-xs italic">
+              <div className="col-span-full py-16 text-center text-slate-400 text-xs italic">
                 No person records found
               </div>
             ) : (
               players.map((p) => (
                 <div
                   key={p.id}
-                  className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between gap-2"
+                  className="bg-white border border-slate-200/90 rounded-xl p-3 shadow-2xs flex flex-col justify-between gap-2 hover:border-blue-300 transition-colors"
                 >
-                  <div className="flex items-center justify-between pb-1.5 border-b border-gray-100">
-                    <Tag color="blue" className="font-mono font-bold text-[10px] sm:text-xs m-0">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                    <Tag color="blue" className="font-mono font-bold text-[10px] m-0">
                       {p.id}
                     </Tag>
                     <div className="flex items-center gap-1">
@@ -271,29 +266,29 @@ export default function PlayersPage() {
                     </div>
                   </div>
 
-                  <div className="text-xs space-y-1">
+                  <div className="text-[12px] space-y-1">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="w-8 text-gray-400 font-medium select-none shrink-0">
-                        FN:
+                      <span className="w-16 text-slate-400 font-normal select-none shrink-0 uppercase text-[10px]">
+                        F-NAME:
                       </span>
-                      <span className="font-bold text-[13px] text-gray-800">
+                      <span className="font-bold text-[12px] text-gray-800">
                         {p.first_name || '-'}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="w-8 text-gray-400 font-medium select-none shrink-0">
-                        SN:
+                      <span className="w-16 text-slate-400 font-normal select-none shrink-0 uppercase text-[10px]">
+                        S-NAME:
                       </span>
-                      <span className="font-bold text-[13px] text-gray-800">
+                      <span className="font-bold text-[12px] text-gray-800">
                         {p.second_name || '-'}
                       </span>
                     </div>
                     {p.common_name && (
                       <div className="flex items-baseline gap-1.5">
-                        <span className="w-8 text-gray-400 font-medium select-none shrink-0">
-                          CN:
+                        <span className="w-16 text-slate-400 font-normal select-none shrink-0 uppercase text-[10px]">
+                          C-NAME:
                         </span>
-                        <span className="font-bold text-[13px] text-gray-700 italic">
+                        <span className="font-bold text-[12px] text-gray-700 italic">
                           {p.common_name}
                         </span>
                       </div>
@@ -303,19 +298,32 @@ export default function PlayersPage() {
               ))
             )}
           </div>
-          {total > pageSize && (
-            <div className="mt-4 flex justify-center">
-              <Pagination
-                current={page}
-                pageSize={pageSize}
-                total={total}
-                size="small"
-                showSizeChanger={false}
-                onChange={(p) => setPage(p)}
-              />
-            </div>
-          )}
         </div>
+
+        {/* Pinned Bottom Pagination */}
+        {total > 0 && (
+          <div className="shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-white gap-3 flex-wrap sm:flex-nowrap">
+            <span className="text-xs text-slate-500 font-medium shrink-0">
+              Hiển thị <strong className="text-slate-700">{Math.min((page - 1) * pageSize + 1, total)}</strong> - <strong className="text-slate-700">{Math.min(page * pageSize, total)}</strong> / <strong className="text-blue-600">{total.toLocaleString()}</strong> cầu thủ
+            </span>
+            <Pagination
+              current={page}
+              pageSize={pageSize}
+              total={total}
+              size="small"
+              showSizeChanger={true}
+              pageSizeOptions={['10', '20', '50', '100']}
+              locale={{ items_per_page: '/ trang' }}
+              onChange={(p, s) => {
+                setPage(p);
+                if (s && s !== pageSize) {
+                  setPageSize(s);
+                  setPage(1);
+                }
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

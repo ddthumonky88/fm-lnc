@@ -5,7 +5,6 @@ export enum RecordType {
   CITY = 'city',
   AWARD = 'award',
   PLAYER = 'player',
-  STAGE = 'stage',
   REGION = 'region',
 }
 
@@ -20,7 +19,6 @@ export enum EntityType {
   CITY = 'city',
   AWARD = 'award',
   PLAYER = 'player',
-  STAGE = 'stage',
   REGION = 'region',
 }
 

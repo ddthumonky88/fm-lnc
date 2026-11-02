@@ -20,7 +20,6 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
     cities: any[];
     awards: any[];
     players: any[];
-    stages: any[];
   }>({
     clubs: [],
     competitions: [],
@@ -29,7 +28,6 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
     cities: [],
     awards: [],
     players: [],
-    stages: [],
   });
 
   useEffect(() => {
@@ -42,7 +40,6 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
         cities: [],
         awards: [],
         players: [],
-        stages: [],
       });
       return;
     }
@@ -59,7 +56,6 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
           cities: res.cities || [],
           awards: res.awards || [],
           players: res.players || [],
-          stages: res.stages || [],
         });
       } catch (e) {
         console.error(e);
@@ -80,8 +76,7 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
     results.stadiums.length +
     results.cities.length +
     results.awards.length +
-    results.players.length +
-    results.stages.length;
+    results.players.length;
 
   return (
     <div className="absolute inset-0 z-50 flex items-start justify-center bg-black/60 p-2.5 pt-3 overflow-hidden">
@@ -351,35 +346,6 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectItem }: Quic
                     </div>
                     <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
                       {p.id}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Stages */}
-          {results.stages.length > 0 && (
-            <div>
-              <div className="text-[11px] font-bold text-rose-600 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                <span>Stages ({results.stages.length})</span>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {results.stages.map((st) => (
-                  <div
-                    key={st.id}
-                    onClick={() => {
-                      onSelectItem(st, 'stage');
-                      onClose();
-                    }}
-                    className="py-2 px-2 hover:bg-rose-50 rounded cursor-pointer flex items-center justify-between transition"
-                  >
-                    <div>
-                      <div className="text-xs font-semibold text-rose-950">{st.name}</div>
-                      <div className="text-[11px] text-gray-500">Tournament Stage Name</div>
-                    </div>
-                    <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded">
-                      {st.id}
                     </span>
                   </div>
                 ))}

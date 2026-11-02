@@ -8,7 +8,6 @@ import {
   City,
   Award,
   Person,
-  Stage,
   Region,
 } from '../entities';
 import { HierarchyService } from './hierarchy.service';
@@ -24,7 +23,6 @@ import { HierarchyController } from './hierarchy.controller';
       City,
       Award,
       Person,
-      Stage,
       Region,
     ]),
   ],

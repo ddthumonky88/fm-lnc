@@ -8,7 +8,6 @@ import {
   Stadium,
   Award,
   Person,
-  Stage,
   Region,
 } from '../entities';
 import { RecordsService } from './records.service';
@@ -26,7 +25,6 @@ import { HierarchyModule } from '../hierarchy/hierarchy.module';
       Stadium,
       Award,
       Person,
-      Stage,
       Region,
     ]),
   ],

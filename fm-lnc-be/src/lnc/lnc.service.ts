@@ -11,7 +11,6 @@ import {
   Stadium,
   Award,
   Person,
-  Stage,
   normalizeConfed,
   ConfederationEnum,
 } from '../entities';
@@ -28,7 +27,6 @@ export class LncService {
     @InjectRepository(Stadium) private stadiumRepo: Repository<Stadium>,
     @InjectRepository(Award) private awardRepo: Repository<Award>,
     @InjectRepository(Person) private personRepo: Repository<Person>,
-    @InjectRepository(Stage) private stageRepo: Repository<Stage>,
   ) {}
 
   /**
@@ -233,16 +231,6 @@ export class LncService {
       out += `# PEOPLE\n${hr}`;
       for (const p of people) {
         out += `"CHANGE_PLAYER_NAME"\t${p.id}\t"${p.first_name}"\t\t"${p.common_name}"\t\t\t"${p.second_name}"\n`;
-      }
-      out += '\n';
-    }
-
-    // 8. STAGES
-    const stages = await this.stageRepo.find({ order: { id: 'ASC' } });
-    if (stages.length > 0) {
-      out += `# STAGES\n${hr}`;
-      for (const st of stages) {
-        out += `"STAGE_NAME_LONG_NAME_CHANGE"\t\t${st.id}\t\t"${st.name}"\t\t\t\t8\n`;
       }
       out += '\n';
     }

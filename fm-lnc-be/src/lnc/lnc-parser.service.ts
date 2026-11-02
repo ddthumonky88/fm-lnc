@@ -440,11 +440,6 @@ export class LncParserService {
               if (isCommented) awards[id].inactive_fields.add('name_sh');
               else awards[id].inactive_fields.delete('name_sh');
             }
-          } else if (cmd === 'STAGE_NAME_LONG_NAME_CHANGE') {
-            await queryRunner.query(
-              `INSERT INTO stages (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name`,
-              [id, val],
-            );
           }
         }
       }

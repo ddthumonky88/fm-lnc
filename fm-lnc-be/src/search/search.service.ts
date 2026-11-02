@@ -9,7 +9,6 @@ import {
   City,
   Award,
   Person,
-  Stage,
 } from '../entities';
 import {
   mapClub,
@@ -30,7 +29,6 @@ export class SearchService {
     @InjectRepository(City) private cityRepo: Repository<City>,
     @InjectRepository(Award) private awardRepo: Repository<Award>,
     @InjectRepository(Person) private personRepo: Repository<Person>,
-    @InjectRepository(Stage) private stageRepo: Repository<Stage>,
   ) {}
 
   async search(query: string, limit = 20) {
@@ -43,7 +41,6 @@ export class SearchService {
         cities: [],
         awards: [],
         players: [],
-        stages: [],
       };
     }
 
@@ -51,7 +48,7 @@ export class SearchService {
     const isId = /^\d+$/.test(term);
     const idVal = isId ? parseInt(term, 10) : -1;
 
-    const [clubs, competitions, nations, stadiums, cities, awards, players, stages] = await Promise.all([
+    const [clubs, competitions, nations, stadiums, cities, awards, players] = await Promise.all([
       this.clubRepo
         .createQueryBuilder('c')
         .leftJoinAndSelect('c.nation', 'nation')
@@ -139,13 +136,6 @@ export class SearchService {
         .limit(limit)
         .getMany(),
 
-      this.stageRepo
-        .createQueryBuilder('st')
-        .where('st.name ILIKE :q', { q: `%${term}%` })
-        .orWhere('st.id = :idVal', { idVal })
-        .orderBy('st.id', 'ASC')
-        .limit(limit)
-        .getMany(),
     ]);
 
     return {
@@ -156,7 +146,6 @@ export class SearchService {
       cities: cities.map(mapCity),
       awards: awards.map(mapAward),
       players,
-      stages,
     };
   }
 }

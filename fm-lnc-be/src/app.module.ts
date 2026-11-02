@@ -10,7 +10,6 @@ import {
   Stadium,
   Award,
   Person,
-  Stage,
   Region,
 } from './entities';
 import { LncModule } from './lnc/lnc.module';
@@ -45,7 +44,6 @@ dotenv.config();
         Stadium,
         Award,
         Person,
-        Stage,
         Region,
       ],
       synchronize: false, // We created schema and seeded directly

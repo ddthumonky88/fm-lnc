@@ -129,73 +129,44 @@ function StadiumDetailContent() {
   const stadiumName = stadiumInfo.name || `Stadium ${stadiumInfo.id}`;
 
   return (
-    <div className="w-full p-3 sm:p-5 space-y-4">
-      {/* 1. Title của Body: Back + Icon + (Line 1: Thẻ ID, Line 2: Name) + Actions */}
-      <DetailBodyHeader
-        onBack={() => router.push('/list-stadiums')}
-        id={stadiumInfo.id}
-        name={stadiumName}
-        icon={<StadiumIcon size={22} className="text-emerald-600" />}
-        badgeTypeStyles="bg-emerald-50/90 border-emerald-300 text-emerald-600"
-        extraTag={
-          stadiumInfo.capacity ? (
-            <Tag color="green" className="m-0 text-xs">
-              Capacity: {Number(stadiumInfo.capacity).toLocaleString()}
-            </Tag>
-          ) : undefined
-        }
-        onEdit={handleEdit}
-        onDelete={() => setDeleteModalOpen(true)}
-      />
-
-      {/* 2. Vùng thông tin: Card chi tiết thuộc tính */}
-      <div className="w-full">
-        <RecordDetailView
-          data={stadiumInfo}
-          type={EntityType.STADIUM}
-          showHeader={false}
+    <div className="w-full h-full overflow-y-auto bg-slate-100/70 p-3 sm:p-4 lg:p-5 space-y-4">
+      {/* 1. Title của Body */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs">
+        <DetailBodyHeader
+          onBack={() => router.push('/list-stadiums')}
+          id={stadiumInfo.id}
+          name={stadiumName}
+          icon={<StadiumIcon size={22} className="text-emerald-600" />}
+          badgeTypeStyles="bg-emerald-50 border-emerald-200 text-emerald-700"
+          extraTag={
+            stadiumInfo.capacity ? (
+              <Tag color="green" className="m-0 text-xs font-semibold">
+                Capacity: {Number(stadiumInfo.capacity).toLocaleString()}
+              </Tag>
+            ) : undefined
+          }
           onEdit={handleEdit}
+          onDelete={() => setDeleteModalOpen(true)}
         />
       </div>
 
-      {/* 3. Vùng các thẻ (kèm theo số lượng) con trực thuộc */}
-      <ChildEntitiesSection
-        items={[
-          ...(nationId
-            ? [
-                {
-                  key: 'nation',
-                  label: `Nation (${nationName || nationId})`,
-                  count: 1,
-                  icon: <NationIcon size={18} className="text-cyan-500" />,
-                  badgeStyles: 'bg-cyan-50 border-cyan-200 text-cyan-600',
-                  onClick: () => router.push(`/nation/${nationId}`),
-                },
-              ]
-            : []),
-          ...(cityId
-            ? [
-                {
-                  key: 'city',
-                  label: `City (${cityName || cityId})`,
-                  count: 1,
-                  icon: <CityIcon size={18} className="text-sky-500" />,
-                  badgeStyles: 'bg-sky-50 border-sky-200 text-sky-600',
-                  onClick: () => router.push(`/city/${cityId}`),
-                },
-              ]
-            : []),
-          {
-            key: 'clubs',
-            label: 'Clubs using this stadium',
-            count: stadiumInfo.clubsCount ?? (stadiumInfo.clubs?.length || 0),
-            icon: <ClubIcon size={18} className="text-blue-500" />,
-            badgeStyles: 'bg-blue-50 border-blue-200 text-blue-600',
-            onClick: () =>
-              router.push(`/list-clubs${nationId ? `?nationId=${nationId}` : ''}`),
-          },
-        ]}
-      />
+      {/* 2. Layout 2 cột theo Wireframe: Trái là Vùng thông tin, Phải là ??? (tạm thời để trống, đóng khung) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
+        {/* Vùng thông tin (bên trái) */}
+        <div className="lg:col-span-5 xl:col-span-4 min-w-0 space-y-4">
+          <RecordDetailView
+            data={stadiumInfo}
+            type={EntityType.STADIUM}
+            showHeader={false}
+            onEdit={handleEdit}
+          />
+        </div>
+
+        {/* Khung bên phải để trống hoàn toàn */}
+        <div className="lg:col-span-7 xl:col-span-8 min-w-0">
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs min-h-[500px]" />
+        </div>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmModal

@@ -295,51 +295,17 @@ function ClubDetailContent() {
   const clubLogoUrl = !logoLoadError ? getClubLogoUrl(currentClub.id) : null;
 
   return (
-    <div className="w-full p-3 sm:p-5 space-y-4">
-      {/* 1. Title của Body: Back + Icon + (Line 1: Thẻ ID, Line 2: Name) + Actions */}
-      <DetailBodyHeader
-        onBack={() => router.push('/list-clubs')}
-        id={currentClub.id}
-        name={currentClubTitle}
-        code3={currentClub.name_3l || currentClub.code}
-        logoUrl={clubLogoUrl}
-        icon={<ClubIcon size={22} className="text-blue-600" />}
-        badgeTypeStyles="bg-blue-50/90 border-blue-300 text-blue-600"
-        onEdit={() =>
-                openRecordModal(
-                  RecordType.CLUB,
-                  currentClub,
-                  currentClub?.nation_id,
-                  currentClub?.comp_id
-                )
-              }
-        onDelete={() => setDeleteModalOpen(true)}
-      />
-
-      {/* Selector nếu có nhiều đội trong gia đình */}
-      {hasAffiliates && (
-        <div className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
-          <div className="text-xs font-semibold text-slate-500 mb-1.5">
-            Select a team in the club family:
-          </div>
-          <Select
-            value={activeTab}
-            onChange={handleTabChange}
-            options={tabItems}
-            optionLabelProp="selectedLabel"
-            className="family-team-select w-full"
-            popupClassName="family-team-select-dropdown"
-            popupMatchSelectWidth
-          />
-        </div>
-      )}
-
-      {/* 2. Vùng thông tin: Card chi tiết thuộc tính */}
-      <div className="w-full">
-        <RecordDetailView
-          data={currentClub}
-          type={EntityType.CLUB}
-          hideClubAffiliates
+    <div className="w-full h-full overflow-y-auto bg-slate-100/70 p-3 sm:p-4 lg:p-5 space-y-4">
+      {/* 1. Title của Body */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs">
+        <DetailBodyHeader
+          onBack={() => router.push('/list-clubs')}
+          id={currentClub.id}
+          name={currentClubTitle}
+          code3={currentClub.name_3l || currentClub.code}
+          logoUrl={clubLogoUrl}
+          icon={<ClubIcon size={22} className="text-blue-600" />}
+          badgeTypeStyles="bg-blue-50 border-blue-200 text-blue-700"
           onEdit={() =>
             openRecordModal(
               RecordType.CLUB,
@@ -348,96 +314,65 @@ function ClubDetailContent() {
               currentClub?.comp_id
             )
           }
-          onNavigateConfed={() => router.push('/list-nations')}
-          onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
-          onNavigateComp={(cId) =>
-            router.push(`/comp/${cId}${currentNationId ? `?nationId=${currentNationId}` : ''}`)
-          }
-          onNavigateClub={(cId) => {
-            const inFamily = familyTeams.some((t) => String(t.id) === String(cId));
-            if (inFamily) {
-              handleTabChange(String(cId));
-            } else {
-              router.push(`/club/${cId}`);
-            }
-          }}
+          onDelete={() => setDeleteModalOpen(true)}
         />
       </div>
 
-      {/* 3. Vùng các thẻ (kèm theo số lượng) con trực thuộc / liên quan */}
-      <ChildEntitiesSection
-        items={[
-          ...(currentClub.comp || currentClub.comp_id
-            ? [
-                {
-                  key: 'comp',
-                  label: `Competition (${currentClub.comp?.name_sh || currentClub.comp?.name_lg || 'Competition'})`,
-                  count: 1,
-                  icon: <DomesticCompIcon size={18} className="text-amber-500" />,
-                  badgeStyles: 'bg-amber-50 border-amber-200 text-amber-600',
-                  onClick: () =>
-                    router.push(
-                      `/comp/${currentClub.comp?.id || currentClub.comp_id}${
-                        currentNationId ? `?nationId=${currentNationId}` : ''
-                      }`
-                    ),
-                },
-              ]
-            : []),
-          ...(currentNationId
-            ? [
-                {
-                  key: 'nation',
-                  label: `Nation (${currentClub.nation?.name_sh || currentClub.nation?.name_lg || currentNationId})`,
-                  count: 1,
-                  icon: <NationIcon size={18} className="text-cyan-500" />,
-                  badgeStyles: 'bg-cyan-50 border-cyan-200 text-cyan-600',
-                  onClick: () => router.push(`/nation/${currentNationId}`),
-                },
-              ]
-            : []),
-          ...(currentClub.stadium_id || currentClub.stadium?.id
-            ? [
-                {
-                  key: 'stadium',
-                  label: `Stadium (${currentClub.stadium?.name || currentClub.stadium_id})`,
-                  count: 1,
-                  icon: <StadiumIcon size={18} className="text-emerald-500" />,
-                  badgeStyles: 'bg-emerald-50 border-emerald-200 text-emerald-600',
-                  onClick: () =>
-                    router.push(
-                      `/stadium/${currentClub.stadium?.id || currentClub.stadium_id}`
-                    ),
-                },
-              ]
-            : []),
-          ...(currentClub.city_id || currentClub.city?.id
-            ? [
-                {
-                  key: 'city',
-                  label: `City (${currentClub.city?.name || currentClub.city_id})`,
-                  count: 1,
-                  icon: <CityIcon size={18} className="text-sky-500" />,
-                  badgeStyles: 'bg-sky-50 border-sky-200 text-sky-600',
-                  onClick: () =>
-                    router.push(`/city/${currentClub.city?.id || currentClub.city_id}`),
-                },
-              ]
-            : []),
-          ...(hasAffiliates
-            ? [
-                {
-                  key: 'affiliates',
-                  label: 'Family teams',
-                  count: familyTeams.length,
-                  icon: <ClubIcon size={18} className="text-indigo-500" />,
-                  badgeStyles: 'bg-indigo-50 border-indigo-200 text-indigo-600',
-                  onClick: () => {},
-                },
-              ]
-            : []),
-        ]}
-      />
+      {/* 2. Layout 2 cột theo Wireframe: Trái là Vùng thông tin, Phải là ??? (tạm thời để trống, đóng khung) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
+        {/* Vùng thông tin (bên trái) */}
+        <div className="lg:col-span-5 xl:col-span-4 min-w-0 space-y-4">
+          {/* Selector nếu có nhiều đội trong gia đình */}
+          {hasAffiliates && (
+            <div className="bg-white p-3 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <div className="text-xs font-semibold text-slate-500 mb-1.5">
+                Select a team in the club family:
+              </div>
+              <Select
+                value={activeTab}
+                onChange={handleTabChange}
+                options={tabItems}
+                optionLabelProp="selectedLabel"
+                className="family-team-select w-full"
+                popupClassName="family-team-select-dropdown"
+                popupMatchSelectWidth
+              />
+            </div>
+          )}
+
+          <RecordDetailView
+            data={currentClub}
+            type={EntityType.CLUB}
+            hideClubAffiliates
+            onEdit={() =>
+              openRecordModal(
+                RecordType.CLUB,
+                currentClub,
+                currentClub?.nation_id,
+                currentClub?.comp_id
+              )
+            }
+            onNavigateConfed={() => router.push('/list-nations')}
+            onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
+            onNavigateComp={(cId) =>
+              router.push(`/comp/${cId}${currentNationId ? `?nationId=${currentNationId}` : ''}`)
+            }
+            onNavigateClub={(cId) => {
+              const inFamily = familyTeams.some((t) => String(t.id) === String(cId));
+              if (inFamily) {
+                handleTabChange(String(cId));
+              } else {
+                router.push(`/club/${cId}`);
+              }
+            }}
+          />
+        </div>
+
+        {/* Khung bên phải để trống hoàn toàn */}
+        <div className="lg:col-span-7 xl:col-span-8 min-w-0">
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs min-h-[500px]" />
+        </div>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmModal

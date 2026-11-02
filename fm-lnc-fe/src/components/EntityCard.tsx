@@ -169,6 +169,12 @@ export default function EntityCard({
   const [idCopied, setIdCopied] = useState(false);
 
   const entityTypeStr = String(type).toLowerCase();
+  const isComp =
+    entityTypeStr === 'competition' ||
+    entityTypeStr === 'comp' ||
+    entityTypeStr === 'international_competition' ||
+    type === EntityType.COMPETITION;
+
   const isSmall =
     cardSize !== undefined
       ? cardSize === 'small'
@@ -176,7 +182,7 @@ export default function EntityCard({
         entityTypeStr === 'stadium' ||
         entityTypeStr === 'city';
 
-  const is2Line = !isSmall && (largeStyle === '2-line' || cardStyle === '2-line');
+  const is2Line = isComp || (!isSmall && (largeStyle === '2-line' || cardStyle === '2-line'));
 
   const isRedKeyword = (val?: any): boolean => {
     if (!val || typeof val !== 'string') return false;
@@ -326,13 +332,6 @@ export default function EntityCard({
             <UserOutlined />
           </span>
         );
-      case EntityType.STAGE:
-      case 'stage':
-        return (
-          <span className="w-6 h-6 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-xs text-rose-600">
-            <FlagOutlined />
-          </span>
-        );
     }
   };
 
@@ -349,9 +348,7 @@ export default function EntityCard({
       ? data.common_name
         ? `"${data.common_name}"`
         : 'Person / Player'
-      : type === EntityType.STAGE
-        ? 'Tournament Stage'
-        : data.name_sh || '';
+      : data.name_sh || '';
   const hasThreeLetter =
     [
       EntityType.NATION,
@@ -695,18 +692,18 @@ export default function EntityCard({
               // Specific Entity Type Fields
               if (entityTypeStr === 'player') {
                 fields.push({
-                  label: 'FN:',
+                  label: 'F-NAME:',
                   value: data.first_name || '-',
                 });
                 fields.push({
-                  label: 'SN:',
+                  label: 'S-NAME:',
                   value: data.second_name || '-',
                 });
                 if (data.common_name) {
                   fields.push({
-                    label: 'CN:',
+                    label: 'C-NAME:',
                     value: (
-                      <span className="font-bold text-xs sm:text-[13px] leading-snug truncate text-gray-700 italic min-w-0 block">
+                      <span className="font-bold text-[12px] leading-snug truncate text-gray-700 italic min-w-0 block">
                         {data.common_name}
                       </span>
                     ),
@@ -717,7 +714,7 @@ export default function EntityCard({
                   title === '[REMOVE]' ||
                   (typeof title === 'string' && title.trim().toUpperCase() === '[REMOVE]');
                 fields.push({
-                  label: 'Name:',
+                  label: 'NAME:',
                   value: isTitleRemove ? (
                     <Tooltip title="[REMOVE]" trigger="hover" destroyOnHidden>
                       <span className="inline-flex items-center text-red-500 text-[14px]">
@@ -743,7 +740,7 @@ export default function EntityCard({
                     String(regionVal).trim().toUpperCase().startsWith('[REMOVE]');
 
                   fields.push({
-                    label: 'Region:',
+                    label: 'REGION:',
                     value: isRegionRemove ? (
                       <Tooltip title="[REMOVE]" trigger="hover" destroyOnHidden>
                         <span className="inline-flex items-center text-red-500 text-[14px]">
@@ -761,7 +758,7 @@ export default function EntityCard({
                 }
               } else if (entityTypeStr === 'stadium') {
                 fields.push({
-                  label: 'Name:',
+                  label: 'NAME:',
                   value: title,
                   align: 'start',
                   lineClamp: 3,
@@ -770,7 +767,7 @@ export default function EntityCard({
                 });
               } else if (entityTypeStr === 'club') {
                 fields.push({
-                  label: 'LN:',
+                  label: 'L-NAME:',
                   value: data.is_virtual ? '-' : data.name_lg || title,
                   align: 'start',
                   lineClamp: 2,
@@ -783,7 +780,7 @@ export default function EntityCard({
 
                 if (hasThreeLetter || data.name_sh || data.is_virtual) {
                   fields.push({
-                    label: 'SN:',
+                    label: 'S-NAME:',
                     value: data.is_virtual ? '-' : data.name_sh || title,
                     align: 'start',
                     lineClamp: 2,
@@ -793,13 +790,13 @@ export default function EntityCard({
                 }
 
                 fields.push({
-                  label: '6N:',
+                  label: '6L-NAME:',
                   value: code6 || '-',
                   isInactive: isInactive('name_6l'),
                 });
 
                 fields.push({
-                  label: '3N:',
+                  label: '3L-NAME:',
                   value: data.is_virtual ? '-' : code3 || '-',
                   isInactive: isInactive('name_3l'),
                 });
@@ -813,10 +810,10 @@ export default function EntityCard({
                 const isExt = data.is_extinct || compValue === 'EXT';
 
                 fields.push({
-                  label: 'Comp:',
+                  label: 'COMP:',
                   value: (
                     <span
-                      className={`font-bold text-xs sm:text-[13px] leading-snug truncate min-w-0 block ${
+                      className={`font-bold text-[12px] leading-snug truncate min-w-0 block ${
                         isExt
                           ? 'text-red-600'
                           : compValue === '-'
@@ -841,10 +838,10 @@ export default function EntityCard({
                     affClub?.name ||
                     affId;
                   fields.push({
-                    label: 'Affiliate:',
+                    label: 'AFFILIATE:',
                     value: (
                       <span
-                        className="text-[11px] truncate block text-sky-700 font-semibold"
+                        className="text-[12px] truncate block text-sky-700 font-semibold"
                         title={`Parent: ${pName} (${affId})`}
                       >
                         {affType ? `[${affType}] ` : ''}
@@ -858,48 +855,35 @@ export default function EntityCard({
 
                 if (data.affiliatesCount && data.affiliatesCount > 0) {
                   fields.push({
-                    label: 'Teams:',
+                    label: 'TEAMS:',
                     value: `${data.affiliatesCount} affiliates`,
                     align: 'start',
                   });
                 }
               } else if (entityTypeStr === 'region') {
                 fields.push({
-                  label: 'Name:',
+                  label: 'NAME:',
                   value: data.name || title,
                   align: 'start',
                   lineClamp: 2,
                 });
                 if (data.code) {
                   fields.push({
-                    label: 'Code:',
+                    label: 'CODE:',
                     value: data.code,
                   });
                 }
                 if (data.citiesCount !== undefined) {
                   fields.push({
-                    label: 'Cities:',
+                    label: 'CITIES:',
                     value: `${data.citiesCount} cities`,
                   });
                 }
-              } else if (entityTypeStr === 'stage') {
-                fields.push({
-                  label: 'Name:',
-                  value: data.name || title,
-                  align: 'start',
-                  lineClamp: 2,
-                  isInactive: isInactive('name'),
-                  isRed: isRedKeyword(data.name || title),
-                });
-                fields.push({
-                  label: 'Type:',
-                  value: 'Tournament Stage',
-                });
               } else {
                 // Default: Competition, Nation, Award, Confederation, etc.
                 const lnValue = data.name_lg || (data.is_virtual ? (data.virtual_type === 'EXTINCT' ? '[EXTINCT]' : '[OTHER]') : title);
                 fields.push({
-                  label: 'LN:',
+                  label: 'L-NAME:',
                   value: lnValue,
                   align: 'start',
                   lineClamp: 2,
@@ -913,7 +897,7 @@ export default function EntityCard({
                 if (hasThreeLetter || data.name_sh || data.is_virtual) {
                   const snValue = data.name_sh || (data.is_virtual ? (data.virtual_type === 'EXTINCT' ? '[EXTINCT]' : '[OTHER]') : title);
                   fields.push({
-                    label: 'SN:',
+                    label: 'S-NAME:',
                     value: snValue,
                     align: 'start',
                     lineClamp: 2,
@@ -930,7 +914,7 @@ export default function EntityCard({
                 ) {
                   const val3 = data.name_3l || code3 || (data.is_virtual ? (data.virtual_type === 'EXTINCT' ? '[EXTINCT]' : '[OTHER]') : '-');
                   fields.push({
-                    label: '3N:',
+                    label: '3L-NAME:',
                     value: val3,
                     isInactive: isInactive('name_3l'),
                     isRed: isRedKeyword(val3),
@@ -949,12 +933,14 @@ export default function EntityCard({
                   ? 'min-h-[90px]'
                   : entityTypeStr === 'club'
                     ? 'min-h-[160px]'
-                    : 'min-h-[120px]';
+                    : isComp
+                      ? 'min-h-[150px]'
+                      : 'min-h-[120px]';
 
             return (
               /* Fields List: Stack label on top of value for small/2-column cards; 1-line (1:3 ratio) for large */
               <div
-                className={`flex flex-col gap-2 mb-1 text-xs ${bodyMinHeightClass} justify-start`}
+                className={`flex flex-col gap-3 mb-1 text-[12px] ${bodyMinHeightClass} justify-start`}
               >
                 {renderedFields.map((field, idx) => {
                   const isNode = React.isValidElement(field.value);
@@ -976,9 +962,9 @@ export default function EntityCard({
                     return (
                       <div key={idx} className="flex flex-col min-w-0">
                         <span
-                          className={`text-[11px] font-semibold select-none leading-none mb-1 tracking-wider block ${
+                          className={`text-[10px] font-normal select-none leading-none mb-0.5 tracking-wider uppercase block ${
                             field.isInactive
-                              ? 'text-red-600 font-semibold'
+                              ? 'text-red-500 font-medium'
                               : 'text-slate-400'
                           }`}
                         >
@@ -991,7 +977,7 @@ export default function EntityCard({
                             removeIconNode
                           ) : (
                             <span
-                              className={`font-bold text-xs sm:text-[13px] leading-snug whitespace-normal break-words min-w-0 block ${
+                              className={`font-bold text-[12px] leading-snug whitespace-normal break-words min-w-0 block ${
                                 field.isInactive || field.isRed ? 'text-red-600' : 'text-slate-900'
                               }`}
                               title={
@@ -1007,16 +993,16 @@ export default function EntityCard({
                     );
                   }
 
-                  // 1-Line layout: [LN:] [Value] (Tỉ lệ label : value = 1 : 3, khoảng cách dòng đều nhau)
+                  // 1-Line layout: [L-NAME:] [Value] (Tỉ lệ label : value = 1 : 3, khoảng cách dòng đều nhau, min 76px cho label)
                   return (
                     <div
                       key={idx}
-                      className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-2.5 min-w-0"
+                      className="grid grid-cols-[minmax(76px,1fr)_minmax(0,3fr)] items-start gap-2.5 min-w-0"
                     >
                       <span
-                        className={`text-xs font-semibold select-none leading-snug truncate ${
+                        className={`text-[10px] font-normal select-none leading-snug truncate uppercase ${
                           field.isInactive
-                            ? 'text-red-600 font-semibold'
+                            ? 'text-red-500 font-medium'
                             : 'text-slate-400'
                         }`}
                       >
@@ -1029,7 +1015,7 @@ export default function EntityCard({
                           removeIconNode
                         ) : (
                           <span
-                            className={`font-bold text-xs sm:text-[13px] leading-snug whitespace-normal break-words min-w-0 block ${
+                            className={`font-bold text-[12px] leading-snug whitespace-normal break-words min-w-0 block ${
                               field.isInactive || field.isRed ? 'text-red-600' : 'text-slate-800'
                             }`}
                             title={

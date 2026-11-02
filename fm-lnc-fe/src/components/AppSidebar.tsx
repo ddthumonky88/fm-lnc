@@ -15,6 +15,7 @@ import {
   BankOutlined,
   EnvironmentOutlined,
   StarOutlined,
+  HomeOutlined,
 } from '@ant-design/icons';
 import { StadiumIcon } from './EntityIcons';
 
@@ -53,9 +54,8 @@ export default function AppSidebar({
   const router = useRouter();
 
   // Active check by route
+  const isHomeActive = pathname === '/' || pathname === '/home';
   const isNationActive =
-    pathname === '/' ||
-    pathname === '/home' ||
     pathname.startsWith('/list-nations') ||
     pathname.startsWith('/nation');
   const isCompActive =
@@ -69,7 +69,6 @@ export default function AppSidebar({
   const isAwardActive =
     pathname.startsWith('/list-awards') || pathname.startsWith('/award');
   const isPlayersActive = pathname === '/players';
-  const isStagesActive = pathname === '/stages';
 
   interface NavItem {
     key: string;
@@ -83,6 +82,17 @@ export default function AppSidebar({
   }
 
   const navItems: NavItem[] = [
+    {
+      key: 'HOME',
+      title: 'Home',
+      label: 'Home',
+      icon: <HomeOutlined className="text-base" />,
+      active: isHomeActive,
+      onClick: () => {
+        router.push('/home');
+        if (isMobileOpen) onCloseMobile();
+      },
+    },
     {
       key: 'NATION',
       title: 'Nations',
@@ -160,17 +170,6 @@ export default function AppSidebar({
         if (isMobileOpen) onCloseMobile();
       },
     },
-    {
-      key: 'STAGE',
-      title: 'Stage',
-      label: 'Stage',
-      icon: <FlagOutlined className="text-base" />,
-      active: isStagesActive,
-      onClick: () => {
-        router.push('/stages');
-        if (isMobileOpen) onCloseMobile();
-      },
-    },
   ];
 
   // Helper to render sidebar content for desktop or mobile drawer
@@ -180,22 +179,22 @@ export default function AppSidebar({
     return (
       <div className="flex flex-col h-full bg-[#0a1120] text-slate-300 border-r border-[#19263e] select-none">
         {/* Brand Header */}
-        <div className="h-16 px-4 flex items-center justify-between border-b border-[#19263e] shrink-0">
-          <div
-            onClick={() => {
-              router.push('/');
-              if (isMobile) onCloseMobile();
-            }}
-            className="flex items-center gap-3 cursor-pointer group overflow-hidden"
-          >
-            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md shadow-black/20 shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
-              <img
-                src="/fm/icons/icon-192.png"
-                alt="FM24 LNC"
-                className="w-full h-full object-contain rounded-xl"
-              />
-            </div>
-            {!isCollapsed && (
+        {isMobile ? (
+          <div className="h-14 px-4 flex items-center justify-between border-b border-[#19263e] shrink-0">
+            <div
+              onClick={() => {
+                router.push('/home');
+                onCloseMobile();
+              }}
+              className="flex items-center gap-2.5 cursor-pointer group overflow-hidden"
+            >
+              <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md shadow-black/20 shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
+                <img
+                  src="/fm/icons/icon-192.png"
+                  alt="FM24 LNC"
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              </div>
               <div className="min-w-0 transition-opacity duration-200">
                 <div className="font-bold text-sm text-white tracking-wide flex items-center gap-1.5">
                   <span>FM24 LNC</span>
@@ -205,11 +204,9 @@ export default function AppSidebar({
                 </div>
                 <div className="text-[11px] text-slate-400 truncate">Database Manager</div>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Mobile close button */}
-          {isMobile && (
+            {/* Mobile close button */}
             <button
               type="button"
               onClick={onCloseMobile}
@@ -218,8 +215,33 @@ export default function AppSidebar({
             >
               <CloseOutlined />
             </button>
-          )}
-        </div>
+          </div>
+        ) : !isCollapsed ? (
+          <div className="h-10 px-3 flex items-center justify-between border-b border-[#19263e]/60 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Menu điều hướng
+            </span>
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs"
+              title="Thu gọn sidebar"
+            >
+              <LeftOutlined />
+            </button>
+          </div>
+        ) : (
+          <div className="h-10 flex items-center justify-center border-b border-[#19263e]/60 shrink-0">
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs"
+              title="Mở rộng sidebar"
+            >
+              <RightOutlined />
+            </button>
+          </div>
+        )}
 
         {/* Navigation Items (World, Person, Stage) */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2.5 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800">
@@ -352,14 +374,21 @@ export default function AppSidebar({
 
   return (
     <>
-      {/* Desktop Persistent Sidebar: hidden in mobile-frame mode */}
+      {/* Desktop Persistent Sidebar */}
+      <aside
+        className={`hidden md:flex flex-col shrink-0 h-full bg-[#0a1120] text-slate-300 border-r border-[#19263e] select-none transition-all duration-200 z-20 ${
+          collapsed ? 'w-16' : 'w-56'
+        }`}
+      >
+        {renderSidebarContent(false)}
+      </aside>
 
-      {/* Mobile Drawer Overlay - Contained inside mobile-frame */}
+      {/* Mobile Drawer Overlay */}
       {isMobileOpen && (
-        <div className="absolute inset-0 z-50 flex overflow-hidden">
+        <div className="fixed inset-0 z-50 md:hidden flex overflow-hidden">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={onCloseMobile}
           />
 

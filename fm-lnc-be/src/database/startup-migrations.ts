@@ -33,6 +33,9 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
       DECLARE
           r RECORD;
       BEGIN
+          -- 0. Drop stages table
+          DROP TABLE IF EXISTS "stages" CASCADE;
+
           -- 1. Ensure table regions exists
           CREATE TABLE IF NOT EXISTS "regions" (
               "id" SERIAL PRIMARY KEY,
@@ -139,7 +142,6 @@ export async function runStartupMigrations(dataSource: DataSource, logger: Logge
           ALTER TABLE IF EXISTS "awards" ALTER COLUMN "comp_id" TYPE VARCHAR(64) USING "comp_id"::text;
 
           ALTER TABLE IF EXISTS "people" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
-          ALTER TABLE IF EXISTS "stages" ALTER COLUMN "id" TYPE VARCHAR(64) USING "id"::text;
 
           -- 4. Re-create foreign keys
           BEGIN

@@ -21,6 +21,7 @@ function ListClubsContent() {
   const initialNationId = searchParams.get('nationId') || 'all';
   const initialCompId = searchParams.get('compId') || undefined;
 
+  const [selectedConfed, setSelectedConfed] = useState<string>('all');
   const [selectedNation, setSelectedNation] = useState<string>(initialNationId);
   const [selectedCompId, setSelectedCompId] = useState<string | undefined>(initialCompId);
   const [selectedCompName, setSelectedCompName] = useState<string>('');
@@ -28,6 +29,7 @@ function ListClubsContent() {
 
   // Modal temporary state
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [tempConfed, setTempConfed] = useState<string>('all');
   const [tempNation, setTempNation] = useState<string>(initialNationId);
   const [tempExtinct, setTempExtinct] = useState<string>('all');
   const [tempCompId, setTempCompId] = useState<string | undefined>(initialCompId);
@@ -126,6 +128,7 @@ function ListClubsContent() {
     try {
       const res = await searchClubs(
         {
+          confedId: selectedConfed !== 'all' ? selectedConfed : undefined,
           nationId: selectedNation === 'all' ? undefined : selectedNation,
           compId: selectedCompId,
           extinct: extinctFilter === 'all' ? undefined : extinctFilter === 'extinct',
@@ -145,19 +148,18 @@ function ListClubsContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedNation, selectedCompId, extinctFilter, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, selectedNation, selectedCompId, extinctFilter, page, pageSize, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadClubs();
   }, [loadClubs]);
 
   // Filter summary:
-  // - Nếu chỉ chọn quốc gia: {confed} > {nation_short_name}
-  // - Nếu có chọn giải đấu: {confed} > {nation_3letter} > {comp_name}
   const levels: string[] = [];
   if (selectedNation !== 'all') {
     const nationNode = findNationInTree(treeNodes, selectedNation);
-    if (nationNode?.confed) levels.push(nationNode.confed);
+    const confed = selectedConfed !== 'all' ? selectedConfed : nationNode?.confed;
+    if (confed) levels.push(confed);
 
     if (selectedCompId) {
       // Có giải đấu: dùng {nation_3letter} và {comp_name}
@@ -165,8 +167,8 @@ function ListClubsContent() {
       levels.push(nation3l);
 
       let compName = selectedCompName;
-      if (selectedCompId.startsWith('oth-')) compName = 'Other';
-      else if (selectedCompId.startsWith('ext-')) compName = 'Extinct';
+      if (selectedCompId.startsWith('oth-')) compName = '[OTH] Other';
+      else if (selectedCompId.startsWith('ext-')) compName = '[EXT] Extinct';
       else if (!compName) compName = `Comp: ${selectedCompId}`;
       levels.push(compName);
     } else {
@@ -180,14 +182,9 @@ function ListClubsContent() {
         levels.push('Giải thể');
       }
     }
-  } else {
-    if (selectedCompId) {
-      let compName = selectedCompName;
-      if (selectedCompId.startsWith('oth-')) compName = 'Other';
-      else if (selectedCompId.startsWith('ext-')) compName = 'Extinct';
-      else if (!compName) compName = `Comp: ${selectedCompId}`;
-      levels.push(compName);
-    } else if (extinctFilter === 'active') {
+  } else if (selectedConfed !== 'all') {
+    levels.push(selectedConfed);
+    if (extinctFilter === 'active') {
       levels.push('Hoạt động');
     } else if (extinctFilter === 'extinct') {
       levels.push('Giải thể');
@@ -195,9 +192,10 @@ function ListClubsContent() {
   }
 
   const filterSummary = levels.length > 0 ? levels.join(' > ') : 'Tất cả câu lạc bộ';
-  const hasActiveCustomFilter = selectedNation !== 'all' || extinctFilter !== 'all' || !!selectedCompId;
+  const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all' || extinctFilter !== 'all' || !!selectedCompId;
 
   const handleOpenModal = () => {
+    setTempConfed(selectedConfed);
     setTempNation(selectedNation);
     setTempExtinct(extinctFilter);
     setTempCompId(selectedCompId);
@@ -205,15 +203,27 @@ function ListClubsContent() {
     setModalOpen(true);
   };
 
+  const confedKeys = ['afc', 'caf', 'concacaf', 'conmebol', 'ofc', 'uefa'];
+
   // Đổi option trên cây trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handleSelectTreeNode = (key: string, nodeData?: any) => {
+    const lk = key.toLowerCase();
     if (key === 'all') {
+      setTempConfed('all');
       setTempNation('all');
       setTempCompId(undefined);
       setTempCompName('');
       setTempExtinct('all');
+    } else if (key.startsWith('confed_') || confedKeys.includes(lk)) {
+      const confedCode = key.replace('confed_', '').toUpperCase();
+      setTempConfed(confedCode);
+      setTempNation('all');
+      setTempCompId(undefined);
+      setTempCompName('');
     } else if (key.startsWith('nation_')) {
       const nid = key.replace('nation_', '');
+      const nationNode = findNationInTree(treeNodes, nid);
+      if (nationNode?.confed) setTempConfed(nationNode.confed);
       setTempNation(nid);
       setTempCompId(undefined);
       setTempCompName('');
@@ -231,14 +241,72 @@ function ListClubsContent() {
       setTempNation(nid);
       setTempCompId('oth-' + nid);
       setTempExtinct('active');
-      setTempCompName('Other');
+      setTempCompName('[OTH] Other');
     } else if (key.startsWith('ext_')) {
       const nid = key.replace('ext_', '');
       setTempNation(nid);
       setTempCompId('ext-' + nid);
       setTempExtinct('extinct');
-      setTempCompName('Extinct');
+      setTempCompName('[EXT] Extinct');
     }
+  };
+
+  const currentTreeSelectedKey = selectedCompId
+    ? selectedCompId.startsWith('oth-')
+      ? `oth_${selectedCompId.slice(4)}`
+      : selectedCompId.startsWith('ext-')
+      ? `ext_${selectedCompId.slice(4)}`
+      : `comp_${selectedCompId}`
+    : selectedNation !== 'all'
+    ? `nation_${selectedNation}`
+    : selectedConfed !== 'all'
+    ? selectedConfed.toLowerCase()
+    : 'all';
+
+  const applyFilterDirectly = (key: string, nodeData?: any) => {
+    const lk = key.toLowerCase();
+    if (key === 'all') {
+      setSelectedConfed('all');
+      setSelectedNation('all');
+      setSelectedCompId(undefined);
+      setSelectedCompName('');
+      setExtinctFilter('all');
+    } else if (key.startsWith('confed_') || confedKeys.includes(lk)) {
+      const confedCode = key.replace('confed_', '').toUpperCase();
+      setSelectedConfed(confedCode);
+      setSelectedNation('all');
+      setSelectedCompId(undefined);
+      setSelectedCompName('');
+    } else if (key.startsWith('nation_')) {
+      const nid = key.replace('nation_', '');
+      const nationNode = findNationInTree(treeNodes, nid);
+      if (nationNode?.confed) setSelectedConfed(nationNode.confed);
+      setSelectedNation(nid);
+      setSelectedCompId(undefined);
+      setSelectedCompName('');
+    } else if (key.startsWith('comp_')) {
+      const compId = key.replace('comp_', '');
+      const nid = nodeData?.nationId || nodeData?.compData?.nation_id;
+      if (nid) {
+        setSelectedNation(nid);
+      }
+      setSelectedCompId(compId);
+      const cName = nodeData?.shortName || nodeData?.compData?.name_sh || nodeData?.compData?.name || '';
+      setSelectedCompName(cName);
+    } else if (key.startsWith('oth_')) {
+      const nid = key.replace('oth_', '');
+      setSelectedNation(nid);
+      setSelectedCompId('oth-' + nid);
+      setExtinctFilter('active');
+      setSelectedCompName('[OTH] Other');
+    } else if (key.startsWith('ext_')) {
+      const nid = key.replace('ext_', '');
+      setSelectedNation(nid);
+      setSelectedCompId('ext-' + nid);
+      setExtinctFilter('extinct');
+      setSelectedCompName('[EXT] Extinct');
+    }
+    setPage(1);
   };
 
   const handleClearComp = () => {
@@ -250,6 +318,7 @@ function ListClubsContent() {
   };
 
   const handleResetModal = () => {
+    setTempConfed('all');
     setTempNation('all');
     setTempExtinct('all');
     setTempCompId(undefined);
@@ -257,6 +326,7 @@ function ListClubsContent() {
   };
 
   const handleApplyModal = () => {
+    setSelectedConfed(tempConfed);
     setSelectedNation(tempNation);
     setSelectedCompId(tempCompId);
     setSelectedCompName(tempCompName);
@@ -266,56 +336,91 @@ function ListClubsContent() {
   };
 
   return (
-    <div className="h-full flex flex-col min-h-0 bg-white">
-      {/* 1. Fixed Top Toolbar */}
-      <div className="shrink-0 flex-none px-3.5 pt-3 pb-2.5 border-b border-slate-100 bg-white space-y-2.5">
-        {/* Layer 1: Thanh Search trên cùng (không bọc trong khung) */}
-        <Input
-          size="large"
-          placeholder="Search..."
-          allowClear
-          prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
-        />
+    <div className="h-full w-full flex min-h-0 bg-slate-100/70 p-3 sm:p-4 gap-3 sm:gap-4 overflow-hidden">
+      {/* 1. KHU VỰC FILTER: Khung đóng viền riêng biệt bên trái */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 xl:w-80 shrink-0 bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden h-full">
+        {/* Filter Header */}
+        <div className="h-12 px-3.5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center text-xs">
+              <ClubIcon size={14} />
+            </span>
+            <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
+              Cây đơn vị
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => applyFilterDirectly('all')}
+            className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+          >
+            Đặt lại
+          </button>
+        </div>
 
-        {/* Layer 2: [Icon đại diện page] [Thanh select filter] */}
-        <ListPageFilterBar
-          pageIcon={<ClubIcon size={20} />}
-          iconBoxClassName="bg-indigo-50 text-indigo-600 border-indigo-200/80"
-          filterSummary={filterSummary}
-          hasActiveCustomFilter={hasActiveCustomFilter}
-          onClick={handleOpenModal}
-        />
-      </div>
+        {/* Filter Body: UnitTree chiếm trọn chiều cao */}
+        <div className="flex-1 min-h-0 h-full p-2.5 flex flex-col overflow-hidden">
+          <UnitTree
+            mode="club"
+            height="100%"
+            selectedKey={currentTreeSelectedKey}
+            onSelectNode={(key, node) => applyFilterDirectly(key, node)}
+            allOptionLabel="Tất cả CLB (All)"
+          />
+        </div>
+      </aside>
 
-      {/* 2. Danh sách cuộn mượt */}
-      <div
-        ref={listContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto mobile-frame-scroll px-3.5 py-3 pb-8"
-      >
-        <CardGrid
-          items={clubs}
-          type={EntityType.CLUB}
-          loading={loading}
-          cardSize="large"
-          onNavigate={(record) => {
-            if (record?.id) {
-              router.push(`/club/${record.id}`);
-            }
-          }}
-          serverPagination={{
-            current: page,
-            pageSize,
-            total,
-            onChange: (p, ps) => {
-              setPage(p);
-              setPageSize(ps);
-            },
-          }}
-          emptyText="Không tìm thấy câu lạc bộ nào phù hợp"
-        />
+      {/* 2. KHU VỰC BÊN PHẢI: Search + Vùng Danh Sách */}
+      <div className="flex-1 min-w-0 min-h-0 h-full flex flex-col gap-3 overflow-hidden">
+        {/* Khung Search trên cùng */}
+        <div className="shrink-0 flex-none bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs">
+          <Input
+            size="large"
+            placeholder="Search..."
+            allowClear
+            prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
+          />
+
+          {/* Mobile Filter Bar (Chỉ hiển thị trên mobile < md) */}
+          <div className="md:hidden mt-2">
+            <ListPageFilterBar
+              pageIcon={<ClubIcon size={20} />}
+              iconBoxClassName="bg-indigo-50 text-indigo-600 border-indigo-200/80"
+              filterSummary={filterSummary}
+              hasActiveCustomFilter={hasActiveCustomFilter}
+              onClick={handleOpenModal}
+            />
+          </div>
+        </div>
+
+        {/* Khung Vùng danh sách bên dưới */}
+        <div className="flex-1 min-h-0 h-full bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+          <CardGrid
+            items={clubs}
+            type={EntityType.CLUB}
+            loading={loading}
+            containerRef={listContainerRef}
+            cardSize="large"
+            onNavigate={(record) => {
+              if (record?.id) {
+                router.push(`/club/${record.id}`);
+              }
+            }}
+            serverPagination={{
+              current: page,
+              pageSize,
+              total,
+              onChange: (p, ps) => {
+                setPage(p);
+                setPageSize(ps);
+              },
+            }}
+            emptyText="Không tìm thấy câu lạc bộ nào phù hợp"
+          />
+        </div>
       </div>
 
       {/* 3. Modal bộ lọc Câu lạc bộ */}

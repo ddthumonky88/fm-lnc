@@ -48,11 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }}
           >
             <App className="h-full w-full">
-              {/* Desktop: center content in a mobile-phone frame */}
-              <div className="mobile-frame-wrapper">
-                <div className="mobile-frame" id="mobile-frame-root">
-                  <AppLayout>{children}</AppLayout>
-                </div>
+              <div id="mobile-frame-root" className="h-full w-full flex flex-col overflow-hidden">
+                <AppLayout>{children}</AppLayout>
               </div>
             </App>
           </ConfigProvider>

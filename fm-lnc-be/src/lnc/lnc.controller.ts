@@ -14,7 +14,6 @@ import {
   Stadium,
   Award,
   Person,
-  Stage,
 } from '../entities';
 import { Repository } from 'typeorm';
 import { RawResponse } from '../common/raw-response.decorator';
@@ -32,7 +31,6 @@ export class LncController {
     @InjectRepository(Stadium) private stadiumRepo: Repository<Stadium>,
     @InjectRepository(Award) private awardRepo: Repository<Award>,
     @InjectRepository(Person) private personRepo: Repository<Person>,
-    @InjectRepository(Stage) private stageRepo: Repository<Stage>,
   ) {}
 
   @ApiOperation({ summary: 'Xuất dữ liệu toàn bộ ra file định dạng .LNC' })
@@ -169,7 +167,6 @@ export class LncController {
         stadiums: 3762,
         awards: 1180,
         people: 8900,
-        stages: 12,
       },
     },
   })
@@ -184,7 +181,6 @@ export class LncController {
       stadiums,
       awards,
       people,
-      stages,
     ] = await Promise.all([
       Promise.resolve(8),
       this.nationRepo.count(),
@@ -194,7 +190,6 @@ export class LncController {
       this.stadiumRepo.count(),
       this.awardRepo.count(),
       this.personRepo.count(),
-      this.stageRepo.count(),
     ]);
 
     return {
@@ -206,7 +201,6 @@ export class LncController {
       stadiums,
       awards,
       people,
-      stages,
     };
   }
 }

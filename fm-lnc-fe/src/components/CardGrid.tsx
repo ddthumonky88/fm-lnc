@@ -5,7 +5,7 @@ import { Pagination, Empty } from 'antd';
 import EntityCard from './EntityCard';
 import { EntityTypeValue } from '../types';
 
-interface CardGridProps {
+export interface CardGridProps {
   items: any[];
   type: EntityTypeValue;
   loading?: boolean;
@@ -25,6 +25,7 @@ interface CardGridProps {
     total: number;
     onChange: (page: number, pageSize: number) => void;
   };
+  containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function CardGrid({
@@ -42,9 +43,26 @@ export default function CardGrid({
   defaultPageSize = 20,
   columns,
   serverPagination,
+  containerRef,
 }: CardGridProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
+
+  const internalScrollRef = React.useRef<HTMLDivElement>(null);
+  const scrollRef = containerRef || internalScrollRef;
+
+  const isServer = Boolean(serverPagination);
+  const totalRecords = isServer ? serverPagination!.total : items.length;
+  const currentPageSize = isServer ? serverPagination!.pageSize : pageSize;
+  const maxPage = Math.max(1, Math.ceil(totalRecords / currentPageSize));
+  const currentPage = isServer ? serverPagination!.current : Math.min(page, maxPage);
+
+  // Scroll to top on page change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [currentPage, scrollRef]);
 
   // Keep page within valid bounds when items or pageSize changes (client mode)
   useEffect(() => {
@@ -52,9 +70,9 @@ export default function CardGrid({
       if (items.length === 0) {
         setPage(1);
       } else {
-        const maxPage = Math.max(1, Math.ceil(items.length / pageSize));
-        if (page > maxPage) {
-          setPage(maxPage);
+        const maxP = Math.max(1, Math.ceil(items.length / pageSize));
+        if (page > maxP) {
+          setPage(maxP);
         }
       }
     }
@@ -75,7 +93,7 @@ export default function CardGrid({
 
   if (loading) {
     return (
-      <div className="text-center py-16 text-sm text-gray-500 flex flex-col items-center gap-3">
+      <div className="h-full flex-1 flex flex-col items-center justify-center py-16 text-sm text-gray-500 gap-3">
         <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
         <span>Loading cards...</span>
       </div>
@@ -84,17 +102,13 @@ export default function CardGrid({
 
   if (items.length === 0) {
     return (
-      <div className="py-12 bg-white rounded-lg border border-gray-100 shadow-sm">
-        <Empty description={emptyText} />
+      <div className="h-full flex-1 flex items-center justify-center p-6">
+        <div className="py-12 px-8 bg-white rounded-xl border border-gray-100 shadow-2xs max-w-md w-full text-center">
+          <Empty description={emptyText} />
+        </div>
       </div>
     );
   }
-
-  const isServer = Boolean(serverPagination);
-  const totalRecords = isServer ? serverPagination!.total : items.length;
-  const currentPageSize = isServer ? serverPagination!.pageSize : pageSize;
-  const maxPage = Math.max(1, Math.ceil(totalRecords / currentPageSize));
-  const currentPage = isServer ? serverPagination!.current : Math.min(page, maxPage);
 
   const startIndex = (currentPage - 1) * currentPageSize;
   const pagedItems = isServer ? items : items.slice(startIndex, startIndex + currentPageSize);
@@ -111,54 +125,65 @@ export default function CardGrid({
           entityTypeStr === 'stadium' ||
           entityTypeStr === 'city';
 
-  const gridClasses =
-    columns === 2
-      ? 'grid grid-cols-2 gap-2.5'
-      : columns === 1
-        ? 'grid grid-cols-1 gap-3'
-        : isSmall
-          ? 'grid grid-cols-2 gap-2.5'
-          : 'grid grid-cols-1 gap-3';
+  const gridClasses = isSmall
+    ? 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3'
+    : 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5';
 
   return (
-    <div>
-      <div className={gridClasses}>
-        {pagedItems.map((item) => (
-          <EntityCard
-            key={item.id}
-            type={type}
-            data={item}
-            cardSize={isSmall ? 'small' : 'large'}
-            largeStyle={largeStyle || cardStyle}
-            onNavigate={onNavigate}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onViewChildren={onViewChildren}
-          />
-        ))}
+    <div className="flex flex-col h-full min-h-0 w-full overflow-hidden">
+      {/* Scrollable Cards Grid Area */}
+      <div
+        ref={scrollRef as any}
+        className="flex-1 min-h-0 overflow-y-auto px-3.5 sm:px-5 py-3 sm:py-4 scrollbar-thin"
+      >
+        <div className={gridClasses}>
+          {pagedItems.map((item) => (
+            <EntityCard
+              key={item.id}
+              type={type}
+              data={item}
+              cardSize={isSmall ? 'small' : 'large'}
+              largeStyle={largeStyle || cardStyle}
+              onNavigate={onNavigate}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onViewChildren={onViewChildren}
+            />
+          ))}
+        </div>
       </div>
 
+      {/* Fixed Bottom Pagination Bar (Pinned) */}
       {totalRecords > 0 && (
-        <div className="flex flex-col items-center justify-center mt-4 pt-3 border-t border-gray-100 gap-1.5 text-center w-full">
-          <Pagination
-            current={currentPage}
-            pageSize={currentPageSize}
-            total={totalRecords}
-            showSizeChanger={false}
-            showQuickJumper={false}
-            size="small"
-            onChange={(p, s) => {
-              if (isServer) {
-                serverPagination!.onChange(p, s);
-              } else {
-                setPage(p);
-                setPageSize(s);
-              }
-            }}
-          />
-          <span className="text-[11px] text-gray-400">
-            Showing {showingStart} - {showingEnd} of {totalRecords} records
+        <div className="shrink-0 flex items-center justify-between px-4 py-2 sm:py-2.5 border-t border-slate-200 bg-white shadow-2xs z-10 gap-3 flex-wrap sm:flex-nowrap">
+          <span className="text-xs text-slate-500 font-medium shrink-0">
+            Hiển thị <strong className="text-slate-700">{showingStart}</strong> - <strong className="text-slate-700">{showingEnd}</strong> / <strong className="text-blue-600">{totalRecords.toLocaleString()}</strong> bản ghi
           </span>
+          <div className="flex items-center gap-2 ml-auto">
+            <Pagination
+              current={currentPage}
+              pageSize={currentPageSize}
+              total={totalRecords}
+              showTotal={(total) => (
+                <span className="text-xs text-slate-500 font-medium mr-1.5 sm:hidden">
+                  Tổng: <strong className="text-blue-600">{total.toLocaleString()}</strong>
+                </span>
+              )}
+              showSizeChanger={true}
+              pageSizeOptions={['10', '20', '50', '100']}
+              locale={{ items_per_page: '/ trang' }}
+              showQuickJumper={false}
+              size="small"
+              onChange={(p, s) => {
+                if (isServer) {
+                  serverPagination!.onChange(p, s);
+                } else {
+                  setPage(p);
+                  setPageSize(s);
+                }
+              }}
+            />
+          </div>
         </div>
       )}
     </div>
