@@ -495,7 +495,7 @@ export default function EntityCard({
     {
       key: 'navigate',
       icon: <EyeOutlined className="text-blue-600" />,
-      label: 'Xem chi tiết',
+      label: 'View details',
       onClick: (e: any) => {
         e?.domEvent?.stopPropagation();
         handleNavigateAction();
@@ -506,7 +506,7 @@ export default function EntityCard({
           {
             key: 'info',
             icon: <InfoCircleOutlined className="text-sky-500" />,
-            label: 'Thông tin nhanh (Modal)',
+            label: 'Quick info (Modal)',
             onClick: (e: any) => {
               e?.domEvent?.stopPropagation();
               setModalMode('view');
@@ -520,7 +520,7 @@ export default function EntityCard({
           {
             key: 'subcomps',
             icon: <BranchesOutlined className="text-amber-500" />,
-            label: `Giải đấu phụ (${data.childrenCount || data.children_count})`,
+            label: `Sub-competitions (${data.childrenCount || data.children_count})`,
             onClick: (e: any) => {
               e?.domEvent?.stopPropagation();
               onViewChildren?.(data);
@@ -533,7 +533,7 @@ export default function EntityCard({
           {
             key: 'edit',
             icon: <EditOutlined className="text-emerald-600" />,
-            label: 'Chỉnh sửa',
+            label: 'Edit',
             onClick: (e: any) => {
               e?.domEvent?.stopPropagation();
               onEdit(data);
@@ -546,7 +546,7 @@ export default function EntityCard({
           {
             key: 'delete',
             icon: <DeleteOutlined className="text-red-500" />,
-            label: 'Xóa',
+            label: 'Delete',
             danger: true,
             onClick: (e: any) => {
               e?.domEvent?.stopPropagation();
@@ -609,7 +609,7 @@ export default function EntityCard({
                       </Tag>
                     ) : (
                       <Tooltip
-                        title={idCopied ? 'Đã sao chép!' : 'Nhấn để copy ID'}
+                        title={idCopied ? 'Copied!' : 'Click to copy ID'}
                         trigger="hover"
                         destroyOnHidden
                       >

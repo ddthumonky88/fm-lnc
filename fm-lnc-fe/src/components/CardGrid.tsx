@@ -157,7 +157,7 @@ export default function CardGrid({
       {totalRecords > 0 && (
         <div className="shrink-0 flex items-center justify-between px-4 py-2 sm:py-2.5 border-t border-slate-200 bg-white shadow-2xs z-10 gap-3 flex-wrap sm:flex-nowrap">
           <span className="text-xs text-slate-500 font-medium shrink-0">
-            Hiển thị <strong className="text-slate-700">{showingStart}</strong> - <strong className="text-slate-700">{showingEnd}</strong> / <strong className="text-blue-600">{totalRecords.toLocaleString()}</strong> bản ghi
+            Showing <strong className="text-slate-700">{showingStart}</strong> - <strong className="text-slate-700">{showingEnd}</strong> / <strong className="text-blue-600">{totalRecords.toLocaleString()}</strong> records
           </span>
           <div className="flex items-center gap-2 ml-auto">
             <Pagination
@@ -166,7 +166,7 @@ export default function CardGrid({
               total={totalRecords}
               showTotal={(total) => (
                 <span className="text-xs text-slate-500 font-medium mr-1.5 sm:hidden">
-                  Tổng: <strong className="text-blue-600">{total.toLocaleString()}</strong>
+                  Total: <strong className="text-blue-600">{total.toLocaleString()}</strong>
                 </span>
               )}
               showSizeChanger={true}

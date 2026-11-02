@@ -304,7 +304,7 @@ export default function PlayersPage() {
         {total > 0 && (
           <div className="shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-white gap-3 flex-wrap sm:flex-nowrap">
             <span className="text-xs text-slate-500 font-medium shrink-0">
-              Hiển thị <strong className="text-slate-700">{Math.min((page - 1) * pageSize + 1, total)}</strong> - <strong className="text-slate-700">{Math.min(page * pageSize, total)}</strong> / <strong className="text-blue-600">{total.toLocaleString()}</strong> cầu thủ
+              Showing <strong className="text-slate-700">{Math.min((page - 1) * pageSize + 1, total)}</strong> - <strong className="text-slate-700">{Math.min(page * pageSize, total)}</strong> / <strong className="text-blue-600">{total.toLocaleString()}</strong> players
             </span>
             <Pagination
               current={page}

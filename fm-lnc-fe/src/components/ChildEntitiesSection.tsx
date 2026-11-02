@@ -20,7 +20,7 @@ export interface ChildEntitiesSectionProps {
 }
 
 export default function ChildEntitiesSection({
-  title = 'THỰC THỂ TRỰC THUỘC',
+  title = 'CHILD ENTITIES',
   items,
   className = '',
 }: ChildEntitiesSectionProps) {
@@ -35,7 +35,7 @@ export default function ChildEntitiesSection({
           {title}
         </span>
         <span className="text-xs font-semibold text-slate-500">
-          {items.length} mục
+          {items.length} items
         </span>
       </div>
 

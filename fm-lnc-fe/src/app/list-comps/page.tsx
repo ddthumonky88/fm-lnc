@@ -13,14 +13,14 @@ import { fetchCompetitionsList, fetchUnitTree, findNationInTree, CompetitionItem
 import { EntityType } from '../../types';
 
 const CONFEDERATIONS = [
-  { label: '🌍 Tất cả Châu lục / Toàn cầu', value: 'all' },
-  { label: '🇪🇺 UEFA (Châu Âu)', value: 'UEFA' },
-  { label: '🌏 AFC (Châu Á)', value: 'AFC' },
-  { label: '🌍 CAF (Châu Phi)', value: 'CAF' },
-  { label: '🌎 CONCACAF (Bắc, Trung Mỹ & Caribe)', value: 'CONCACAF' },
-  { label: '🌎 CONMEBOL (Nam Mỹ)', value: 'CONMEBOL' },
-  { label: '🌏 OFC (Châu Đại Dương)', value: 'OFC' },
-  { label: '🌐 WORLD (Quốc tế)', value: 'WORLD' },
+  { label: '🌍 All Confederations / Global', value: 'all' },
+  { label: '🇪🇺 UEFA (Europe)', value: 'UEFA' },
+  { label: '🌏 AFC (Asia)', value: 'AFC' },
+  { label: '🌍 CAF (Africa)', value: 'CAF' },
+  { label: '🌎 CONCACAF (North, Central America & Caribbean)', value: 'CONCACAF' },
+  { label: '🌎 CONMEBOL (South America)', value: 'CONMEBOL' },
+  { label: '🌏 OFC (Oceania)', value: 'OFC' },
+  { label: '🌐 WORLD (International)', value: 'WORLD' },
 ];
 
 function ListCompsContent() {
@@ -170,7 +170,7 @@ function ListCompsContent() {
     levels.push(selectedConfed);
   }
 
-  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'Tất cả giải đấu';
+  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'All competitions';
   const hasActiveCustomFilter = scope !== 'all' || selectedConfed !== 'all' || selectedNation !== 'all';
 
   const handleOpenModal = () => {
@@ -293,7 +293,7 @@ function ListCompsContent() {
               <CompIcon size={14} />
             </span>
             <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
-              Cây đơn vị
+              Unit Tree
             </span>
           </div>
           <button
@@ -301,7 +301,7 @@ function ListCompsContent() {
             onClick={() => applyFilterDirectly('all')}
             className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            Đặt lại
+            Reset
           </button>
         </div>
 
@@ -312,7 +312,7 @@ function ListCompsContent() {
             height="100%"
             selectedKey={currentTreeSelectedKey}
             onSelectNode={(key, node) => applyFilterDirectly(key, node)}
-            allOptionLabel="Tất cả Châu lục / Toàn cầu (All)"
+            allOptionLabel="All Confederations / Global"
           />
         </div>
       </aside>
@@ -367,7 +367,7 @@ function ListCompsContent() {
                 setPageSize(ps);
               },
             }}
-            emptyText="Không tìm thấy giải đấu nào phù hợp"
+            emptyText="No matching competitions found"
           />
         </div>
       </div>
@@ -379,20 +379,20 @@ function ListCompsContent() {
             <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center">
               <CompIcon size={16} />
             </span>
-            <span>Bộ lọc Giải đấu</span>
+            <span>Competition Filter</span>
           </div>
         }
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={[
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
-            Đặt lại
+            Reset
           </Button>,
           <Button key="close" onClick={() => setModalOpen(false)}>
-            Đóng
+            Close
           </Button>,
           <Button key="apply" type="primary" onClick={handleApplyModal}>
-            Áp dụng
+            Apply
           </Button>,
         ]}
         width={480}

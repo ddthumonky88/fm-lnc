@@ -155,7 +155,7 @@ function ListAwardsContent() {
     levels.push(selectedConfed);
   }
 
-  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'Tất cả giải thưởng';
+  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'All awards';
   const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all' || !!selectedCompId;
 
   const handleOpenModal = () => {
@@ -242,7 +242,7 @@ function ListAwardsContent() {
               <AwardIcon size={14} />
             </span>
             <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
-              Cây đơn vị
+              Unit Tree
             </span>
           </div>
           <button
@@ -250,7 +250,7 @@ function ListAwardsContent() {
             onClick={() => applyFilterDirectly('all')}
             className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            Đặt lại
+            Reset
           </button>
         </div>
 
@@ -261,7 +261,7 @@ function ListAwardsContent() {
             height="100%"
             selectedKey={currentTreeSelectedKey}
             onSelectNode={(val) => applyFilterDirectly(val)}
-            allOptionLabel="Tất cả Giải thưởng (All)"
+            allOptionLabel="All Awards"
           />
         </div>
       </aside>
@@ -313,7 +313,7 @@ function ListAwardsContent() {
                 setPageSize(ps);
               },
             }}
-            emptyText="Không tìm thấy giải thưởng nào phù hợp"
+            emptyText="No matching awards found"
           />
         </div>
       </div>
@@ -325,20 +325,20 @@ function ListAwardsContent() {
             <span className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center">
               <AwardIcon size={16} />
             </span>
-            <span>Cây đơn vị</span>
+            <span>Unit Tree</span>
           </div>
         }
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={[
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
-            Đặt lại
+            Reset
           </Button>,
           <Button key="close" onClick={() => setModalOpen(false)}>
-            Đóng
+            Close
           </Button>,
           <Button key="apply" type="primary" onClick={handleApplyModal}>
-            Áp dụng
+            Apply
           </Button>,
         ]}
         width={480}
@@ -350,7 +350,7 @@ function ListAwardsContent() {
           {tempCompId && (
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
-                Giải đấu được gán:
+                Assigned competition:
               </label>
               <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
                 <Tag
@@ -362,7 +362,7 @@ function ListAwardsContent() {
                   Comp ID: {tempCompId}
                 </Tag>
                 <span className="text-xs text-slate-500">
-                  Nhấn dấu × để chuyển sang lọc theo quốc gia
+                  Click × to switch to filtering by nation
                 </span>
               </div>
             </div>
@@ -380,7 +380,7 @@ function ListAwardsContent() {
                     : 'all'
               }
               onSelectNode={(val) => handlePickNation(val)}
-              allOptionLabel="Tất cả quốc gia (All Nations)"
+              allOptionLabel="All Nations"
             />
           </div>
         </div>

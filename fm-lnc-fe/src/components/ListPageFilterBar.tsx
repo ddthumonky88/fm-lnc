@@ -78,7 +78,7 @@ export default function ListPageFilterBar({
       <button
         type="button"
         onClick={onClick}
-        aria-label="Mở bộ lọc"
+        aria-label="Open filter"
         className="flex-1 min-w-0 h-10 px-3.5 bg-slate-50/90 hover:bg-slate-100/90 active:bg-slate-200/70 border border-slate-200 hover:border-blue-400 focus:border-blue-500 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer shadow-2xs group"
       >
         <div className="flex items-center gap-2 truncate min-w-0 flex-1">

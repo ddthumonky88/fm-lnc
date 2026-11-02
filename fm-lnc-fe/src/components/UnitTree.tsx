@@ -44,14 +44,14 @@ export const CONFEDERATION_META: Record<
   string,
   { name: string; icon: string; order: number }
 > = {
-  WORLD: { name: 'Toàn cầu', icon: '🌐', order: 0 },
-  AFC: { name: 'Châu Á', icon: '🌏', order: 1 },
-  CAF: { name: 'Châu Phi', icon: '🌍', order: 2 },
-  CONCACAF: { name: 'Bắc, Trung Mỹ & Caribe', icon: '🌎', order: 3 },
-  CONMEBOL: { name: 'Nam Mỹ', icon: '🌎', order: 4 },
-  OFC: { name: 'Châu Đại Dương', icon: '🌏', order: 5 },
-  UEFA: { name: 'Châu Âu', icon: '🇪🇺', order: 6 },
-  EXTINCT: { name: 'Quốc gia lịch sử / Giải thể', icon: '🏛️', order: 7 },
+  WORLD: { name: 'Global', icon: '🌐', order: 0 },
+  AFC: { name: 'Asia', icon: '🌏', order: 1 },
+  CAF: { name: 'Africa', icon: '🌍', order: 2 },
+  CONCACAF: { name: 'North, Central America & Caribbean', icon: '🌎', order: 3 },
+  CONMEBOL: { name: 'South America', icon: '🌎', order: 4 },
+  OFC: { name: 'Oceania', icon: '🌏', order: 5 },
+  UEFA: { name: 'Europe', icon: '🇪🇺', order: 6 },
+  EXTINCT: { name: 'Historical / Dissolved Nations', icon: '🏛️', order: 7 },
 };
 
 function getExpandedKeysForSelectedKey(nodes: UnitTreeNode[], targetKey: string): React.Key[] {
@@ -691,7 +691,7 @@ export default function UnitTree({
         {loadingTree && !apiTreeData && nations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-xs">
             <Spin size="small" className="mb-2" />
-            <span>Đang tải cây đơn vị...</span>
+            <span>Loading unit tree...</span>
           </div>
         ) : (
           <Tree

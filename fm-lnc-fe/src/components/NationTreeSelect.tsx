@@ -8,19 +8,19 @@ export const CONFEDERATION_META: Record<
   string,
   { name: string; icon: string; order: number }
 > = {
-  UEFA: { name: 'Châu Âu', icon: '🇪🇺', order: 1 },
-  AFC: { name: 'Châu Á', icon: '🌏', order: 2 },
-  CAF: { name: 'Châu Phi', icon: '🌍', order: 3 },
-  CONCACAF: { name: 'Bắc, Trung Mỹ & Caribe', icon: '🌎', order: 4 },
-  CONMEBOL: { name: 'Nam Mỹ', icon: '🌎', order: 5 },
-  OFC: { name: 'Châu Đại Dương', icon: '🌏', order: 6 },
-  EXTINCT: { name: 'Quốc gia lịch sử / Giải thể', icon: '🏛️', order: 7 },
+  UEFA: { name: 'Europe', icon: '🇪🇺', order: 1 },
+  AFC: { name: 'Asia', icon: '🌏', order: 2 },
+  CAF: { name: 'Africa', icon: '🌍', order: 3 },
+  CONCACAF: { name: 'North, Central America & Caribbean', icon: '🌎', order: 4 },
+  CONMEBOL: { name: 'South America', icon: '🌎', order: 5 },
+  OFC: { name: 'Oceania', icon: '🌏', order: 6 },
+  EXTINCT: { name: 'Historical / Dissolved Nations', icon: '🏛️', order: 7 },
 };
 
 export function getNationDisplayName(
   nations: NationItem[],
   nationId?: string | null,
-  fallbackText = 'Tất cả quốc gia',
+  fallbackText = 'All nations',
 ): string {
   if (!nationId || nationId === 'all') {
     return fallbackText;
@@ -62,7 +62,7 @@ export function buildNationTreeData(nations: NationItem[], includeAllOption = tr
 
   if (includeAllOption) {
     treeNodes.push({
-      title: '🌍 Tất cả Quốc gia (All Nations)',
+      title: '🌍 All Nations',
       value: 'all',
       key: 'all',
     });
@@ -132,7 +132,7 @@ export default function NationTreeSelect({
   nations,
   value,
   onChange,
-  placeholder = 'Tìm kiếm & chọn quốc gia...',
+  placeholder = 'Search & select nation...',
   className = 'w-full',
   size = 'middle',
   allowClear = false,

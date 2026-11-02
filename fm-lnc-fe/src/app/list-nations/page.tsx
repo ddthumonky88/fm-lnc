@@ -19,7 +19,7 @@ interface ConfedOption {
 }
 
 const CONFEDERATIONS: ConfedOption[] = [
-  { value: 'all', code: 'Tất cả liên đoàn', icon: '🌍' },
+  { value: 'all', code: 'All confederations', icon: '🌍' },
   { value: 'UEFA', code: 'UEFA', icon: '🌍' },
   { value: 'AFC', code: 'AFC', icon: '🌏' },
   { value: 'CAF', code: 'CAF', icon: '🌍' },
@@ -149,7 +149,7 @@ function ListNationsContent() {
               <NationIcon size={14} />
             </span>
             <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
-              Cây đơn vị
+              Unit Tree
             </span>
           </div>
           <button
@@ -160,7 +160,7 @@ function ListNationsContent() {
             }}
             className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            Đặt lại
+            Reset
           </button>
         </div>
 
@@ -175,7 +175,7 @@ function ListNationsContent() {
               setSelectedConfed(val === 'all' ? 'all' : val.toUpperCase());
               setPage(1);
             }}
-            allOptionLabel="Tất cả Liên đoàn (All)"
+            allOptionLabel="All Confederations"
           />
         </div>
       </aside>
@@ -227,7 +227,7 @@ function ListNationsContent() {
                 setPageSize(ps);
               },
             }}
-            emptyText="Không tìm thấy quốc gia nào phù hợp"
+            emptyText="No matching nations found"
           />
         </div>
       </div>
@@ -239,20 +239,20 @@ function ListNationsContent() {
             <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center">
               <NationIcon size={16} />
             </span>
-            <span>Cây đơn vị</span>
+            <span>Unit Tree</span>
           </div>
         }
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={[
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
-            Đặt lại
+            Reset
           </Button>,
           <Button key="close" onClick={() => setModalOpen(false)}>
-            Đóng
+            Close
           </Button>,
           <Button key="apply" type="primary" onClick={handleApplyModal}>
-            Áp dụng
+            Apply
           </Button>,
         ]}
         width={480}
@@ -265,7 +265,7 @@ function ListNationsContent() {
             confedOnly
             selectedKey={tempConfed}
             onSelectNode={(val) => handlePickConfed(val)}
-            allOptionLabel="Tất cả Liên đoàn (All)"
+            allOptionLabel="All Confederations"
           />
         </div>
       </Modal>

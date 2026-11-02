@@ -114,7 +114,7 @@ function ListCitiesContent() {
     loadData();
   }, [loadData]);
 
-  let filterSummary = 'Tất cả thành phố';
+  let filterSummary = 'All cities';
   if (selectedNation !== 'all') {
     const nationNode = findNationInTree(treeNodes, selectedNation);
     if (nationNode) {
@@ -205,7 +205,7 @@ function ListCitiesContent() {
               <CityIcon size={14} />
             </span>
             <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
-              Cây đơn vị
+              Unit Tree
             </span>
           </div>
           <button
@@ -216,7 +216,7 @@ function ListCitiesContent() {
             }}
             className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            Đặt lại
+            Reset
           </button>
         </div>
 
@@ -227,7 +227,7 @@ function ListCitiesContent() {
             height="100%"
             selectedKey={currentTreeSelectedKey}
             onSelectNode={handleSelectDirectly}
-            allOptionLabel="Tất cả Thành phố (All)"
+            allOptionLabel="All Cities"
           />
         </div>
       </aside>
@@ -279,7 +279,7 @@ function ListCitiesContent() {
                 setPageSize(ps);
               },
             }}
-            emptyText="Không tìm thấy thành phố nào phù hợp"
+            emptyText="No matching cities found"
           />
         </div>
       </div>
@@ -291,20 +291,20 @@ function ListCitiesContent() {
             <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center">
               <CityIcon size={16} />
             </span>
-            <span>Cây đơn vị</span>
+            <span>Unit Tree</span>
           </div>
         }
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={[
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
-            Đặt lại
+            Reset
           </Button>,
           <Button key="close" onClick={() => setModalOpen(false)}>
-            Đóng
+            Close
           </Button>,
           <Button key="apply" type="primary" onClick={handleApplyModal}>
-            Áp dụng
+            Apply
           </Button>,
         ]}
         width={480}
@@ -316,7 +316,7 @@ function ListCitiesContent() {
             mode="city"
             selectedKey={tempNation !== 'all' ? tempNation : tempConfed !== 'all' ? tempConfed.toLowerCase() : 'all'}
             onSelectNode={(val) => handlePickNation(val)}
-            allOptionLabel="Tất cả quốc gia (All Nations)"
+            allOptionLabel="All Nations"
           />
         </div>
       </Modal>

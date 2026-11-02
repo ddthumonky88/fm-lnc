@@ -177,21 +177,21 @@ function ListClubsContent() {
       levels.push(nationName);
 
       if (extinctFilter === 'active') {
-        levels.push('Hoạt động');
+        levels.push('Active');
       } else if (extinctFilter === 'extinct') {
-        levels.push('Giải thể');
+        levels.push('Dissolved');
       }
     }
   } else if (selectedConfed !== 'all') {
     levels.push(selectedConfed);
     if (extinctFilter === 'active') {
-      levels.push('Hoạt động');
+      levels.push('Active');
     } else if (extinctFilter === 'extinct') {
-      levels.push('Giải thể');
+      levels.push('Dissolved');
     }
   }
 
-  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'Tất cả câu lạc bộ';
+  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'All clubs';
   const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all' || extinctFilter !== 'all' || !!selectedCompId;
 
   const handleOpenModal = () => {
@@ -346,7 +346,7 @@ function ListClubsContent() {
               <ClubIcon size={14} />
             </span>
             <span className="font-bold text-xs uppercase tracking-wider text-slate-700">
-              Cây đơn vị
+              Unit Tree
             </span>
           </div>
           <button
@@ -354,7 +354,7 @@ function ListClubsContent() {
             onClick={() => applyFilterDirectly('all')}
             className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            Đặt lại
+            Reset
           </button>
         </div>
 
@@ -365,7 +365,7 @@ function ListClubsContent() {
             height="100%"
             selectedKey={currentTreeSelectedKey}
             onSelectNode={(key, node) => applyFilterDirectly(key, node)}
-            allOptionLabel="Tất cả CLB (All)"
+            allOptionLabel="All Clubs"
           />
         </div>
       </aside>
@@ -418,7 +418,7 @@ function ListClubsContent() {
                 setPageSize(ps);
               },
             }}
-            emptyText="Không tìm thấy câu lạc bộ nào phù hợp"
+            emptyText="No matching clubs found"
           />
         </div>
       </div>
@@ -430,20 +430,20 @@ function ListClubsContent() {
             <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center">
               <ClubIcon size={16} />
             </span>
-            <span>Bộ lọc Câu lạc bộ</span>
+            <span>Club Filter</span>
           </div>
         }
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={[
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
-            Đặt lại
+            Reset
           </Button>,
           <Button key="close" onClick={() => setModalOpen(false)}>
-            Đóng
+            Close
           </Button>,
           <Button key="apply" type="primary" onClick={handleApplyModal}>
-            Áp dụng
+            Apply
           </Button>,
         ]}
         width={480}

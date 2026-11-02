@@ -80,7 +80,7 @@ export default function DetailBodyHeader({
     <div className={`flex items-center gap-2.5 sm:gap-3 min-w-0 px-0.5 py-1 ${className}`}>
       {/* Merged Back button + Entity icon/logo */}
       {onBack ? (
-        <Tooltip title="Quay lại danh sách" placement="bottom">
+        <Tooltip title="Back to list" placement="bottom">
           <button
             type="button"
             onClick={onBack}

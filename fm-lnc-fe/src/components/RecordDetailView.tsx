@@ -354,7 +354,7 @@ export default function RecordDetailView({
     <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-2.5">
       <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
         <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider">
-          THÔNG TIN ĐỊNH DANH
+          IDENTITY
         </span>
       </div>
 
@@ -750,7 +750,7 @@ export default function RecordDetailView({
     <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-2.5">
       <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
         <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider">
-          {isCity || isStadium ? 'THUỘC TÍNH CHI TIẾT' : 'THUỘC TÍNH & MÀU SẮC'}
+          {isCity || isStadium ? 'DETAILED ATTRIBUTES' : 'ATTRIBUTES & COLORS'}
         </span>
       </div>
 
@@ -821,7 +821,7 @@ export default function RecordDetailView({
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
           <span className={getLabelClass('capacity', 'pt-0.5')}>CAPACITY:</span>
           <span className="font-bold text-[12px] text-slate-800 font-mono text-left">
-            {Number(currentData.capacity || currentData.seating_capacity).toLocaleString()} chỗ
+            {Number(currentData.capacity || currentData.seating_capacity).toLocaleString()} seats
           </span>
         </div>
       )}
@@ -911,7 +911,7 @@ export default function RecordDetailView({
         <div className="mt-2 bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 flex items-start gap-2 text-xs text-slate-700">
           <InfoCircleOutlined className="text-sky-500 mt-0.5 shrink-0" />
           <div className="min-w-0 flex-1">
-            <span className="font-semibold text-slate-700 block mb-0.5 text-[10px] uppercase">Ghi chú:</span>
+            <span className="font-semibold text-slate-700 block mb-0.5 text-[10px] uppercase">Notes:</span>
             <p className="italic text-slate-600 break-words m-0 text-[11px]">{currentData.note}</p>
           </div>
         </div>
