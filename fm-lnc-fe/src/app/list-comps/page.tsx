@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Input, Modal, Button, Segmented, Select, App } from 'antd';
+import { Input, Modal, Button, App } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import CardGrid from '../../components/CardGrid';
 import { CompIcon } from '../../components/EntityIcons';
@@ -139,20 +139,30 @@ function ListCompsContent() {
     loadCompetitions();
   }, [loadCompetitions]);
 
-  // Filter summary text
-  const filterParts: string[] = [];
-  if (scope === 'domestic') filterParts.push('Quốc nội');
-  else if (scope === 'international') filterParts.push('Quốc tế');
-
-  if (selectedConfed !== 'all') {
-    filterParts.push(selectedConfed);
+  // Filter summary: cấp 1 > cấp 2
+  const levels: string[] = [];
+  if (selectedConfed === 'WORLD') {
+    levels.push('WORLD');
+  } else if (scope === 'international') {
+    if (selectedConfed !== 'all') {
+      levels.push(selectedConfed);
+    }
+    levels.push('International');
+  } else if (selectedNation !== 'all') {
+    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
+    let confed = selectedConfed !== 'all' ? selectedConfed : '';
+    if (!confed && nation) {
+      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
+      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
+      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
+    }
+    if (confed) levels.push(confed);
+    levels.push(getNationDisplayName(nationsList, selectedNation));
+  } else if (selectedConfed !== 'all') {
+    levels.push(selectedConfed);
   }
 
-  if (selectedNation !== 'all') {
-    filterParts.push(getNationDisplayName(nationsList, selectedNation));
-  }
-
-  const filterSummary = filterParts.length > 0 ? filterParts.join(' • ') : 'Tất cả giải đấu';
+  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'Tất cả giải đấu';
   const hasActiveCustomFilter = scope !== 'all' || selectedConfed !== 'all' || selectedNation !== 'all';
 
   const handleOpenModal = () => {
@@ -162,47 +172,50 @@ function ListCompsContent() {
     setModalOpen(true);
   };
 
-  // Đổi option -> áp dụng ngay và về trang 1 (modal giữ mở để chỉnh tiếp)
-  const handlePickScope = (val: 'all' | 'domestic' | 'international') => {
-    setTempScope(val);
-    setScope(val);
-    if (val === 'international') {
-      setTempNation('all');
-      setSelectedNation('all');
-    }
-    setPage(1);
-  };
-
   const handleSelectTreeNode = (key: string, nodeData?: any) => {
     if (key === 'all') {
+      setTempScope('all');
+      setScope('all');
       setTempConfed('all');
       setSelectedConfed('all');
       setTempNation('all');
       setSelectedNation('all');
+    } else if (key === 'confed_WORLD') {
+      setTempScope('international');
+      setScope('international');
+      setTempConfed('WORLD');
+      setSelectedConfed('WORLD');
+      setTempNation('all');
+      setSelectedNation('all');
+    } else if (key.startsWith('intl_')) {
+      const confedCode = key.replace('intl_', '');
+      setTempScope('international');
+      setScope('international');
+      setTempConfed(confedCode);
+      setSelectedConfed(confedCode);
+      setTempNation('all');
+      setSelectedNation('all');
     } else if (key.startsWith('confed_')) {
       const confedCode = key.replace('confed_', '');
+      setTempScope('all');
+      setScope('all');
       setTempConfed(confedCode);
       setSelectedConfed(confedCode);
       setTempNation('all');
       setSelectedNation('all');
     } else {
-      if (tempScope === 'international') {
-        setTempConfed(key);
-        setSelectedConfed(key);
-        setTempNation('all');
-        setSelectedNation('all');
-      } else {
-        const nation = nodeData?.nationData;
-        let confedCode = 'all';
-        if (nation) {
-          if (typeof nation.confed === 'string') confedCode = nation.confed.toUpperCase();
-          else if (nation.confed?.code) confedCode = nation.confed.code.toUpperCase();
-        }
-        setTempConfed(confedCode);
-        setSelectedConfed(confedCode);
-        setTempNation(key);
-        setSelectedNation(key);
+      const nation = nodeData?.nationData;
+      let confedCode = 'all';
+      if (nation) {
+        if (typeof nation.confed === 'string') confedCode = nation.confed.toUpperCase();
+        else if (nation.confed?.code) confedCode = nation.confed.code.toUpperCase();
       }
+      setTempScope('domestic');
+      setScope('domestic');
+      setTempConfed(confedCode);
+      setSelectedConfed(confedCode);
+      setTempNation(key);
+      setSelectedNation(key);
     }
     setPage(1);
   };
@@ -294,52 +307,25 @@ function ListCompsContent() {
         centered
         destroyOnClose
       >
-        <div className="py-2 space-y-4">
-          {/* Phạm vi giải đấu */}
-          <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
-              Phạm vi giải đấu:
-            </label>
-            <Segmented
-              value={tempScope}
-              onChange={(val) => handlePickScope(val as any)}
-              options={[
-                { label: 'Tất cả', value: 'all' },
-                { label: '🏆 Quốc nội', value: 'domestic' },
-                { label: '🌍 Quốc tế', value: 'international' },
-              ]}
-              block
-              size="middle"
-            />
-          </div>
-
-          {/* Cây đơn vị */}
-          <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
-              Cây đơn vị:
-            </label>
-            <UnitTree
-              confedOnly={tempScope === 'international'}
-              allowSelectConfed={true}
-              nations={nationsList}
-              selectedKey={
-                tempNation !== 'all'
-                  ? tempNation
-                  : tempConfed !== 'all'
-                  ? tempScope === 'international'
-                    ? tempConfed
-                    : `confed_${tempConfed}`
-                  : 'all'
-              }
-              onSelectNode={handleSelectTreeNode}
-              allOptionLabel={
-                tempScope === 'international'
-                  ? 'Tất cả Liên đoàn (All)'
-                  : 'Tất cả đơn vị (All)'
-              }
-              height={260}
-            />
-          </div>
+        <div className="py-1">
+          <UnitTree
+            mode="comp"
+            allowSelectConfed={true}
+            nations={nationsList}
+            selectedKey={
+              tempNation !== 'all'
+                ? tempNation
+                : tempConfed === 'WORLD'
+                ? 'confed_WORLD'
+                : tempScope === 'international' && tempConfed !== 'all'
+                ? `intl_${tempConfed}`
+                : tempConfed !== 'all'
+                ? `confed_${tempConfed}`
+                : 'all'
+            }
+            onSelectNode={handleSelectTreeNode}
+            height={340}
+          />
         </div>
       </Modal>
     </div>

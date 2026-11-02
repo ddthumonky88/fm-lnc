@@ -131,15 +131,24 @@ function ListAwardsContent() {
     loadAwards();
   }, [loadAwards]);
 
-  // Filter summary
-  const filterParts: string[] = [];
-  if (selectedCompId) {
-    filterParts.push(`Comp: ${selectedCompId}`);
-  } else if (selectedNation !== 'all') {
-    filterParts.push(getNationDisplayName(nationsList, selectedNation));
+  // Filter summary: cấp 1 > cấp 2 > cấp 3
+  const levels: string[] = [];
+  if (selectedNation !== 'all') {
+    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
+    let confed = '';
+    if (nation) {
+      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
+      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
+      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
+    }
+    if (confed) levels.push(confed);
+    levels.push(getNationDisplayName(nationsList, selectedNation));
+    if (selectedCompId) levels.push(`Comp: ${selectedCompId}`);
+  } else if (selectedCompId) {
+    levels.push(`Comp: ${selectedCompId}`);
   }
 
-  const filterSummary = filterParts.length > 0 ? filterParts.join(' • ') : 'Tất cả giải thưởng';
+  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'Tất cả giải thưởng';
   const hasActiveCustomFilter = selectedNation !== 'all' || !!selectedCompId;
 
   const handleOpenModal = () => {

@@ -111,10 +111,18 @@ function ListStadiumsContent() {
     loadData();
   }, [loadData]);
 
-  const filterSummary =
-    selectedNation !== 'all'
-      ? getNationDisplayName(nationsList, selectedNation)
-      : 'Tất cả quốc gia';
+  let filterSummary = 'Tất cả quốc gia';
+  if (selectedNation !== 'all') {
+    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
+    let confed = '';
+    if (nation) {
+      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
+      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
+      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
+    }
+    const nationName = getNationDisplayName(nationsList, selectedNation);
+    filterSummary = confed ? `${confed} > ${nationName}` : nationName;
+  }
 
   const hasActiveCustomFilter = selectedNation !== 'all';
 

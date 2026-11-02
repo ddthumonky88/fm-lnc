@@ -122,21 +122,47 @@ function ListClubsContent() {
     loadClubs();
   }, [loadClubs]);
 
-  // Filter summary
-  const filterParts: string[] = [];
+  // Filter summary: cấp 1 > cấp 2 > cấp 3
+  const levels: string[] = [];
   if (selectedNation !== 'all') {
-    filterParts.push(getNationDisplayName(nationsList, selectedNation));
-  }
-  if (extinctFilter === 'active') {
-    filterParts.push('Hoạt động');
-  } else if (extinctFilter === 'extinct') {
-    filterParts.push('Giải thể');
-  }
-  if (selectedCompId) {
-    filterParts.push(`Comp: ${selectedCompId}`);
+    const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
+    let confed = '';
+    if (nation) {
+      if (typeof nation.confed === 'string') confed = nation.confed.toUpperCase();
+      else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
+      else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
+    }
+    // Cấp 1
+    if (confed) levels.push(confed);
+
+    // Cấp 2
+    levels.push(getNationDisplayName(nationsList, selectedNation));
+
+    // Cấp 3
+    if (selectedCompId) {
+      if (selectedCompId.startsWith('oth-')) {
+        levels.push('Other');
+      } else if (selectedCompId.startsWith('ext-')) {
+        levels.push('Extinct');
+      } else {
+        levels.push(`Comp: ${selectedCompId}`);
+      }
+    } else {
+      if (extinctFilter === 'active') {
+        levels.push('Hoạt động');
+      } else if (extinctFilter === 'extinct') {
+        levels.push('Giải thể');
+      }
+    }
+  } else {
+    if (extinctFilter === 'active') {
+      levels.push('Hoạt động');
+    } else if (extinctFilter === 'extinct') {
+      levels.push('Giải thể');
+    }
   }
 
-  const filterSummary = filterParts.length > 0 ? filterParts.join(' • ') : 'Tất cả câu lạc bộ';
+  const filterSummary = levels.length > 0 ? levels.join(' > ') : 'Tất cả câu lạc bộ';
   const hasActiveCustomFilter = selectedNation !== 'all' || extinctFilter !== 'all' || !!selectedCompId;
 
   const handleOpenModal = () => {
@@ -147,9 +173,46 @@ function ListClubsContent() {
   };
 
   // Đổi option -> áp dụng ngay và về trang 1 (modal giữ mở để chỉnh tiếp)
-  const handlePickNation = (val: string) => {
-    setTempNation(val);
-    setSelectedNation(val);
+  const handleSelectTreeNode = (key: string, nodeData?: any) => {
+    if (key === 'all') {
+      setTempNation('all');
+      setSelectedNation('all');
+      setTempCompId(undefined);
+      setSelectedCompId(undefined);
+      setTempExtinct('all');
+      setExtinctFilter('all');
+    } else if (key.startsWith('nation_')) {
+      const nid = key.replace('nation_', '');
+      setTempNation(nid);
+      setSelectedNation(nid);
+      setTempCompId(undefined);
+      setSelectedCompId(undefined);
+    } else if (key.startsWith('comp_')) {
+      const compId = key.replace('comp_', '');
+      const nid = nodeData?.nationId || nodeData?.compData?.nation_id;
+      if (nid) {
+        setTempNation(nid);
+        setSelectedNation(nid);
+      }
+      setTempCompId(compId);
+      setSelectedCompId(compId);
+    } else if (key.startsWith('oth_')) {
+      const nid = key.replace('oth_', '');
+      setTempNation(nid);
+      setSelectedNation(nid);
+      setTempCompId('oth-' + nid);
+      setSelectedCompId('oth-' + nid);
+      setTempExtinct('active');
+      setExtinctFilter('active');
+    } else if (key.startsWith('ext_')) {
+      const nid = key.replace('ext_', '');
+      setTempNation(nid);
+      setSelectedNation(nid);
+      setTempCompId('ext-' + nid);
+      setSelectedCompId('ext-' + nid);
+      setTempExtinct('extinct');
+      setExtinctFilter('extinct');
+    }
     setPage(1);
   };
 
@@ -259,10 +322,20 @@ function ListClubsContent() {
               Cây đơn vị:
             </label>
             <UnitTree
+              mode="club"
               nations={nationsList}
-              selectedKey={tempNation}
-              onSelectNode={(val) => handlePickNation(val)}
-              allOptionLabel="Tất cả quốc gia (All Nations)"
+              selectedKey={
+                tempCompId
+                  ? tempCompId.startsWith('oth-')
+                    ? `oth_${tempCompId.slice(4)}`
+                    : tempCompId.startsWith('ext-')
+                    ? `ext_${tempCompId.slice(4)}`
+                    : `comp_${tempCompId}`
+                  : tempNation !== 'all'
+                  ? `nation_${tempNation}`
+                  : 'all'
+              }
+              onSelectNode={handleSelectTreeNode}
               height={280}
             />
           </div>
