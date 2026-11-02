@@ -131,16 +131,19 @@ function ListNationsContent() {
     setModalOpen(true);
   };
 
-  // Chọn option -> áp dụng ngay, về trang 1 và đóng modal
+  // Chọn option trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handlePickConfed = (val: string) => {
     setTempConfed(val);
-    setSelectedConfed(val);
-    setPage(1);
-    setModalOpen(false);
   };
 
   const handleResetModal = () => {
-    handlePickConfed('UEFA');
+    setTempConfed('UEFA');
+  };
+
+  const handleApplyModal = () => {
+    setSelectedConfed(tempConfed);
+    setPage(1);
+    setModalOpen(false);
   };
 
   return (
@@ -212,6 +215,12 @@ function ListNationsContent() {
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
             Đặt lại
           </Button>,
+          <Button key="close" onClick={() => setModalOpen(false)}>
+            Đóng
+          </Button>,
+          <Button key="apply" type="primary" onClick={handleApplyModal}>
+            Áp dụng
+          </Button>,
         ]}
         width={460}
         centered
@@ -221,7 +230,7 @@ function ListNationsContent() {
           <UnitTree
             confedOnly
             nations={allNations}
-            selectedKey={selectedConfed}
+            selectedKey={tempConfed}
             onSelectNode={(val) => handlePickConfed(val)}
             allOptionLabel="Tất cả Liên đoàn (All)"
           />

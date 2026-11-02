@@ -142,7 +142,8 @@ function ListAwardsContent() {
       else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
     }
     if (confed) levels.push(confed);
-    levels.push(getNationDisplayName(nationsList, selectedNation));
+    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
+    levels.push(nation3l || getNationDisplayName(nationsList, selectedNation));
     if (selectedCompId) levels.push(`Comp: ${selectedCompId}`);
   } else if (selectedCompId) {
     levels.push(`Comp: ${selectedCompId}`);
@@ -157,24 +158,26 @@ function ListAwardsContent() {
     setModalOpen(true);
   };
 
-  // Chọn option -> áp dụng ngay và về trang 1
+  // Chọn option trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handlePickNation = (val: string) => {
     setTempNation(val);
-    setSelectedNation(val);
-    setPage(1);
-    setModalOpen(false);
+    setTempCompId(undefined);
   };
 
   const handleClearComp = () => {
     setTempCompId(undefined);
-    setSelectedCompId(undefined);
-    setPage(1);
   };
 
   const handleResetModal = () => {
     setTempCompId(undefined);
-    setSelectedCompId(undefined);
-    handlePickNation('all');
+    setTempNation('all');
+  };
+
+  const handleApplyModal = () => {
+    setSelectedNation(tempNation);
+    setSelectedCompId(tempCompId);
+    setPage(1);
+    setModalOpen(false);
   };
 
   return (
@@ -246,6 +249,12 @@ function ListAwardsContent() {
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
             Đặt lại
           </Button>,
+          <Button key="close" onClick={() => setModalOpen(false)}>
+            Đóng
+          </Button>,
+          <Button key="apply" type="primary" onClick={handleApplyModal}>
+            Áp dụng
+          </Button>,
         ]}
         width={460}
         centered
@@ -278,7 +287,7 @@ function ListAwardsContent() {
           <div>
             <UnitTree
               nations={nationsList}
-              selectedKey={selectedNation}
+              selectedKey={tempNation}
               onSelectNode={(val) => handlePickNation(val)}
               allOptionLabel="Tất cả quốc gia (All Nations)"
             />

@@ -563,3 +563,19 @@ body:has(.ant-modal-root .ant-modal-wrap:not([style*='display: none'])) .ant-too
   background: transparent !important;
 }
 
+.unit-tree-directory .ant-tree-node-content-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+}
+
+.unit-tree-directory .ant-tree-title {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+

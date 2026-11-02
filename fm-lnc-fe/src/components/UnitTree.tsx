@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Tree, Input } from 'antd';
-import { CaretDownFilled, DownOutlined, RightOutlined } from '@ant-design/icons';
+import { DownOutlined, RightOutlined, CheckOutlined } from '@ant-design/icons';
 import { NationItem, CompetitionItem, fetchDomesticCompetitions } from '../services/api';
 import type { DataNode } from 'antd/es/tree';
 
@@ -570,7 +570,7 @@ export default function UnitTree({
             )
           }
           titleRender={(node: any) => {
-            const isSelected = selectedKey === String(node.key);
+            const isSelected = Boolean(selectedKey && String(selectedKey) === String(node.key));
             const isLevel1 = node.level === 1;
 
             if (!isLevel1) {
@@ -587,29 +587,37 @@ export default function UnitTree({
               );
 
               return (
-                <span className="inline-flex items-center gap-1.5 min-w-0 select-none text-xs">
-                  {!hideTag && code3 && (
-                    <span
-                      className={`inline-flex items-center justify-center px-1 py-0.5 rounded text-[10px] font-mono font-medium tracking-wider flex-shrink-0 border leading-none ${
-                        isSelected
-                          ? 'bg-blue-100 text-blue-700 border-blue-300'
-                          : 'bg-slate-100 text-slate-600 border-slate-200'
-                      }`}
-                    >
-                      {code3}
+                <span className="flex items-center justify-between w-full min-w-0 pr-1 select-none text-xs">
+                  <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
+                    {!hideTag && code3 && (
+                      <span
+                        className={`inline-flex items-center justify-center px-1 py-0.5 rounded text-[10px] font-mono font-medium tracking-wider flex-shrink-0 border leading-none ${
+                          isSelected
+                            ? 'bg-blue-100 text-blue-700 border-blue-300'
+                            : 'bg-slate-100 text-slate-600 border-slate-200'
+                        }`}
+                      >
+                        {code3}
+                      </span>
+                    )}
+                    <span className={`truncate ${isSelected ? 'font-medium text-blue-700' : ''}`}>
+                      {shortName}
                     </span>
-                  )}
-                  <span className="truncate flex-1">
-                    {shortName}
                   </span>
+                  {isSelected && (
+                    <CheckOutlined className="text-blue-600 text-xs shrink-0 ml-auto pl-2" />
+                  )}
                 </span>
               );
             }
 
             // Level 1: ALL, WORLD, AFC, CAF, CONCACAF, CONMEBOL, OFC, UEFA, EXTINCT
             return (
-              <span className="truncate flex-1 select-none text-xs font-semibold">
-                {node.title}
+              <span className="flex items-center justify-between w-full min-w-0 pr-1 select-none text-xs font-semibold">
+                <span className={`truncate ${isSelected ? 'text-blue-700' : ''}`}>{node.title}</span>
+                {isSelected && (
+                  <CheckOutlined className="text-blue-600 text-xs shrink-0 ml-auto pl-2" />
+                )}
               </span>
             );
           }}

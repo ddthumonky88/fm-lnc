@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Input, Modal, Button, Segmented, Tag, App } from 'antd';
+import { Input, Modal, Button, Tag, App } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import CardGrid from '../../components/CardGrid';
 import { ClubIcon } from '../../components/EntityIcons';
@@ -10,7 +10,7 @@ import ListPageFilterBar from '../../components/ListPageFilterBar';
 import { getNationDisplayName } from '../../components/NationTreeSelect';
 import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
-import { searchClubs, fetchAllNations, ClubItem, NationItem } from '../../services/api';
+import { searchClubs, fetchAllNations, fetchCompetitionInfo, ClubItem, NationItem } from '../../services/api';
 import { EntityType } from '../../types';
 
 function ListClubsContent() {
@@ -24,6 +24,7 @@ function ListClubsContent() {
 
   const [selectedNation, setSelectedNation] = useState<string>(initialNationId);
   const [selectedCompId, setSelectedCompId] = useState<string | undefined>(initialCompId);
+  const [selectedCompName, setSelectedCompName] = useState<string>('');
   const [extinctFilter, setExtinctFilter] = useState<string>('all');
 
   // Modal temporary state
@@ -31,6 +32,7 @@ function ListClubsContent() {
   const [tempNation, setTempNation] = useState<string>(initialNationId);
   const [tempExtinct, setTempExtinct] = useState<string>('all');
   const [tempCompId, setTempCompId] = useState<string | undefined>(initialCompId);
+  const [tempCompName, setTempCompName] = useState<string>('');
 
   const [nationsList, setNationsList] = useState<NationItem[]>([]);
   const [keyword, setKeyword] = useState<string>('');
@@ -66,6 +68,33 @@ function ListClubsContent() {
       setTempCompId(qComp);
     }
   }, [searchParams]);
+
+  // Load comp name if initial compId is present
+  useEffect(() => {
+    if (selectedCompId && !selectedCompName) {
+      if (selectedCompId.startsWith('oth-')) {
+        setSelectedCompName('Other');
+        setTempCompName('Other');
+      } else if (selectedCompId.startsWith('ext-')) {
+        setSelectedCompName('Extinct');
+        setTempCompName('Extinct');
+      } else {
+        fetchCompetitionInfo(selectedCompId)
+          .then((comp) => {
+            if (comp) {
+              const name = comp.name_sh || comp.name || comp.name_lg || '';
+              setSelectedCompName(name);
+              setTempCompName(name);
+              if (comp.nation_id && selectedNation === 'all') {
+                setSelectedNation(String(comp.nation_id));
+                setTempNation(String(comp.nation_id));
+              }
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [selectedCompId, selectedCompName, selectedNation]);
 
   // Debounce search input
   useEffect(() => {
@@ -122,7 +151,7 @@ function ListClubsContent() {
     loadClubs();
   }, [loadClubs]);
 
-  // Filter summary: cấp 1 > cấp 2 > cấp 3
+  // Filter summary: {confed} > {nation_3letter} > {comp_short_name}
   const levels: string[] = [];
   if (selectedNation !== 'all') {
     const nation = nationsList.find((n) => String(n.id) === String(selectedNation));
@@ -132,20 +161,25 @@ function ListClubsContent() {
       else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
       else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
     }
-    // Cấp 1
+    // Cấp 1: {confed}
     if (confed) levels.push(confed);
 
-    // Cấp 2
-    levels.push(getNationDisplayName(nationsList, selectedNation));
+    // Cấp 2: {nation_3letter}
+    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
+    if (nation3l) {
+      levels.push(nation3l);
+    } else {
+      levels.push(getNationDisplayName(nationsList, selectedNation));
+    }
 
-    // Cấp 3
+    // Cấp 3: {comp_short_name}
     if (selectedCompId) {
       if (selectedCompId.startsWith('oth-')) {
         levels.push('Other');
       } else if (selectedCompId.startsWith('ext-')) {
         levels.push('Extinct');
       } else {
-        levels.push(`Comp: ${selectedCompId}`);
+        levels.push(selectedCompName || `Comp: ${selectedCompId}`);
       }
     } else {
       if (extinctFilter === 'active') {
@@ -155,7 +189,15 @@ function ListClubsContent() {
       }
     }
   } else {
-    if (extinctFilter === 'active') {
+    if (selectedCompId) {
+      if (selectedCompId.startsWith('oth-')) {
+        levels.push('Other');
+      } else if (selectedCompId.startsWith('ext-')) {
+        levels.push('Extinct');
+      } else {
+        levels.push(selectedCompName || `Comp: ${selectedCompId}`);
+      }
+    } else if (extinctFilter === 'active') {
       levels.push('Hoạt động');
     } else if (extinctFilter === 'extinct') {
       levels.push('Giải thể');
@@ -169,73 +211,68 @@ function ListClubsContent() {
     setTempNation(selectedNation);
     setTempExtinct(extinctFilter);
     setTempCompId(selectedCompId);
+    setTempCompName(selectedCompName);
     setModalOpen(true);
   };
 
-  // Đổi option -> áp dụng ngay và về trang 1 (modal giữ mở để chỉnh tiếp)
+  // Đổi option trên cây trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handleSelectTreeNode = (key: string, nodeData?: any) => {
     if (key === 'all') {
       setTempNation('all');
-      setSelectedNation('all');
       setTempCompId(undefined);
-      setSelectedCompId(undefined);
+      setTempCompName('');
       setTempExtinct('all');
-      setExtinctFilter('all');
     } else if (key.startsWith('nation_')) {
       const nid = key.replace('nation_', '');
       setTempNation(nid);
-      setSelectedNation(nid);
       setTempCompId(undefined);
-      setSelectedCompId(undefined);
+      setTempCompName('');
     } else if (key.startsWith('comp_')) {
       const compId = key.replace('comp_', '');
       const nid = nodeData?.nationId || nodeData?.compData?.nation_id;
       if (nid) {
         setTempNation(nid);
-        setSelectedNation(nid);
       }
       setTempCompId(compId);
-      setSelectedCompId(compId);
+      const cName = nodeData?.shortName || nodeData?.compData?.name_sh || nodeData?.compData?.name || '';
+      setTempCompName(cName);
     } else if (key.startsWith('oth_')) {
       const nid = key.replace('oth_', '');
       setTempNation(nid);
-      setSelectedNation(nid);
       setTempCompId('oth-' + nid);
-      setSelectedCompId('oth-' + nid);
       setTempExtinct('active');
-      setExtinctFilter('active');
+      setTempCompName('Other');
     } else if (key.startsWith('ext_')) {
       const nid = key.replace('ext_', '');
       setTempNation(nid);
-      setSelectedNation(nid);
       setTempCompId('ext-' + nid);
-      setSelectedCompId('ext-' + nid);
       setTempExtinct('extinct');
-      setExtinctFilter('extinct');
+      setTempCompName('Extinct');
     }
-    setPage(1);
-  };
-
-  const handlePickExtinct = (val: string) => {
-    setTempExtinct(val);
-    setExtinctFilter(val);
-    setPage(1);
   };
 
   const handleClearComp = () => {
     setTempCompId(undefined);
+    setTempCompName('');
     setSelectedCompId(undefined);
+    setSelectedCompName('');
     setPage(1);
   };
 
   const handleResetModal = () => {
     setTempNation('all');
-    setSelectedNation('all');
     setTempExtinct('all');
-    setExtinctFilter('all');
     setTempCompId(undefined);
-    setSelectedCompId(undefined);
+    setTempCompName('');
+  };
+
+  const handleApplyModal = () => {
+    setSelectedNation(tempNation);
+    setSelectedCompId(tempCompId);
+    setSelectedCompName(tempCompName);
+    setExtinctFilter(tempExtinct);
     setPage(1);
+    setModalOpen(false);
   };
 
   return (
@@ -307,78 +344,35 @@ function ListClubsContent() {
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
             Đặt lại
           </Button>,
-          <Button key="close" type="primary" onClick={() => setModalOpen(false)}>
+          <Button key="close" onClick={() => setModalOpen(false)}>
             Đóng
+          </Button>,
+          <Button key="apply" type="primary" onClick={handleApplyModal}>
+            Áp dụng
           </Button>,
         ]}
         width={460}
         centered
         destroyOnClose
       >
-        <div className="py-2 space-y-4">
-          {/* Cây đơn vị */}
-          <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
-              Cây đơn vị:
-            </label>
-            <UnitTree
-              mode="club"
-              nations={nationsList}
-              selectedKey={
-                tempCompId
-                  ? tempCompId.startsWith('oth-')
-                    ? `oth_${tempCompId.slice(4)}`
-                    : tempCompId.startsWith('ext-')
-                    ? `ext_${tempCompId.slice(4)}`
-                    : `comp_${tempCompId}`
-                  : tempNation !== 'all'
-                  ? `nation_${tempNation}`
-                  : 'all'
-              }
-              onSelectNode={handleSelectTreeNode}
-              height={280}
-            />
-          </div>
-
-          {/* Tình trạng CLB */}
-          <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
-              Tình trạng hoạt động:
-            </label>
-            <Segmented
-              value={tempExtinct}
-              onChange={(val) => handlePickExtinct(val as string)}
-              options={[
-                { label: 'Tất cả', value: 'all' },
-                { label: '🟢 Hoạt động', value: 'active' },
-                { label: '⚪ Giải thể', value: 'extinct' },
-              ]}
-              block
-              size="middle"
-            />
-          </div>
-
-          {/* Filter theo Comp nếu có */}
-          {tempCompId && (
-            <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
-                Giải đấu được gán:
-              </label>
-              <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                <Tag
-                  closable
-                  color="blue"
-                  onClose={handleClearComp}
-                  className="font-medium"
-                >
-                  Comp ID: {tempCompId}
-                </Tag>
-                <span className="text-xs text-slate-500">
-                  Nhấn dấu × để hủy lọc theo giải đấu
-                </span>
-              </div>
-            </div>
-          )}
+        <div className="py-1">
+          <UnitTree
+            mode="club"
+            nations={nationsList}
+            selectedKey={
+              tempCompId
+                ? tempCompId.startsWith('oth-')
+                  ? `oth_${tempCompId.slice(4)}`
+                  : tempCompId.startsWith('ext-')
+                  ? `ext_${tempCompId.slice(4)}`
+                  : `comp_${tempCompId}`
+                : tempNation !== 'all'
+                ? `nation_${tempNation}`
+                : 'all'
+            }
+            onSelectNode={handleSelectTreeNode}
+            height={340}
+          />
         </div>
       </Modal>
     </div>

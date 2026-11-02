@@ -157,7 +157,8 @@ function ListCompsContent() {
       else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
     }
     if (confed) levels.push(confed);
-    levels.push(getNationDisplayName(nationsList, selectedNation));
+    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
+    levels.push(nation3l || getNationDisplayName(nationsList, selectedNation));
   } else if (selectedConfed !== 'all') {
     levels.push(selectedConfed);
   }
@@ -175,34 +176,22 @@ function ListCompsContent() {
   const handleSelectTreeNode = (key: string, nodeData?: any) => {
     if (key === 'all') {
       setTempScope('all');
-      setScope('all');
       setTempConfed('all');
-      setSelectedConfed('all');
       setTempNation('all');
-      setSelectedNation('all');
     } else if (key === 'confed_WORLD') {
       setTempScope('international');
-      setScope('international');
       setTempConfed('WORLD');
-      setSelectedConfed('WORLD');
       setTempNation('all');
-      setSelectedNation('all');
     } else if (key.startsWith('intl_')) {
       const confedCode = key.replace('intl_', '');
       setTempScope('international');
-      setScope('international');
       setTempConfed(confedCode);
-      setSelectedConfed(confedCode);
       setTempNation('all');
-      setSelectedNation('all');
     } else if (key.startsWith('confed_')) {
       const confedCode = key.replace('confed_', '');
       setTempScope('all');
-      setScope('all');
       setTempConfed(confedCode);
-      setSelectedConfed(confedCode);
       setTempNation('all');
-      setSelectedNation('all');
     } else {
       const nation = nodeData?.nationData;
       let confedCode = 'all';
@@ -211,23 +200,23 @@ function ListCompsContent() {
         else if (nation.confed?.code) confedCode = nation.confed.code.toUpperCase();
       }
       setTempScope('domestic');
-      setScope('domestic');
       setTempConfed(confedCode);
-      setSelectedConfed(confedCode);
       setTempNation(key);
-      setSelectedNation(key);
     }
-    setPage(1);
   };
 
   const handleResetModal = () => {
     setTempScope('all');
-    setScope('all');
     setTempConfed('all');
-    setSelectedConfed('all');
     setTempNation('all');
-    setSelectedNation('all');
+  };
+
+  const handleApplyModal = () => {
+    setScope(tempScope);
+    setSelectedConfed(tempConfed);
+    setSelectedNation(tempNation);
     setPage(1);
+    setModalOpen(false);
   };
 
   return (
@@ -299,8 +288,11 @@ function ListCompsContent() {
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
             Đặt lại
           </Button>,
-          <Button key="close" type="primary" onClick={() => setModalOpen(false)}>
+          <Button key="close" onClick={() => setModalOpen(false)}>
             Đóng
+          </Button>,
+          <Button key="apply" type="primary" onClick={handleApplyModal}>
+            Áp dụng
           </Button>,
         ]}
         width={460}

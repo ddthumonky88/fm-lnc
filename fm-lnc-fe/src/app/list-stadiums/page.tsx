@@ -120,8 +120,9 @@ function ListStadiumsContent() {
       else if (nation.confed?.code) confed = nation.confed.code.toUpperCase();
       else if (nation.confed_id) confed = String(nation.confed_id).toUpperCase();
     }
-    const nationName = getNationDisplayName(nationsList, selectedNation);
-    filterSummary = confed ? `${confed} > ${nationName}` : nationName;
+    const nation3l = (nation?.name_3l || (nation as any)?.code || nation?.name_sh || nation?.name || '').toUpperCase();
+    const nationDisplay = nation3l || getNationDisplayName(nationsList, selectedNation);
+    filterSummary = confed ? `${confed} > ${nationDisplay}` : nationDisplay;
   }
 
   const hasActiveCustomFilter = selectedNation !== 'all';
@@ -131,16 +132,19 @@ function ListStadiumsContent() {
     setModalOpen(true);
   };
 
-  // Chọn option -> áp dụng ngay, về trang 1 và đóng modal
+  // Chọn option trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handlePickNation = (val: string) => {
     setTempNation(val);
-    setSelectedNation(val);
-    setPage(1);
-    setModalOpen(false);
   };
 
   const handleResetModal = () => {
-    handlePickNation('all');
+    setTempNation('all');
+  };
+
+  const handleApplyModal = () => {
+    setSelectedNation(tempNation);
+    setPage(1);
+    setModalOpen(false);
   };
 
   return (
@@ -212,6 +216,12 @@ function ListStadiumsContent() {
           <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetModal}>
             Đặt lại
           </Button>,
+          <Button key="close" onClick={() => setModalOpen(false)}>
+            Đóng
+          </Button>,
+          <Button key="apply" type="primary" onClick={handleApplyModal}>
+            Áp dụng
+          </Button>,
         ]}
         width={460}
         centered
@@ -220,7 +230,7 @@ function ListStadiumsContent() {
         <div className="py-1">
           <UnitTree
             nations={nationsList}
-            selectedKey={selectedNation}
+            selectedKey={tempNation}
             onSelectNode={(val) => handlePickNation(val)}
             allOptionLabel="Tất cả quốc gia (All Nations)"
           />
