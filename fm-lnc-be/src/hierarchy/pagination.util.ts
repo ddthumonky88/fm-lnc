@@ -34,6 +34,11 @@ function getPropertyValue(obj: any, property: string): any {
     if (type.includes('league') || type.includes('division') || type.includes('tier')) return 1;
     return 4;
   }
+  if (property === '_cityRemoveRank') {
+    if (obj.is_remove === true) return 1;
+    const reg = String(obj.region || obj.categories || obj.category || '').trim().toUpperCase();
+    return reg === '[REMOVE]' || reg.startsWith('[REMOVE]') ? 1 : 0;
+  }
   if (obj[property] !== undefined) return obj[property];
   if (property.includes('.')) {
     return property.split('.').reduce((acc, part) => acc?.[part], obj);

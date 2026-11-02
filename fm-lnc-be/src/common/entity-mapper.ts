@@ -266,7 +266,16 @@ export function mapCity(city: any) {
 
   const regEntity = city.regionEntity;
   const regName = regEntity?.name ?? null;
-  const cleanRegionName = regName || (city.region ? String(city.region).replace(/^\[[^\]]+\]\s*/, '').trim() : null);
+  const rawRegion = regName || city.region || null;
+  let cleanRegionName = rawRegion;
+  if (rawRegion && rawRegion !== '[REMOVE]') {
+    const stripped = String(rawRegion).replace(/^\[[^\]]+\]\s*/, '').trim();
+    cleanRegionName = stripped || rawRegion;
+  }
+
+  const isRemove =
+    rawRegion === '[REMOVE]' ||
+    String(rawRegion || '').trim().toUpperCase().startsWith('[REMOVE]');
 
   return {
     id: String(city.id),
@@ -274,6 +283,7 @@ export function mapCity(city: any) {
     name_lg: city.name_lg ?? city.name ?? null,
     name_sh: city.name_sh ?? null,
     region: cleanRegionName,
+    is_remove: isRemove,
     is_disabled: !!city.is_disabled,
     inactive_fields: city.is_disabled ? 'name' : null,
     nation,

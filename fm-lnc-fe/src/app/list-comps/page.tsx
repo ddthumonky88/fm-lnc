@@ -124,7 +124,19 @@ function ListCompsContent() {
         refreshSignal > 0,
       );
 
-      const items = Array.isArray(res) ? res : (res as any)?.content || [];
+      const rawItems = Array.isArray(res) ? res : (res as any)?.content || [];
+      const items = rawItems.filter((c: any) => {
+        const id = String(c.id || '').toUpperCase();
+        const type = String(c.virtual_type || c.type || '').toUpperCase();
+        return (
+          !id.startsWith('OTH-') &&
+          !id.startsWith('EXT-') &&
+          id !== '[OTHER]' &&
+          id !== '[EXTINCT]' &&
+          type !== 'OTHER' &&
+          type !== 'EXTINCT'
+        );
+      });
       const totalElements = (res as any)?.totalElements ?? (res as any)?.total ?? items.length;
       setCompetitions(items);
       setTotal(totalElements);

@@ -252,91 +252,7 @@ export class HierarchyService {
       }),
     );
 
-    if (!strNationId) {
-      return paginateAndSort(comps, withDefaultSort(filter, COMPETITION_DEFAULT_SORT));
-    }
-
-    const countsRaw = await this.clubRepo.query(
-      `SELECT
-        COUNT(*) FILTER (WHERE comp_id IS NULL AND (is_extinct = false OR is_extinct IS NULL))::int as other_count,
-        COUNT(*) FILTER (WHERE is_extinct = true)::int as extinct_count
-      FROM clubs
-      WHERE nation_id = $1;`,
-      [strNationId],
-    );
-
-    const otherClubsCount = countsRaw[0]?.other_count || 0;
-    const extinctClubsCount = countsRaw[0]?.extinct_count || 0;
-
-    const nationRef = mapNationRef(nation) || {
-      id: strNationId,
-      name_lg: null,
-      name_sh: null,
-      name_3l: null,
-    };
-    const confedRef = nation?.confed || null;
-
-    const virtualOther = {
-      id: `oth-${strNationId}`,
-      name: '[OTHER]',
-      name_lg: '[OTHER]',
-      name_sh: '[OTHER]',
-      name_3l: '[OTHER]',
-      type: 'Other Competitions',
-      nation: nationRef,
-      confed: confedRef,
-      parent_comp: null,
-      is_virtual: true,
-      virtual_type: 'OTHER',
-      stats: {
-        club: otherClubsCount,
-        award: 0,
-        children: 0,
-      },
-    };
-
-    const virtualExtinct = {
-      id: `ext-${strNationId}`,
-      name: '[EXTINCT]',
-      name_lg: '[EXTINCT]',
-      name_sh: '[EXTINCT]',
-      name_3l: '[EXTINCT]',
-      type: 'Extinct Competitions',
-      nation: nationRef,
-      confed: confedRef,
-      parent_comp: null,
-      is_virtual: true,
-      virtual_type: 'EXTINCT',
-      stats: {
-        club: extinctClubsCount,
-        award: 0,
-        children: 0,
-      },
-    };
-
-    const virtualItems: any[] = [];
-    const qTerm = searchKey.toLowerCase();
-    const matchVirtual = (name: string, cat: string) => {
-      if (!qTerm) return true;
-      return (
-        name.toLowerCase().includes(qTerm) ||
-        cat.toLowerCase().includes(qTerm) ||
-        'other'.includes(qTerm) ||
-        'extinct'.includes(qTerm)
-      );
-    };
-
-    if (matchVirtual(virtualOther.name_lg, virtualOther.type)) {
-      virtualItems.push(virtualOther);
-    }
-    if (matchVirtual(virtualExtinct.name_lg, virtualExtinct.type)) {
-      virtualItems.push(virtualExtinct);
-    }
-
-    return paginateAndSort(
-      [...virtualItems, ...comps],
-      withDefaultSort(filter, COMPETITION_DEFAULT_SORT),
-    );
+    return paginateAndSort(comps, withDefaultSort(filter, COMPETITION_DEFAULT_SORT));
   }
 
   async searchClubs(filter: ClubSearchQueryDto) {
@@ -516,7 +432,16 @@ export class HierarchyService {
     }
 
     const items = await qb.orderBy('city.id', 'ASC').getMany();
-    return paginateAndSort(items.map(mapCity), withDefaultSort(filter, ['region,asc', 'id,asc']));
+    const rawSort = filter?.sort
+      ? Array.isArray(filter.sort)
+        ? filter.sort
+        : [filter.sort]
+      : ['region,asc', 'id,asc'];
+    const sortWithRemoveRank = [
+      '_cityRemoveRank,asc',
+      ...rawSort.filter((s: string) => !s.startsWith('_cityRemoveRank')),
+    ];
+    return paginateAndSort(items.map(mapCity), { ...filter, sort: sortWithRemoveRank });
   }
 
   async getRegionsByNation(nationIdOrFilter?: any, legacyFilter?: PaginationQueryDto) {

@@ -375,6 +375,7 @@ export interface CityItem {
   nation_id?: string;
   country_id?: string;
   region?: string;
+  is_remove?: boolean;
   is_disabled?: boolean;
   isDisabled?: boolean;
   inactive_fields?: string;

@@ -15,6 +15,7 @@ import {
   CheckOutlined,
   InfoCircleOutlined,
   EllipsisOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
@@ -203,6 +204,16 @@ export default function EntityCard({
     data.virtual_type === 'REMOVE' ||
     (typeof data.id === 'string' && data.id.startsWith('[')),
   );
+
+  const isCityRemove =
+    entityTypeStr === 'city' &&
+    Boolean(
+      data.is_remove ||
+      isRedKeyword(data.region) ||
+      isRedKeyword(data.categories) ||
+      isRedKeyword(data.category) ||
+      (typeof data.region === 'string' && data.region.toUpperCase().includes('[REMOVE]'))
+    );
 
   const handleCopyId = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -559,7 +570,11 @@ export default function EntityCard({
           }
           handleNavigateAction();
         }}
-        className={`bg-blue-50/70 hover:bg-blue-50 border border-blue-200/80 hover:border-blue-400 rounded-lg ${
+        className={`${
+          isCityRemove
+            ? 'bg-red-50/70 hover:bg-red-100/60 border border-red-200/80 hover:border-red-400'
+            : 'bg-blue-50/70 hover:bg-blue-50 border border-blue-200/80 hover:border-blue-400'
+        } rounded-lg ${
           isSmall ? 'px-2.5 py-2' : 'px-3 py-2 sm:px-3.5 sm:py-2.5'
         } shadow-2xs hover:shadow-md transition-all duration-150 flex flex-col justify-between group h-full ${
           isNavigable ? 'cursor-pointer' : ''
@@ -567,7 +582,7 @@ export default function EntityCard({
       >
         <div>
           {/* Top Header Bar: chỉ gồm [Thẻ ID] và [btn 3 chấm] */}
-          <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-blue-200/60 min-w-0">
+          <div className={`flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b ${isCityRemove ? 'border-red-200/60' : 'border-blue-200/60'} min-w-0`}>
             <div className="flex items-center min-w-0">
                 {data.id !== undefined && data.id !== null && data.id !== '' && (
                   <div onClick={(e) => e.stopPropagation()} className="flex items-center shrink-0">
@@ -589,7 +604,11 @@ export default function EntityCard({
                         }}
                         className="m-0 font-mono font-bold text-xs shrink-0 select-none py-0 px-1.5 leading-tight shadow-2xs"
                       >
-                        {String(data.id).replace(/^\[/, '').replace(/\]$/, '')}
+                        {data.id === '[REMOVE]' || data.id === 'REMOVE' ? (
+                          <CloseCircleOutlined className="text-red-500" />
+                        ) : (
+                          String(data.id).replace(/^\[/, '').replace(/\]$/, '')
+                        )}
                       </Tag>
                     ) : (
                       <Tooltip
@@ -600,11 +619,11 @@ export default function EntityCard({
                         <Tag
                           onClick={handleCopyId}
                           style={{
-                            border: isRedKeyword(data.id)
+                            border: isRedKeyword(data.id) || isCityRemove
                               ? '1px solid #f87171'
                               : '1px solid #60a5fa',
-                            color: isRedKeyword(data.id) ? '#dc2626' : '#1d4ed8',
-                            backgroundColor: isRedKeyword(data.id)
+                            color: isRedKeyword(data.id) || isCityRemove ? '#dc2626' : '#1d4ed8',
+                            backgroundColor: isRedKeyword(data.id) || isCityRemove
                               ? '#fef2f2'
                               : 'rgba(239, 246, 255, 0.85)',
                           }}
@@ -622,11 +641,17 @@ export default function EntityCard({
                               : undefined
                           }
                         >
-                          <span>{String(data.id).replace(/^\[/, '').replace(/\]$/, '')}</span>
+                          <span>
+                            {data.id === '[REMOVE]' || data.id === 'REMOVE' ? (
+                              <CloseCircleOutlined className="text-red-500" />
+                            ) : (
+                              String(data.id).replace(/^\[/, '').replace(/\]$/, '')
+                            )}
+                          </span>
                           {idCopied ? (
                             <CheckOutlined className="text-emerald-500 text-[10px]" />
                           ) : (
-                            <CopyOutlined className="text-[10px] text-blue-500 hover:text-blue-700" />
+                            <CopyOutlined className={`text-[10px] ${isCityRemove ? 'text-red-400 hover:text-red-600' : 'text-blue-500 hover:text-blue-700'}`} />
                           )}
                         </Tag>
                       </Tooltip>
@@ -688,24 +713,50 @@ export default function EntityCard({
                   });
                 }
               } else if (entityTypeStr === 'city') {
+                const isTitleRemove =
+                  title === '[REMOVE]' ||
+                  (typeof title === 'string' && title.trim().toUpperCase() === '[REMOVE]');
                 fields.push({
                   label: 'Name:',
-                  value: title,
+                  value: isTitleRemove ? (
+                    <Tooltip title="[REMOVE]" trigger="hover" destroyOnHidden>
+                      <span className="inline-flex items-center text-red-500 text-[14px]">
+                        <CloseCircleOutlined />
+                      </span>
+                    </Tooltip>
+                  ) : (
+                    title
+                  ),
                   align: 'start',
                   lineClamp: 3,
                   isInactive: isInactive('name') || isTitleInactive,
-                  isRed: isRedKeyword(title),
+                  isRed: isRedKeyword(title) || isCityRemove,
                 });
                 let regionVal = data.region;
                 if (regionVal) {
-                  regionVal = String(regionVal).replace(/^\[[^\]]+\]\s*/, '').trim();
+                  const cleaned = String(regionVal).replace(/^\[[^\]]+\]\s*/, '').trim();
+                  const displayRegion = cleaned || regionVal;
+                  const isRegionRemove =
+                    displayRegion === '[REMOVE]' ||
+                    String(regionVal).trim().toUpperCase() === '[REMOVE]' ||
+                    String(displayRegion).trim().toUpperCase() === '[REMOVE]' ||
+                    String(regionVal).trim().toUpperCase().startsWith('[REMOVE]');
+
                   fields.push({
                     label: 'Region:',
-                    value: regionVal,
+                    value: isRegionRemove ? (
+                      <Tooltip title="[REMOVE]" trigger="hover" destroyOnHidden>
+                        <span className="inline-flex items-center text-red-500 text-[14px]">
+                          <CloseCircleOutlined />
+                        </span>
+                      </Tooltip>
+                    ) : (
+                      displayRegion
+                    ),
                     align: 'start',
                     lineClamp: 2,
                     isInactive: isInactive('region'),
-                    isRed: isRedKeyword(regionVal),
+                    isRed: isRedKeyword(displayRegion) || isCityRemove,
                   });
                 }
               } else if (entityTypeStr === 'stadium') {
@@ -907,6 +958,18 @@ export default function EntityCard({
               >
                 {renderedFields.map((field, idx) => {
                   const isNode = React.isValidElement(field.value);
+                  const isRemoveVal =
+                    typeof field.value === 'string' &&
+                    (field.value.trim().toUpperCase() === '[REMOVE]' ||
+                      field.value.trim().toUpperCase() === 'REMOVE');
+
+                  const removeIconNode = isRemoveVal ? (
+                    <Tooltip title="[REMOVE]" trigger="hover" destroyOnHidden>
+                      <span className="inline-flex items-center text-red-500 text-[14px]">
+                        <CloseCircleOutlined />
+                      </span>
+                    </Tooltip>
+                  ) : null;
 
                   // 2 Line layout (Small card / 2 columns / 2-line style)
                   if (isSmall || is2Line) {
@@ -924,6 +987,8 @@ export default function EntityCard({
                         <div className="min-w-0">
                           {isNode ? (
                             field.value
+                          ) : removeIconNode ? (
+                            removeIconNode
                           ) : (
                             <span
                               className={`font-bold text-xs sm:text-[13px] leading-snug whitespace-normal break-words min-w-0 block ${
@@ -960,6 +1025,8 @@ export default function EntityCard({
                       <div className="min-w-0">
                         {isNode ? (
                           field.value
+                        ) : removeIconNode ? (
+                          removeIconNode
                         ) : (
                           <span
                             className={`font-bold text-xs sm:text-[13px] leading-snug whitespace-normal break-words min-w-0 block ${
