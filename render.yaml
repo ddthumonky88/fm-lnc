@@ -3,8 +3,8 @@ services:
   - type: web
     name: fm-lnc-backend
     runtime: docker
-    dockerfilePath: ./fm-lnc-be/Dockerfile
-    dockerContext: ./fm-lnc-be
+    dockerfilePath: ./fm-lnc-be-java/Dockerfile
+    dockerContext: ./fm-lnc-be-java
     region: singapore          # gần Việt Nam nhất
     plan: free
     envVars:
@@ -32,8 +32,8 @@ services:
         fromDatabase:
           name: fm-lnc-db
           property: database
-      - key: NODE_ENV
-        value: production
+      - key: LNC_FILES_DIR
+        value: /app/data
 
   # ─── PostgreSQL Database ───────────────────────────────────────────────────
 databases:

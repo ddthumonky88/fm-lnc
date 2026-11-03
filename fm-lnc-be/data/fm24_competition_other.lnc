@@ -12829,12 +12829,12 @@
 "COMP_COLOUR_CHANGE" 		157097 		 0 234 0 4 239 195 23 					""
 "COMP_LONG_NAME_CHANGE" 	157097 		"FIFA U20 World Cup" 					""
 "COMP_SHORT_NAME_CHANGE" 	157097 		"FIFA U20 World Cup" 					""
-"COMP_3LETTER_NAME_CHANGE"	157097		"FWC20"							""
+"COMP_3LETTER_NAME_CHANGE"	157097		"U20WC"							""
 
 "COMP_COLOUR_CHANGE" 		13100167 	 0 234 0 4 239 195 23 					""
 "COMP_LONG_NAME_CHANGE" 	13100167	"FIFA U17 World Cup" 					""
 "COMP_SHORT_NAME_CHANGE" 	13100167	"FIFA U17 World Cup" 					""
-"COMP_3LETTER_NAME_CHANGE"	13100167	"FWC17"							""
+"COMP_3LETTER_NAME_CHANGE"	13100167	"U17WC"							""
 
 
 # COMP > WORLD > INTERNATIONAL > Club International (Worldwide)
@@ -12888,26 +12888,29 @@
 
 "COMP_LONG_NAME_CHANGE" 	23154146 	"FIFA Arab Cup Qualifier" 				""
 "COMP_SHORT_NAME_CHANGE" 	23154146 	"FIFA Arab Cup Qualifier" 				""
-"COMP_3LETTER_NAME_CHANGE"	23154146	"FAC.Q"							""
+"COMP_3LETTER_NAME_CHANGE"	23154146	"FAC-QR"						""
 
 "COMP_LONG_NAME_CHANGE" 	5626865 	"UAFA Arab Cup" 					""
 "COMP_SHORT_NAME_CHANGE" 	5626865 	"UAFA Arab Cup" 					""
-"COMP_3LETTER_NAME_CHANGE"	5626865 	"UAFA"							""
+"COMP_3LETTER_NAME_CHANGE"	5626865 	"UAFA.AC"						""
 
 
 # COMP > WORLD > INTERNATIONAL > Club International (Arab)
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	5623042 	"Arab Club Champions Cup" 				""
 "COMP_SHORT_NAME_CHANGE" 	5623042 	"Arab Club Champions Cup" 				""
+"COMP_3LETTER_NAME_CHANGE"	5623042 	"ACCC"							""
 
 
 # COMP > WORLD > INTERNATIONAL > NT International (Intercontinental)
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	145234 		"AFC-OFC Challenge Cup" 				""
 "COMP_SHORT_NAME_CHANGE" 	145234 		"AFC-OFC Challenge Cup" 				""
+"COMP_3LETTER_NAME_CHANGE" 	145234 		"AOC" 							""
 
 "COMP_LONG_NAME_CHANGE" 	5626857 	"Afro-Asian Cup of Nations" 				""
 "COMP_SHORT_NAME_CHANGE" 	5626857 	"Afro-Asian Cup of Nations" 				""
+"COMP_3LETTER_NAME_CHANGE" 	5626857 	"AACN" 							""
 
 
 # COMP > WORLD > INTERNATIONAL > NT International (UEFA-CONMEBOL)
@@ -12915,6 +12918,7 @@
 "COMP_COLOUR_CHANGE" 		2000157475 	 0 250 211 132 26 25 91 				""
 "COMP_LONG_NAME_CHANGE" 	2000157475	"UEFA-CONMEBOL Finalissima" 				""
 "COMP_SHORT_NAME_CHANGE" 	2000157475	"UEFA-CONMEBOL Finalissima" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000157475	"FNL" 							""
 
 
 # COMP > WORLD > INTERNATIONAL > Club International (UEFA-CONMEBOL)
@@ -12922,45 +12926,49 @@
 "COMP_COLOUR_CHANGE" 		2000182343 	 0 255 255 255 1 18 109 				""
 "COMP_LONG_NAME_CHANGE" 	2000182343	"U20 Intercontinental Cup"	 			""
 "COMP_SHORT_NAME_CHANGE" 	2000182343	"U20 Intercontinental Cup" 				""
+"COMP_3LETTER_NAME_CHANGE"	2000182343	"U20IC"							""
 
 "COMP_LONG_NAME_CHANGE" 	2000272767	"UEFA-CONMEBOL Club Challenge"	 			""
 "COMP_SHORT_NAME_CHANGE" 	2000272767	"UEFA-CONMEBOL Club Challenge" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000272767	"UCCC" 							""
 
 
 # COMP > WORLD > INTERNATIONAL > NT International (Other)
 #====================================================================================
 "COMP_COLOUR_CHANGE" 		2000200284	 0 255 255 255 0 40 102 				""
 "COMP_LONG_NAME_CHANGE" 	2000200284 	"U23 International" 					""
-"COMP_SHORT_NAME_CHANGE" 	2000200284  	"U23 International" 					""
-"COMP_3LETTER_NAME_CHANGE" 	2000200284  	"U23"		 					""
+"COMP_SHORT_NAME_CHANGE" 	2000200284 	"U23 International" 					""
+"COMP_3LETTER_NAME_CHANGE" 	2000200284 	"U23"		 					""
 
 "COMP_COLOUR_CHANGE" 		114554 		 0 255 255 255 0 40 102 				""
 "COMP_LONG_NAME_CHANGE" 	114554 	 	"U21 International" 					""
-"COMP_SHORT_NAME_CHANGE" 	114554 	  	"U21 International" 					""
-"COMP_3LETTER_NAME_CHANGE" 	114554 	  	"U21"		 					""
+"COMP_SHORT_NAME_CHANGE" 	114554 	 	"U21 International" 					""
+"COMP_3LETTER_NAME_CHANGE" 	114554 	 	"U21"		 					""
 
 "COMP_COLOUR_CHANGE" 		150919 		 0 255 255 255 0 40 102 				""
 "COMP_LONG_NAME_CHANGE" 	150919 	 	"U20 International" 					""
-"COMP_SHORT_NAME_CHANGE" 	150919 	  	"U20 International" 					""
-"COMP_3LETTER_NAME_CHANGE" 	150919 	  	"U20"		 					""
+"COMP_SHORT_NAME_CHANGE" 	150919 	 	"U20 International" 					""
+"COMP_3LETTER_NAME_CHANGE" 	150919 	 	"U20"		 					""
 
 "COMP_COLOUR_CHANGE" 		150785 		 0 255 255 255 0 40 102 				""
 "COMP_LONG_NAME_CHANGE" 	150785 	 	"U19 International" 					""
-"COMP_SHORT_NAME_CHANGE" 	150785 	  	"U19 International" 					""
-"COMP_3LETTER_NAME_CHANGE" 	150785 	  	"U19"		 					""
+"COMP_SHORT_NAME_CHANGE" 	150785 	 	"U19 International" 					""
+"COMP_3LETTER_NAME_CHANGE" 	150785 	 	"U19"		 					""
 
 "COMP_COLOUR_CHANGE" 		150716 		 0 255 255 255 0 40 102 				""
 "COMP_LONG_NAME_CHANGE" 	150716 	 	"U18 International" 					""
-"COMP_SHORT_NAME_CHANGE" 	150716 	  	"U18 International" 					""
-"COMP_3LETTER_NAME_CHANGE" 	150716 	  	"U18"		 					""
+"COMP_SHORT_NAME_CHANGE" 	150716 	 	"U18 International" 					""
+"COMP_3LETTER_NAME_CHANGE" 	150716 	 	"U18"		 					""
 
 "COMP_COLOUR_CHANGE" 		104551 		 0 255 255 255 0 40 102 				""
 "COMP_LONG_NAME_CHANGE" 	104551 		"Friendly" 						""
 "COMP_SHORT_NAME_CHANGE" 	104551 		"Friendly" 						""
+"COMP_3LETTER_NAME_CHANGE" 	104551 		"FR" 							""
 
 "COMP_COLOUR_CHANGE" 		150988 		 0 255 255 255 0 40 102 				""
 "COMP_LONG_NAME_CHANGE" 	150988 		"Friendly" 						""
 "COMP_SHORT_NAME_CHANGE" 	150988 		"Friendly" 						""
+"COMP_3LETTER_NAME_CHANGE" 	150988 		"FR" 							""
 
 
 # COMP > AFC > INTERNATIONAL > NT International
@@ -12968,10 +12976,12 @@
 "COMP_COLOUR_CHANGE" 		100102 		 0 145 105 26 237 237 239 				""
 "COMP_LONG_NAME_CHANGE" 	100102 		"FIFA WC Qualifiers: AFC Asian Qualifier" 		""
 "COMP_SHORT_NAME_CHANGE" 	100102 		"FIFA WC Qualifiers: AFC Asian Qualifier"		""
+"COMP_3LETTER_NAME_CHANGE" 	100102 		"WCQ" 							""
 
 "COMP_COLOUR_CHANGE" 		5627758 	 0 0 0 0 206 189 128 					""
 "COMP_LONG_NAME_CHANGE" 	5627758		"AFC Olympic Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	5627758		"AFC Olympic Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE" 	5627758		"OGQ" 							""
 
 "COMP_COLOUR_CHANGE" 		102414 		 0 255 255 255 9 124 227 				""
 "COMP_LONG_NAME_CHANGE" 	102414 		"AFC Asian Cup" 					""
@@ -12981,7 +12991,7 @@
 "COMP_COLOUR_CHANGE" 		102412 		 0 255 255 255 9 124 227 				""
 "COMP_LONG_NAME_CHANGE" 	102412 		"AFC Asian Cup Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	102412 		"AFC Asian Cup Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	102412		"AAC.Q"							""
+"COMP_3LETTER_NAME_CHANGE"	102412		"AAC-QR"						""
 
 "COMP_LONG_NAME_CHANGE" 	102413 		"Asian Games"						""
 "COMP_SHORT_NAME_CHANGE" 	102413 		"Asian Games"		 				""
@@ -12990,38 +13000,32 @@
 "COMP_COLOUR_CHANGE" 		23177175	 0 255 255 255 128 33 80				""
 "COMP_LONG_NAME_CHANGE" 	23177175	"AFC U23 Asian Cup"					""
 "COMP_SHORT_NAME_CHANGE" 	23177175	"AFC U23 Asian Cup" 					""
-"COMP_3LETTER_NAME_CHANGE"	23177175	"AAC23"							""
+"COMP_3LETTER_NAME_CHANGE"	23177175	"U23 AC"						""
 
 "COMP_COLOUR_CHANGE" 		23177174	 0 255 255 255 128 33 80				""
 "COMP_LONG_NAME_CHANGE" 	23177174	"AFC U23 Asian Cup Qualifiers"				""
 "COMP_SHORT_NAME_CHANGE" 	23177174	"AFC U23 Asian Cup Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	23177174	"AAC23.Q"						""
+"COMP_3LETTER_NAME_CHANGE"	23177174	"U23 ACQ"						""
 
 "COMP_COLOUR_CHANGE" 		5626772		 0 255 255 255 226 115 57				""
 "COMP_LONG_NAME_CHANGE" 	5626772		"AFC U20 Asian Cup"					""
 "COMP_SHORT_NAME_CHANGE" 	5626772		"AFC U20 Asian Cup" 					""
-"COMP_3LETTER_NAME_CHANGE"	5626772		"AAC20"							""
+"COMP_3LETTER_NAME_CHANGE"	5626772		"U20 AC"						""
 
 "COMP_COLOUR_CHANGE" 		5626828		 0 255 255 255 226 115 57				""
 "COMP_LONG_NAME_CHANGE" 	5626828		"AFC U20 Asian Cup Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	5626828		"AFC U20 Asian Cup Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	5626828		"AAC20.Q"						""
+"COMP_3LETTER_NAME_CHANGE"	5626828		"U20 ACQ"						""
 
 "COMP_COLOUR_CHANGE" 		5626804		 0 255 255 255 0 164 217				""
 "COMP_LONG_NAME_CHANGE" 	5626804		"AFC U17 Asian Cup"					""
 "COMP_SHORT_NAME_CHANGE" 	5626804		"AFC U17 Asian Cup" 					""
-"COMP_3LETTER_NAME_CHANGE"	5626804		"AAC17"							""
+"COMP_3LETTER_NAME_CHANGE"	5626804		"U17 AC"						""
 
 "COMP_COLOUR_CHANGE" 		1009934		 0 255 255 255 0 164 217				""
 "COMP_LONG_NAME_CHANGE" 	1009934		"AFC U17 Asian Cup Qualifiers"				""
 "COMP_SHORT_NAME_CHANGE" 	1009934		"AFC U17 Asian Cup Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	1009934		"AAC17.Q"						""
-
-"COMP_LONG_NAME_CHANGE" 	23000095	"AFC Challenge Cup"					""
-"COMP_SHORT_NAME_CHANGE" 	23000095	"AFC Challenge Cup" 					""
-
-"COMP_LONG_NAME_CHANGE" 	23390443	"AFC Solidarity Cup"					""
-"COMP_SHORT_NAME_CHANGE" 	23390443	"AFC Solidarity Cup" 					""
+"COMP_3LETTER_NAME_CHANGE"	1009934		"U17 ACQ"						""
 
 
 # COMP > AFC > INTERNATIONAL > Club International
@@ -13041,6 +13045,15 @@
 "COMP_SHORT_NAME_CHANGE" 	1001960		"AFC Challenge League"					""
 "COMP_3LETTER_NAME_CHANGE" 	1001960		"ACGL"							""
 
+
+# COMP > AFC > INTERNATIONAL > Extinct International
+#====================================================================================
+"COMP_LONG_NAME_CHANGE" 	23000095	"AFC Challenge Cup"					""
+"COMP_SHORT_NAME_CHANGE" 	23000095	"AFC Challenge Cup" 					""
+
+"COMP_LONG_NAME_CHANGE" 	23390443	"AFC Solidarity Cup"					""
+"COMP_SHORT_NAME_CHANGE" 	23390443	"AFC Solidarity Cup" 					""
+
 "COMP_LONG_NAME_CHANGE" 	127287		"AFC Super Cup"						""
 "COMP_SHORT_NAME_CHANGE" 	127287		"AFC Super Cup" 					""
 "COMP_3LETTER_NAME_CHANGE"	127287		"ASC"							""
@@ -13048,21 +13061,21 @@
 
 # COMP > AFC > INTERNATIONAL > NT International (ASEAN)
 #====================================================================================
-"COMP_LONG_NAME_CHANGE" 	5626560		"ASEAN Huyndai Cup"					""
+"COMP_LONG_NAME_CHANGE" 	5626560		"ASEAN Hyundai Cup"					""
 "COMP_SHORT_NAME_CHANGE" 	5626560		"ASEAN Hyundai Cup" 					""
 "COMP_3LETTER_NAME_CHANGE"	5626560		"AHC"							""
 
-"COMP_LONG_NAME_CHANGE" 	23023485	"ASEAN Huyndai Cup Qualifiers"				""
-"COMP_SHORT_NAME_CHANGE" 	23023485	"ASEAN Huyndai Cup Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	23023485	"AHC.Q"							""
+"COMP_LONG_NAME_CHANGE" 	23023485	"ASEAN Hyundai Cup Qualifiers"				""
+"COMP_SHORT_NAME_CHANGE" 	23023485	"ASEAN Hyundai Cup Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE"	23023485	"AHC-QR"						""
 
 "COMP_LONG_NAME_CHANGE" 	5626564		"SEA Games"						""
 "COMP_SHORT_NAME_CHANGE" 	5626564		"SEA Games"			 			""
-"COMP_3LETTER_NAME_CHANGE"	5626564		"SEA"							""
+"COMP_3LETTER_NAME_CHANGE"	5626564		"SEAG"							""
 
 "COMP_LONG_NAME_CHANGE" 	23163000	"ASEAN U23 Mandiri Cup"					""
 "COMP_SHORT_NAME_CHANGE" 	23163000	"ASEAN U23 Mandiri Cup" 				""
-"COMP_3LETTER_NAME_CHANGE"	23163000	"ASEAN U23"						""
+"COMP_3LETTER_NAME_CHANGE"	23163000	"AFF U23"						""
 
 "COMP_LONG_NAME_CHANGE" 	15066133	"AFF U19 Youth Championship"				""
 "COMP_SHORT_NAME_CHANGE" 	15066133	"AFF U19 Youth Championship" 				""
@@ -13096,7 +13109,7 @@
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	23159584 	"SAFF Club Championship"	 			""
 "COMP_SHORT_NAME_CHANGE" 	23159584	"SAFF Club Championship" 				""
-"COMP_3LETTER_NAME_CHANGE"	23159584	"SACC"							""
+"COMP_3LETTER_NAME_CHANGE"	23159584	"SAFF.CC"						""
 
 
 # COMP > AFC > INTERNATIONAL > NT International (EAFF)
@@ -13107,7 +13120,7 @@
 
 "COMP_LONG_NAME_CHANGE" 	5627647 	"Road to EAFF Championship" 				""
 "COMP_SHORT_NAME_CHANGE" 	5627647		"Road to EAFF Championship" 				""
-"COMP_3LETTER_NAME_CHANGE"	5627647 	"RTEA"							""
+"COMP_3LETTER_NAME_CHANGE"	5627647 	"RTEC"							""
 
 "COMP_LONG_NAME_CHANGE" 	23201524	"EAFF U20 Championship" 				""
 "COMP_SHORT_NAME_CHANGE" 	23201524	"EAFF U20 Championship" 				""
@@ -13163,10 +13176,12 @@
 "COMP_COLOUR_CHANGE" 		100104 		 0 145 105 26 237 237 239 				""
 "COMP_LONG_NAME_CHANGE" 	100104 		"FIFA WC Qualifiers: CAF African Qualifier"		""
 "COMP_SHORT_NAME_CHANGE" 	100104 		"FIFA WC Qualifiers: CAF African Qualifier"		""
+"COMP_3LETTER_NAME_CHANGE" 	100104 		"WCQ" 							""
 
 "COMP_COLOUR_CHANGE" 		150916 		 0 0 0 0 206 189 128 					""
 "COMP_LONG_NAME_CHANGE" 	150916 		"CAF Olympic Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	150916 		"CAF Olympic Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE" 	150916 		"OGQ" 							""
 
 "COMP_COLOUR_CHANGE" 		1301390 	 0 255 255 255 7 69 52 					""
 "COMP_LONG_NAME_CHANGE" 	1301390		"TotalEnergies CAF Africa Cup of Nations" 		""
@@ -13176,6 +13191,7 @@
 "COMP_COLOUR_CHANGE" 		147032 		 0 255 255 255 7 69 52 					""
 "COMP_LONG_NAME_CHANGE" 	147032		"CAF Africa Cup of Nations Qualifiers" 			""
 "COMP_SHORT_NAME_CHANGE" 	147032		"CAF Africa Cup of Nations Qualifiers" 			""
+"COMP_3LETTER_NAME_CHANGE"	147032		"AFCON-QR"						""
 
 "COMP_LONG_NAME_CHANGE" 	13100123	"TotalEnergies CAF African Nations Championship" 	""
 "COMP_SHORT_NAME_CHANGE" 	13100123	"CAF African Nations Championship" 			""
@@ -13183,6 +13199,7 @@
 
 "COMP_LONG_NAME_CHANGE" 	13160886	"CAF African Nations Championship Qualifiers" 		""
 "COMP_SHORT_NAME_CHANGE" 	13160886	"CAF African Nations Championship Qualifiers" 		""
+"COMP_3LETTER_NAME_CHANGE"	13160886	"CHAN-QR"						""
 
 "COMP_LONG_NAME_CHANGE" 	13100157	"African Games" 					""
 "COMP_SHORT_NAME_CHANGE" 	13100157	"African Games" 					""
@@ -13191,27 +13208,27 @@
 "COMP_COLOUR_CHANGE" 		13117767	 0 255 255 255 190 159 101				""
 "COMP_LONG_NAME_CHANGE" 	13117767	"TotalEnergies CAF U23 Africa Cup of Nations" 		""
 "COMP_SHORT_NAME_CHANGE" 	13117767	"CAF U23 Africa Cup of Nations"		 		""
-"COMP_3LETTER_NAME_CHANGE"	13117767	"A23"							""
+"COMP_3LETTER_NAME_CHANGE"	13117767	"U23 AFCON"						""
 
 "COMP_COLOUR_CHANGE" 		13148019	 0 255 255 255 190 159 101				""
 "COMP_LONG_NAME_CHANGE" 	13148019	"CAF U23 AFCON Qualifiers"				""
 "COMP_SHORT_NAME_CHANGE" 	13148019	"CAF U23 AFCON Qualifiers"				""
-"COMP_3LETTER_NAME_CHANGE"	13148019	"A23Q"							""
+"COMP_3LETTER_NAME_CHANGE"	13148019	"U23 AFQ"						""
 
 "COMP_COLOUR_CHANGE" 		13100131	 0 255 173 6 30 19 75					""
 "COMP_LONG_NAME_CHANGE" 	13100131	"TotalEnergies CAF U20 Africa Cup of Nations" 		""
 "COMP_SHORT_NAME_CHANGE" 	13100131	"CAF U20 Africa Cup of Nations" 			""
-"COMP_3LETTER_NAME_CHANGE"	13100131	"A20"							""
+"COMP_3LETTER_NAME_CHANGE"	13100131	"U20 AFCON"						""
 
 "COMP_COLOUR_CHANGE" 		167279		 0 255 173 6 30 19 75					""
 "COMP_LONG_NAME_CHANGE" 	167279 		"CAF U20 AFCON Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	167279 		"CAF U20 AFCON Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	167279		"A20Q"							""
+"COMP_3LETTER_NAME_CHANGE"	167279		"U17 AFQ"						""
 
 "COMP_COLOUR_CHANGE" 		13100132	 0 0 224 101 1 45 206					""
 "COMP_LONG_NAME_CHANGE" 	13100132	"TotalEnergies CAF U17 Africa Cup of Nations" 		""
 "COMP_SHORT_NAME_CHANGE" 	13100132	"CAF U17 Africa Cup of Nations" 			""
-"COMP_3LETTER_NAME_CHANGE"	13100132	"A17"							""
+"COMP_3LETTER_NAME_CHANGE"	13100132	"U17 AFCON"						""
 
 
 # COMP > CAF > INTERNATIONAL > Club International
@@ -13219,17 +13236,17 @@
 "COMP_COLOUR_CHANGE" 		127299 		 0 255 255 255 1 119 72 				""
 "COMP_LONG_NAME_CHANGE" 	127299 		"TotalEnergies CAF Champions League" 			""
 "COMP_SHORT_NAME_CHANGE" 	127299 		"CAF Champions League" 					""
-"COMP_3LETTER_NAME_CHANGE"	127299		"CCL"							""
+"COMP_3LETTER_NAME_CHANGE"	127299		"CAFCL"							""
 
 "COMP_COLOUR_CHANGE" 		12017574	 0 255 255 255 1 119 72 				""
 "COMP_LONG_NAME_CHANGE" 	12017574 	"TotalEnergies CAF Confederation Cup"			""
 "COMP_SHORT_NAME_CHANGE" 	12017574 	"CAF Confederation Cup" 				""
-"COMP_3LETTER_NAME_CHANGE"	12017574	"CCC"							""
+"COMP_3LETTER_NAME_CHANGE"	12017574	"CAFCC"							""
 
 "COMP_COLOUR_CHANGE" 		131273 		 0 255 255 255 124 170 200 				""
 "COMP_LONG_NAME_CHANGE" 	131273 		"TotalEnergies CAF Super Cup" 				""
 "COMP_SHORT_NAME_CHANGE" 	131273 		"CAF Super Cup" 					""
-"COMP_3LETTER_NAME_CHANGE"	131273		"CSC"							""
+"COMP_3LETTER_NAME_CHANGE"	131273		"CAFSC"							""
 
 "COMP_LONG_NAME_CHANGE" 	2000289984	"African Football League" 				""
 "COMP_SHORT_NAME_CHANGE" 	2000289984	"African Football League" 				""
@@ -13240,6 +13257,7 @@
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	2000273420	"UNIFFAC U20 Cup" 					""
 "COMP_SHORT_NAME_CHANGE" 	2000273420	"UNIFFAC U20 Cup" 					""
+"COMP_3LETTER_NAME_CHANGE" 	2000273420	"UNIFFAC U20" 						""
 
 
 # COMP > CAF > INTERNATIONAL > NT International (COSAFA)
@@ -13250,6 +13268,7 @@
 
 "COMP_LONG_NAME_CHANGE" 	13104923	"COSAFA U20 Championship"				""
 "COMP_SHORT_NAME_CHANGE" 	13104923	"COSAFA U20 Championship" 				""
+"COMP_3LETTER_NAME_CHANGE" 	13104923	"COSAFA U20" 						""
 
 
 # COMP > CAF > INTERNATIONAL > NT International (CECAFA)
@@ -13260,9 +13279,11 @@
 
 "COMP_LONG_NAME_CHANGE" 	2000111891	"CECAFA U23 Championship"				""
 "COMP_SHORT_NAME_CHANGE" 	2000111891	"CECAFA U23 Championship" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000111891	"CECAFA U23" 						""
 
 "COMP_LONG_NAME_CHANGE" 	13105505	"CECAFA U20 Championship"				""
 "COMP_SHORT_NAME_CHANGE" 	13105505	"CECAFA U20 Championship" 				""
+"COMP_3LETTER_NAME_CHANGE" 	13105505	"CECAFA U20" 						""
 
 
 # COMP > CAF > INTERNATIONAL > NT International (WAFU)
@@ -13277,10 +13298,12 @@
 "COMP_COLOUR_CHANGE" 		100101		 0 145 105 26 237 237 239 				""
 "COMP_LONG_NAME_CHANGE" 	100101 		"FIFA WC Qualifiers: CONCACAF Qualifier" 		""
 "COMP_SHORT_NAME_CHANGE" 	100101 		"FIFA WC Qualifiers: CONCACAF Qualifier" 		""
+"COMP_3LETTER_NAME_CHANGE" 	100101 		"WCQ" 							""
 
 "COMP_COLOUR_CHANGE" 		157150 		 0 0 0 0 206 189 128 					""
 "COMP_LONG_NAME_CHANGE" 	157150 		"CONCACAF Olympic Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	157150 		"CONCACAF Olympic Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE" 	157150 		"OGQ" 							""
 
 "COMP_COLOUR_CHANGE" 		145509 		 0 255 200 78 0 17 64 					""
 "COMP_LONG_NAME_CHANGE" 	145509 		"CONCACAF Gold Cup" 					""
@@ -13290,12 +13313,12 @@
 "COMP_COLOUR_CHANGE" 		215380 		 0 255 200 78 0 17 64 					""
 "COMP_LONG_NAME_CHANGE" 	215380 		"CONCACAF Gold Cup Playoffs"				""
 "COMP_SHORT_NAME_CHANGE" 	215380 		"CONCACAF Gold Cup Playoffs" 				""
-"COMP_3LETTER_NAME_CHANGE"	215380		"GCP"							""
+"COMP_3LETTER_NAME_CHANGE"	215380		"CGC-PO"						""
 
 "COMP_COLOUR_CHANGE" 		2000110630	 0 255 200 78 0 17 64 					""
 "COMP_LONG_NAME_CHANGE" 	2000110630	"CONCACAF Gold Cup Qualifiers"				""
 "COMP_SHORT_NAME_CHANGE" 	2000110630	"CONCACAF Gold Cup Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	2000110630	"GCQ"							""
+"COMP_3LETTER_NAME_CHANGE"	2000110630	"CGC-QR"						""
 
 "COMP_COLOUR_CHANGE" 		222981 		 0 255 255 255 22 9 85 					""
 "COMP_LONG_NAME_CHANGE" 	222981 		"CONCACAF Nations League" 				""
@@ -13305,7 +13328,7 @@
 "COMP_COLOUR_CHANGE" 		222982 		 0 255 255 255 22 9 85 					""
 "COMP_LONG_NAME_CHANGE" 	222982 		"CONCACAF Nations League Qualifying"			""
 "COMP_SHORT_NAME_CHANGE" 	222982 		"CONCACAF Nations League Qualifying"			""
-"COMP_3LETTER_NAME_CHANGE"	222982		"CNL"							""
+"COMP_3LETTER_NAME_CHANGE"	222982		"CNL-QR"						""
 
 #"PARENT_COMP_ID"		222983		 222981							""
 "COMP_COLOUR_CHANGE" 		222983 		 0 255 255 255 22 9 85 					""
@@ -13328,7 +13351,7 @@
 "COMP_COLOUR_CHANGE" 		157149 		 0 255 255 255 102 45 144				""
 "COMP_LONG_NAME_CHANGE" 	157149 		"CONCACAF U20 Championship" 				""
 "COMP_SHORT_NAME_CHANGE" 	157149 		"CONCACAF U20 Championship" 				""
-"COMP_3LETTER_NAME_CHANGE"	157149		"C20"							""
+"COMP_3LETTER_NAME_CHANGE"	157149		"CCC U20"						""
 
 
 # COMP > CONCACAF > INTERNATIONAL > Club International
@@ -13340,7 +13363,7 @@
 
 "COMP_COLOUR_CHANGE" 		219740	 	 0 0 0 0 255 255 255 					""
 "COMP_LONG_NAME_CHANGE" 	219740 		"CONCACAF League" 					""
-"COMP_SHORT_NAME_CHANGE" 	219740  	"CONCACAF League" 					""
+"COMP_SHORT_NAME_CHANGE" 	219740 		"CONCACAF League" 					""
 "COMP_3LETTER_NAME_CHANGE"	219740		"CL"							""
 
 "COMP_COLOUR_CHANGE" 		51078102 	 0 255 255 255 0 0 0					""
@@ -13350,16 +13373,18 @@
 
 "COMP_COLOUR_CHANGE" 		222987 		 0 138 115 74 255 255 255 				""
 "COMP_LONG_NAME_CHANGE" 	222987 		"Campeones Cup" 					""
-"COMP_SHORT_NAME_CHANGE" 	222987  	"Campeones Cup" 					""
+"COMP_SHORT_NAME_CHANGE" 	222987 		"Campeones Cup" 					""
 "COMP_3LETTER_NAME_CHANGE"	222987		"CC"							""
 
 "COMP_COLOUR_CHANGE" 		2000259628 	 0 255 255 255 162 17 72				""
 "COMP_LONG_NAME_CHANGE" 	2000259628	"CONCACAF Central American Cup" 			""
 "COMP_SHORT_NAME_CHANGE" 	2000259628	"CONCACAF Central American Cup" 			""
+"COMP_3LETTER_NAME_CHANGE" 	2000259628	"CCAC" 							""
 
 "COMP_COLOUR_CHANGE" 		2000259627	 0 255 255 255 68 101 250				""
 "COMP_LONG_NAME_CHANGE" 	2000259627	"CONCACAF Caribbean Cup" 				""
 "COMP_SHORT_NAME_CHANGE" 	2000259627	"CONCACAF Caribbean Cup" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000259627	"CCBC" 							""
 
 "COMP_LONG_NAME_CHANGE" 	82081964	"CFU Club Shield"	 				""
 "COMP_SHORT_NAME_CHANGE" 	82081964	"CFU Club Shield" 					""
@@ -13372,8 +13397,7 @@
 "COMP_SHORT_NAME_CHANGE" 	29047086 	"Caribbean Cup" 					""
 
 "COMP_LONG_NAME_CHANGE" 	87000416 	"Copa Centroamericana" 					""
-"COMP_SHORT_NAME_CHANGE" 	87000416  	"Copa Centroamericana" 					""
-
+"COMP_SHORT_NAME_CHANGE" 	87000416 	"Copa Centroamericana" 					""
 
 
 # COMP > CONMEBOL > INTERNATIONAL > NT International
@@ -13381,11 +13405,12 @@
 "COMP_COLOUR_CHANGE" 		100103 		 0 145 105 26 237 237 239 				""
 "COMP_LONG_NAME_CHANGE" 	100103 		"FIFA WC Qualifiers: CONMEBOL Qualifier" 		""
 "COMP_SHORT_NAME_CHANGE" 	100103 		"FIFA WC Qualifiers: CONMEBOL Qualifier" 		""
+"COMP_3LETTER_NAME_CHANGE" 	100103 		"WCQ" 							""
 
 "COMP_COLOUR_CHANGE" 		1301389 	 0 255 255 255 2 50 163 				""
 "COMP_LONG_NAME_CHANGE" 	1301389 	"CONMEBOL Copa América" 				""
 "COMP_SHORT_NAME_CHANGE"	1301389 	"CONMEBOL Copa América" 				""
-"COMP_3LETTER_NAME_CHANGE"	1301389		"CCA"							""
+"COMP_3LETTER_NAME_CHANGE"	1301389		"CA"							""
 
 "COMP_COLOUR_CHANGE" 		95035962 	 0 255 255 255 2 50 163 				""
 "COMP_LONG_NAME_CHANGE" 	95035962 	"CONMEBOL Copa América Playoffs"			""
@@ -13395,17 +13420,17 @@
 "COMP_COLOUR_CHANGE" 		8830803 	 0 0 0 0 206 189 128 					""
 "COMP_LONG_NAME_CHANGE" 	8830803 	"CONMEBOL Pre-Olympic Tournament"			""
 "COMP_SHORT_NAME_CHANGE"	8830803 	"CONMEBOL Pre-Olympic Tournament"			""
-"COMP_3LETTER_NAME_CHANGE"	8830803		"CPO"							""
+"COMP_3LETTER_NAME_CHANGE"	8830803		"CPOT"							""
 
 "COMP_COLOUR_CHANGE" 		8830770 	 0 255 255 255 33 123 35 				""
 "COMP_LONG_NAME_CHANGE" 	8830770 	"CONMEBOL Sudamericano Sub-20" 				""
 "COMP_SHORT_NAME_CHANGE" 	8830770 	"CONMEBOL Sudamericano Sub-20" 				""
-"COMP_3LETTER_NAME_CHANGE"	8830770		"S20"							""
+"COMP_3LETTER_NAME_CHANGE"	8830770		"SUD20"							""
 
 "COMP_COLOUR_CHANGE" 		8830792 	 0 255 255 255 187 26 21 				""
 "COMP_LONG_NAME_CHANGE" 	8830792 	"CONMEBOL Sudamericano Sub-17" 				""
 "COMP_SHORT_NAME_CHANGE" 	8830792 	"CONMEBOL Sudamericano Sub-17" 				""
-"COMP_3LETTER_NAME_CHANGE"	8830792		"S17"							""
+"COMP_3LETTER_NAME_CHANGE"	8830792		"SUD17"							""
 
 
 # COMP > CONMEBOL > INTERNATIONAL > Club International
@@ -13418,26 +13443,27 @@
 "COMP_COLOUR_CHANGE" 		317567 		 0 0 0 0 255 255 255 					""
 "COMP_LONG_NAME_CHANGE" 	317567 		"CONMEBOL Copa Sudamericana" 				""
 "COMP_SHORT_NAME_CHANGE" 	317567 		"CONMEBOL Sudamericana" 				""
-"COMP_3LETTER_NAME_CHANGE"	317567		"SDA"							""
+"COMP_3LETTER_NAME_CHANGE"	317567		"SUD"							""
 
 "COMP_COLOUR_CHANGE" 		102418 		 0 255 255 255 4 92 181					""
 "COMP_LONG_NAME_CHANGE" 	102418 		"CONMEBOL Recopa Sudamericana" 				""
 "COMP_SHORT_NAME_CHANGE" 	102418		"CONMEBOL Recopa"		 			""
-"COMP_3LETTER_NAME_CHANGE"	102418		"RCS"							""
+"COMP_3LETTER_NAME_CHANGE"	102418		"RECOPA"						""
 
 "COMP_LONG_NAME_CHANGE" 	19158846 	"CONMEBOL Copa Libertadores Sub-20" 			""
 "COMP_SHORT_NAME_CHANGE" 	19158846 	"CONMEBOL Libertadores Sub-20" 				""
-"COMP_3LETTER_NAME_CHANGE"	19158846	"L20"							""
+"COMP_3LETTER_NAME_CHANGE"	19158846	"LIB S20"						""
 
 
 # COMP > CONMEBOL > INTERNATIONAL > Extinct International
 #====================================================================================
 "COMP_LONG_NAME_CHANGE" 	109200 		"Copa Mercosur" 					""
 "COMP_SHORT_NAME_CHANGE" 	109200 		"Copa Mercosur" 					""
+"COMP_3LETTER_NAME_CHANGE" 	109200 		"MER" 							""
 
 "COMP_LONG_NAME_CHANGE" 	19168653 	"Superclásico de las Américas" 				""
 "COMP_SHORT_NAME_CHANGE" 	19168653 	"Superclásico de las Américas" 				""
-
+"COMP_3LETTER_NAME_CHANGE" 	19168653 	"SCA" 							""
 
 
 # COMP > OFC > INTERNATIONAL > NT International
@@ -13445,10 +13471,12 @@
 "COMP_COLOUR_CHANGE" 		100100		 0 145 105 26 237 237 239 				""
 "COMP_LONG_NAME_CHANGE" 	100100 		"FIFA WC Qualifiers: OFC Oceania Qualifier"		""
 "COMP_SHORT_NAME_CHANGE" 	100100 		"FIFA WC Qualifiers: OFC Oceania Qualifier"		""
+"COMP_3LETTER_NAME_CHANGE" 	100100 		"WCQ" 							""
 
 "COMP_COLOUR_CHANGE" 		150918 		 0 0 0 0 206 189 128 					""
 "COMP_LONG_NAME_CHANGE" 	150918 		"OFC Olympic Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	150918 		"OFC Olympic Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE" 	150918 		"OGQ" 							""
 
 "COMP_COLOUR_CHANGE" 		129986 		 0 22 44 117 169 198 220 				""
 "COMP_LONG_NAME_CHANGE" 	129986 		"OFC Nations Cup" 					""
@@ -13463,7 +13491,7 @@
 "COMP_COLOUR_CHANGE" 		31039224	 0 255 255 255 16 49 120				""
 "COMP_LONG_NAME_CHANGE" 	31039224 	"OFC U19 Championship Qualifiers"			""
 "COMP_SHORT_NAME_CHANGE" 	31039224 	"OFC U19 Championship Qualifiers"			""
-"COMP_3LETTER_NAME_CHANGE"	31039224	"OFC 19Q"						""
+"COMP_3LETTER_NAME_CHANGE"	31039224	"OFC U19Q"						""
 
 "COMP_LONG_NAME_CHANGE" 	23209782 	"OFC U17 Championship"					""
 "COMP_SHORT_NAME_CHANGE" 	23209782 	"OFC U17 Championship"					""
@@ -13477,33 +13505,33 @@
 "COMP_SHORT_NAME_CHANGE" 	127285 		"OFC Champions League" 					""
 "COMP_3LETTER_NAME_CHANGE"	127285		"OCL"							""
 
-#"COMP_LONG_NAME_CHANGE" 	2000340113 	"OFC Professional League" 				""
-#"COMP_SHORT_NAME_CHANGE" 	2000340113 	"OFC Pro League" 					""
-#"COMP_3LETTER_NAME_CHANGE" 	2000340113 	"OPL" 							""
-
 
 # COMP > UEFA > INTERNATIONAL > NT International
 #====================================================================================
 "COMP_COLOUR_CHANGE" 		100105 		 0 145 105 26 237 237 239 				""
 "COMP_LONG_NAME_CHANGE" 	100105 		"FIFA WC Qualifiers: UEFA European Qualifier"	 	""
 "COMP_SHORT_NAME_CHANGE" 	100105 		"FIFA WC Qualifiers: UEFA European Qualifier"	 	""
+"COMP_3LETTER_NAME_CHANGE" 	100105 		"WCQ" 							""
 
 "COMP_COLOUR_CHANGE" 		162448 		 0 0 0 0 206 189 128 					""
 "COMP_LONG_NAME_CHANGE" 	162448 		"UEFA Olympic Qualifiers" 				""
 "COMP_SHORT_NAME_CHANGE" 	162448 		"UEFA Olympic Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE" 	162448 		"OGQ" 							""
 
 "COMP_COLOUR_CHANGE" 		1301388 	 0 255 255 255 26 60 218 				""
 "COMP_LONG_NAME_CHANGE" 	1301388 	"UEFA European Championship" 				""
-"COMP_SHORT_NAME_CHANGE" 	1301388 	"UEFA Euro"						""
+"COMP_SHORT_NAME_CHANGE" 	1301388 	"UEFA EURO"						""
 "COMP_3LETTER_NAME_CHANGE"	1301388		"EURO"							""
 
 "COMP_COLOUR_CHANGE" 		95 		 0 255 255 255 26 60 218 				""
-"COMP_LONG_NAME_CHANGE" 	95 		"UEFA Euro Playoffs"			 		""
-"COMP_SHORT_NAME_CHANGE" 	95 		"UEFA Euro Playoffs" 					""
+"COMP_LONG_NAME_CHANGE" 	95 		"UEFA EURO Playoffs"			 		""
+"COMP_SHORT_NAME_CHANGE" 	95 		"UEFA EURO Playoffs" 					""
+"COMP_3LETTER_NAME_CHANGE" 	95 		"EURO-PO" 						""
 
 "COMP_COLOUR_CHANGE" 		100109 		 0 255 255 255 26 60 218 				""
-"COMP_LONG_NAME_CHANGE" 	100109 		"UEFA Euro Qualifiers"			 		""
-"COMP_SHORT_NAME_CHANGE" 	100109 		"UEFA Euro Qualifiers" 					""
+"COMP_LONG_NAME_CHANGE" 	100109 		"UEFA EURO Qualifiers"			 		""
+"COMP_SHORT_NAME_CHANGE" 	100109 		"UEFA EURO Qualifiers" 					""
+"COMP_3LETTER_NAME_CHANGE" 	100109 		"EURO-QR" 						""
 
 "COMP_COLOUR_CHANGE" 		90 		 0 255 255 255 29 48 72 				""
 "COMP_LONG_NAME_CHANGE" 	90 		"UEFA Nations League" 					""
@@ -13514,83 +13542,91 @@
 "COMP_COLOUR_CHANGE" 		91 		 0 255 255 255 29 48 72 				""
 "COMP_LONG_NAME_CHANGE" 	91 		"UEFA Nations League A" 				""
 "COMP_SHORT_NAME_CHANGE" 	91 		"UEFA Nations League A" 				""
-"COMP_3LETTER_NAME_CHANGE"	91		"UNL/A"							""
+"COMP_3LETTER_NAME_CHANGE"	91		"UNLA"							""
 
 #"PARENT_COMP_ID"		92		 90							""
 "COMP_COLOUR_CHANGE" 		92 		 0 255 255 255 29 48 72 				""
 "COMP_LONG_NAME_CHANGE" 	92 		"UEFA Nations League B" 				""
 "COMP_SHORT_NAME_CHANGE" 	92 		"UEFA Nations League B" 				""
-"COMP_3LETTER_NAME_CHANGE"	92		"UNL/B"							""
+"COMP_3LETTER_NAME_CHANGE"	92		"UNLB"							""
 
 #"PARENT_COMP_ID"		93		 90							""
 "COMP_COLOUR_CHANGE" 		93 		 0 255 255 255 29 48 72 				""
 "COMP_LONG_NAME_CHANGE" 	93 		"UEFA Nations League C" 				""
 "COMP_SHORT_NAME_CHANGE" 	93 		"UEFA Nations League C" 				""
-"COMP_3LETTER_NAME_CHANGE"	93		"UNL/C"							""
+"COMP_3LETTER_NAME_CHANGE"	93		"UNLC"							""
 
 #"PARENT_COMP_ID"		94		 90							""
 "COMP_COLOUR_CHANGE" 		94 		 0 255 255 255 29 48 72 				""
 "COMP_LONG_NAME_CHANGE" 	94 		"UEFA Nations League D" 				""
 "COMP_SHORT_NAME_CHANGE" 	94 		"UEFA Nations League D" 				""
-"COMP_3LETTER_NAME_CHANGE"	94		"UNL/D"							""
+"COMP_3LETTER_NAME_CHANGE"	94		"UNLD"							""
 
 "COMP_COLOUR_CHANGE" 		150783 		 0 255 255 255 4 118 188 				""
 "COMP_LONG_NAME_CHANGE" 	150783 		"UEFA U21 European Championship" 			""
-"COMP_SHORT_NAME_CHANGE" 	150783 		"UEFA U21 Euro"		 				""
-"COMP_3LETTER_NAME_CHANGE"	150783		"E21"							""
+"COMP_SHORT_NAME_CHANGE" 	150783 		"UEFA U21 EURO"		 				""
+"COMP_3LETTER_NAME_CHANGE"	150783		"U21 EURO"						""
 
 "COMP_COLOUR_CHANGE" 		150784 		 0 255 255 255 4 118 188 				""
-"COMP_LONG_NAME_CHANGE" 	150784 		"UEFA U21 Euro Qualifiers" 				""
-"COMP_SHORT_NAME_CHANGE" 	150784 		"UEFA U21 Euro Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	150784		"E21Q"							""
+"COMP_LONG_NAME_CHANGE" 	150784 		"UEFA U21 EURO Qualifiers" 				""
+"COMP_SHORT_NAME_CHANGE" 	150784 		"UEFA U21 EURO Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE"	150784		"U21 EUQ"						""
 
 "COMP_COLOUR_CHANGE" 		29192582 	 0 255 255 255 55 153 200 				""
 "COMP_LONG_NAME_CHANGE" 	29192582 	"UEFA U20 Elite League" 				""
 "COMP_SHORT_NAME_CHANGE" 	29192582	"UEFA U20 Elite League" 				""
+"COMP_3LETTER_NAME_CHANGE" 	29192582	"U20EL" 						""
 
 "COMP_COLOUR_CHANGE" 		150786 		 0 255 255 255 25 153 44 				""
 "COMP_LONG_NAME_CHANGE" 	150786 		"UEFA U19 European Championship" 			""
-"COMP_SHORT_NAME_CHANGE" 	150786 		"UEFA U19 Euro"		 				""
-"COMP_3LETTER_NAME_CHANGE"	150786		"E19"							""
+"COMP_SHORT_NAME_CHANGE" 	150786 		"UEFA U19 EURO"		 				""
+"COMP_3LETTER_NAME_CHANGE"	150786		"U19 EURO"						""
 
 "COMP_COLOUR_CHANGE" 		150787 		 0 255 255 255 25 153 44 				""
-"COMP_LONG_NAME_CHANGE" 	150787 		"UEFA U19 Euro Qualifiers" 				""
-"COMP_SHORT_NAME_CHANGE" 	150787 		"UEFA U19 Euro Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	150787		"E19Q"							""
+"COMP_LONG_NAME_CHANGE" 	150787 		"UEFA U19 EURO Qualifiers" 				""
+"COMP_SHORT_NAME_CHANGE" 	150787 		"UEFA U19 EURO Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE"	150787		"U19 EUQ"						""
 
 "COMP_COLOUR_CHANGE" 		2000032598	 0 255 255 255 25 153 44 				""
-"COMP_LONG_NAME_CHANGE" 	2000032598	"UEFA U19 Euro Qualifiers A" 				""
-"COMP_SHORT_NAME_CHANGE" 	2000032598	"UEFA U19 Euro Qualifiers A" 				""
+"COMP_LONG_NAME_CHANGE" 	2000032598	"UEFA U19 EURO Qualifiers A" 				""
+"COMP_SHORT_NAME_CHANGE" 	2000032598	"UEFA U19 EURO Qualifiers A" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000032598	"U19 EUQ/A" 						""
 
 "COMP_COLOUR_CHANGE" 		2000032600	 0 255 255 255 25 153 44 				""
-"COMP_LONG_NAME_CHANGE" 	2000032600	"UEFA U19 Euro Qualifiers B" 				""
-"COMP_SHORT_NAME_CHANGE" 	2000032600	"UEFA U19 Euro Qualifiers B" 				""
+"COMP_LONG_NAME_CHANGE" 	2000032600	"UEFA U19 EURO Qualifiers B" 				""
+"COMP_SHORT_NAME_CHANGE" 	2000032600	"UEFA U19 EURO Qualifiers B" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000032600	"U19 EUQ/B" 						""
 
 "COMP_COLOUR_CHANGE" 		2000032590	 0 255 255 255 25 153 44 				""
-"COMP_LONG_NAME_CHANGE" 	2000032590	"UEFA U19 Euro Preliminary Round" 			""
-"COMP_SHORT_NAME_CHANGE" 	2000032590	"UEFA U19 Euro Preliminary Round" 			""
+"COMP_LONG_NAME_CHANGE" 	2000032590	"UEFA U19 EURO Preliminary Round" 			""
+"COMP_SHORT_NAME_CHANGE" 	2000032590	"UEFA U19 EURO Preliminary Round" 			""
+"COMP_3LETTER_NAME_CHANGE" 	2000032590	"U19 EUP" 						""
 
-"COMP_LONG_NAME_CHANGE" 	2000032449	"UEFA U19 Euro Preliminary A" 				""
-"COMP_SHORT_NAME_CHANGE" 	2000032449	"UEFA U19 Euro Preliminary A" 				""
+"COMP_LONG_NAME_CHANGE" 	2000032449	"UEFA U19 EURO Preliminary A" 				""
+"COMP_SHORT_NAME_CHANGE" 	2000032449	"UEFA U19 EURO Preliminary A" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000032449	"U19 EUP/A" 						""
 
-"COMP_LONG_NAME_CHANGE" 	2000032450	"UEFA U19 Euro Preliminary B" 				""
-"COMP_SHORT_NAME_CHANGE" 	2000032450	"UEFA U19 Euro Preliminary B"	 			""
+"COMP_LONG_NAME_CHANGE" 	2000032450	"UEFA U19 EURO Preliminary B" 				""
+"COMP_SHORT_NAME_CHANGE" 	2000032450	"UEFA U19 EURO Preliminary B"	 			""
+"COMP_3LETTER_NAME_CHANGE" 	2000032450	"U19 EUP/B" 						""
 
-"COMP_LONG_NAME_CHANGE" 	2000032451	"UEFA U19 Euro Preliminary C" 				""
-"COMP_SHORT_NAME_CHANGE" 	2000032451	"UEFA U19 Euro Preliminary C" 				""
+"COMP_LONG_NAME_CHANGE" 	2000032451	"UEFA U19 EURO Preliminary C" 				""
+"COMP_SHORT_NAME_CHANGE" 	2000032451	"UEFA U19 EURO Preliminary C" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000032451	"U19 EUP/C" 						""
 
-"COMP_LONG_NAME_CHANGE" 	2000032447	"UEFA U19 Euro Preliminary D" 				""
-"COMP_SHORT_NAME_CHANGE" 	2000032447	"UEFA U19 Euro Preliminary D" 				""
+"COMP_LONG_NAME_CHANGE" 	2000032447	"UEFA U19 EURO Preliminary D" 				""
+"COMP_SHORT_NAME_CHANGE" 	2000032447	"UEFA U19 EURO Preliminary D" 				""
+"COMP_3LETTER_NAME_CHANGE" 	2000032447	"U19 EUP/D" 						""
 
 "COMP_COLOUR_CHANGE" 		5781023 	 0 255 255 255 233 85 5 				""
 "COMP_LONG_NAME_CHANGE" 	5781023 	"UEFA U17 European Championship" 			""
-"COMP_SHORT_NAME_CHANGE" 	5781023 	"UEFA U17 Euro"			 			""
-"COMP_3LETTER_NAME_CHANGE"	5781023		"E17"							""
+"COMP_SHORT_NAME_CHANGE" 	5781023 	"UEFA U17 EURO"			 			""
+"COMP_3LETTER_NAME_CHANGE"	5781023		"U17 EURO"						""
 
 "COMP_COLOUR_CHANGE" 		5781024 	 0 255 255 255 233 85 5 				""
-"COMP_LONG_NAME_CHANGE" 	5781024 	"UEFA U17 Euro Qualifiers" 				""
-"COMP_SHORT_NAME_CHANGE" 	5781024 	"UEFA U17 Euro Qualifiers" 				""
-"COMP_3LETTER_NAME_CHANGE"	5781024		"E17Q"							""
+"COMP_LONG_NAME_CHANGE" 	5781024 	"UEFA U17 EURO Qualifiers" 				""
+"COMP_SHORT_NAME_CHANGE" 	5781024 	"UEFA U17 EURO Qualifiers" 				""
+"COMP_3LETTER_NAME_CHANGE"	5781024		"U17 EUQ"						""
 
 
 # COMP > UEFA > INTERNATIONAL > Club International
@@ -13622,7 +13658,7 @@
 
 "COMP_COLOUR_CHANGE" 		1301395 	 0 255 255 255 3 93 116 				""
 "COMP_LONG_NAME_CHANGE" 	1301395 	"UEFA Cup Winners' Cup" 				""
-"COMP_SHORT_NAME_CHANGE" 	1301395  	"UEFA Cup Winners' Cup" 				""
+"COMP_SHORT_NAME_CHANGE" 	1301395 	"UEFA Cup Winners' Cup" 				""
 "COMP_3LETTER_NAME_CHANGE"	1301395		"UCWC"							""
 
 
@@ -13760,7 +13796,6 @@
 "AWARD_LONG_NAME_CHANGE"	23331651	"AFC Asian Cup Best Goalkeeper"				""
 "AWARD_SHORT_NAME_CHANGE"	23331651	"AFC Asian Cup Best Goalkeeper"				""
 
-
 # AWARDS > AFC > [23177175] AFC U23 Asian Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	23222666	"AFC U23 Asian Cup Top Goalscorer"			""
@@ -13785,18 +13820,15 @@
 "AWARD_LONG_NAME_CHANGE"	2000251568	"AFC U20 Asian Cup Best Goalkeeper"			""
 "AWARD_SHORT_NAME_CHANGE"	2000251568	"AFC U20 Asian Cup Best Goalkeeper"			""
 
-
 # AWARDS > AFC > [5626804] AFC U17 Asian Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	5627755		"AFC U17 Asian Cup Team of the Tournament"		""
 "AWARD_SHORT_NAME_CHANGE"	5627755		"AFC U17 Asian Cup Team of the Tournament"		""
 
-
 # AWARDS > AFC > [23000095] AFC Challenge Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	23054868	"AFC Challenge Cup Top Goalscorer"			""
 "AWARD_SHORT_NAME_CHANGE"	23054868	"AFC Challenge Cup Top Goalscorer"			""
-
 
 # AWARDS > AFC > [127286] AFC Champions League Elite
 #====================================================================================
@@ -13809,7 +13841,6 @@
 "AWARD_LONG_NAME_CHANGE"	23340386	"AFC Champions League Elite Dream Team"			""
 "AWARD_SHORT_NAME_CHANGE"	23340386	"AFC Champions League Elite Dream Team"			""
 
-
 # AWARDS > AFC > [1001959] AFC Champions League Two
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	23226058	"AFC Champions League Two Top Goalscorer" 		""
@@ -13817,14 +13848,12 @@
 "AWARD_LONG_NAME_CHANGE"	23226068	"AFC Champions League Two MVP Award" 			""
 "AWARD_SHORT_NAME_CHANGE"	23226068	"AFC Champions League Two MVP Award" 			""
 
-
 # AWARDS > AFC > [1001960] AFC Challenge League
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	23014185	"AFC Challenge League Top Goalscorer" 			""
 "AWARD_SHORT_NAME_CHANGE"	23014185	"AFC Challenge League Top Goalscorer" 			""
 "AWARD_LONG_NAME_CHANGE"	23226069	"AFC Challenge League MVP Award" 			""
 "AWARD_SHORT_NAME_CHANGE"	23226069	"AFC Challenge League MVP Award" 			""
-
 
 # AWARDS > AFC > [5626560] ASEAN Hyundai Cup
 #====================================================================================
@@ -13837,7 +13866,6 @@
 "AWARD_LONG_NAME_CHANGE"	23134727	"ASEAN Hyundai Cup Fair Play Award"			""
 "AWARD_SHORT_NAME_CHANGE"	23134727	"ASEAN Hyundai Cup Fair Play Award"			""
 
-
 # AWARDS > AFC > [5632240] ASEAN Shopee Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	5632241		"ASEAN Shopee Cup Shopee MVP Award"			""
@@ -13847,12 +13875,10 @@
 "AWARD_LONG_NAME_CHANGE"	5632243		"ASEAN Shopee Cup Top Goalscorer"			""
 "AWARD_SHORT_NAME_CHANGE"	5632243		"ASEAN Shopee Cup Top Goalscorer"			""
 
-
 # AWARDS > AFC > Mekong Club Championship
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	23340414	"Toyota Mekong Club Championship MVP Award"		""
 "AWARD_SHORT_NAME_CHANGE"	23340414	"Mekong Club Championship MVP Award"			""
-
 
 # AWARDS > CAF > CAF
 #====================================================================================
@@ -13881,7 +13907,6 @@
 "AWARD_LONG_NAME_CHANGE"	13117806	"BBC African Footballer of the Year" 			""
 "AWARD_SHORT_NAME_CHANGE"	13117806	"African Footballer of the Year" 			""
 
-
 # AWARDS > CAF > [1301390] CAF Africa Cup of Nations
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	150938		"CAF AFCON Best Player"					""
@@ -13896,7 +13921,6 @@
 "AWARD_SHORT_NAME_CHANGE"	13105674	"CAF AFCON Best Goalkeeper"				""
 "AWARD_LONG_NAME_CHANGE"	13105677	"CAF AFCON Best Young Player"				""
 "AWARD_SHORT_NAME_CHANGE"	13105677	"CAF AFCON Best Young Player"				""
-
 
 # AWARDS > CAF > [13100123] CAF African Nations Championship
 #====================================================================================
@@ -13913,7 +13937,6 @@
 "AWARD_LONG_NAME_CHANGE"	2000084514	"CHAN Best Young Player"				""
 "AWARD_SHORT_NAME_CHANGE"	2000084514	"CHAN Best Young Player"				""
 
-
 # AWARDS > CAF > [13117767] CAF U23 Africa Cup of Nations
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	13145867	"CAF U23 AFCON Best Player"				""
@@ -13926,7 +13949,6 @@
 "AWARD_SHORT_NAME_CHANGE"	13145870	"CAF U23 AFCON Fair Play Award"				""
 "AWARD_LONG_NAME_CHANGE"	13145871	"CAF U23 AFCON Top Goalscorer"				""
 "AWARD_SHORT_NAME_CHANGE"	13145871	"CAF U23 AFCON Top Goalscorer"				""
-
 
 # AWARDS > CAF > [13100131] CAF U20 Africa Cup of Nations
 #====================================================================================
@@ -13941,7 +13963,6 @@
 "AWARD_LONG_NAME_CHANGE"	13114921	"CAF U20 AFCON Fair Play Award"				""
 "AWARD_SHORT_NAME_CHANGE"	13114921	"CAF U20 AFCON Fair Play Award"				""
 
-
 # AWARDS > CAF > [13100132] CAF U17 Africa Cup of Nations
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	13109628	"CAF U17 AFCON Top Goalscorer"				""
@@ -13953,7 +13974,6 @@
 "AWARD_LONG_NAME_CHANGE"	2000259804	"CAF U17 AFCON Best Goalkeeper"				""
 "AWARD_SHORT_NAME_CHANGE"	2000259804	"CAF U17 AFCON Best Goalkeeper"				""
 
-
 # AWARDS > CAF > [127299] CAF Champions League
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	2000119504	"CAF Champions League Player of the Season"		""
@@ -13963,7 +13983,6 @@
 "AWARD_LONG_NAME_CHANGE"	2000119515	"CAF Champions League Team of the Season"		""
 "AWARD_SHORT_NAME_CHANGE"	2000119515	"CAF Champions League Team of the Season"		""
 
-
 # AWARDS > CAF > [12017574] CAF Confederation Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	2000119505	"CAF Confederation Cup Player of the Season"		""
@@ -13972,7 +13991,6 @@
 "AWARD_SHORT_NAME_CHANGE"	2000119514	"CAF Confederation Cup Top Goalscorer"			""
 "AWARD_LONG_NAME_CHANGE"	2000119516	"CAF Confederation Cup Team of the Season"		""
 "AWARD_SHORT_NAME_CHANGE"	2000119516	"CAF Confederation Cup Team of the Season"		""
-
 
 # AWARDS > CONCACAF > CONCACAF
 #====================================================================================
@@ -13987,7 +14005,6 @@
 "AWARD_LONG_NAME_CHANGE"	72042676 	"CONCACAF Goal of the Year" 				""
 "AWARD_SHORT_NAME_CHANGE"	72042676 	"CONCACAF Goal of the Year" 				""
 
-
 # AWARDS > CONCACAF > [145509] CONCACAF Gold Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	150946		"CONCACAF Gold Cup Goal of the Tournament"		""
@@ -14001,7 +14018,6 @@
 "AWARD_LONG_NAME_CHANGE"	72038577	"CONCACAF Gold Cup Best Goalkeeper"			""
 "AWARD_SHORT_NAME_CHANGE"	72038577	"CONCACAF Gold Cup Best Goalkeeper"			""
 
-
 # AWARDS > CONCACAF > [222981] CONCACAF Nations League
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	13230992	"CONCACAF Nations League Best Young Player"		""
@@ -14013,7 +14029,6 @@
 "AWARD_LONG_NAME_CHANGE"	13230996	"CONCACAF Nations League Best Player"			""
 "AWARD_SHORT_NAME_CHANGE"	13230996	"CONCACAF Nations League Best Player"			""
 
-
 # AWARDS > CONCACAF > [157149] CONCACAF U20 Championship
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	2000186486	"CONCACAF U20 Championship Top Goalscorer"		""
@@ -14024,7 +14039,6 @@
 "AWARD_SHORT_NAME_CHANGE"	2000186489	"CONCACAF U20 Championship Best Goalkeeper"		""
 "AWARD_LONG_NAME_CHANGE"	2000186490	"CONCACAF U20 Championship Best XI"			""
 "AWARD_SHORT_NAME_CHANGE"	2000186490	"CONCACAF U20 Championship Best XI"			""
-
 
 # AWARDS > CONCACAF > [51002641] CONCACAF Champions Cup
 #====================================================================================
@@ -14041,7 +14055,6 @@
 "AWARD_LONG_NAME_CHANGE"	13197502	"CONCACAF Champions Cup Best Young Player"		""
 "AWARD_SHORT_NAME_CHANGE"	13197502	"CONCACAF Champions Cup Best Young Player"		""
 
-
 # AWARDS > CONCACAF > [51078102] Leagues Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	2000287497	"Leagues Cup Best Goalkeeper"				""
@@ -14050,7 +14063,6 @@
 "AWARD_SHORT_NAME_CHANGE"	2000287498	"Leagues Cup Top Goalscorer"				""
 "AWARD_LONG_NAME_CHANGE"	2000287499	"Leagues Cup Best Player"				""
 "AWARD_SHORT_NAME_CHANGE"	2000287499	"Leagues Cup Best Player"				""
-
 
 # AWARDS > CONCACAF > [2000259628] CONCACAF Central American Cup
 #====================================================================================
@@ -14065,7 +14077,6 @@
 "AWARD_LONG_NAME_CHANGE"	2000283854	"CONCACAF CA Cup Fair Play Award"			""
 "AWARD_SHORT_NAME_CHANGE"	2000283854	"CONCACAF CA Cup Fair Play Award"			""
 
-
 # AWARDS > CONCACAF > [2000259627] CONCACAF Caribbean Cup
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	2000283855	"CONCACAF Caribbean Cup Best Young Player"		""
@@ -14079,7 +14090,6 @@
 "AWARD_LONG_NAME_CHANGE"	2000283859	"CONCACAF Caribbean Cup Fair Play Award"		""
 "AWARD_SHORT_NAME_CHANGE"	2000283859	"CONCACAF Caribbean Cup Fair Play Award"		""
 
-
 # AWARDS > CONMEBOL > CONMEBOL
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	102410		"Rey de América"					""
@@ -14088,7 +14098,6 @@
 "AWARD_SHORT_NAME_CHANGE"	314913		"Entrenador Sudamericano del Año"			""
 "AWARD_LONG_NAME_CHANGE"	315332		"Equipo Ideal de América"				""
 "AWARD_SHORT_NAME_CHANGE"	315332		"Equipo Ideal de América"				""
-
 
 # AWARDS > CONMEBOL > [1301389] CONMEBOL Copa América
 #====================================================================================
@@ -14105,7 +14114,6 @@
 "AWARD_LONG_NAME_CHANGE"	19164374	"CONMEBOL Copa América Best Young Player"		""
 "AWARD_SHORT_NAME_CHANGE"	19164374	"CONMEBOL Copa América Best Young Player"		""
 
-
 # AWARDS > CONMEBOL > [8830770] CONMEBOL Sudamericano Sub-20
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	19035015	"CONMEBOL Sub-20 Top Goalscorer"			""
@@ -14116,7 +14124,6 @@
 "AWARD_SHORT_NAME_CHANGE"	19164377	"CONMEBOL Sub-20 Best Goalkeeper"			""
 "AWARD_LONG_NAME_CHANGE"	19164379	"CONMEBOL Sub-20 Team of the Tournament"		""
 "AWARD_SHORT_NAME_CHANGE"	19164379	"CONMEBOL Sub-20 Team of the Tournament"		""
-
 
 # AWARDS > CONMEBOL > [102415] CONMEBOL Libertadores
 #====================================================================================
@@ -14135,7 +14142,6 @@
 "AWARD_LONG_NAME_CHANGE"	19342546	"CONMEBOL Copa Libertadores Team of the Week"		""
 "AWARD_SHORT_NAME_CHANGE"	19342546	"CONMEBOL Copa Libertadores Team of the Week"		""
 
-
 # AWARDS > CONMEBOL > [317567] CONMEBOL Sudamericana
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	19034645	"CONMEBOL Copa Sudamericana Golden Boot"		""
@@ -14149,12 +14155,10 @@
 "AWARD_LONG_NAME_CHANGE"	19342550	"CONMEBOL Copa Sudamericana Goal of the Year"		""
 "AWARD_SHORT_NAME_CHANGE"	19342550	"CONMEBOL Copa Sudamericana Goal of the Year"		""
 
-
 # AWARDS > CONMEBOL > [102418] CONMEBOL Recopa
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	19040130	"CONMEBOL Recopa Man of the Match"			""
 "AWARD_SHORT_NAME_CHANGE"	19040130	"CONMEBOL Recopa Man of the Match"			""
-
 
 # AWARDS > CONMEBOL > [19158846] CONMEBOL Libertadores Sub-20
 #====================================================================================
@@ -14165,12 +14169,10 @@
 "AWARD_LONG_NAME_CHANGE"	19164436	"CONMEBOL Copa Libertadores S20 Team of the Year"	""
 "AWARD_SHORT_NAME_CHANGE"	19164436	"CONMEBOL Copa Libertadores S20 Team of the Year"	""
 
-
 # AWARDS > OFC > OFC
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	131308		"OFC Footballer of the Year"				""
 "AWARD_SHORT_NAME_CHANGE"	131308		"OFC Footballer of the Year"				""
-
 
 # AWARDS > OFC > [129986] OFC Nations Cup
 #====================================================================================
@@ -14183,12 +14185,10 @@
 "AWARD_LONG_NAME_CHANGE"	150953		"OFC Nations Cup Top Goalscorer"			""
 "AWARD_SHORT_NAME_CHANGE"	150953		"OFC Nations Cup Top Goalscorer"			""
 
-
 # AWARDS > OFC > [127285] OFC Champions League
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	23228543	"OFC Champions League Top Goalscorer"			""
 "AWARD_SHORT_NAME_CHANGE"	23228543	"OFC Champions League Top Goalscorer"			""
-
 
 # AWARDS > UEFA > UEFA
 #====================================================================================
@@ -14207,7 +14207,6 @@
 "AWARD_LONG_NAME_CHANGE"	29086770 	"UEFA Men's Player of the Year" 			""
 "AWARD_SHORT_NAME_CHANGE" 	29086770 	"UEFA Men's Player of the Year" 			""
 
-
 # AWARDS > UEFA > [1301388] UEFA Euro
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	150929		"UEFA Euro Team of the Tournament"			""
@@ -14221,14 +14220,12 @@
 "AWARD_LONG_NAME_CHANGE"	29173467	"UEFA Euro Young Player of the Tournament"		""
 "AWARD_SHORT_NAME_CHANGE"	29173467	"UEFA Euro Young Player of the Tournament"		""
 
-
 # AWARDS > UEFA > [90] UEFA Nations League
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	13230042	"UEFA Nations League Best Player"			""
 "AWARD_SHORT_NAME_CHANGE"	13230042	"UEFA Nations League Best Player"			""
 "AWARD_LONG_NAME_CHANGE"	13230990	"UEFA Nations League Best Young Player"			""
 "AWARD_SHORT_NAME_CHANGE"	13230990	"UEFA Nations League Best Young Player"			""
-
 
 # AWARDS > UEFA > [150783] UEFA U21 Euro
 #====================================================================================
@@ -14241,7 +14238,6 @@
 "AWARD_LONG_NAME_CHANGE"	13130096 	"UEFA U21 Euro Golden Boot" 				""
 "AWARD_SHORT_NAME_CHANGE"	13130096 	"UEFA U21 Euro Golden Boot" 				""
 
-
 # AWARDS > UEFA > [150786] UEFA U19 Euro
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	13130097 	"UEFA U19 Euro Golden Ball" 				""
@@ -14253,7 +14249,6 @@
 "AWARD_LONG_NAME_CHANGE"	13130100 	"UEFA U19 Euro Golden Boot" 				""
 "AWARD_SHORT_NAME_CHANGE"	13130100 	"UEFA U19 Euro Golden Boot" 				""
 
-
 # AWARDS > UEFA > [5781023] UEFA U17 Euro
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	13130101 	"UEFA U17 Euro Golden Ball" 				""
@@ -14264,7 +14259,6 @@
 "AWARD_SHORT_NAME_CHANGE"	13130103 	"UEFA U17 Euro Goal of the Tournament" 			""
 "AWARD_LONG_NAME_CHANGE"	13130104 	"UEFA U17 Euro Golden Boot" 				""
 "AWARD_SHORT_NAME_CHANGE"	13130104 	"UEFA U17 Euro Golden Boot" 				""
-
 
 # AWARDS > UEFA > [1301394] UEFA Champions League
 #====================================================================================
@@ -14285,7 +14279,6 @@
 "AWARD_LONG_NAME_CHANGE"	13197494	"UEFA Champions League Forward of the Season"		""
 "AWARD_SHORT_NAME_CHANGE"	13197494	"UEFA Champions League Forward of the Season"		""
 
-
 # AWARDS > UEFA > [1301396] UEFA Europa League
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	13197495	"UEFA Europa League Player of the Season"		""
@@ -14295,7 +14288,6 @@
 "AWARD_LONG_NAME_CHANGE"	89073425	"UEFA Europa League Golden Boot"			""
 "AWARD_SHORT_NAME_CHANGE"	89073425	"UEFA Europa League Golden Boot"			""
 
-
 # AWARDS > UEFA > [31051584] UEFA Conference League
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	89073340	"UEFA Conference League Player of the Season"		""
@@ -14304,7 +14296,6 @@
 "AWARD_SHORT_NAME_CHANGE"	89073341	"UEFA Conference League Team of the Season"		""
 "AWARD_LONG_NAME_CHANGE"	89073342	"UEFA Conference League Golden Boot"			""
 "AWARD_SHORT_NAME_CHANGE"	89073342	"UEFA Conference League Golden Boot"			""
-
 
 # AWARDS > CONMEBOL > [ARG] ARGENTINA > [102421] Liga Profesional
 #====================================================================================
@@ -14327,7 +14318,6 @@
 "AWARD_LONG_NAME_CHANGE"	961945		"LPF Manager of the Month"				""
 "AWARD_SHORT_NAME_CHANGE"	961945		"LPF Manager of the Month"				""
 
-
 # AWARDS > AFC > [AUS] AUSTRALIA > [129985] A-League Men
 #====================================================================================
 "AWARD_LONG_NAME_CHANGE"	130004 		"A-League Men Young Footballer of the Month"		""
@@ -14348,7 +14338,6 @@
 "AWARD_SHORT_NAME_CHANGE"	15021088	"A-League Men Goal of the Year"				""
 "AWARD_LONG_NAME_CHANGE"	15021813	"A-League Youth Player of the Year"			""
 "AWARD_SHORT_NAME_CHANGE"	15021813	"A-League Youth Player of the Year"			""
-
 
 # AWARDS > AFC > [AUS] AUSTRALIA > [130185] NPL NSW
 #====================================================================================

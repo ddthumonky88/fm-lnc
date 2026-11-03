@@ -235,15 +235,15 @@ function ListCitiesContent() {
       {/* 2. KHU VỰC BÊN PHẢI: Search + Vùng Danh Sách */}
       <div className="flex-1 min-w-0 min-h-0 h-full flex flex-col gap-3 overflow-hidden">
         {/* Khung Search trên cùng */}
-        <div className="shrink-0 flex-none bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs">
+        <div className="shrink-0 flex-none bg-white border border-slate-200/90 rounded-2xl p-2 shadow-2xs">
           <Input
-            size="large"
+            size="middle"
             placeholder="Search..."
             allowClear
             prefix={<SearchOutlined className="text-slate-400 text-lg mr-2" />}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="w-full text-sm sm:text-base bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-2 px-3 shadow-2xs transition-colors"
+            className="w-full text-sm bg-slate-50/80 hover:bg-white focus:bg-white rounded-xl border border-slate-200 hover:border-blue-400 focus:border-blue-500 py-1 px-3 shadow-2xs transition-colors"
           />
 
           {/* Mobile Filter Bar (Chỉ hiển thị trên mobile < md) */}

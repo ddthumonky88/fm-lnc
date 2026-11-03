@@ -581,7 +581,7 @@ export class LncParserService {
               clubs[id] = { nat_code: curClubNatCode, comp_cat: curClubCompCat, note, inactive_fields: new Set() };
             }
             if (!clubs[id].inactive_fields) clubs[id].inactive_fields = new Set();
-            if (cmd === 'CLUB_NAME_CHANGE') {
+            if (cmd === 'CLUB_NAME_CHANGE' || cmd === 'CLUB_LONG_NAME_CHANGE') {
               clubs[id].name_lg = val;
               if (isCommented) clubs[id].inactive_fields.add('name_lg');
               else clubs[id].inactive_fields.delete('name_lg');

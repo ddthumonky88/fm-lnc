@@ -1,4 +1,4 @@
-﻿﻿
+﻿
 
 # CLUB > AFC > [AUS] AUSTRALIA > [129985] A-League Men (23/24)
 #==============================================================================
@@ -3627,17 +3627,17 @@
 "CLUB_6LETTER_NAME_CHANGE"	2000267295	"OshMU"							""
 "CLUB_3LETTER_NAME_CHANGE"	2000267295	"OMU"							""
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339536 	"FC Bishkek City" 					"" # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339536 	"FC Bishkek City" 					"" # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339536 	"Bishkek City" 						"" # [NEW]
 #"CLUB_6LETTER_NAME_CHANGE"	2000339536	"Bishkek City"						"" # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339536 	"BKC" 							"" # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339537 	"FC Bars Issyk-Kul" 					"" # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339537 	"FC Bars Issyk-Kul" 					"" # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339537 	"Bars" 							"" # [NEW]
 #"CLUB_6LETTER_NAME_CHANGE" 	2000339537 	"Bars" 							"" # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339537 	"BARS" 							"" # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339538 	"FC Asiagoal Bishkek" 					"" # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339538 	"FC Asiagoal Bishkek" 					"" # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339538 	"Asiagoal Bishkek" 					"" # [NEW]
 #"CLUB_6LETTER_NAME_CHANGE"	2000339538	"Asiagoal"						"" # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339538 	"AGB" 							"" # [NEW]
@@ -3757,7 +3757,7 @@
 #"CLUB_6LETTER_NAME_CHANGE"	23189417	"Lao Police"						""
 "CLUB_3LETTER_NAME_CHANGE"	23189417	"LAP"							""
 
-"CLUB_LONG_NAME_CHANGE" 	23260497 	"Pinkeo 2010 Chanthabouly Pakse FC"			""
+"CLUB_NAME_CHANGE" 	23260497 	"Pinkeo 2010 Chanthabouly Pakse FC"			""
 "CLUB_SHORT_NAME_CHANGE" 	23260497 	"Chanthabouly"						""
 #"CLUB_6LETTER_NAME_CHANGE" 	23260497 	"Chanthabouly"						""
 
@@ -3813,7 +3813,7 @@
 "CLUB_3LETTER_NAME_CHANGE"	64047962	"KPS"							""
 
 #"AFFILIATED_CLUB_ID"		64047963	"U19-23189417"						""  # [LAO] Lao Police
-"CLUB_LONG_NAME_CHANGE" 	64047963 	"Lao Police Academy"					""  # [LAO] Lao Police
+"CLUB_NAME_CHANGE" 	64047963 	"Lao Police Academy"					""  # [LAO] Lao Police
 "CLUB_SHORT_NAME_CHANGE" 	64047963 	"Lao Police Academy"					""  # [LAO] Lao Police
 "CLUB_6LETTER_NAME_CHANGE" 	64047963 	"LAP.A"							""  # [LAO] Lao Police
 
@@ -4161,7 +4161,7 @@
 
 # CLUB > AFC > [MAS] MALAYSIA > [23501366] Piala MFL
 #==============================================================================
-"CLUB_LONG_NAME_CHANGE" 	2000083043 	"Skuad Projek FAM-Majlis Sukan Negara"			""
+"CLUB_NAME_CHANGE" 	2000083043 	"Skuad Projek FAM-Majlis Sukan Negara"			""
 "CLUB_SHORT_NAME_CHANGE" 	2000083043 	"Projek FAM-MSN"					""
 "CLUB_3LETTER_NAME_CHANGE" 	2000083043 	"PFM"							""
 
@@ -4700,12 +4700,12 @@
 "CLUB_6LETTER_NAME_CHANGE"	2000188455	"Cebu"							""
 "CLUB_3LETTER_NAME_CHANGE"	2000188455	"CEB"							""
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339486 	"One Taguig FC" 					""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339486 	"One Taguig FC" 					""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339486 	"One Taguig" 						""  # [NEW]
 #"CLUB_6LETTER_NAME_CHANGE"	2000339486	"Taguig"						""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339486 	"TAG" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339507 	"Manila Digger FC" 					""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339507 	"Manila Digger FC" 					""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339507 	"Manila Digger" 					""  # [NEW]
 #"CLUB_6LETTER_NAME_CHANGE"	2000339507	"Manila D."						""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339507 	"MND" 							""  # [NEW]
@@ -9917,7 +9917,7 @@
 #"CLUB_6LETTER_NAME_CHANGE"	2000152066	"Montréal"						""
 "CLUB_3LETTER_NAME_CHANGE"	2000152066	"MTL"							""
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339424 	"San Diego FC" 						""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339424 	"San Diego FC" 						""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339424 	"San Diego" 						""  # [NEW]
 #"CLUB_6LETTER_NAME_CHANGE" 	2000339424 	"San Diego" 						""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339424 	"SD" 							""  # [NEW]
@@ -10106,19 +10106,19 @@
 "CLUB_SHORT_NAME_CHANGE"	2000173524	"Spokane Velocity"					""
 "CLUB_3LETTER_NAME_CHANGE"	2000173524	"SPK"							""
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339539 	"AV Alta FC" 						""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339539 	"AV Alta FC" 						""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339539 	"AV Alta" 						""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339539 	"AV" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339540 	"FC Naples" 						""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339540 	"FC Naples" 						""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339540 	"FC Naples" 						""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339540 	"NAP" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339541 	"Portland Hearts of Pine" 				""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339541 	"Portland Hearts of Pine" 				""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339541 	"Portland Hearts of Pine" 				""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339541 	"POR" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339542 	"Westchester SC" 					""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339542 	"Westchester SC" 					""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339542 	"Westchester" 						""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339542 	"WES" 							""  # [NEW]
 
@@ -12567,23 +12567,23 @@
 
 # CLUB > OFC > [2000340113] OFC Pro League
 #==============================================================================
-#"CLUB_LONG_NAME_CHANGE" 	2000339503 	"Tahiti United FC" 					""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339503 	"Tahiti United FC" 					""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339503 	"Tahiti United" 					""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339503 	"TAU" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339504 	"Bula FC" 						""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339504 	"Bula FC" 						""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339504 	"Bula FC" 						""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339504 	"BULA" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339505 	"Vanuatu United FC" 					""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339505 	"Vanuatu United FC" 					""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339505	"Vanuatu United" 					""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339505 	"VAU" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339506 	"Solomon Kings FC" 					""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339506 	"Solomon Kings FC" 					""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339506	"Solomon Kings" 					""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339506 	"SOK" 							""  # [NEW]
 
-#"CLUB_LONG_NAME_CHANGE" 	2000339544 	"South Island United FC" 				""  # [NEW]
+#"CLUB_NAME_CHANGE" 	2000339544 	"South Island United FC" 				""  # [NEW]
 #"CLUB_SHORT_NAME_CHANGE" 	2000339544 	"South Island United" 					""  # [NEW]
 #"CLUB_3LETTER_NAME_CHANGE" 	2000339544 	"SIU" 							""  # [NEW]
 
@@ -13542,10 +13542,10 @@
 "CLUB_SHORT_NAME_CHANGE"	16009429	"AKA Sturm Graz"					""  # [AUT] Sturm Graz
 "CLUB_6LETTER_NAME_CHANGE"	16009429	"STU.A"							""  # [AUT] Sturm Graz
 
-"CLUB_LONG_NAME_CHANGE" 	16009432 	"Fußballakademie Tirol" 				""
+"CLUB_NAME_CHANGE" 	16009432 	"Fußballakademie Tirol" 				""
 "CLUB_SHORT_NAME_CHANGE" 	16009432 	"AKA Tirol" 						""
 
-"CLUB_LONG_NAME_CHANGE" 	16009433 	"Fussball Akademie Hypo Vorarlberg" 			""
+"CLUB_NAME_CHANGE" 	16009433 	"Fussball Akademie Hypo Vorarlberg" 			""
 "CLUB_SHORT_NAME_CHANGE" 	16009433 	"AKA Hypo Vorarlberg" 					""
 
 #"AFFILIATED_CLUB_ID"		16009434	"U18-159"						""  # [AUT] Oberbank Ried
@@ -13553,7 +13553,7 @@
 "CLUB_SHORT_NAME_CHANGE"	16009434	"AKA SV Ried"						""  # [AUT] Oberbank Ried
 "CLUB_6LETTER_NAME_CHANGE"	16009434	"SVR.A"							""  # [AUT] Oberbank Ried
 
-"CLUB_LONG_NAME_CHANGE" 	16009435 	"Fußball Akademie St. Pölten NÖ" 			""
+"CLUB_NAME_CHANGE" 	16009435 	"Fußball Akademie St. Pölten NÖ" 			""
 "CLUB_SHORT_NAME_CHANGE" 	16009435 	"AKA St. Pölten NÖ" 					""
 
 #"AFFILIATED_CLUB_ID"		16009436	"U18-158"						""  # [AUT] RB Salzburg
@@ -13566,7 +13566,7 @@
 "CLUB_SHORT_NAME_CHANGE"	16009437	"AKA Admira Wacker"					""  # [AUT] Admira Wacker
 "CLUB_6LETTER_NAME_CHANGE"	16009437	"ADM.A"							""  # [AUT] Admira Wacker
 
-"CLUB_LONG_NAME_CHANGE" 	16009439 	"Fußballakademie Burgenland" 				""
+"CLUB_NAME_CHANGE" 	16009439 	"Fußballakademie Burgenland" 				""
 "CLUB_SHORT_NAME_CHANGE" 	16009439 	"AKA Burgenland" 					""
 
 #"AFFILIATED_CLUB_ID"		16114442	"U18-16034828"						""  # [AUT] RZ Pellets WAC

@@ -58,13 +58,14 @@ function getExpandedKeysForSelectedKey(nodes: UnitTreeNode[], targetKey: string)
   const keys: React.Key[] = [];
   function traverse(list: UnitTreeNode[], path: React.Key[]): boolean {
     for (const node of list) {
+      const nodeKey = String(node.key);
+      const normalizedNodeKey = nodeKey.toLowerCase();
+      const normalizedTargetKey = String(targetKey).toLowerCase();
       const match =
-        String(node.key) === String(targetKey) ||
-        (targetKey.startsWith('nation_') && String(node.key) === targetKey.replace('nation_', '')) ||
-        (node.key === `nation_${targetKey}`) ||
-        (targetKey.startsWith('comp_') && String(node.key) === targetKey) ||
-        (targetKey.startsWith('oth_') && String(node.key) === targetKey) ||
-        (targetKey.startsWith('ext_') && String(node.key) === targetKey);
+        normalizedNodeKey === normalizedTargetKey ||
+        (normalizedTargetKey.startsWith('nation_') &&
+          normalizedNodeKey === normalizedTargetKey.replace('nation_', '')) ||
+        normalizedNodeKey === `nation_${normalizedTargetKey}`;
       if (match) {
         keys.push(...path);
         return true;
@@ -79,6 +80,20 @@ function getExpandedKeysForSelectedKey(nodes: UnitTreeNode[], targetKey: string)
   }
   traverse(nodes, []);
   return keys;
+}
+
+function findActualTreeKey(nodes: DataNode[], targetKey?: string): React.Key | undefined {
+  if (!targetKey) return undefined;
+
+  const normalizedTarget = String(targetKey).toLowerCase();
+  for (const node of nodes) {
+    if (String(node.key).toLowerCase() === normalizedTarget) return node.key;
+    if (node.children?.length) {
+      const childKey = findActualTreeKey(node.children, targetKey);
+      if (childKey !== undefined) return childKey;
+    }
+  }
+  return undefined;
 }
 
 export default function UnitTree({
@@ -609,6 +624,13 @@ export default function UnitTree({
     return filterNodes(rawTreeData);
   }, [rawTreeData, keyword]);
 
+  // Ant Design Tree is single-select here, so always pass exactly one key that
+  // matches the key casing returned by the API (confederation keys are lowercase).
+  const actualSelectedKey = useMemo(
+    () => findActualTreeKey(rawTreeData, selectedKey),
+    [rawTreeData, selectedKey],
+  );
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setKeyword(val);
@@ -700,11 +722,7 @@ export default function UnitTree({
             showLine={{ showLeafIcon: false }}
             treeData={filteredTreeData}
             loadData={currentMode === 'club' && !apiTreeData ? handleLoadData : undefined}
-            selectedKeys={
-              selectedKey
-                ? [selectedKey, selectedKey.toLowerCase(), selectedKey.toUpperCase()]
-                : []
-            }
+            selectedKeys={actualSelectedKey !== undefined ? [actualSelectedKey] : []}
             expandedKeys={expandedKeys}
             autoExpandParent={autoExpandParent}
             onExpand={(keys) => {
