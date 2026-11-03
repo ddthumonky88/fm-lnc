@@ -178,24 +178,28 @@ export default function AppSidebar({
 
     return (
       <div className="flex flex-col h-full bg-[#0a1120] text-slate-300 border-r border-[#19263e] select-none">
-        {/* Brand Header */}
-        {isMobile ? (
-          <div className="h-14 px-4 flex items-center justify-between border-b border-[#19263e] shrink-0">
-            <div
-              onClick={() => {
-                router.push('/home');
-                onCloseMobile();
-              }}
-              className="flex items-center gap-2.5 cursor-pointer group overflow-hidden"
-            >
-              <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md shadow-black/20 shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
-                <img
-                  src="/fm/icons/icon-192.png"
-                  alt="FM24 LNC"
-                  className="w-full h-full object-contain rounded-lg"
-                />
-              </div>
-              <div className="min-w-0 transition-opacity duration-200">
+        {/* Brand Header (full-height sidebar: logo on top, like admin layout) */}
+        <div
+          className={`h-14 flex items-center border-b border-[#19263e] shrink-0 ${
+            isCollapsed ? 'justify-center px-0' : 'justify-between px-4'
+          }`}
+        >
+          <div
+            onClick={() => {
+              router.push('/home');
+              if (isMobile) onCloseMobile();
+            }}
+            className="flex items-center gap-2.5 cursor-pointer group overflow-hidden"
+          >
+            <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md shadow-black/20 shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
+              <img
+                src="/fm/icons/icon-192.png"
+                alt="FM24 LNC"
+                className="w-full h-full object-contain rounded-lg"
+              />
+            </div>
+            {!isCollapsed && (
+              <div className="min-w-0">
                 <div className="font-bold text-sm text-white tracking-wide flex items-center gap-1.5">
                   <span>FM24 LNC</span>
                   <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded">
@@ -204,9 +208,11 @@ export default function AppSidebar({
                 </div>
                 <div className="text-[11px] text-slate-400 truncate">Database Manager</div>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Mobile close button */}
+          {/* Mobile close button */}
+          {isMobile && (
             <button
               type="button"
               onClick={onCloseMobile}
@@ -215,33 +221,8 @@ export default function AppSidebar({
             >
               <CloseOutlined />
             </button>
-          </div>
-        ) : !isCollapsed ? (
-          <div className="h-10 px-3 flex items-center justify-between border-b border-[#19263e]/60 shrink-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Menu điều hướng
-            </span>
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs"
-              title="Thu gọn sidebar"
-            >
-              <LeftOutlined />
-            </button>
-          </div>
-        ) : (
-          <div className="h-10 flex items-center justify-center border-b border-[#19263e]/60 shrink-0">
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs"
-              title="Mở rộng sidebar"
-            >
-              <RightOutlined />
-            </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Navigation Items (World, Person, Stage) */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2.5 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800">

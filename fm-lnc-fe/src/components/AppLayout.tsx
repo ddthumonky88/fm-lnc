@@ -146,43 +146,42 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       refreshSignal={refreshSignal}
       triggerRefresh={triggerRefresh}
     >
-      <div className="relative flex flex-col h-full w-full bg-[#f8fafc] text-slate-800 font-sans antialiased overflow-hidden">
-        {/* Top Header (Full width across top) */}
-        <AppHeader
+      <div className="relative flex h-full w-full bg-[#f8fafc] text-slate-800 font-sans antialiased overflow-hidden">
+        {/* Sidebar: full-height on the left (persistent on desktop, drawer on mobile) */}
+        <AppSidebar
           collapsed={sidebarCollapsed}
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          isMobileOpen={mobileMenuOpen}
+          onCloseMobile={() => setMobileMenuOpen(false)}
           onOpenSearchModal={() => setIsSearchModalOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onSync={handleSyncLnc}
-          isSyncing={isSyncing}
           onExport={handleExportLnc}
-          onQuickAdd={(type) => handleOpenRecordModal(type)}
-          onRefresh={triggerRefresh}
-          currentStepTitle={currentHeaderTitle}
-          currentStepId={currentHeaderId}
-          breadcrumbs={breadcrumbs}
-          backHref={backHref}
-          headerLogo={headerLogo}
+          totalContinents={totalContinents}
         />
 
-        {/* Horizontal Body Container below Header */}
-        <div className="flex flex-1 min-h-0 w-full overflow-hidden">
-          {/* Sidebar: persistent on desktop, drawer on mobile */}
-          <AppSidebar
+        {/* Right column: Header on top, Main content below */}
+        <div className="flex flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden">
+          <AppHeader
             collapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-            isMobileOpen={mobileMenuOpen}
-            onCloseMobile={() => setMobileMenuOpen(false)}
+            onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
             onOpenSearchModal={() => setIsSearchModalOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}
             onSync={handleSyncLnc}
+            isSyncing={isSyncing}
             onExport={handleExportLnc}
-            totalContinents={totalContinents}
+            onQuickAdd={(type) => handleOpenRecordModal(type)}
+            onRefresh={triggerRefresh}
+            currentStepTitle={currentHeaderTitle}
+            currentStepId={currentHeaderId}
+            breadcrumbs={breadcrumbs}
+            backHref={backHref}
+            headerLogo={headerLogo}
           />
 
           {/* Main Content Area */}
-          <main className="flex-1 min-w-0 min-h-0 h-full flex flex-col bg-white overflow-hidden">
+          <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-slate-100/70 overflow-hidden">
             {children}
           </main>
         </div>

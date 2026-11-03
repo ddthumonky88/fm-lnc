@@ -23,6 +23,7 @@ import {
 import { fetchPlayers, deleteRecord, PlayerItem } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { RecordType } from '../../types';
+import AppPagination from '../../components/AppPagination';
 
 export default function PlayersPage() {
   const { openRecordModal, refreshSignal, setHeaderTitle, setHeaderId } = useApp();
@@ -302,26 +303,26 @@ export default function PlayersPage() {
 
         {/* Pinned Bottom Pagination */}
         {total > 0 && (
-          <div className="shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-white gap-3 flex-wrap sm:flex-nowrap">
-            <span className="text-xs text-slate-500 font-medium shrink-0">
+          <div className="shrink-0 flex flex-col sm:flex-row items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 border-t border-slate-100 bg-white gap-1.5 sm:gap-3">
+            <div className="text-xs text-slate-500 font-medium text-center sm:text-left shrink-0">
               Showing <strong className="text-slate-700">{Math.min((page - 1) * pageSize + 1, total)}</strong> - <strong className="text-slate-700">{Math.min(page * pageSize, total)}</strong> / <strong className="text-blue-600">{total.toLocaleString()}</strong> players
-            </span>
-            <Pagination
-              current={page}
-              pageSize={pageSize}
-              total={total}
-              size="small"
-              showSizeChanger={true}
-              pageSizeOptions={['10', '20', '50', '100']}
-              locale={{ items_per_page: '/ trang' }}
-              onChange={(p, s) => {
-                setPage(p);
-                if (s && s !== pageSize) {
-                  setPageSize(s);
-                  setPage(1);
-                }
-              }}
-            />
+            </div>
+            <div className="flex items-center justify-center sm:justify-end max-w-full overflow-x-auto">
+              <AppPagination
+                current={page}
+                pageSize={pageSize}
+                total={total}
+                showSizeChanger={true}
+                pageSizeOptions={[10, 20, 50, 100]}
+                onChange={(p, s) => {
+                  setPage(p);
+                  if (s && s !== pageSize) {
+                    setPageSize(s);
+                    setPage(1);
+                  }
+                }}
+              />
+            </div>
           </div>
         )}
       </div>

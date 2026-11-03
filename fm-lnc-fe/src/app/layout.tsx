@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               token: {
                 colorPrimary: '#1d70b8',
                 borderRadius: 6,
-                fontFamily: `var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
+                fontFamily: `var(--font-inter, 'Inter'), Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`,
               },
             }}
           >

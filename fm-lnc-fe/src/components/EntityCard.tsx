@@ -837,16 +837,26 @@ export default function EntityCard({
                     affClub?.name_lg ||
                     affClub?.name ||
                     affId;
+                  const cleanType = String(affType || '').replace(/^\[/, '').replace(/\]$/, '').trim();
                   fields.push({
                     label: 'AFFILIATE:',
                     value: (
-                      <span
-                        className="text-[12px] truncate block text-sky-700 font-semibold"
+                      <div
+                        className="flex items-center gap-1.5 min-w-0"
                         title={`Parent: ${pName} (${affId})`}
                       >
-                        {affType ? `[${affType}] ` : ''}
-                        {pName || '-'}
-                      </span>
+                        {cleanType && (
+                          <Tag
+                            color="cyan"
+                            className="m-0 font-mono font-bold text-[10px] px-1.5 py-0 leading-tight shrink-0 border-sky-300 bg-sky-50 text-sky-700"
+                          >
+                            {cleanType}
+                          </Tag>
+                        )}
+                        <span className="text-[12px] truncate font-semibold text-slate-800">
+                          {pName || '-'}
+                        </span>
+                      </div>
                     ),
                     align: 'start',
                     isInactive: isInactive('affiliate_club'),

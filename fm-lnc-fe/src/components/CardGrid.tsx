@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Pagination, Empty } from 'antd';
+import { Empty } from 'antd';
 import EntityCard from './EntityCard';
+import AppPagination from './AppPagination';
 import { EntityTypeValue } from '../types';
 
 export interface CardGridProps {
@@ -155,25 +156,17 @@ export default function CardGrid({
 
       {/* Fixed Bottom Pagination Bar (Pinned) */}
       {totalRecords > 0 && (
-        <div className="shrink-0 flex items-center justify-between px-4 py-2 sm:py-2.5 border-t border-slate-200 bg-white shadow-2xs z-10 gap-3 flex-wrap sm:flex-nowrap">
-          <span className="text-xs text-slate-500 font-medium shrink-0">
+        <div className="shrink-0 flex flex-col sm:flex-row items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 border-t border-slate-200/90 bg-white shadow-2xs z-10 gap-1.5 sm:gap-3">
+          <div className="text-xs text-slate-500 font-medium text-center sm:text-left shrink-0">
             Showing <strong className="text-slate-700">{showingStart}</strong> - <strong className="text-slate-700">{showingEnd}</strong> / <strong className="text-blue-600">{totalRecords.toLocaleString()}</strong> records
-          </span>
-          <div className="flex items-center gap-2 ml-auto">
-            <Pagination
+          </div>
+          <div className="flex items-center justify-center sm:justify-end max-w-full overflow-x-auto">
+            <AppPagination
               current={currentPage}
               pageSize={currentPageSize}
               total={totalRecords}
-              showTotal={(total) => (
-                <span className="text-xs text-slate-500 font-medium mr-1.5 sm:hidden">
-                  Total: <strong className="text-blue-600">{total.toLocaleString()}</strong>
-                </span>
-              )}
               showSizeChanger={true}
-              pageSizeOptions={['10', '20', '50', '100']}
-              locale={{ items_per_page: '/ trang' }}
-              showQuickJumper={false}
-              size="small"
+              pageSizeOptions={[10, 20, 50, 100]}
               onChange={(p, s) => {
                 if (isServer) {
                   serverPagination!.onChange(p, s);

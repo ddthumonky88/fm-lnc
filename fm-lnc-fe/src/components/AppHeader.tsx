@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button, Dropdown, Tooltip, type MenuProps } from 'antd';
 import {
   MenuOutlined,
-  SearchOutlined,
   SyncOutlined,
   DownloadOutlined,
   PlusOutlined,
@@ -244,45 +243,44 @@ export default function AppHeader({
             <MenuOutlined className="text-base" />
           </button>
 
-          {/* Brand Logo & Title on Desktop Header */}
-          <div
-            onClick={() => router.push('/home')}
-            className="hidden sm:flex items-center gap-2 cursor-pointer select-none group mr-1"
-          >
-            <img
-              src="/fm/icons/icon-192.png"
-              alt="FM24 LNC"
-              className="w-7 h-7 object-contain rounded-lg shadow-2xs group-hover:scale-105 transition-transform"
-              onError={(e) => {
-                if (!e.currentTarget.src.endsWith('/icons/icon-192.png')) {
-                  e.currentTarget.src = '/icons/icon-192.png';
-                }
-              }}
-            />
-            <span className="font-bold text-sm text-slate-800 tracking-tight group-hover:text-blue-600 transition-colors">
-              FM24 LNC
-            </span>
-            <span className="text-[10px] font-bold uppercase px-1.5 py-0.2 bg-blue-50 text-blue-600 border border-blue-200 rounded">
-              24.3
-            </span>
-          </div>
-        </div>
-
-        {/* Center Section: Quick Search Bar */}
-        <div className="flex-1 max-w-[200px] xs:max-w-[240px] mx-auto">
-          <button
-            type="button"
-            onClick={onOpenSearchModal}
-            className="w-full h-8 px-2.5 rounded-lg bg-slate-50 hover:bg-slate-100/90 border border-slate-200 hover:border-blue-400/60 flex items-center justify-between text-xs text-slate-500 hover:text-slate-700 transition-all cursor-pointer group shadow-2xs"
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <SearchOutlined className="text-slate-400 group-hover:text-blue-600 transition-colors text-xs shrink-0" />
-              <span className="truncate">Search...</span>
+          {/* Inline breadcrumbs next to the hamburger */}
+          {effectiveBreadcrumbs.length > 0 && (
+            <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-[13px] font-bold uppercase tracking-tight min-w-0 overflow-hidden">
+              {effectiveBreadcrumbs.map((crumb, idx) => {
+                const isLast = idx === effectiveBreadcrumbs.length - 1;
+                return (
+                  <React.Fragment key={idx}>
+                    {idx > 0 && (
+                      <span className="text-[#1d70b8] font-bold select-none px-0.5">&gt;</span>
+                    )}
+                    {isLast ? (
+                      <span className="font-bold text-[#0f3b6c] whitespace-nowrap">
+                        {crumb.title}
+                      </span>
+                    ) : crumb.href ? (
+                      <a
+                        onClick={() => router.push(crumb.href!)}
+                        className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap"
+                      >
+                        {crumb.title}
+                      </a>
+                    ) : crumb.onClick ? (
+                      <a
+                        onClick={crumb.onClick}
+                        className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap"
+                      >
+                        {crumb.title}
+                      </a>
+                    ) : (
+                      <span className="text-[#1d70b8] font-bold whitespace-nowrap">
+                        {crumb.title}
+                      </span>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
-            <kbd className="inline-flex items-center gap-0.5 px-1 py-0.2 text-[10px] font-semibold text-slate-400 bg-white rounded border border-slate-200 shadow-2xs">
-              ⌘K
-            </kbd>
-          </button>
+          )}
         </div>
 
         {/* Right Section: Actions Dropdown + Settings Button */}
@@ -322,46 +320,6 @@ export default function AppHeader({
         </div>
       </div>
 
-      {/* Dedicated Breadcrumbs Bar (below main header) */}
-      {effectiveBreadcrumbs.length > 1 && (
-        <div className="bg-white border-t border-slate-100 px-3 sm:px-6 py-1.5 sm:py-2 transition-all">
-          <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-[13px] font-bold uppercase tracking-tight flex-wrap">
-            {effectiveBreadcrumbs.map((crumb, idx) => {
-              const isLast = idx === effectiveBreadcrumbs.length - 1;
-              return (
-                <React.Fragment key={idx}>
-                  {idx > 0 && (
-                    <span className="text-[#1d70b8] font-bold select-none px-0.5">&gt;</span>
-                  )}
-                  {isLast ? (
-                    <span className="font-bold text-[#0f3b6c] whitespace-nowrap">
-                      {crumb.title}
-                    </span>
-                  ) : crumb.href ? (
-                    <a
-                      onClick={() => router.push(crumb.href!)}
-                      className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap"
-                    >
-                      {crumb.title}
-                    </a>
-                  ) : crumb.onClick ? (
-                    <a
-                      onClick={crumb.onClick}
-                      className="text-[#1d70b8] hover:underline font-bold cursor-pointer whitespace-nowrap"
-                    >
-                      {crumb.title}
-                    </a>
-                  ) : (
-                    <span className="text-[#1d70b8] font-bold whitespace-nowrap">
-                      {crumb.title}
-                    </span>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </header>
   );
 }
