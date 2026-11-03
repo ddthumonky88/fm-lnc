@@ -30,7 +30,7 @@ function getTeamTypeCode(team: any, isRoot: boolean): string {
 
   const rawType = String(
     team.affiliate_club_type ||
-    team.affiliate_club?.type ||
+    team.affiliate?.type ||
     ''
   ).toUpperCase().trim();
 
@@ -134,7 +134,7 @@ function ClubDetailContent() {
       const nationId = activeRecord.nation?.id || activeRecord.nation_id;
       const bcs = buildEntityBreadcrumbs({
         nationId,
-        nationCode: activeRecord.nation?.name_3l || (activeRecord as any).nation_three_letter,
+        nationCode: activeRecord.nation?.name_3l,
         entityTitle: title,
       });
       setBreadcrumbs(bcs);
@@ -182,7 +182,7 @@ function ClubDetailContent() {
       const nId = selected.nation?.id || selected.nation_id;
       const bcs = buildEntityBreadcrumbs({
         nationId: nId,
-        nationCode: selected.nation?.name_3l || (selected as any).nation_three_letter,
+        nationCode: selected.nation?.name_3l,
         entityTitle: title,
       });
       setBreadcrumbs(bcs);
@@ -220,9 +220,9 @@ function ClubDetailContent() {
 
     const rootId = String(
       (club as any)?.rootClubId ||
-        club?.affiliate_club?.id ||
+        club?.affiliate?.id ||
         (club as any)?.affiliate_club_id ||
-        familyTeams.find((t: any) => !t.affiliate_club && !t.affiliate_club_id)?.id ||
+        familyTeams.find((t: any) => !t.affiliate && !t.affiliate_club_id)?.id ||
         club?.id
     );
     return familyTeams.map((team: any) => {

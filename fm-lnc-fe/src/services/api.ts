@@ -329,7 +329,7 @@ export interface ClubItem {
   name_3l?: string;
   nation_id?: string;
   comp_id?: string;
-  affiliate_club?: AffiliateClubInfo | null;
+  affiliate?: AffiliateClubInfo | null;
   affiliatesCount?: number;
   affiliates?: ClubItem[];
   familyTeams?: ClubItem[];
@@ -1138,14 +1138,7 @@ export async function fetchConfederationInfo(
 export async function fetchClubInfo(
   clubId: string,
   forceRefresh = false,
-): Promise<
-  ClubItem & {
-    competition_name?: string;
-    parent_competition_name?: string;
-    nation_name?: string;
-    nation_three_letter?: string;
-  }
-> {
+): Promise<ClubItem> {
   return cachedFetch<any>(`${getApiBase()}/hierarchy/clubs/${clubId}/info`, forceRefresh);
 }
 

@@ -1009,7 +1009,7 @@ export default function RecordDetailView({
       )}
 
       {/* Club Affiliate Info */}
-      {!hideClubAffiliates && isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
+      {!hideClubAffiliates && isClub && (currentData.affiliate?.id || currentData.affiliate?.name_lg || currentData.affiliate?.name_sh || currentData.affiliate?.type) && (
         <>
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
             <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
@@ -1017,36 +1017,36 @@ export default function RecordDetailView({
             </span>
             <div
               onClick={() => {
-                if (currentData.affiliate_club?.id && onNavigateClub) {
-                  onNavigateClub(String(currentData.affiliate_club.id));
+                if (currentData.affiliate?.id && onNavigateClub) {
+                  onNavigateClub(String(currentData.affiliate.id));
                 }
               }}
               className={`flex items-center gap-1.5 flex-wrap ${
-                currentData.affiliate_club?.id && onNavigateClub ? 'cursor-pointer group' : ''
+                currentData.affiliate?.id && onNavigateClub ? 'cursor-pointer group' : ''
               }`}
             >
               <span
                 className={`font-bold text-[12px] ${
-                  currentData.affiliate_club?.id && onNavigateClub
+                  currentData.affiliate?.id && onNavigateClub
                     ? 'text-blue-600 group-hover:underline'
                     : 'text-slate-800'
                 }`}
               >
-                {currentData.affiliate_club?.name_lg ||
-                  currentData.affiliate_club?.name_sh ||
-                  currentData.affiliate_club?.name ||
-                  `Club #${currentData.affiliate_club?.id}`}
+                {currentData.affiliate?.name_lg ||
+                  currentData.affiliate?.name_sh ||
+                  currentData.affiliate?.name ||
+                  `Club #${currentData.affiliate?.id}`}
               </span>
             </div>
           </div>
-          {currentData.affiliate_club?.type && (
+          {currentData.affiliate?.type && (
             <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
               <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
                 AFFILIATE TYPE:
               </span>
               <div>
                 <span className="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
-                  {currentData.affiliate_club.type}
+                  {currentData.affiliate.type}
                 </span>
               </div>
             </div>

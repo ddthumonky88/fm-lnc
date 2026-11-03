@@ -60,7 +60,20 @@ public class HierarchyController {
   @PostMapping("/nations/search") public Map<String,Object> nations(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("nations",merge(q,f),"COALESCE(name_sh,name_lg)");}
   @PostMapping("/int-competitions/search") public Map<String,Object> intComps(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return pageSql("competitions",merge(q,f),"nation_id IS NULL AND parent_id IS NULL","COALESCE(name_sh,name_lg)");}
   @PostMapping("/domestic-competitions/search") public Map<String,Object> domestic(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return pageSql("competitions",merge(q,f),"nation_id IS NOT NULL","COALESCE(name_sh,name_lg)");}
-  @PostMapping("/club/search") public Map<String,Object> clubs(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("clubs",merge(q,f),"LENGTH(id), id");}
+  @PostMapping("/club/search")
+  public Map<String,Object> clubs(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){
+    Map<String,Object> result=page("clubs",merge(q,f),"LENGTH(id), id");
+    Object rows=result.get("content");
+    if(rows instanceof List<?> content){
+      for(Object row:content){
+        if(row instanceof Map<?,?> raw){
+          @SuppressWarnings("unchecked") Map<String,Object> club=(Map<String,Object>)raw;
+          enrichClub(club);
+        }
+      }
+    }
+    return result;
+  }
   @PostMapping("/stadiums/search") public Map<String,Object> stadiums(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("stadiums",merge(q,f),"name");}
   @PostMapping("/cities/search") public Map<String,Object> cities(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("cities",merge(q,f),"name");}
   @PostMapping({"/awards/search","/awards"}) public Map<String,Object> awards(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("awards",merge(q,f),"COALESCE(name_sh,name_lg)");}
@@ -76,28 +89,38 @@ public class HierarchyController {
   @GetMapping("/clubs/{id}/info")
   public Map<String,Object> clubInfo(@PathVariable String id){
     Map<String,Object> club=new LinkedHashMap<>(info("clubs",id));
-    Object nationId=club.get("nation_id");
-    if(nationId!=null){
-      List<Map<String,Object>> nations=jdbc.queryForList("SELECT id,name_lg,name_sh,name_3l,confed FROM nations WHERE id::text=?",String.valueOf(nationId));
-      if(!nations.isEmpty()){
-        Map<String,Object> nation=nations.get(0);
-        club.put("nation",nation);
-        club.put("nation_name",text(nation.get("name_lg"),nation.get("name_sh")));
-        club.put("nation_three_letter",nation.get("name_3l"));
-      }
-    }
+    enrichClub(club);
+    return club;
+  }
+
+  private void enrichClub(Map<String,Object> club){
     Object compId=club.get("comp_id");
     if(compId!=null){
       List<Map<String,Object>> comps=jdbc.queryForList("SELECT id,name_lg,name_sh,name_3l,nation_id FROM competitions WHERE id::text=?",String.valueOf(compId));
       if(!comps.isEmpty()){
         Map<String,Object> comp=comps.get(0);
         club.put("comp",comp);
-        club.put("competition",comp);
-        club.put("competition_name",text(comp.get("name_lg"),comp.get("name_sh")));
-        club.put("comp_name",text(comp.get("name_sh"),comp.get("name_lg")));
+        if(club.get("nation_id")==null && comp.get("nation_id")!=null) club.put("nation_id",comp.get("nation_id"));
       }
     }
-    return club;
+    Object nationId=club.get("nation_id");
+    if(nationId!=null){
+      List<Map<String,Object>> nations=jdbc.queryForList("SELECT id,name_lg,name_sh,name_3l,confed FROM nations WHERE id::text=?",String.valueOf(nationId));
+      if(!nations.isEmpty()){
+        Map<String,Object> nation=nations.get(0);
+        club.put("nation",nation);
+      }
+    }
+    Object affiliateId=club.get("affiliate_club_id");
+    club.put("affiliate",null);
+    if(affiliateId!=null){
+      List<Map<String,Object>> affiliates=jdbc.queryForList("SELECT id,name_lg,name_sh,name_6l,name_3l FROM clubs WHERE id::text=?",String.valueOf(affiliateId));
+      if(!affiliates.isEmpty()){
+        Map<String,Object> affiliate=new LinkedHashMap<>(affiliates.get(0));
+        affiliate.put("type",club.get("affiliate_club_type"));
+        club.put("affiliate",affiliate);
+      }
+    }
   }
   @GetMapping("/clubs/{id}/affiliates") public List<Map<String,Object>> affiliates(@PathVariable String id){return jdbc.queryForList("SELECT * FROM clubs WHERE affiliate_club_id=?",id);}
   @GetMapping("/cities/{id}/info") public Map<String,Object> cityInfo(@PathVariable String id){return info("cities",id);}

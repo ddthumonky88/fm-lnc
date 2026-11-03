@@ -258,15 +258,15 @@ export default function RecordDetailModal({
             ? String(defaultParentId)
             : '',
         affiliate_type: activeData.affiliate_type || '',
-        affiliate_club_id: activeData.affiliate_club?.id
-          ? String(activeData.affiliate_club.id)
+        affiliate_club_id: activeData.affiliate?.id
+          ? String(activeData.affiliate.id)
           : activeData.affiliate_club_id
             ? String(activeData.affiliate_club_id)
             : activeData.parent_id
               ? String(activeData.parent_id)
               : '',
         affiliate_club_type:
-          activeData.affiliate_club?.type ||
+          activeData.affiliate?.type ||
           activeData.affiliate_club_type ||
           activeData.affiliate_type ||
           '',
@@ -1204,10 +1204,9 @@ export default function RecordDetailModal({
                         <span
                           className={`font-bold text-xs sm:text-[13px] ${getValueClass(['comp_id', 'competition_id'])} line-clamp-3 break-words`}
                         >
-                          {currentData.competition?.name_sh ||
-                            currentData.competition?.name_lg ||
-                            currentData.competition?.name ||
-                            currentData.comp_name ||
+                          {currentData.comp?.name_sh ||
+                            currentData.comp?.name_lg ||
+                            currentData.comp?.name ||
                             `Competition ${currentData.comp_id}`}
                         </span>
                         <span className="text-xs text-slate-400 font-mono shrink-0">
@@ -1222,7 +1221,7 @@ export default function RecordDetailModal({
               )}
 
               {/* Club Affiliate Info (Đội 1 & Loại đội con) */}
-              {isClub && (currentData.affiliate_club?.id || currentData.affiliate_club?.name_lg || currentData.affiliate_club?.name_sh || currentData.affiliate_club?.type) && (
+              {isClub && (currentData.affiliate?.id || currentData.affiliate?.name_lg || currentData.affiliate?.name_sh || currentData.affiliate?.type) && (
                 <>
                   <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                     <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
@@ -1230,26 +1229,26 @@ export default function RecordDetailModal({
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="font-bold text-xs sm:text-[13px] text-slate-800">
-                        {currentData.affiliate_club?.name_lg ||
-                          currentData.affiliate_club?.name_sh ||
-                          currentData.affiliate_club?.name ||
-                          `Club #${currentData.affiliate_club?.id}`}
+                        {currentData.affiliate?.name_lg ||
+                          currentData.affiliate?.name_sh ||
+                          currentData.affiliate?.name ||
+                          `Club #${currentData.affiliate?.id}`}
                       </span>
-                      {currentData.affiliate_club?.id && (
+                      {currentData.affiliate?.id && (
                         <span className="text-[11px] font-mono text-slate-400">
-                          (ID: {currentData.affiliate_club?.id})
+                          (ID: {currentData.affiliate?.id})
                         </span>
                       )}
                     </div>
                   </div>
-                  {currentData.affiliate_club?.type && (
+                  {currentData.affiliate?.type && (
                     <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
                       <span className={getLabelClass(['affiliate_club'], 'pt-0.5')}>
                         Affiliate Type:
                       </span>
                       <div>
                         <span className="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
-                          {currentData.affiliate_club.type}
+                          {currentData.affiliate.type}
                         </span>
                       </div>
                     </div>
