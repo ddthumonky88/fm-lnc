@@ -16,6 +16,7 @@ fm-lnc-fe/.next/
 fm-lnc-fe/.next-dev/
 out/
 fm-lnc-fe/out/
+fm-lnc-be-java/target/
 *.tsbuildinfo
 fm-lnc-fe/tsconfig.tsbuildinfo
 
