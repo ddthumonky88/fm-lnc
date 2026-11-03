@@ -2,6 +2,14 @@
 
 Java 21 / Spring Boot replacement backend for `fm-lnc-be`.
 
+Hướng dẫn đầy đủ: [RUN_AND_DEPLOY.md](RUN_AND_DEPLOY.md)
+
+Chạy nhanh từ CMD, VS Code terminal hoặc double-click:
+
+```bat
+run-local.bat
+```
+
 ## Run
 
 The project builds in Docker, so local Maven is optional:

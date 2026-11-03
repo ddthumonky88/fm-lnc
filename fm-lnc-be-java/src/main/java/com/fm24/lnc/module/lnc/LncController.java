@@ -1,11 +1,18 @@
 package com.fm24.lnc.module.lnc;
 
+import com.fm24.lnc.common.RawResponse;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +53,18 @@ public class LncController {
     Map<String, Object> result = new LinkedHashMap<>(databaseStats());
     result.put("lnc", files.status());
     return result;
+  }
+
+  @RawResponse
+  @GetMapping("/files/{name:.+}")
+  public ResponseEntity<FileSystemResource> publicFile(@PathVariable String name) {
+    var file = files.require(name);
+    return ResponseEntity.ok()
+        .cacheControl(CacheControl.noCache())
+        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + name + "\"")
+        .contentType(MediaType.parseMediaType("text/plain;charset=UTF-8"))
+        .contentLength(file.toFile().length())
+        .body(new FileSystemResource(file));
   }
 
   private Map<String, Object> databaseStats() {
