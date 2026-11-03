@@ -57,6 +57,18 @@ Chạy trực tiếp bằng Spring Boot khi phát triển:
 mvn spring-boot:run
 ```
 
+### Tự reload khi sửa code Java
+
+Project có `spring-boot-devtools` và workspace bật `java.autobuild.enabled`.
+Giữ `run-local.bat` đang chạy, sau đó lưu file `.java` trong VS Code. Java extension sẽ compile thay đổi và Spring Boot tự restart application context; không cần đóng terminal hay chạy lại file `.bat`.
+
+Nếu lưu file nhưng không thấy dòng `Restarting` trong terminal:
+
+1. Nhấn `Ctrl+Shift+P`.
+2. Chạy **Java: Clean Java Language Server Workspace**.
+3. Chọn **Restart and delete**.
+4. Chạy lại `run-local.bat` một lần duy nhất.
+
 ## 4. Chạy local bằng Docker
 
 Build image:

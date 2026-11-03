@@ -57,14 +57,14 @@ public class HierarchyController {
     } return roots;
   }
 
-  @PostMapping("/nations/search") public Map<String,Object> nations(@RequestBody(required=false) Map<String,Object> f){return page("nations",f,"COALESCE(name_sh,name_lg)");}
-  @PostMapping("/int-competitions/search") public Map<String,Object> intComps(@RequestBody(required=false) Map<String,Object> f){return pageSql("competitions",f,"nation_id IS NULL AND parent_id IS NULL","COALESCE(name_sh,name_lg)");}
-  @PostMapping("/domestic-competitions/search") public Map<String,Object> domestic(@RequestBody(required=false) Map<String,Object> f){return pageSql("competitions",f,"nation_id IS NOT NULL","COALESCE(name_sh,name_lg)");}
-  @PostMapping("/club/search") public Map<String,Object> clubs(@RequestBody(required=false) Map<String,Object> f){return page("clubs",f,"COALESCE(name_sh,name_lg)");}
-  @PostMapping("/stadiums/search") public Map<String,Object> stadiums(@RequestBody(required=false) Map<String,Object> f){return page("stadiums",f,"name");}
-  @PostMapping("/cities/search") public Map<String,Object> cities(@RequestBody(required=false) Map<String,Object> f){return page("cities",f,"name");}
-  @PostMapping({"/awards/search","/awards"}) public Map<String,Object> awards(@RequestBody(required=false) Map<String,Object> f){return page("awards",f,"COALESCE(name_sh,name_lg)");}
-  @PostMapping("/players") public Map<String,Object> players(@RequestBody(required=false) Map<String,Object> f){return page("people",f,"CONCAT_WS(' ',first_name,common_name,second_name)");}
+  @PostMapping("/nations/search") public Map<String,Object> nations(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("nations",merge(q,f),"COALESCE(name_sh,name_lg)");}
+  @PostMapping("/int-competitions/search") public Map<String,Object> intComps(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return pageSql("competitions",merge(q,f),"nation_id IS NULL AND parent_id IS NULL","COALESCE(name_sh,name_lg)");}
+  @PostMapping("/domestic-competitions/search") public Map<String,Object> domestic(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return pageSql("competitions",merge(q,f),"nation_id IS NOT NULL","COALESCE(name_sh,name_lg)");}
+  @PostMapping("/club/search") public Map<String,Object> clubs(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("clubs",merge(q,f),"LENGTH(id), id");}
+  @PostMapping("/stadiums/search") public Map<String,Object> stadiums(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("stadiums",merge(q,f),"name");}
+  @PostMapping("/cities/search") public Map<String,Object> cities(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("cities",merge(q,f),"name");}
+  @PostMapping({"/awards/search","/awards"}) public Map<String,Object> awards(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("awards",merge(q,f),"COALESCE(name_sh,name_lg)");}
+  @PostMapping("/players") public Map<String,Object> players(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("people",merge(q,f),"CONCAT_WS(' ',first_name,common_name,second_name)");}
 
   @GetMapping("/regions") public List<Map<String,Object>> regions(){return jdbc.queryForList("SELECT r.*,COUNT(c.id)::int cities_count FROM regions r LEFT JOIN cities c ON c.region_id=r.id GROUP BY r.id ORDER BY r.name");}
   @PostMapping("/regions/search") public Map<String,Object> regionSearch(@RequestBody(required=false) Map<String,Object> f){return page("regions",f,"name");}
@@ -87,14 +87,17 @@ public class HierarchyController {
     Map<String,Object> f=input==null?Map.of():input; int page=num(f.get("page"),0),size=Math.min(num(f.get("size"),20),300); List<Object> args=new ArrayList<>();
     StringBuilder where=new StringBuilder(base); add(where,args,f,"nationId","nation_id"); add(where,args,f,"compId","comp_id"); add(where,args,f,"parentId","parent_id"); add(where,args,f,"regionId","region_id"); add(where,args,f,"type","type");
     Object confed=f.get("confedId");if(confed!=null&&!String.valueOf(confed).equalsIgnoreCase("all")){where.append(" AND confed=?");args.add(String.valueOf(confed).toUpperCase());}
-    Object keyword=f.get("keyword");if(keyword!=null&&!String.valueOf(keyword).isBlank()){where.append(" AND (id::text ILIKE ? OR ").append(order).append(" ILIKE ?)");args.add("%"+keyword+"%");args.add("%"+keyword+"%");}
+    String search=searchExpression(table);
+    Object keyword=f.get("keyword");if(keyword!=null&&!String.valueOf(keyword).isBlank()){where.append(" AND (id::text ILIKE ? OR ").append(search).append(" ILIKE ?)");args.add("%"+keyword+"%");args.add("%"+keyword+"%");}
     Integer total=jdbc.queryForObject("SELECT COUNT(*) FROM "+table+" WHERE "+where,Integer.class,args.toArray()); List<Object> queryArgs=new ArrayList<>(args);queryArgs.add(size);queryArgs.add(page*size);
     List<Map<String,Object>> content=jdbc.queryForList("SELECT * FROM "+table+" WHERE "+where+" ORDER BY "+order+" LIMIT ? OFFSET ?",queryArgs.toArray()); int pages=(int)Math.ceil((total==null?0:total)/(double)size);
     return Map.of("content",content,"page",page,"size",size,"totalElements",total==null?0:total,"totalPages",pages,"first",page==0,"last",page+1>=pages,"hasPrevious",page>0,"hasNext",page+1<pages);
   }
   private Map<String,Object> info(String table,String id){return jdbc.queryForMap("SELECT * FROM "+table+" WHERE id::text=?",id);}
+  private String searchExpression(String table){return switch(table){case "nations","competitions","clubs","awards"->"COALESCE(name_sh,name_lg)";case "people"->"CONCAT_WS(' ',first_name,common_name,second_name)";default->"name";};}
   private void add(StringBuilder w,List<Object>a,Map<String,Object>f,String key,String col){Object v=f.get(key);if(v!=null&&!String.valueOf(v).isBlank()){w.append(" AND ").append(col).append("::text=?");a.add(v);}}
-  private int num(Object value,int fallback){return value instanceof Number n?n.intValue():fallback;}
+  private Map<String,Object> merge(Map<String,String> query,Map<String,Object> body){Map<String,Object> out=new LinkedHashMap<>();if(body!=null)out.putAll(body);if(query!=null)out.putAll(query);return out;}
+  private int num(Object value,int fallback){if(value instanceof Number n)return n.intValue();if(value!=null)try{return Integer.parseInt(String.valueOf(value));}catch(NumberFormatException ignored){}return fallback;}
   private String text(Object a,Object b){String x=a==null?"":String.valueOf(a);return x.isBlank()?String.valueOf(b):x;}
   private String confedName(String c){return Map.of("AFC","Asia","CAF","Africa","CONCACAF","North America","CONMEBOL","South America","OFC","Oceania","UEFA","Europe","WORLD","World","EXTINCT","Extinct").getOrDefault(c,c);}
   private Map<String,Object> special(String key,String code,String name,String confed){Map<String,Object> n=node(key,"["+code+"] "+name,code,name,2,true,List.of());n.put("confed",confed);return n;}
