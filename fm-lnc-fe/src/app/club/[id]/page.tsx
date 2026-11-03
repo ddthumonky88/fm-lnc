@@ -81,7 +81,6 @@ function ClubDetailContent() {
   const params = useParams();
   const router = useRouter();
   const {
-    openRecordModal,
     setHeaderTitle,
     setHeaderId,
     setBreadcrumbs,
@@ -306,14 +305,6 @@ function ClubDetailContent() {
           logoUrl={clubLogoUrl}
           icon={<ClubIcon size={22} className="text-blue-600" />}
           badgeTypeStyles="bg-blue-50 border-blue-200 text-blue-700"
-          onEdit={() =>
-            openRecordModal(
-              RecordType.CLUB,
-              currentClub,
-              currentClub?.nation_id,
-              currentClub?.comp_id
-            )
-          }
           onDelete={() => setDeleteModalOpen(true)}
         />
       </div>
@@ -321,7 +312,7 @@ function ClubDetailContent() {
       {/* 2. Layout 2 cột theo Wireframe: Trái là Vùng thông tin, Phải là ??? (tạm thời để trống, đóng khung) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
         {/* Vùng thông tin (bên trái) */}
-        <div className="lg:col-span-5 xl:col-span-4 min-w-0 space-y-4">
+        <div className="lg:col-span-3 min-w-0 space-y-4">
           {/* Selector nếu có nhiều đội trong gia đình */}
           {hasAffiliates && (
             <div className="bg-white p-3 rounded-2xl border border-slate-200/90 shadow-2xs">
@@ -343,15 +334,10 @@ function ClubDetailContent() {
           <RecordDetailView
             data={currentClub}
             type={EntityType.CLUB}
+            section="identity"
+            inlineEdit
             hideClubAffiliates
-            onEdit={() =>
-              openRecordModal(
-                RecordType.CLUB,
-                currentClub,
-                currentClub?.nation_id,
-                currentClub?.comp_id
-              )
-            }
+            onSaved={loadData}
             onNavigateConfed={() => router.push('/list-nations')}
             onNavigateNation={(nId) => router.push(`/nation/${nId}`)}
             onNavigateComp={(cId) =>
@@ -369,7 +355,7 @@ function ClubDetailContent() {
         </div>
 
         {/* Khung bên phải để trống hoàn toàn */}
-        <div className="lg:col-span-7 xl:col-span-8 min-w-0">
+        <div className="lg:col-span-9 min-w-0">
           <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs min-h-[500px]" />
         </div>
       </div>

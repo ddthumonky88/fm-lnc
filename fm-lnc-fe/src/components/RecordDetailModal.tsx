@@ -127,6 +127,7 @@ export default function RecordDetailModal({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isQuickEditing, setIsQuickEditing] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<any>({
@@ -147,6 +148,7 @@ export default function RecordDetailModal({
     is_international: false,
     is_extinct: false,
     note: '',
+    inactive_fields: null,
     nation_id: defaultNationId ? String(defaultNationId) : null,
     comp_id: defaultCompId ? String(defaultCompId) : null,
     parent_id: defaultParentId ? String(defaultParentId) : '',
@@ -214,6 +216,7 @@ export default function RecordDetailModal({
       const activeData = data || {};
       setCurrentData(activeData);
       setMode(isCreate ? 'create' : initialMode === 'edit' ? 'edit' : 'view');
+      setIsQuickEditing(false);
       setErrorMessage(null);
 
       setFormData({
@@ -238,6 +241,7 @@ export default function RecordDetailModal({
         is_international: !!activeData.is_international,
         is_extinct: !!activeData.is_extinct,
         note: activeData.note || '',
+        inactive_fields: activeData.inactive_fields || null,
         nation_id: activeData.nation_id
           ? String(activeData.nation_id)
           : defaultNationId
@@ -294,6 +298,18 @@ export default function RecordDetailModal({
     .split(',')
     .map((s: string) => s.trim().toLowerCase())
     .filter(Boolean);
+
+  const quickInactiveFields = String(formData.inactive_fields || '')
+    .split(',')
+    .map((field) => field.trim().toLowerCase())
+    .filter(Boolean);
+
+  const toggleQuickInactive = (field: string, checked: boolean) => {
+    const next = new Set(quickInactiveFields);
+    if (checked) next.add(field);
+    else next.delete(field);
+    setFormData({ ...formData, inactive_fields: Array.from(next).sort().join(',') || null });
+  };
 
   const isFieldInactive = (field: string | string[]) => {
     const fields = Array.isArray(field) ? field : [field];
@@ -560,6 +576,7 @@ export default function RecordDetailModal({
         setCurrentData(updated);
         triggerRefresh();
         onSuccess?.();
+        setIsQuickEditing(false);
         setMode('view');
       }
     } catch (err: any) {
@@ -678,18 +695,20 @@ export default function RecordDetailModal({
                 : 'border-slate-100'
             }`}
           >
-            <Button
-              key="close"
-              icon={<CloseOutlined />}
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="font-medium px-4 h-9 rounded-lg border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center gap-1.5"
-            >
-              <span>Close</span>
-            </Button>
-            {canDelete && (
+            {!isQuickEditing && (
+              <Button
+                key="close"
+                icon={<CloseOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="font-medium px-4 h-9 rounded-lg border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center gap-1.5"
+              >
+                <span>Close</span>
+              </Button>
+            )}
+            {canDelete && !isQuickEditing && (
               <Popconfirm
                 title="Delete Record"
                 description={`Are you sure you want to delete "${title}"?`}
@@ -709,16 +728,51 @@ export default function RecordDetailModal({
                 </Button>
               </Popconfirm>
             )}
-            {canEdit && (
+            {canEdit && !isQuickEditing && (
               <Button
                 key="edit"
                 type="primary"
                 icon={<EditOutlined />}
-                onClick={() => setMode('edit')}
+                onClick={() => {
+                  if (isClub) setIsQuickEditing(true);
+                  else setMode('edit');
+                }}
                 className="font-medium px-4 h-9 rounded-lg bg-blue-600 hover:bg-blue-700 shadow-sm flex items-center justify-center gap-1.5"
               >
                 <span>Edit</span>
               </Button>
+            )}
+            {canEdit && isClub && isQuickEditing && (
+              <>
+                <Button
+                  key="cancel-quick-edit"
+                  icon={<CloseOutlined />}
+                  disabled={isSaving}
+                  onClick={() => {
+                    setFormData((previous: any) => ({
+                      ...previous,
+                      name_lg: currentData.name_lg || currentData.name || '',
+                      name_sh: currentData.name_sh || '',
+                      name_6l: currentData.name_6l || '',
+                      name_3l: currentData.name_3l || currentData.code || '',
+                    }));
+                    setIsQuickEditing(false);
+                  }}
+                  className="font-medium px-4 h-9 rounded-lg min-w-24"
+                >
+                  <span>Cancel</span>
+                </Button>
+                <Button
+                  key="save-quick-edit"
+                  type="primary"
+                  icon={<SaveOutlined />}
+                  loading={isSaving}
+                  onClick={handleSave}
+                  className="font-medium px-4 h-9 rounded-lg min-w-32 bg-blue-600 hover:bg-blue-700 shadow-sm"
+                >
+                  <span>Save Changes</span>
+                </Button>
+              </>
             )}
           </div>
         ) : (
@@ -772,7 +826,12 @@ export default function RecordDetailModal({
         {mode === 'view' ? (
           <div className="space-y-3">
             {/* Primary Details Card */}
-            <div className="bg-sky-50/70 border border-sky-200/80 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
+            <div className="bg-sky-50/70 border border-sky-200/80 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-1.5">
+              {isClub && (
+                <div className="mb-2.5 rounded-lg bg-sky-700 px-3 py-2 text-center text-[13px] font-bold uppercase tracking-wide text-white shadow-sm">
+                  Team Information
+                </div>
+              )}
               {/* Names Block */}
               {/* Names Block */}
               {isPlayer ? (
@@ -826,11 +885,11 @@ export default function RecordDetailModal({
               ) : isClub ? (
                 <>
                   {/* LN */}
-                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
+                  <div className="grid grid-cols-[112px_minmax(0,1fr)] items-center gap-3 min-w-0 rounded-md bg-white/75 px-2.5 py-2">
+                    <span className={`${getLabelClass(['name_lg', 'name'])} text-right`}>L-NAME:</span>
                     <span
                       className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
-                      style={{
+                      style={isQuickEditing ? undefined : {
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical',
@@ -843,18 +902,33 @@ export default function RecordDetailModal({
                           : currentData.name_lg || currentData.name || title
                       }
                     >
-                      {currentData.is_virtual
-                        ? '-'
-                        : currentData.name_lg || currentData.name || title}
+                      {currentData.is_virtual ? '-' : isQuickEditing ? (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Input.TextArea
+                            autoSize={{ minRows: 1, maxRows: 4 }}
+                            value={formData.name_lg}
+                            onChange={(e) => setFormData({ ...formData, name_lg: e.target.value })}
+                            className="!resize-none !text-[12px] font-semibold flex-1 min-w-0"
+                          />
+                          <Tooltip title="Inactive field">
+                            <Checkbox
+                              aria-label="Mark long name as inactive"
+                              checked={quickInactiveFields.includes('name_lg')}
+                              onChange={(e) => toggleQuickInactive('name_lg', e.target.checked)}
+                              className="shrink-0"
+                            />
+                          </Tooltip>
+                        </div>
+                      ) : currentData.name_lg || currentData.name || title}
                     </span>
                   </div>
 
                   {/* SN */}
-                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
+                  <div className="grid grid-cols-[112px_minmax(0,1fr)] items-center gap-3 min-w-0 rounded-md px-2.5 py-2">
+                    <span className={`${getLabelClass(['name_sh'])} text-right`}>S-NAME:</span>
                     <span
                       className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
-                      style={{
+                      style={isQuickEditing ? undefined : {
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical',
@@ -863,35 +937,87 @@ export default function RecordDetailModal({
                       }}
                       title={currentData.is_virtual ? '-' : currentData.name_sh || '-'}
                     >
-                      {currentData.is_virtual ? '-' : currentData.name_sh || '-'}
+                      {currentData.is_virtual ? '-' : isQuickEditing ? (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Input.TextArea
+                            autoSize={{ minRows: 1, maxRows: 4 }}
+                            value={formData.name_sh}
+                            onChange={(e) => setFormData({ ...formData, name_sh: e.target.value })}
+                            className="!resize-none !text-[12px] font-semibold flex-1 min-w-0"
+                          />
+                          <Tooltip title="Inactive field">
+                            <Checkbox
+                              aria-label="Mark short name as inactive"
+                              checked={quickInactiveFields.includes('name_sh')}
+                              onChange={(e) => toggleQuickInactive('name_sh', e.target.checked)}
+                              className="shrink-0"
+                            />
+                          </Tooltip>
+                        </div>
+                      ) : currentData.name_sh || '-'}
                     </span>
                   </div>
 
                   {/* 6N */}
-                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                    <span className={getLabelClass(['name_6l'], 'pt-0.5')}>
+                  <div className="grid grid-cols-[112px_minmax(0,1fr)] items-center gap-3 min-w-0 rounded-md bg-white/75 px-2.5 py-2">
+                    <span className={`${getLabelClass(['name_6l'])} text-right`}>
                       6L-NAME:
                     </span>
                     <span
                       className={`font-mono font-bold text-[12px] ${getValueClass(['name_6l'])} break-words text-left`}
                     >
-                      {currentData.name_6l || '-'}
+                      {isQuickEditing ? (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Input
+                            size="large"
+                            value={formData.name_6l}
+                            onChange={(e) => setFormData({ ...formData, name_6l: e.target.value })}
+                            onPressEnter={handleSave}
+                            className="!text-[12px] font-semibold flex-1 min-w-0"
+                          />
+                          <Tooltip title="Inactive field">
+                            <Checkbox
+                              aria-label="Mark six-letter name as inactive"
+                              checked={quickInactiveFields.includes('name_6l')}
+                              onChange={(e) => toggleQuickInactive('name_6l', e.target.checked)}
+                              className="shrink-0"
+                            />
+                          </Tooltip>
+                        </div>
+                      ) : currentData.name_6l || '-'}
                     </span>
                   </div>
 
                   {/* 3N */}
-                  <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
+                  <div className="grid grid-cols-[112px_minmax(0,1fr)] items-center gap-3 min-w-0 rounded-md px-2.5 py-2">
                     <span
-                      className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}
+                      className={`${getLabelClass(['name_3l', 'code'])} text-right`}
                     >
                       3L-NAME:
                     </span>
                     <span
                       className={`font-mono font-bold text-[12px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
                     >
-                      {currentData.is_virtual
-                        ? '-'
-                        : currentData.name_3l || currentData.code || '-'}
+                      {currentData.is_virtual ? '-' : isQuickEditing ? (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Input
+                            size="large"
+                            maxLength={3}
+                            value={formData.name_3l}
+                            onChange={(e) => setFormData({ ...formData, name_3l: e.target.value })}
+                            onPressEnter={handleSave}
+                            className="!text-[12px] font-semibold uppercase flex-1 min-w-0"
+                          />
+                          <Tooltip title="Inactive field">
+                            <Checkbox
+                              aria-label="Mark three-letter name as inactive"
+                              checked={quickInactiveFields.includes('name_3l')}
+                              onChange={(e) => toggleQuickInactive('name_3l', e.target.checked)}
+                              className="shrink-0"
+                            />
+                          </Tooltip>
+                        </div>
+                      ) : currentData.name_3l || currentData.code || '-'}
                     </span>
                   </div>
                 </>
@@ -1012,8 +1138,10 @@ export default function RecordDetailModal({
 
               {/* Associated Nation */}
               {!isNation && !isInternationalComp && nationId && (
-                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                  <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
+                <div className={isClub
+                  ? 'grid grid-cols-[112px_minmax(0,1fr)] items-center gap-3 min-w-0 rounded-md bg-white/75 px-2.5 py-2'
+                  : 'grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90'}>
+                  <span className={`${getLabelClass(['nation_id', 'country_id', 'nation'], isClub ? '' : 'pt-0.5')} ${isClub ? 'text-right' : ''}`}>
                     NATION:
                   </span>
                   <div className="flex items-center gap-1.5 min-w-0 text-left">
@@ -1061,9 +1189,9 @@ export default function RecordDetailModal({
 
               {/* Assigned Competition / League for Club */}
               {isClub && (
-                <div className="grid grid-cols-[minmax(110px,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-sky-100/90">
-                  <span className={getLabelClass(['comp_id', 'competition_id'], 'pt-0.5')}>
-                    Comp:
+                <div className="grid grid-cols-[112px_minmax(0,1fr)] items-center gap-3 min-w-0 rounded-md px-2.5 py-2">
+                  <span className={`${getLabelClass(['comp_id', 'competition_id'])} text-right`}>
+                    COMP:
                   </span>
                   <div className="flex items-center gap-1.5 min-w-0 text-left">
                     {currentData.is_extinct ? (

@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Tag, Button, Tooltip, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Tag, Button, Checkbox, Input, Tooltip, message } from 'antd';
 import {
   CopyOutlined,
   CheckOutlined,
   EditOutlined,
+  SaveOutlined,
+  CloseOutlined,
   InfoCircleOutlined,
   UserOutlined,
   AppstoreOutlined,
@@ -20,7 +22,7 @@ import {
   CityIcon,
   AwardIcon,
 } from './EntityIcons';
-import { getNationLogoUrl } from '../services/api';
+import { getNationLogoUrl, updateRecord } from '../services/api';
 
 const parseColor = (rgbStr?: string | null) => {
   if (!rgbStr || typeof rgbStr !== 'string') return null;
@@ -97,6 +99,8 @@ export interface RecordDetailViewProps {
     totalIntComps?: number;
   };
   onEdit?: () => void;
+  inlineEdit?: boolean;
+  onSaved?: () => void | Promise<void>;
   onNavigateConfed?: (confedId: string) => void;
   onNavigateNation?: (nationId: string) => void;
   onNavigateParentComp?: (compId: string) => void;
@@ -114,6 +118,8 @@ export default function RecordDetailView({
   section = 'all',
   counts,
   onEdit,
+  inlineEdit = false,
+  onSaved,
   onNavigateConfed,
   onNavigateNation,
   onNavigateParentComp,
@@ -123,6 +129,31 @@ export default function RecordDetailView({
   onNavigateFakeComp,
 }: RecordDetailViewProps) {
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [nameDraft, setNameDraft] = useState({
+    name_lg: '',
+    name_sh: '',
+    name_6l: '',
+    name_3l: '',
+  });
+  const [inactiveDraft, setInactiveDraft] = useState<string[]>([]);
+
+  useEffect(() => {
+    setNameDraft({
+      name_lg: data?.name_lg || data?.name || '',
+      name_sh: data?.name_sh || '',
+      name_6l: data?.name_6l || '',
+      name_3l: data?.name_3l || data?.code || '',
+    });
+    setInactiveDraft(
+      String(data?.inactive_fields || '')
+        .split(',')
+        .map((field) => field.trim().toLowerCase())
+        .filter(Boolean),
+    );
+    setIsEditing(false);
+  }, [data?.id, data?.name_lg, data?.name_sh, data?.name_6l, data?.name_3l, data?.inactive_fields]);
 
   if (!data) return null;
 
@@ -293,6 +324,97 @@ export default function RecordDetailView({
   const bgInfo = parseColor(currentData.bg_color);
   const fgInfo = parseColor(currentData.fg_color);
 
+  const handleInlineSave = async () => {
+    if (!currentData.id) return;
+    setIsSaving(true);
+    try {
+      await updateRecord(RecordType.CLUB, String(currentData.id), {
+        name_lg: nameDraft.name_lg.trim() || null,
+        name_sh: nameDraft.name_sh.trim() || null,
+        name_6l: nameDraft.name_6l.trim() || null,
+        name_3l: nameDraft.name_3l.trim() || null,
+        inactive_fields: inactiveDraft.length ? [...inactiveDraft].sort().join(',') : null,
+      });
+      message.success('Club updated successfully');
+      setIsEditing(false);
+      await onSaved?.();
+    } catch (error: any) {
+      message.error(error?.message || 'Failed to update club');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleInactiveDraft = (field: string, checked: boolean) => {
+    setInactiveDraft((previous) => {
+      const next = new Set(previous);
+      if (checked) next.add(field);
+      else next.delete(field);
+      return Array.from(next);
+    });
+  };
+
+  const resetInlineDraft = () => {
+    setNameDraft({
+      name_lg: currentData.name_lg || currentData.name || '',
+      name_sh: currentData.name_sh || '',
+      name_6l: currentData.name_6l || '',
+      name_3l: currentData.name_3l || currentData.code || '',
+    });
+    setInactiveDraft(
+      String(currentData.inactive_fields || '')
+        .split(',')
+        .map((field: string) => field.trim().toLowerCase())
+        .filter(Boolean),
+    );
+  };
+
+  const renderInlineName = (field: keyof typeof nameDraft, fallback = '-') =>
+    isEditing ? (
+      <div className="flex items-center gap-2 min-w-0">
+        {field === 'name_lg' ? (
+          <Input.TextArea
+            autoSize={{ minRows: 1, maxRows: 4 }}
+            value={nameDraft[field]}
+            onChange={(event) =>
+              setNameDraft((previous) => ({ ...previous, [field]: event.target.value }))
+            }
+            className="!resize-none !text-[12px] font-semibold flex-1 min-w-0"
+          />
+        ) : field === 'name_sh' ? (
+          <Input.TextArea
+            autoSize={{ minRows: 1, maxRows: 4 }}
+            value={nameDraft[field]}
+            onChange={(event) =>
+              setNameDraft((previous) => ({ ...previous, [field]: event.target.value }))
+            }
+            className="!resize-none !text-[12px] font-semibold flex-1 min-w-0"
+          />
+        ) : (
+          <Input
+            size="large"
+            value={nameDraft[field]}
+            maxLength={field === 'name_3l' ? 3 : undefined}
+            onChange={(event) =>
+              setNameDraft((previous) => ({ ...previous, [field]: event.target.value }))
+            }
+            onPressEnter={handleInlineSave}
+            className="!text-[12px] font-semibold flex-1 min-w-0"
+          />
+        )}
+        <Tooltip title="Inactive field">
+          <Checkbox
+            aria-label={`Mark ${field} as inactive`}
+            checked={inactiveDraft.includes(field)}
+            onChange={(event) => toggleInactiveDraft(field, event.target.checked)}
+            className="shrink-0"
+          />
+        </Tooltip>
+      </div>
+    ) : (
+      nameDraft[field] || fallback
+    );
+
   // 1. Header Card (Optional)
   const renderHeader = () => (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs flex items-center justify-between gap-3">
@@ -351,11 +473,71 @@ export default function RecordDetailView({
 
   // 2. Section 1: THÔNG TIN ĐỊNH DANH (Names & Hierarchy)
   const renderIdentity = () => (
-    <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-2.5">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
-        <span className="text-[10px] font-normal text-slate-400 uppercase tracking-wider">
-          IDENTITY
+    <div className={`bg-white rounded-2xl p-3.5 shadow-2xs space-y-1.5 ${isClub ? 'border border-sky-200/90' : 'border border-slate-200/90'}`}>
+      <div className={`flex items-center justify-between ${isClub ? 'rounded-xl bg-sky-700 px-3 py-2.5 mb-2.5' : 'border-b border-slate-100 pb-2 mb-1'}`}>
+        <span className={isClub
+          ? 'text-[11px] font-bold text-white uppercase tracking-wider'
+          : 'text-[10px] font-normal text-slate-400 uppercase tracking-wider'}>
+          {isClub ? 'TEAM INFORMATION' : 'IDENTITY'}
         </span>
+        {inlineEdit && isClub && !isVirtual ? (
+          <div className="flex items-center gap-1">
+            {isEditing ? (
+              <>
+                <Tooltip title="Cancel">
+                  <Button
+                    type="text"
+                    size="small"
+                    aria-label="Cancel editing"
+                    icon={<CloseOutlined />}
+                    disabled={isSaving}
+                    onClick={() => {
+                      resetInlineDraft();
+                      setIsEditing(false);
+                    }}
+                    className="!h-8 !w-8 !min-w-8 !p-0 !text-white hover:!bg-white/15"
+                  />
+                </Tooltip>
+                <Tooltip title="Save changes">
+                  <Button
+                    type="primary"
+                    size="small"
+                    aria-label="Save changes"
+                    icon={<SaveOutlined />}
+                    loading={isSaving}
+                    onClick={handleInlineSave}
+                    className="!h-8 !w-8 !min-w-8 !p-0 !bg-white !text-sky-700 hover:!bg-sky-50"
+                  />
+                </Tooltip>
+              </>
+            ) : (
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => {
+                  resetInlineDraft();
+                  setIsEditing(true);
+                }}
+                className={isClub
+                  ? '!h-7 !px-2.5 text-[11px] font-semibold !text-white hover:!bg-white/15'
+                  : '!h-6 !px-2 text-[11px] font-medium text-blue-600 hover:!bg-blue-50 hover:!text-blue-700'}
+              >
+                Edit
+              </Button>
+            )}
+          </div>
+        ) : onEdit && !isVirtual ? (
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={onEdit}
+            className="!h-6 !px-2 text-[11px] font-medium text-blue-600 hover:!bg-blue-50 hover:!text-blue-700"
+          >
+            Edit
+          </Button>
+        ) : null}
       </div>
 
       {isCity || isStadium ? (
@@ -489,47 +671,47 @@ export default function RecordDetailView({
         </>
       ) : isClub ? (
         <>
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
-            <span className={getLabelClass(['name_lg', 'name'], 'pt-0.5')}>L-NAME:</span>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-center gap-3 min-w-0 rounded-lg bg-slate-50/90 px-3 py-2.5">
+            <span className={getLabelClass(['name_lg', 'name'], 'text-right')}>L-NAME:</span>
             <span
               className={`font-bold text-[12px] ${getValueClass(['name_lg', 'name'], 'text-slate-900')} line-clamp-3 break-words text-left`}
               title={isVirtual ? '-' : currentData.name_lg || currentData.name || title}
             >
-              {isVirtual ? '-' : currentData.name_lg || currentData.name || title}
+              {isVirtual ? '-' : renderInlineName('name_lg', title)}
             </span>
           </div>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
-            <span className={getLabelClass(['name_sh'], 'pt-0.5')}>S-NAME:</span>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-center gap-3 min-w-0 rounded-lg px-3 py-2.5">
+            <span className={getLabelClass(['name_sh'], 'text-right')}>S-NAME:</span>
             <span
               className={`font-bold text-[12px] ${getValueClass(['name_sh'])} line-clamp-3 break-words text-left`}
               title={isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
             >
-              {isVirtual ? '-' : currentData.name_sh || currentData.name || '-'}
+              {isVirtual ? '-' : renderInlineName('name_sh')}
             </span>
           </div>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
-            <span className={getLabelClass(['name_6l'], 'pt-0.5')}>6L-NAME:</span>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-center gap-3 min-w-0 rounded-lg bg-slate-50/90 px-3 py-2.5">
+            <span className={getLabelClass(['name_6l'], 'text-right')}>6L-NAME:</span>
             <span
               className={`font-sans font-bold text-[12px] ${getValueClass(['name_6l'])} break-words text-left`}
             >
-              {currentData.name_6l || '-'}
+              {renderInlineName('name_6l')}
             </span>
           </div>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
-            <span className={getLabelClass(['name_3l', 'code'], 'pt-0.5')}>3L-NAME:</span>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-center gap-3 min-w-0 rounded-lg px-3 py-2.5">
+            <span className={getLabelClass(['name_3l', 'code'], 'text-right')}>3L-NAME:</span>
             <span
               className={`font-sans font-bold text-[12px] ${getValueClass(['name_3l', 'code'])} break-words text-left`}
             >
-              {isVirtual ? '-' : currentData.name_3l || currentData.code || '-'}
+              {isVirtual ? '-' : renderInlineName('name_3l')}
             </span>
           </div>
 
           {confedName && (
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
-              <span className={getLabelClass(['confed_id', 'confed'], 'pt-0.5')}>CONFED:</span>
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-center gap-3 min-w-0 rounded-lg bg-slate-50/90 px-3 py-2.5">
+              <span className={getLabelClass(['confed_id', 'confed'], 'text-right')}>CONFED:</span>
               <span
                 onClick={() => {
                   if (confedId && onNavigateConfed) onNavigateConfed(String(confedId));
@@ -546,8 +728,8 @@ export default function RecordDetailView({
           )}
 
           {nationId && (
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100">
-              <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'pt-0.5')}>
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-center gap-3 min-w-0 rounded-lg bg-slate-50/90 px-3 py-2.5">
+              <span className={getLabelClass(['nation_id', 'country_id', 'nation'], 'text-right')}>
                 NATION:
               </span>
               <div
@@ -582,8 +764,8 @@ export default function RecordDetailView({
           )}
 
           {(currentData.comp || currentData.comp_id) && (
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-start gap-4 min-w-0 pb-2 border-b border-slate-100 last:border-b-0 last:pb-0">
-              <span className={getLabelClass(['comp_id', 'competition_id', 'comp'], 'pt-0.5')}>
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] items-center gap-3 min-w-0 rounded-lg px-3 py-2.5">
+              <span className={getLabelClass(['comp_id', 'competition_id', 'comp'], 'text-right')}>
                 LEAGUE:
               </span>
               <div

@@ -73,7 +73,32 @@ public class HierarchyController {
   @PostMapping("/competitions/{id}/sub-competitions") public Map<String,Object> subComps(@PathVariable String id,@RequestBody(required=false) Map<String,Object> f){Map<String,Object> filter=f==null?new LinkedHashMap<>():new LinkedHashMap<>(f);filter.put("parentId",id);return page("competitions",filter,"COALESCE(name_sh,name_lg)");}
 
   @GetMapping({"/nations/{id}/info","/nations/{id}/hub"}) public Map<String,Object> nationInfo(@PathVariable String id){return info("nations",id);}
-  @GetMapping("/clubs/{id}/info") public Map<String,Object> clubInfo(@PathVariable String id){return info("clubs",id);}
+  @GetMapping("/clubs/{id}/info")
+  public Map<String,Object> clubInfo(@PathVariable String id){
+    Map<String,Object> club=new LinkedHashMap<>(info("clubs",id));
+    Object nationId=club.get("nation_id");
+    if(nationId!=null){
+      List<Map<String,Object>> nations=jdbc.queryForList("SELECT id,name_lg,name_sh,name_3l,confed FROM nations WHERE id::text=?",String.valueOf(nationId));
+      if(!nations.isEmpty()){
+        Map<String,Object> nation=nations.get(0);
+        club.put("nation",nation);
+        club.put("nation_name",text(nation.get("name_lg"),nation.get("name_sh")));
+        club.put("nation_three_letter",nation.get("name_3l"));
+      }
+    }
+    Object compId=club.get("comp_id");
+    if(compId!=null){
+      List<Map<String,Object>> comps=jdbc.queryForList("SELECT id,name_lg,name_sh,name_3l,nation_id FROM competitions WHERE id::text=?",String.valueOf(compId));
+      if(!comps.isEmpty()){
+        Map<String,Object> comp=comps.get(0);
+        club.put("comp",comp);
+        club.put("competition",comp);
+        club.put("competition_name",text(comp.get("name_lg"),comp.get("name_sh")));
+        club.put("comp_name",text(comp.get("name_sh"),comp.get("name_lg")));
+      }
+    }
+    return club;
+  }
   @GetMapping("/clubs/{id}/affiliates") public List<Map<String,Object>> affiliates(@PathVariable String id){return jdbc.queryForList("SELECT * FROM clubs WHERE affiliate_club_id=?",id);}
   @GetMapping("/cities/{id}/info") public Map<String,Object> cityInfo(@PathVariable String id){return info("cities",id);}
   @GetMapping("/awards/{id}/info") public Map<String,Object> awardInfo(@PathVariable String id){return info("awards",id);}
