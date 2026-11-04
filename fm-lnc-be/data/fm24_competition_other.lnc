@@ -2283,7 +2283,7 @@
 
 "COMP_LONG_NAME_CHANGE" 	16068419 	"ÖFB Jugendliga U18"					""
 "COMP_SHORT_NAME_CHANGE" 	16068419	"ÖFB Jugendliga U18"					""
-"COMP_3LETTER_NAME_CHANGE"	16068419	"Ö18"							""
+"COMP_3LETTER_NAME_CHANGE"	16068419	"ÖJL U18"						""
 
 
 # COMP > UEFA > [AUT] AUSTRIA > Other Competitions
@@ -2300,8 +2300,8 @@
 
 # COMP > UEFA > [AZE] AZERBAIJAN > Domestic League (1)
 #====================================================================================
-"COMP_LONG_NAME_CHANGE" 	59006943 	"Misli Azərbaycan Premyer Liqasi"			""
-"COMP_SHORT_NAME_CHANGE" 	59006943 	"Azərbaycan Premyer Liqasi"				""
+"COMP_LONG_NAME_CHANGE" 	59006943 	"Misli Azərbaycan Premyer Liqa"				""
+"COMP_SHORT_NAME_CHANGE" 	59006943 	"Azərbaycan Premyer Liqa"				""
 "COMP_3LETTER_NAME_CHANGE"	59006943	"AZE.PL"						""
 
 

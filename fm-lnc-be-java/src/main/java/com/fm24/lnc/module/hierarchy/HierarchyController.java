@@ -134,7 +134,26 @@ public class HierarchyController {
   private Map<String,Object> pageSql(String table,Map<String,Object> input,String base,String order){
     Map<String,Object> f=input==null?Map.of():input; int page=num(f.get("page"),0),size=Math.min(num(f.get("size"),20),300); List<Object> args=new ArrayList<>();
     StringBuilder where=new StringBuilder(base); add(where,args,f,"nationId","nation_id"); add(where,args,f,"compId","comp_id"); add(where,args,f,"parentId","parent_id"); add(where,args,f,"regionId","region_id"); add(where,args,f,"type","type");
-    Object confed=f.get("confedId");if(confed!=null&&!String.valueOf(confed).equalsIgnoreCase("all")){where.append(" AND confed=?");args.add(String.valueOf(confed).toUpperCase());}
+    Object confed=f.get("confedId");
+    if(confed!=null&&!String.valueOf(confed).equalsIgnoreCase("all")){
+      String confedCode=String.valueOf(confed).toUpperCase();
+      switch(table){
+        case "nations","competitions" -> {
+          where.append(" AND confed=?");
+          args.add(confedCode);
+        }
+        case "clubs" -> {
+          where.append(" AND (nation_id IN (SELECT id FROM nations WHERE confed=?) OR comp_id IN (SELECT c.id FROM competitions c JOIN nations n ON n.id=c.nation_id WHERE n.confed=?))");
+          args.add(confedCode);
+          args.add(confedCode);
+        }
+        case "cities","stadiums","awards" -> {
+          where.append(" AND nation_id IN (SELECT id FROM nations WHERE confed=?)");
+          args.add(confedCode);
+        }
+        default -> { }
+      }
+    }
     String search=searchExpression(table);
     Object keyword=f.get("keyword");if(keyword!=null&&!String.valueOf(keyword).isBlank()){where.append(" AND (id::text ILIKE ? OR ").append(search).append(" ILIKE ?)");args.add("%"+keyword+"%");args.add("%"+keyword+"%");}
     Integer total=jdbc.queryForObject("SELECT COUNT(*) FROM "+table+" WHERE "+where,Integer.class,args.toArray()); List<Object> queryArgs=new ArrayList<>(args);queryArgs.add(size);queryArgs.add(page*size);

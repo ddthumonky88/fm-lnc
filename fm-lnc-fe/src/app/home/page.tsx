@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Input, Segmented } from 'antd';
 import {
   GlobalOutlined,
@@ -137,7 +137,6 @@ const MENU_CARDS: MenuCardItem[] = [
 ];
 
 export default function HomePage() {
-  const router = useRouter();
   const { setHeaderTitle, setHeaderId, setBreadcrumbs, setBackHref, setHeaderLogo, openSearchModal } = useApp();
 
   const [counts, setCounts] = useState<Record<string, number | null>>({});
@@ -259,9 +258,9 @@ export default function HomePage() {
             {filteredCards.map((item) => {
               const count = counts[item.countKey];
               return (
-                <div
+                <Link
                   key={item.key}
-                  onClick={() => router.push(item.href)}
+                  href={item.href}
                   className="group relative bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-blue-400 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between"
                 >
                   {/* Top: Icon + Tag */}
@@ -311,7 +310,7 @@ export default function HomePage() {
 
                     <RightOutlined className="text-[10px] text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -321,9 +320,9 @@ export default function HomePage() {
             {filteredCards.map((item) => {
               const count = counts[item.countKey];
               return (
-                <div
+                <Link
                   key={item.key}
-                  onClick={() => router.push(item.href)}
+                  href={item.href}
                   className="group relative bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-blue-400 transition-all duration-200 cursor-pointer flex items-center gap-2.5"
                 >
                   <div
@@ -359,7 +358,7 @@ export default function HomePage() {
                     )}
                     <RightOutlined className="text-[10px] text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

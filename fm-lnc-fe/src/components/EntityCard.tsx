@@ -19,7 +19,7 @@ import {
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
-import { getConfederationLogoUrl, getNationLogoUrl } from '../services/api';
+import { getConfederationLogoUrl, getFifaFlagUrl, getNationLogoUrl } from '../services/api';
 import RecordDetailModal from './RecordDetailModal';
 import {
   NationIcon,
@@ -987,9 +987,10 @@ export default function EntityCard({
           const comp = data.comp;
           const compName = comp?.name_sh || comp?.name_lg || comp?.name;
           const nation3Letter = data.nation?.name_3l;
-          const compTagText = compName
-            ? `${nation3Letter ? `[${nation3Letter}] ` : ''}${compName}`
-            : null;
+          const nationFlagUrl =
+            getFifaFlagUrl(nation3Letter) ||
+            getNationLogoUrl(data.nation?.id || data.nation_id, nation3Letter);
+          const compTagText = compName || null;
           const affiliate = data.affiliate;
           const affiliateType = String(affiliate?.type || data.affiliate_club_type || '')
             .replace(/^\[/, '')
@@ -1008,9 +1009,20 @@ export default function EntityCard({
                 <Tooltip title={compTagText}>
                   <Tag
                     color="blue"
-                    className="m-0 inline-flex max-w-full items-center gap-1 truncate text-[10px] font-semibold"
+                    className="m-0 !inline-flex max-w-full !items-center gap-2 truncate px-2 py-1 !text-[12px] font-semibold leading-none"
                   >
-                    <DomesticCompIcon size={11} className="shrink-0" />
+                    {nationFlagUrl ? (
+                      <img
+                        src={nationFlagUrl}
+                        alt={nation3Letter || 'Nation flag'}
+                        className="h-4 w-6 shrink-0 rounded-[3px] border border-black/10 object-cover shadow-2xs"
+                        onError={(event) => {
+                          event.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <FlagOutlined className="shrink-0 text-[14px]" />
+                    )}
                     <span className="truncate">{compTagText}</span>
                   </Tag>
                 </Tooltip>
