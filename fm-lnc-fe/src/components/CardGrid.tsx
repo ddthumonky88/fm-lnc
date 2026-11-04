@@ -166,7 +166,7 @@ export default function CardGrid({
               pageSize={currentPageSize}
               total={totalRecords}
               showSizeChanger={true}
-              pageSizeOptions={[10, 20, 50, 100]}
+              pageSizeOptions={[10, 24, 60]}
               onChange={(p, s) => {
                 if (isServer) {
                   serverPagination!.onChange(p, s);

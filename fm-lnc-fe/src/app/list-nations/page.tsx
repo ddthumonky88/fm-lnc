@@ -11,6 +11,7 @@ import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
 import { fetchNationsByContinent, NationItem } from '../../services/api';
 import { EntityType } from '../../types';
+import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 
 interface ConfedOption {
   value: string;
@@ -46,7 +47,7 @@ function ListNationsContent() {
   const [nations, setNations] = useState<NationItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(20);
+  const [pageSize, setPageSize, pageSizeReady] = useResponsivePageSize(setPage);
   const [total, setTotal] = useState<number>(0);
 
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -86,6 +87,7 @@ function ListNationsContent() {
   }, [selectedConfed, page]);
 
   const loadNations = useCallback(async () => {
+    if (!pageSizeReady) return;
     setLoading(true);
     try {
       const res = await fetchNationsByContinent(
@@ -107,7 +109,7 @@ function ListNationsContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedConfed, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadNations();

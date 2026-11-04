@@ -162,14 +162,14 @@ export default function RecordDetailModal({
   const [cityRegions, setCityRegions] = useState<RegionItem[]>([]);
   useEffect(() => {
     if (isOpen && isCity) {
-      const effNatId = formData.nation_id || currentData.nation_id || defaultNationId;
+      const effNatId = formData.nation_id || currentData.nation_id || currentData.nation?.id || defaultNationId;
       if (effNatId) {
         fetchAllRegionsByNation(String(effNatId))
           .then((regs) => setCityRegions(regs || []))
           .catch(() => setCityRegions([]));
       }
     }
-  }, [isOpen, isCity, formData.nation_id, currentData.nation_id, defaultNationId]);
+  }, [isOpen, isCity, formData.nation_id, currentData.nation_id, currentData.nation?.id, defaultNationId]);
 
   // Dynamic Scroll Detection (khi có scroll và khi không có scroll)
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -242,8 +242,8 @@ export default function RecordDetailModal({
         is_extinct: !!activeData.is_extinct,
         note: activeData.note || '',
         inactive_fields: activeData.inactive_fields || null,
-        nation_id: activeData.nation_id
-          ? String(activeData.nation_id)
+        nation_id: activeData.nation_id || activeData.nation?.id
+          ? String(activeData.nation_id || activeData.nation?.id)
           : defaultNationId
             ? String(defaultNationId)
             : null,
@@ -270,7 +270,12 @@ export default function RecordDetailModal({
           activeData.affiliate_club_type ||
           activeData.affiliate_type ||
           '',
-        region_id: activeData.region_id !== undefined && activeData.region_id !== null ? Number(activeData.region_id) : null,
+        region_id:
+          activeData.region_id !== undefined && activeData.region_id !== null
+            ? Number(activeData.region_id)
+            : activeData.region?.id !== undefined && activeData.region?.id !== null
+              ? Number(activeData.region.id)
+              : null,
         code: activeData.code || '',
       });
     }
@@ -1181,7 +1186,7 @@ export default function RecordDetailModal({
                       }
                     />
                     <span>
-                      {String(currentData.region).replace(/^\[[^\]]+\]\s*/, '').trim()}
+                      {String(currentData.region?.name || currentData.region_name || currentData.region).replace(/^\[[^\]]+\]\s*/, '').trim()}
                     </span>
                   </div>
                 </div>

@@ -22,6 +22,7 @@ import {
 } from '@ant-design/icons';
 import { fetchPlayers, deleteRecord, PlayerItem } from '../../services/api';
 import { useApp } from '../../context/AppContext';
+import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 import { RecordType } from '../../types';
 import AppPagination from '../../components/AppPagination';
 
@@ -33,7 +34,7 @@ export default function PlayersPage() {
   const [filterText, setFilterText] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize, pageSizeReady] = useResponsivePageSize(setPage);
   const [total, setTotal] = useState(0);
   const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -47,6 +48,7 @@ export default function PlayersPage() {
   }, [filterText]);
 
   const loadPlayers = useCallback(async () => {
+    if (!pageSizeReady) return;
     setLoading(true);
     try {
       const data = await fetchPlayers({
@@ -64,7 +66,7 @@ export default function PlayersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, sortField, sortOrder, debouncedKeyword]);
+  }, [page, pageSize, pageSizeReady, sortField, sortOrder, debouncedKeyword]);
 
   useEffect(() => {
     setHeaderTitle('Person');
@@ -313,7 +315,7 @@ export default function PlayersPage() {
                 pageSize={pageSize}
                 total={total}
                 showSizeChanger={true}
-                pageSizeOptions={[10, 20, 50, 100]}
+                pageSizeOptions={[10, 24, 60]}
                 onChange={(p, s) => {
                   setPage(p);
                   if (s && s !== pageSize) {

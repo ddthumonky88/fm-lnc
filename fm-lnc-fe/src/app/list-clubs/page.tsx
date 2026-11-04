@@ -11,6 +11,7 @@ import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
 import { searchClubs, fetchUnitTree, findNationInTree, fetchCompetitionInfo, ClubItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
+import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 
 function ListClubsContent() {
   const router = useRouter();
@@ -41,7 +42,7 @@ function ListClubsContent() {
   const [clubs, setClubs] = useState<ClubItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(24);
+  const [pageSize, setPageSize, pageSizeReady] = useResponsivePageSize(setPage);
   const [total, setTotal] = useState<number>(0);
 
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -124,6 +125,7 @@ function ListClubsContent() {
   }, [selectedNation, selectedCompId, extinctFilter, page]);
 
   const loadClubs = useCallback(async () => {
+    if (!pageSizeReady) return;
     setLoading(true);
     try {
       const res = await searchClubs(
@@ -148,7 +150,7 @@ function ListClubsContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedConfed, selectedNation, selectedCompId, extinctFilter, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, selectedNation, selectedCompId, extinctFilter, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadClubs();

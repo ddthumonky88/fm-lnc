@@ -106,7 +106,8 @@ public class LncParserService {
       } else if (cmd.equals("CITY_NAME_CHANGE")) {
         Map<String, Object> row = row(cities, id);
         row.put("name", value); row.put("nation_code", nationCode);
-        row.put("region", cleanRegion(region)); row.put("disabled", disabled);
+        boolean removeCity = "-".equals(value) || (region != null && region.toUpperCase(Locale.ROOT).contains("-REMOVE]"));
+        row.put("region", removeCity ? "[REMOVE]" : cleanRegion(region)); row.put("disabled", disabled);
       } else if (cmd.equals("STADIUM_NAME_CHANGE")) {
         Map<String, Object> row = row(stadiums, id);
         row.put("name", value); row.put("nation_code", stadiumNation); row.put("disabled", disabled);

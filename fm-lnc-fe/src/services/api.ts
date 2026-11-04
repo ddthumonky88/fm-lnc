@@ -56,6 +56,7 @@ export interface IndependentClubFilterQuery extends PaginationQuery {
 export interface CityFilterQuery extends PaginationQuery {
   category?: string;
   regionCode?: string;
+  removeOnly?: boolean;
 }
 
 export interface PageData<T> {
@@ -374,7 +375,9 @@ export interface CityItem {
   name_sh?: string;
   nation_id?: string;
   country_id?: string;
-  region?: string;
+  region?: Pick<RegionItem, 'id' | 'name'> | string | null;
+  region_id?: number;
+  region_name?: string;
   is_remove?: boolean;
   is_disabled?: boolean;
   isDisabled?: boolean;
@@ -1421,6 +1424,12 @@ export function getFifaFlagUrl(code?: string | null): string {
   const c = (code || '').trim().toUpperCase();
   if (!/^[A-Z]{3}$/.test(c)) return '';
   return `https://api.fifa.com/api/v3/picture/flags-sq-2/${c}`;
+}
+
+export function getLocalFlagUrl(code?: string | null, useOtherFolder = false): string {
+  const normalized = (code || '').trim().toLowerCase();
+  if (!/^[a-z]{3}$/.test(normalized)) return '';
+  return `/flag/${useOtherFolder ? 'other/' : ''}${normalized}.png`;
 }
 
 export function getCompetitionLogoUrl(id: string | number): string {

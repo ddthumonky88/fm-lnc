@@ -65,7 +65,11 @@ export default function CityGroupView({
     const uncategorizedItems: any[] = [];
 
     items.forEach((item) => {
-      const rawCat = normalizeCityRegionGroup(item.region || item.categories);
+      const rawCat = normalizeCityRegionGroup(
+        (typeof item.region === 'object' ? item.region?.name : item.region) ||
+          item.region_name ||
+          item.categories,
+      );
       if (!rawCat) {
         uncategorizedItems.push(item);
       } else {

@@ -24,7 +24,7 @@ export default function AppPagination({
   pageSize,
   total,
   onChange,
-  pageSizeOptions = [10, 20, 50, 100],
+  pageSizeOptions = [10, 24, 60],
   showSizeChanger = true,
   className = '',
 }: AppPaginationProps) {

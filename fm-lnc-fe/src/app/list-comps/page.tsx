@@ -11,6 +11,7 @@ import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
 import { fetchCompetitionsList, fetchUnitTree, findNationInTree, CompetitionItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
+import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 
 const CONFEDERATIONS = [
   { label: '🌍 All Confederations / Global', value: 'all' },
@@ -49,7 +50,7 @@ function ListCompsContent() {
   const [competitions, setCompetitions] = useState<CompetitionItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(24);
+  const [pageSize, setPageSize, pageSizeReady] = useResponsivePageSize(setPage);
   const [total, setTotal] = useState<number>(0);
 
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -110,6 +111,7 @@ function ListCompsContent() {
   }, [scope, selectedConfed, selectedNation, page]);
 
   const loadCompetitions = useCallback(async () => {
+    if (!pageSizeReady) return;
     setLoading(true);
     try {
       const res = await fetchCompetitionsList(
@@ -145,7 +147,7 @@ function ListCompsContent() {
     } finally {
       setLoading(false);
     }
-  }, [scope, selectedConfed, selectedNation, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [scope, selectedConfed, selectedNation, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadCompetitions();

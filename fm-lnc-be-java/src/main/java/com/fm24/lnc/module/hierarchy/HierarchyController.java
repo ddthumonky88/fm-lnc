@@ -50,6 +50,14 @@ public class HierarchyController {
             sub.add(node("comp_"+comp.get("id"),text(comp.get("name_sh"),comp.get("name_lg")),text(comp.get("name_3l"),"CMP"),text(comp.get("name_sh"),comp.get("name_lg")),3,true,List.of()));
           sub.add(special("oth_"+id,"OTH","Other",confed)); sub.add(special("ext_"+id,"EXT","Extinct",confed));
         }
+        if(type.equalsIgnoreCase("city")){
+          Integer removeCount=jdbc.queryForObject("SELECT COUNT(*) FROM cities WHERE nation_id=? AND (TRIM(name)='-' OR UPPER(COALESCE(region,'')) LIKE '[REMOVE]%')",Integer.class,id);
+          if(removeCount!=null&&removeCount>0){
+            String nationCode=text(nation.get("name_3l"),id).toUpperCase();
+            Map<String,Object> removeNode=node("remove_"+id,"["+nationCode+"-REMOVE]","REMOVE","Remove",3,true,List.of());
+            removeNode.put("nationId",id); removeNode.put("isRemove",true); removeNode.put("count",removeCount); sub.add(removeNode);
+          }
+        }
         Map<String,Object> n=node(key,text(nation.get("name_sh"),nation.get("name_lg")),text(nation.get("name_3l"),"---"),text(nation.get("name_sh"),nation.get("name_lg")),2,true,sub);
         n.put("confed",confed); n.put("nationData",nation); children.add(n);
       }
@@ -75,7 +83,14 @@ public class HierarchyController {
     return result;
   }
   @PostMapping("/stadiums/search") public Map<String,Object> stadiums(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("stadiums",merge(q,f),"name");}
-  @PostMapping("/cities/search") public Map<String,Object> cities(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("cities",merge(q,f),"name");}
+  @PostMapping("/cities/search") public Map<String,Object> cities(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){
+    Map<String,Object> result=page("cities",merge(q,f),"CASE WHEN TRIM(name)='-' OR UPPER(COALESCE(region,'')) LIKE '[REMOVE]%' THEN 1 ELSE 0 END, name");
+    Object rows=result.get("content");
+    if(rows instanceof List<?> content) for(Object row:content) if(row instanceof Map<?,?> raw){
+      @SuppressWarnings("unchecked") Map<String,Object> city=(Map<String,Object>)raw; enrichCity(city);
+    }
+    return result;
+  }
   @PostMapping({"/awards/search","/awards"}) public Map<String,Object> awards(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("awards",merge(q,f),"COALESCE(name_sh,name_lg)");}
   @PostMapping("/players") public Map<String,Object> players(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("people",merge(q,f),"CONCAT_WS(' ',first_name,common_name,second_name)");}
 
@@ -122,8 +137,28 @@ public class HierarchyController {
       }
     }
   }
+  private void enrichCity(Map<String,Object> city){
+    Object nationId=city.get("nation_id");
+    if(nationId!=null){
+      List<Map<String,Object>> nations=jdbc.queryForList("SELECT id,name_lg,name_sh,name_3l,confed FROM nations WHERE id::text=?",String.valueOf(nationId));
+      city.put("nation",nations.isEmpty()?null:nations.get(0));
+    } else city.put("nation",null);
+
+    Object rawRegion=city.get("region");
+    Object regionId=city.get("region_id");
+    Map<String,Object> resolvedRegion=null;
+    if(regionId!=null){
+      List<Map<String,Object>> regions=jdbc.queryForList("SELECT id,name FROM regions WHERE id::text=?",String.valueOf(regionId));
+      if(!regions.isEmpty()) resolvedRegion=regions.get(0);
+    }
+    if(resolvedRegion==null&&rawRegion!=null&&!String.valueOf(rawRegion).isBlank()){
+      resolvedRegion=new LinkedHashMap<>(); resolvedRegion.put("id",regionId); resolvedRegion.put("name",rawRegion);
+    }
+    city.put("region",resolvedRegion);
+    city.remove("nation_id"); city.remove("region_id"); city.remove("region_name");
+  }
   @GetMapping("/clubs/{id}/affiliates") public List<Map<String,Object>> affiliates(@PathVariable String id){return jdbc.queryForList("SELECT * FROM clubs WHERE affiliate_club_id=?",id);}
-  @GetMapping("/cities/{id}/info") public Map<String,Object> cityInfo(@PathVariable String id){return info("cities",id);}
+  @GetMapping("/cities/{id}/info") public Map<String,Object> cityInfo(@PathVariable String id){Map<String,Object> city=new LinkedHashMap<>(info("cities",id));enrichCity(city);return city;}
   @GetMapping("/awards/{id}/info") public Map<String,Object> awardInfo(@PathVariable String id){return info("awards",id);}
   @GetMapping("/stadiums/{id}/info") public Map<String,Object> stadiumInfo(@PathVariable String id){return info("stadiums",id);}
   @GetMapping("/regions/{id}/info") public Map<String,Object> regionInfo(@PathVariable String id){return info("regions",id);}
@@ -134,6 +169,7 @@ public class HierarchyController {
   private Map<String,Object> pageSql(String table,Map<String,Object> input,String base,String order){
     Map<String,Object> f=input==null?Map.of():input; int page=num(f.get("page"),0),size=Math.min(num(f.get("size"),20),300); List<Object> args=new ArrayList<>();
     StringBuilder where=new StringBuilder(base); add(where,args,f,"nationId","nation_id"); add(where,args,f,"compId","comp_id"); add(where,args,f,"parentId","parent_id"); add(where,args,f,"regionId","region_id"); add(where,args,f,"type","type");
+    if(table.equals("cities")&&Boolean.parseBoolean(String.valueOf(f.getOrDefault("removeOnly",false)))) where.append(" AND (TRIM(name)='-' OR UPPER(COALESCE(region,'')) LIKE '[REMOVE]%')");
     Object confed=f.get("confedId");
     if(confed!=null&&!String.valueOf(confed).equalsIgnoreCase("all")){
       String confedCode=String.valueOf(confed).toUpperCase();

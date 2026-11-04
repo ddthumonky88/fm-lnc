@@ -11,6 +11,7 @@ import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
 import { fetchCities, fetchUnitTree, findNationInTree, CityItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
+import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 
 function ListCitiesContent() {
   const router = useRouter();
@@ -22,11 +23,13 @@ function ListCitiesContent() {
 
   const [selectedConfed, setSelectedConfed] = useState<string>('all');
   const [selectedNation, setSelectedNation] = useState<string>(initialNationId);
+  const [removeOnly, setRemoveOnly] = useState<boolean>(false);
 
   // Modal temporary state
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [tempConfed, setTempConfed] = useState<string>('all');
   const [tempNation, setTempNation] = useState<string>(initialNationId);
+  const [tempRemoveOnly, setTempRemoveOnly] = useState<boolean>(false);
 
   const [treeNodes, setTreeNodes] = useState<UnitTreeNode[]>([]);
   const [keyword, setKeyword] = useState<string>('');
@@ -35,7 +38,7 @@ function ListCitiesContent() {
   const [cities, setCities] = useState<CityItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(24);
+  const [pageSize, setPageSize, pageSizeReady] = useResponsivePageSize(setPage);
   const [total, setTotal] = useState<number>(0);
 
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -57,6 +60,8 @@ function ListCitiesContent() {
     if (qNation) {
       setSelectedNation(qNation);
       setTempNation(qNation);
+      setRemoveOnly(false);
+      setTempRemoveOnly(false);
     }
   }, [searchParams]);
 
@@ -83,9 +88,10 @@ function ListCitiesContent() {
     if (listContainerRef.current) {
       listContainerRef.current.scrollTop = 0;
     }
-  }, [selectedNation, page]);
+  }, [selectedNation, removeOnly, page]);
 
   const loadData = useCallback(async () => {
+    if (!pageSizeReady) return;
     setLoading(true);
     try {
       const natParam = selectedNation === 'all' ? null : selectedNation;
@@ -93,6 +99,7 @@ function ListCitiesContent() {
         natParam,
         {
           confedId: selectedConfed !== 'all' ? selectedConfed : undefined,
+          removeOnly,
           page: page - 1,
           size: pageSize,
           keyword: debouncedKeyword,
@@ -108,7 +115,7 @@ function ListCitiesContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedConfed, selectedNation, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, selectedNation, removeOnly, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadData();
@@ -123,6 +130,7 @@ function ListCitiesContent() {
       if (confed) levels.push(confed);
       const name = nationNode.shortName || nationNode.title || selectedNation;
       levels.push(name);
+      if (removeOnly) levels.push(`[${nationNode.code3 || selectedNation}-REMOVE]`);
       filterSummary = levels.join(' > ');
     } else {
       filterSummary = selectedNation;
@@ -131,11 +139,12 @@ function ListCitiesContent() {
     filterSummary = selectedConfed;
   }
 
-  const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all';
+  const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all' || removeOnly;
 
   const handleOpenModal = () => {
     setTempConfed(selectedConfed);
     setTempNation(selectedNation);
+    setTempRemoveOnly(removeOnly);
     setModalOpen(true);
   };
 
@@ -144,15 +153,24 @@ function ListCitiesContent() {
   // Chọn option trong modal -> chỉ cập nhật giá trị tạm (temp)
   const handlePickNation = (val: string) => {
     const lk = val.toLowerCase();
-    if (val === 'all') {
+    if (val.startsWith('remove_')) {
+      const nationId = val.replace('remove_', '');
+      setTempNation(nationId);
+      setTempRemoveOnly(true);
+      const nationNode = findNationInTree(treeNodes, nationId);
+      if (nationNode?.confed) setTempConfed(nationNode.confed);
+    } else if (val === 'all') {
       setTempConfed('all');
       setTempNation('all');
+      setTempRemoveOnly(false);
     } else if (val.startsWith('confed_') || confedKeys.includes(lk)) {
       const confedCode = val.replace('confed_', '').toUpperCase();
       setTempConfed(confedCode);
       setTempNation('all');
+      setTempRemoveOnly(false);
     } else {
       setTempNation(val);
+      setTempRemoveOnly(false);
       const nationNode = findNationInTree(treeNodes, val);
       if (nationNode?.confed) setTempConfed(nationNode.confed);
     }
@@ -160,15 +178,24 @@ function ListCitiesContent() {
 
   const handleSelectDirectly = (val: string) => {
     const lk = val.toLowerCase();
-    if (val === 'all') {
+    if (val.startsWith('remove_')) {
+      const nationId = val.replace('remove_', '');
+      setSelectedNation(nationId);
+      setRemoveOnly(true);
+      const nationNode = findNationInTree(treeNodes, nationId);
+      if (nationNode?.confed) setSelectedConfed(nationNode.confed);
+    } else if (val === 'all') {
       setSelectedConfed('all');
       setSelectedNation('all');
+      setRemoveOnly(false);
     } else if (val.startsWith('confed_') || confedKeys.includes(lk)) {
       const confedCode = val.replace('confed_', '').toUpperCase();
       setSelectedConfed(confedCode);
       setSelectedNation('all');
+      setRemoveOnly(false);
     } else {
       setSelectedNation(val);
+      setRemoveOnly(false);
       const nationNode = findNationInTree(treeNodes, val);
       if (nationNode?.confed) setSelectedConfed(nationNode.confed);
     }
@@ -178,17 +205,21 @@ function ListCitiesContent() {
   const handleResetModal = () => {
     setTempConfed('all');
     setTempNation('all');
+    setTempRemoveOnly(false);
   };
 
   const handleApplyModal = () => {
     setSelectedConfed(tempConfed);
     setSelectedNation(tempNation);
+    setRemoveOnly(tempRemoveOnly);
     setPage(1);
     setModalOpen(false);
   };
 
   const currentTreeSelectedKey =
-    selectedNation !== 'all'
+    removeOnly && selectedNation !== 'all'
+      ? `remove_${selectedNation}`
+      : selectedNation !== 'all'
       ? selectedNation
       : selectedConfed !== 'all'
       ? selectedConfed.toLowerCase()
@@ -211,7 +242,9 @@ function ListCitiesContent() {
           <button
             type="button"
             onClick={() => {
+              setSelectedConfed('all');
               setSelectedNation('all');
+              setRemoveOnly(false);
               setPage(1);
             }}
             className="text-[11px] font-medium text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"

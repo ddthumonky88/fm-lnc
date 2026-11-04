@@ -19,7 +19,7 @@ import {
 } from '@ant-design/icons';
 
 import { EntityType } from '../types';
-import { getConfederationLogoUrl, getFifaFlagUrl, getNationLogoUrl } from '../services/api';
+import { getConfederationLogoUrl, getLocalFlagUrl } from '../services/api';
 import RecordDetailModal from './RecordDetailModal';
 import {
   NationIcon,
@@ -188,13 +188,10 @@ export default function EntityCard({
     if (!val || typeof val !== 'string') return false;
     const upper = val.trim().toUpperCase();
     return (
-      upper === '[OTHER]' ||
       upper === '[EXTINCT]' ||
       upper === '[REMOVE]' ||
-      upper === 'OTHER' ||
       upper === 'EXTINCT' ||
       upper === 'REMOVE' ||
-      upper.startsWith('[OTHER]') ||
       upper.startsWith('[EXTINCT]') ||
       upper.startsWith('[REMOVE]')
     );
@@ -215,10 +212,11 @@ export default function EntityCard({
     entityTypeStr === 'city' &&
     Boolean(
       data.is_remove ||
-      isRedKeyword(data.region) ||
+      (typeof data.name === 'string' && data.name.trim() === '-') ||
+      isRedKeyword(data.region?.name || data.region || data.region_name) ||
       isRedKeyword(data.categories) ||
       isRedKeyword(data.category) ||
-      (typeof data.region === 'string' && data.region.toUpperCase().includes('[REMOVE]'))
+      (typeof (data.region?.name || data.region || data.region_name) === 'string' && String(data.region?.name || data.region || data.region_name).toUpperCase().includes('[REMOVE]'))
     );
 
   const handleCopyId = (e: React.MouseEvent) => {
@@ -376,6 +374,12 @@ export default function EntityCard({
 
   const isTitleInactive =
     isInactive('name_lg') || isInactive('name');
+
+  const showsNationFlag = entityTypeStr === 'city' || entityTypeStr === 'club';
+  const entityNationFlagUrl =
+    showsNationFlag && data.nation?.name_3l
+      ? getLocalFlagUrl(data.nation.name_3l)
+      : null;
 
 
   const isNavigable = Boolean(
@@ -580,7 +584,25 @@ export default function EntityCard({
         <div>
           {/* Top Header Bar: chỉ gồm [Thẻ ID] và [btn 3 chấm] */}
           <div className={`flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b ${isCityRemove ? 'border-red-200/60' : 'border-blue-200/60'} min-w-0`}>
-            <div className="flex items-center min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+                {entityNationFlagUrl && (
+                  <Tooltip title={data.nation?.name || data.nation?.name_sh || data.nation?.name_lg || 'Nation'}>
+                    <img
+                      src={entityNationFlagUrl}
+                      alt={data.nation?.name || data.nation?.name_sh || data.nation?.name_lg || 'Nation flag'}
+                      className="h-4 w-6 shrink-0 rounded-[3px] border border-black/10 bg-white object-cover shadow-2xs"
+                      onClick={(event) => event.stopPropagation()}
+                      onError={(event) => {
+                        if (!event.currentTarget.dataset.fallbackAttempted) {
+                          event.currentTarget.dataset.fallbackAttempted = 'true';
+                          event.currentTarget.src = getLocalFlagUrl(data.nation?.name_3l, true);
+                        } else {
+                          event.currentTarget.style.display = 'none';
+                        }
+                      }}
+                    />
+                  </Tooltip>
+                )}
                 {data.id !== undefined && data.id !== null && data.id !== '' && (
                   <div onClick={(e) => e.stopPropagation()} className="flex items-center shrink-0">
                     {isSpecialCard ? (
@@ -711,6 +733,7 @@ export default function EntityCard({
                 }
               } else if (entityTypeStr === 'city') {
                 const isTitleRemove =
+                  title === '-' ||
                   title === '[REMOVE]' ||
                   (typeof title === 'string' && title.trim().toUpperCase() === '[REMOVE]');
                 fields.push({
@@ -729,7 +752,7 @@ export default function EntityCard({
                   isInactive: isInactive('name') || isTitleInactive,
                   isRed: isRedKeyword(title) || isCityRemove,
                 });
-                let regionVal = data.region;
+                let regionVal = data.region?.name || data.region_name || data.region;
                 if (regionVal) {
                   const cleaned = String(regionVal).replace(/^\[[^\]]+\]\s*/, '').trim();
                   const displayRegion = cleaned || regionVal;
@@ -988,8 +1011,7 @@ export default function EntityCard({
           const compName = comp?.name_sh || comp?.name_lg || comp?.name;
           const nation3Letter = data.nation?.name_3l;
           const nationFlagUrl =
-            getFifaFlagUrl(nation3Letter) ||
-            getNationLogoUrl(data.nation?.id || data.nation_id, nation3Letter);
+            getLocalFlagUrl(nation3Letter);
           const compTagText = compName || null;
           const affiliate = data.affiliate;
           const affiliateType = String(affiliate?.type || data.affiliate_club_type || '')
@@ -1017,7 +1039,12 @@ export default function EntityCard({
                         alt={nation3Letter || 'Nation flag'}
                         className="h-4 w-6 shrink-0 rounded-[3px] border border-black/10 object-cover shadow-2xs"
                         onError={(event) => {
-                          event.currentTarget.style.display = 'none';
+                          if (!event.currentTarget.dataset.fallbackAttempted) {
+                            event.currentTarget.dataset.fallbackAttempted = 'true';
+                            event.currentTarget.src = getLocalFlagUrl(nation3Letter, true);
+                          } else {
+                            event.currentTarget.style.display = 'none';
+                          }
                         }}
                       />
                     ) : (

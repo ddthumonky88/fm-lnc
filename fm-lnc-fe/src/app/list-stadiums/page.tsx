@@ -11,6 +11,7 @@ import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
 import { fetchStadiums, fetchUnitTree, findNationInTree, StadiumItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
+import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 
 function ListStadiumsContent() {
   const router = useRouter();
@@ -35,7 +36,7 @@ function ListStadiumsContent() {
   const [stadiums, setStadiums] = useState<StadiumItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(24);
+  const [pageSize, setPageSize, pageSizeReady] = useResponsivePageSize(setPage);
   const [total, setTotal] = useState<number>(0);
 
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -86,6 +87,7 @@ function ListStadiumsContent() {
   }, [selectedNation, page]);
 
   const loadData = useCallback(async () => {
+    if (!pageSizeReady) return;
     setLoading(true);
     try {
       const natParam = selectedNation === 'all' ? null : selectedNation;
@@ -108,7 +110,7 @@ function ListStadiumsContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedConfed, selectedNation, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, selectedNation, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadData();

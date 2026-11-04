@@ -606,7 +606,7 @@ export default function RecordDetailView({
               <span
                 className={`font-bold text-[12px] ${getValueClass('region', 'text-sky-800')} break-words text-left`}
               >
-                {String(currentData.region).replace(/^\[[^\]]+\]\s*/, '').trim()}
+                {String(currentData.region?.name || currentData.region_name || currentData.region).replace(/^\[[^\]]+\]\s*/, '').trim()}
               </span>
             </div>
           )}

@@ -11,6 +11,7 @@ import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
 import { fetchAwards, fetchAwardsInComp, fetchUnitTree, findNationInTree, AwardItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
+import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 
 function ListAwardsContent() {
   const router = useRouter();
@@ -37,7 +38,7 @@ function ListAwardsContent() {
   const [awards, setAwards] = useState<AwardItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(24);
+  const [pageSize, setPageSize, pageSizeReady] = useResponsivePageSize(setPage);
   const [total, setTotal] = useState<number>(0);
 
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -93,6 +94,7 @@ function ListAwardsContent() {
   }, [selectedNation, selectedCompId, page]);
 
   const loadAwards = useCallback(async () => {
+    if (!pageSizeReady) return;
     setLoading(true);
     try {
       let res: any;
@@ -128,7 +130,7 @@ function ListAwardsContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedConfed, selectedNation, selectedCompId, page, pageSize, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, selectedNation, selectedCompId, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadAwards();
