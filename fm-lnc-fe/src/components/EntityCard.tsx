@@ -801,68 +801,6 @@ export default function EntityCard({
                   isInactive: isInactive('name_3l'),
                 });
 
-                // Comp
-                const compObj = data.comp || (data as any).competition;
-                const compNameSh =
-                  compObj?.name_sh ||
-                  compObj?.name;
-                const compValue = data.is_extinct ? 'EXT' : compNameSh || '-';
-                const isExt = data.is_extinct || compValue === 'EXT';
-
-                fields.push({
-                  label: 'COMP:',
-                  value: (
-                    <span
-                      className={`font-bold text-[12px] leading-snug truncate min-w-0 block ${
-                        isExt
-                          ? 'text-red-600'
-                          : compValue === '-'
-                            ? 'text-gray-400 font-normal'
-                            : 'text-gray-800'
-                      }`}
-                      title={compObj?.name_lg || compObj?.name || compValue}
-                    >
-                      {compValue}
-                    </span>
-                  ),
-                });
-
-                const affClub = data.affiliate_club;
-                const affType = affClub?.type;
-                const affId = affClub?.id;
-
-                if (affType || affId) {
-                  const pName =
-                    affClub?.name_sh ||
-                    affClub?.name_lg ||
-                    affClub?.name ||
-                    affId;
-                  const cleanType = String(affType || '').replace(/^\[/, '').replace(/\]$/, '').trim();
-                  fields.push({
-                    label: 'AFFILIATE:',
-                    value: (
-                      <div
-                        className="flex items-center gap-1.5 min-w-0"
-                        title={`Parent: ${pName} (${affId})`}
-                      >
-                        {cleanType && (
-                          <Tag
-                            color="cyan"
-                            className="m-0 font-mono font-bold text-[10px] px-1.5 py-0 leading-tight shrink-0 border-sky-300 bg-sky-50 text-sky-700"
-                          >
-                            {cleanType}
-                          </Tag>
-                        )}
-                        <span className="text-[12px] truncate font-semibold text-slate-800">
-                          {pName || '-'}
-                        </span>
-                      </div>
-                    ),
-                    align: 'start',
-                    isInactive: isInactive('affiliate_club'),
-                  });
-                }
-
                 if (data.affiliatesCount && data.affiliatesCount > 0) {
                   fields.push({
                     label: 'TEAMS:',
@@ -1044,6 +982,53 @@ export default function EntityCard({
             );
           })()}
         </div>
+
+        {entityTypeStr === 'club' && (() => {
+          const comp = data.comp;
+          const compName = comp?.name_sh || comp?.name_lg || comp?.name;
+          const nation3Letter = data.nation?.name_3l;
+          const compTagText = compName
+            ? `${nation3Letter ? `[${nation3Letter}] ` : ''}${compName}`
+            : null;
+          const affiliate = data.affiliate;
+          const affiliateType = String(affiliate?.type || data.affiliate_club_type || '')
+            .replace(/^\[/, '')
+            .replace(/\]$/, '')
+            .trim();
+
+          if (!compTagText && !affiliateType && !data.is_extinct) return null;
+
+          return (
+            <div className="mt-2 flex min-h-7 flex-wrap items-center gap-1.5 border-t border-blue-200/60 pt-2">
+              {data.is_extinct ? (
+                <Tag color="error" className="m-0 max-w-full truncate text-[10px] font-bold">
+                  EXTINCT
+                </Tag>
+              ) : compTagText ? (
+                <Tooltip title={compTagText}>
+                  <Tag
+                    color="blue"
+                    className="m-0 inline-flex max-w-full items-center gap-1 truncate text-[10px] font-semibold"
+                  >
+                    <DomesticCompIcon size={11} className="shrink-0" />
+                    <span className="truncate">{compTagText}</span>
+                  </Tag>
+                </Tooltip>
+              ) : null}
+
+              {affiliateType && (
+                <Tooltip title={`Affiliate type: ${affiliateType}`}>
+                  <Tag
+                    color="cyan"
+                    className="m-0 font-mono text-[10px] font-bold"
+                  >
+                    {affiliateType}
+                  </Tag>
+                </Tooltip>
+              )}
+            </div>
+          );
+        })()}
 
       </div>
 

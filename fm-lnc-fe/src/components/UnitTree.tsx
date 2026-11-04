@@ -621,7 +621,22 @@ export default function UnitTree({
       return result;
     };
 
-    return filterNodes(rawTreeData);
+    const filtered = filterNodes(rawTreeData);
+    const allNode = rawTreeData.find((item) => {
+      const node = item as any;
+      return (
+        String(node.key || '').toLowerCase() === 'all' ||
+        String(node.code3 || '').toUpperCase() === 'ALL' ||
+        String(node.title || '').toUpperCase() === 'ALL'
+      );
+    });
+
+    if (!allNode) return filtered;
+
+    return [
+      allNode,
+      ...filtered.filter((item) => String(item.key).toLowerCase() !== String(allNode.key).toLowerCase()),
+    ];
   }, [rawTreeData, keyword]);
 
   // Ant Design Tree is single-select here, so always pass exactly one key that
