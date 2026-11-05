@@ -22,6 +22,114 @@ HOST = os.getenv("XML_API_HOST", "127.0.0.1")
 PORT = int(os.getenv("XML_API_PORT", "3003"))
 MAX_PAGE_SIZE = 500
 
+FM_FIELD_NAMES = {
+    "TCnn": "nickname",
+    "TCht": "hashtag",
+    "Ca3n": "name_3l",
+    "CScP": "supporter_profile",
+}
+
+FM_TABLE_NAMES = {
+    0: "award",
+    1: "person",
+    2: "city",
+    3: "club",
+    5: "confederation",
+    6: "injury",
+    7: "media",
+    8: "language",
+    10: "nation",
+    18: "derby",
+    21: "stadium",
+    23: "competition_stage_name",
+    25: "competition",
+    27: "weather",
+    47: "region",
+    56: "agreement",
+}
+
+
+def table_name(value: Any) -> str | None:
+    if value is None:
+        return None
+    try:
+        numeric = int(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return FM_TABLE_NAMES.get(numeric, f"type_{numeric}")
+
+
+def table_filter_value(value: str | None) -> str | None:
+    if value is None or value.isdigit():
+        return value
+    reverse_names = {name.lower(): str(table_id) for table_id, name in FM_TABLE_NAMES.items()}
+    resolved = reverse_names.get(value.lower())
+    if resolved is None:
+        raise ValueError("Unknown tableType name; use a numeric FM table type or a supported table name")
+    return resolved
+
+
+def uint32_to_fourcc(value: Any) -> str | None:
+    if value is None:
+        return None
+    try:
+        raw = int(value).to_bytes(4, byteorder="big", signed=False)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return raw.decode("latin-1") if all(32 <= byte <= 126 for byte in raw) else "0x" + raw.hex().upper()
+
+
+def property_filter_value(value: str | None) -> str | None:
+    if value is None or value.isdigit():
+        return value
+    reverse_names = {name.lower(): code for code, name in FM_FIELD_NAMES.items()}
+    value = reverse_names.get(value.lower(), value)
+    if len(value) == 4:
+        return str(int.from_bytes(value.encode("latin-1"), byteorder="big", signed=False))
+    raise ValueError("propertyId must be a numeric ID or a 4-character FM code")
+
+
+def openapi_spec() -> dict[str, Any]:
+    query_parameters = [
+        {"name": "page", "in": "query", "schema": {"type": "integer", "minimum": 0, "default": 0}},
+        {"name": "size", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": MAX_PAGE_SIZE, "default": 50}},
+        {"name": "tableType", "in": "query", "description": "Numeric FM table type or converted table name", "schema": {"type": "string", "example": "club"}},
+        {"name": "propertyId", "in": "query", "description": "Numeric property ID or converted 4-character FM code", "schema": {"type": "string", "example": "TCht"}},
+        {"name": "objectId", "in": "query", "description": "Unique, random or converted FM ID", "schema": {"type": "string"}},
+        {"name": "clientField", "in": "query", "schema": {"type": "boolean"}},
+        {"name": "languageField", "in": "query", "schema": {"type": "boolean"}},
+        {"name": "q", "in": "query", "description": "Search in the converted property value", "schema": {"type": "string"}},
+    ]
+    ok = {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object"}}}}}
+    return {
+        "openapi": "3.0.3",
+        "info": {
+            "title": "FM24 XML Changes API",
+            "description": "Standalone API backed by the formatted FM24 changes.jsonl export.",
+            "version": "1.1.0",
+        },
+        "servers": [{"url": f"http://{HOST}:{PORT}"}],
+        "paths": {
+            "/health": {"get": {"tags": ["System"], "summary": "API health", "responses": ok}},
+            "/api/summary": {"get": {"tags": ["Changes"], "summary": "XML analysis summary", "responses": ok}},
+            "/api/changes": {
+                "get": {
+                    "tags": ["Changes"], "summary": "Search and paginate formatted changes",
+                    "parameters": query_parameters, "responses": ok,
+                }
+            },
+            "/api/objects/{objectId}": {
+                "get": {
+                    "tags": ["Changes"], "summary": "Get all changes for an object",
+                    "parameters": [
+                        {"name": "objectId", "in": "path", "required": True, "description": "Unique, random or converted FM ID", "schema": {"type": "string"}},
+                    ],
+                    "responses": ok,
+                }
+            },
+        },
+    }
+
 
 def scalar(query: dict[str, list[str]], name: str, default: str | None = None) -> str | None:
     values = query.get(name)
@@ -39,36 +147,24 @@ def boolean(value: str | None) -> bool | None:
     raise ValueError(f"Invalid boolean: {value}")
 
 
-def formatted_change(raw: dict[str, Any], line_number: int, include_raw: bool = False) -> dict[str, Any]:
+def formatted_record(raw: dict[str, Any]) -> dict[str, Any]:
     fields = raw.get("fields") or {}
-    unique_id = fields.get("db_unique_id")
-    random_id = fields.get("db_random_id")
-    converted_id = (int(unique_id) & 0xFFFFFFFF) if unique_id is not None else None
-    value = fields.get("new_value")
-    result: dict[str, Any] = {
-        "changeId": line_number,
-        "object": {
-            "id": str(unique_id if unique_id is not None else random_id),
-            "uniqueId": unique_id,
-            "randomId": random_id,
-            "convertedId": converted_id,
-            "tableType": fields.get("database_table_type", raw.get("type")),
-        },
-        "property": {
-            "id": fields.get("property"),
-            "value": value,
-            "valueType": type(value).__name__.lower() if value is not None else "null",
-        },
-        "version": fields.get("version"),
-        "flags": {
-            "clientField": bool(fields.get("is_client_field", False)),
-            "languageField": bool(fields.get("is_language_field", False)),
-        },
-        "source": {"path": raw.get("path"), "tag": raw.get("tag")},
+    property_id = fields.get("property")
+    return {
+        "id": fields.get("db_random_id"),
+        "table": table_name(fields.get("database_table_type", raw.get("type"))),
+        "field": FM_FIELD_NAMES.get(uint32_to_fourcc(property_id) or "", uint32_to_fourcc(property_id)),
+        "oldValue": fields.get("odvl"),
+        "newValue": fields.get("new_value"),
+        "record": fields,
     }
-    if include_raw:
-        result["raw"] = raw
-    return result
+
+
+def formatted_group(uid: str, rows: list[sqlite3.Row]) -> dict[str, Any]:
+    return {
+        "uid": int(uid) if uid.isdigit() else uid,
+        "records": [formatted_record(json.loads(row["raw"])) for row in rows],
+    }
 
 
 def iter_changes() -> Iterator[tuple[int, dict[str, Any]]]:
@@ -186,6 +282,14 @@ class ApiHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def send_html(self, status: HTTPStatus, content: str) -> None:
+        body = content.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self) -> None:  # noqa: N802
         try:
             parsed = urlparse(self.path)
@@ -198,6 +302,10 @@ class ApiHandler(BaseHTTPRequestHandler):
                 self.changes(query)
             elif parsed.path.startswith("/api/objects/"):
                 self.object_changes(parsed.path.rsplit("/", 1)[-1], query)
+            elif parsed.path == "/openapi.json":
+                self.send_json(HTTPStatus.OK, openapi_spec())
+            elif parsed.path in {"/swagger", "/swagger/"}:
+                self.swagger()
             elif parsed.path in {"/", "/docs"}:
                 self.docs()
             else:
@@ -215,10 +323,9 @@ class ApiHandler(BaseHTTPRequestHandler):
     def changes(self, query: dict[str, list[str]]) -> None:
         page = max(0, int(scalar(query, "page", "0") or 0))
         size = min(MAX_PAGE_SIZE, max(1, int(scalar(query, "size", "50") or 50)))
-        include_raw = boolean(scalar(query, "includeRaw")) is True
         filters = {
-            "tableType": scalar(query, "tableType"),
-            "propertyId": scalar(query, "propertyId"),
+            "tableType": table_filter_value(scalar(query, "tableType")),
+            "propertyId": property_filter_value(scalar(query, "propertyId")),
             "objectId": scalar(query, "objectId"),
             "clientField": boolean(scalar(query, "clientField")),
             "languageField": boolean(scalar(query, "languageField")),
@@ -243,12 +350,29 @@ class ApiHandler(BaseHTTPRequestHandler):
             arguments.append(f"%{filters['q']}%")
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
         with database() as connection:
-            total = connection.execute("SELECT COUNT(*) FROM changes" + where, arguments).fetchone()[0]
-            rows = connection.execute(
-                "SELECT line_no,raw FROM changes" + where + " ORDER BY line_no LIMIT ? OFFSET ?",
+            total = connection.execute(
+                "SELECT COUNT(DISTINCT converted_id) FROM changes" + where, arguments
+            ).fetchone()[0]
+            uid_rows = connection.execute(
+                "SELECT converted_id FROM changes" + where +
+                " GROUP BY converted_id ORDER BY CAST(converted_id AS INTEGER) LIMIT ? OFFSET ?",
                 [*arguments, size, page * size],
             ).fetchall()
-        content = [formatted_change(json.loads(row["raw"]), row["line_no"], include_raw) for row in rows]
+            uids = [str(row["converted_id"]) for row in uid_rows]
+            if uids:
+                placeholders = ",".join("?" for _ in uids)
+                grouped_rows = connection.execute(
+                    "SELECT converted_id,line_no,raw FROM changes" + where +
+                    f" AND converted_id IN ({placeholders})" if where else
+                    f"SELECT converted_id,line_no,raw FROM changes WHERE converted_id IN ({placeholders})",
+                    [*arguments, *uids],
+                ).fetchall()
+            else:
+                grouped_rows = []
+        rows_by_uid: dict[str, list[sqlite3.Row]] = {uid: [] for uid in uids}
+        for row in grouped_rows:
+            rows_by_uid[str(row["converted_id"])].append(row)
+        content = [formatted_group(uid, rows_by_uid[uid]) for uid in uids]
         self.send_json(
             HTTPStatus.OK,
             {
@@ -267,13 +391,15 @@ class ApiHandler(BaseHTTPRequestHandler):
         )
 
     def object_changes(self, object_id: str, query: dict[str, list[str]]) -> None:
-        include_raw = boolean(scalar(query, "includeRaw")) is True
         with database() as connection:
             rows = connection.execute(
-                "SELECT line_no,raw FROM changes WHERE unique_id=? OR random_id=? OR converted_id=? ORDER BY line_no",
+                "SELECT converted_id,line_no,raw FROM changes WHERE unique_id=? OR random_id=? OR converted_id=? ORDER BY line_no",
                 (object_id, object_id, object_id),
             ).fetchall()
-        content = [formatted_change(json.loads(row["raw"]), row["line_no"], include_raw) for row in rows]
+        grouped: dict[str, list[sqlite3.Row]] = {}
+        for row in rows:
+            grouped.setdefault(str(row["converted_id"]), []).append(row)
+        content = [formatted_group(uid, group_rows) for uid, group_rows in grouped.items()]
         self.send_json(
             HTTPStatus.OK,
             {"status": 200, "data": {"objectId": object_id, "content": content, "totalElements": len(content)}},
@@ -293,9 +419,28 @@ class ApiHandler(BaseHTTPRequestHandler):
                 },
                 "changeFilters": [
                     "page", "size", "tableType", "propertyId", "objectId",
-                    "clientField", "languageField", "q", "includeRaw",
+                    "clientField", "languageField", "q",
                 ],
             },
+        )
+
+    def swagger(self) -> None:
+        self.send_html(
+            HTTPStatus.OK,
+            """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FM24 XML Changes API - Swagger</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>SwaggerUIBundle({url:'/openapi.json',dom_id:'#swagger-ui',deepLinking:true,displayRequestDuration:true});</script>
+</body>
+</html>""",
         )
 
     def log_message(self, fmt: str, *args: Any) -> None:
