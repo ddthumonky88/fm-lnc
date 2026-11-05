@@ -51,6 +51,20 @@ public class HierarchyController {
           sub.add(special("oth_"+id,"OTH","Other",confed)); sub.add(special("ext_"+id,"EXT","Extinct",confed));
         }
         if(type.equalsIgnoreCase("city")){
+          for(Map<String,Object> region:jdbc.queryForList(
+              "SELECT r.id,r.name,COUNT(c.id)::int city_count FROM regions r " +
+              "JOIN cities c ON c.region_id=r.id " +
+              "WHERE r.nation_id=? AND TRIM(c.name)<>'-' AND UPPER(COALESCE(c.region,'')) NOT LIKE '[REMOVE]%' " +
+              "GROUP BY r.id,r.name ORDER BY r.name",id)){
+            Map<String,Object> regionNode=node(
+                "region_"+id+"_"+region.get("id"),
+                text(region.get("name"),"Other"),"REG",text(region.get("name"),"Other"),3,true,List.of());
+            regionNode.put("nationId",id);
+            regionNode.put("regionId",region.get("id"));
+            regionNode.put("isRegion",true);
+            regionNode.put("count",region.get("city_count"));
+            sub.add(regionNode);
+          }
           Integer removeCount=jdbc.queryForObject("SELECT COUNT(*) FROM cities WHERE nation_id=? AND (TRIM(name)='-' OR UPPER(COALESCE(region,'')) LIKE '[REMOVE]%')",Integer.class,id);
           if(removeCount!=null&&removeCount>0){
             String nationCode=text(nation.get("name_3l"),id).toUpperCase();

@@ -9,7 +9,7 @@ import { CityIcon } from '../../components/EntityIcons';
 import ListPageFilterBar from '../../components/ListPageFilterBar';
 import UnitTree from '../../components/UnitTree';
 import { useApp } from '../../context/AppContext';
-import { fetchCities, fetchUnitTree, findNationInTree, CityItem, UnitTreeNode } from '../../services/api';
+import { fetchCities, fetchUnitTree, findNationInTree, findNodeInTree, CityItem, UnitTreeNode } from '../../services/api';
 import { EntityType } from '../../types';
 import useResponsivePageSize from '../../hooks/useResponsivePageSize';
 
@@ -23,12 +23,14 @@ function ListCitiesContent() {
 
   const [selectedConfed, setSelectedConfed] = useState<string>('all');
   const [selectedNation, setSelectedNation] = useState<string>(initialNationId);
+  const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [removeOnly, setRemoveOnly] = useState<boolean>(false);
 
   // Modal temporary state
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [tempConfed, setTempConfed] = useState<string>('all');
   const [tempNation, setTempNation] = useState<string>(initialNationId);
+  const [tempRegion, setTempRegion] = useState<string>('all');
   const [tempRemoveOnly, setTempRemoveOnly] = useState<boolean>(false);
 
   const [treeNodes, setTreeNodes] = useState<UnitTreeNode[]>([]);
@@ -60,6 +62,8 @@ function ListCitiesContent() {
     if (qNation) {
       setSelectedNation(qNation);
       setTempNation(qNation);
+      setSelectedRegion('all');
+      setTempRegion('all');
       setRemoveOnly(false);
       setTempRemoveOnly(false);
     }
@@ -88,7 +92,7 @@ function ListCitiesContent() {
     if (listContainerRef.current) {
       listContainerRef.current.scrollTop = 0;
     }
-  }, [selectedNation, removeOnly, page]);
+  }, [selectedNation, selectedRegion, removeOnly, page]);
 
   const loadData = useCallback(async () => {
     if (!pageSizeReady) return;
@@ -99,6 +103,7 @@ function ListCitiesContent() {
         natParam,
         {
           confedId: selectedConfed !== 'all' ? selectedConfed : undefined,
+          regionId: selectedRegion !== 'all' ? selectedRegion : undefined,
           removeOnly,
           page: page - 1,
           size: pageSize,
@@ -115,7 +120,7 @@ function ListCitiesContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedConfed, selectedNation, removeOnly, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
+  }, [selectedConfed, selectedNation, selectedRegion, removeOnly, page, pageSize, pageSizeReady, debouncedKeyword, refreshSignal, message]);
 
   useEffect(() => {
     loadData();
@@ -130,6 +135,10 @@ function ListCitiesContent() {
       if (confed) levels.push(confed);
       const name = nationNode.shortName || nationNode.title || selectedNation;
       levels.push(name);
+      if (selectedRegion !== 'all') {
+        const regionNode = findNodeInTree(treeNodes, `region_${selectedNation}_${selectedRegion}`);
+        levels.push(regionNode?.shortName || regionNode?.title || selectedRegion);
+      }
       if (removeOnly) levels.push(`[${nationNode.code3 || selectedNation}-REMOVE]`);
       filterSummary = levels.join(' > ');
     } else {
@@ -139,11 +148,12 @@ function ListCitiesContent() {
     filterSummary = selectedConfed;
   }
 
-  const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all' || removeOnly;
+  const hasActiveCustomFilter = selectedConfed !== 'all' || selectedNation !== 'all' || selectedRegion !== 'all' || removeOnly;
 
   const handleOpenModal = () => {
     setTempConfed(selectedConfed);
     setTempNation(selectedNation);
+    setTempRegion(selectedRegion);
     setTempRemoveOnly(removeOnly);
     setModalOpen(true);
   };
@@ -151,50 +161,74 @@ function ListCitiesContent() {
   const confedKeys = ['afc', 'caf', 'concacaf', 'conmebol', 'ofc', 'uefa'];
 
   // Chọn option trong modal -> chỉ cập nhật giá trị tạm (temp)
-  const handlePickNation = (val: string) => {
+  const handlePickNation = (val: string, nodeData?: UnitTreeNode) => {
     const lk = val.toLowerCase();
     if (val.startsWith('remove_')) {
       const nationId = val.replace('remove_', '');
       setTempNation(nationId);
+      setTempRegion('all');
       setTempRemoveOnly(true);
+      const nationNode = findNationInTree(treeNodes, nationId);
+      if (nationNode?.confed) setTempConfed(nationNode.confed);
+    } else if (val.startsWith('region_') || nodeData?.regionId != null) {
+      const nationId = String(nodeData?.nationId || val.split('_')[1]);
+      const regionId = String(nodeData?.regionId || val.split('_')[2]);
+      setTempNation(nationId);
+      setTempRegion(regionId);
+      setTempRemoveOnly(false);
       const nationNode = findNationInTree(treeNodes, nationId);
       if (nationNode?.confed) setTempConfed(nationNode.confed);
     } else if (val === 'all') {
       setTempConfed('all');
       setTempNation('all');
+      setTempRegion('all');
       setTempRemoveOnly(false);
     } else if (val.startsWith('confed_') || confedKeys.includes(lk)) {
       const confedCode = val.replace('confed_', '').toUpperCase();
       setTempConfed(confedCode);
       setTempNation('all');
+      setTempRegion('all');
       setTempRemoveOnly(false);
     } else {
       setTempNation(val);
+      setTempRegion('all');
       setTempRemoveOnly(false);
       const nationNode = findNationInTree(treeNodes, val);
       if (nationNode?.confed) setTempConfed(nationNode.confed);
     }
   };
 
-  const handleSelectDirectly = (val: string) => {
+  const handleSelectDirectly = (val: string, nodeData?: UnitTreeNode) => {
     const lk = val.toLowerCase();
     if (val.startsWith('remove_')) {
       const nationId = val.replace('remove_', '');
       setSelectedNation(nationId);
+      setSelectedRegion('all');
       setRemoveOnly(true);
+      const nationNode = findNationInTree(treeNodes, nationId);
+      if (nationNode?.confed) setSelectedConfed(nationNode.confed);
+    } else if (val.startsWith('region_') || nodeData?.regionId != null) {
+      const nationId = String(nodeData?.nationId || val.split('_')[1]);
+      const regionId = String(nodeData?.regionId || val.split('_')[2]);
+      setSelectedNation(nationId);
+      setSelectedRegion(regionId);
+      setRemoveOnly(false);
       const nationNode = findNationInTree(treeNodes, nationId);
       if (nationNode?.confed) setSelectedConfed(nationNode.confed);
     } else if (val === 'all') {
       setSelectedConfed('all');
       setSelectedNation('all');
+      setSelectedRegion('all');
       setRemoveOnly(false);
     } else if (val.startsWith('confed_') || confedKeys.includes(lk)) {
       const confedCode = val.replace('confed_', '').toUpperCase();
       setSelectedConfed(confedCode);
       setSelectedNation('all');
+      setSelectedRegion('all');
       setRemoveOnly(false);
     } else {
       setSelectedNation(val);
+      setSelectedRegion('all');
       setRemoveOnly(false);
       const nationNode = findNationInTree(treeNodes, val);
       if (nationNode?.confed) setSelectedConfed(nationNode.confed);
@@ -205,12 +239,14 @@ function ListCitiesContent() {
   const handleResetModal = () => {
     setTempConfed('all');
     setTempNation('all');
+    setTempRegion('all');
     setTempRemoveOnly(false);
   };
 
   const handleApplyModal = () => {
     setSelectedConfed(tempConfed);
     setSelectedNation(tempNation);
+    setSelectedRegion(tempRegion);
     setRemoveOnly(tempRemoveOnly);
     setPage(1);
     setModalOpen(false);
@@ -219,6 +255,8 @@ function ListCitiesContent() {
   const currentTreeSelectedKey =
     removeOnly && selectedNation !== 'all'
       ? `remove_${selectedNation}`
+      : selectedRegion !== 'all' && selectedNation !== 'all'
+      ? `region_${selectedNation}_${selectedRegion}`
       : selectedNation !== 'all'
       ? selectedNation
       : selectedConfed !== 'all'
@@ -244,6 +282,7 @@ function ListCitiesContent() {
             onClick={() => {
               setSelectedConfed('all');
               setSelectedNation('all');
+              setSelectedRegion('all');
               setRemoveOnly(false);
               setPage(1);
             }}
@@ -347,8 +386,8 @@ function ListCitiesContent() {
         <div className="py-1">
           <UnitTree
             mode="city"
-            selectedKey={tempNation !== 'all' ? tempNation : tempConfed !== 'all' ? tempConfed.toLowerCase() : 'all'}
-            onSelectNode={(val) => handlePickNation(val)}
+            selectedKey={tempRemoveOnly && tempNation !== 'all' ? `remove_${tempNation}` : tempRegion !== 'all' && tempNation !== 'all' ? `region_${tempNation}_${tempRegion}` : tempNation !== 'all' ? tempNation : tempConfed !== 'all' ? tempConfed.toLowerCase() : 'all'}
+            onSelectNode={handlePickNation}
             allOptionLabel="All Nations"
           />
         </div>

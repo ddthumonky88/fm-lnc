@@ -56,6 +56,7 @@ export interface IndependentClubFilterQuery extends PaginationQuery {
 export interface CityFilterQuery extends PaginationQuery {
   category?: string;
   regionCode?: string;
+  regionId?: number | string;
   removeOnly?: boolean;
 }
 
@@ -694,6 +695,10 @@ export interface UnitTreeNode {
   isExtinct?: boolean;
   confed?: string;
   nationId?: string;
+  regionId?: number | string;
+  isRegion?: boolean;
+  isRemove?: boolean;
+  count?: number;
   children?: UnitTreeNode[];
 }
 

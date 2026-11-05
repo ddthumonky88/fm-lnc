@@ -509,3 +509,633 @@
 }
 ```
 
+### 21. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 979252543716,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 979252543716,
+    "property": 1413705326,
+    "new_value": "De Deinzenaars",
+    "version": 3032,
+    "db_random_id": 766169732,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 22. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 979252543716,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 979252543716,
+    "property": 1413703796,
+    "new_value": "KMSK",
+    "version": 3032,
+    "db_random_id": 57727489,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 23. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 1103806595329,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 1103806595329,
+    "property": 1413703796,
+    "new_value": "RWDM",
+    "version": 3032,
+    "db_random_id": 236487654,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 24. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 77347280072657649,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 77347280072657649,
+    "property": 1413705326,
+    "new_value": "Geel-Zwart",
+    "version": 3032,
+    "db_random_id": 100838070,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 25. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 35034799860905975,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 35034799860905975,
+    "property": 1413705326,
+    "new_value": "Groen-Wit",
+    "version": 3032,
+    "db_random_id": 693885538,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 26. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 35034799860905975,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 35034799860905975,
+    "property": 1413703796,
+    "new_value": "LSK",
+    "version": 3032,
+    "db_random_id": 450803238,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 27. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2315369625172433,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2315369625172433,
+    "property": 1413705326,
+    "new_value": "Leeuwen",
+    "version": 3032,
+    "db_random_id": 330666568,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 28. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 35024418924949126,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 35024418924949126,
+    "property": 1413705326,
+    "new_value": "Les Hurlus",
+    "version": 3032,
+    "db_random_id": 206556624,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 29. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 35024418924949126,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 35024418924949126,
+    "property": 1413703796,
+    "new_value": "REM",
+    "version": 3032,
+    "db_random_id": 571421012,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 30. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 1241245548833,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 1241245548833,
+    "property": 1413705326,
+    "new_value": "De Kemphanen",
+    "version": 3032,
+    "db_random_id": 149050416,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 31. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 1241245548833,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 1241245548833,
+    "property": 1413703796,
+    "new_value": "KVCW",
+    "version": 3032,
+    "db_random_id": 52533386,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 32. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2074469204451,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2074469204451,
+    "property": 1413705326,
+    "new_value": "De røde",
+    "version": 3032,
+    "db_random_id": 664596420,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 33. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2070174237154,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2070174237154,
+    "property": 1413705326,
+    "new_value": "De hviie",
+    "version": 3032,
+    "db_random_id": 197115570,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 34. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2130303779312,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2130303779312,
+    "property": 1413705326,
+    "new_value": "Drengene fra Vestegnen",
+    "version": 3032,
+    "db_random_id": 854528216,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 35. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2168958484985,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2168958484985,
+    "property": 1413705326,
+    "new_value": "Byens Hold",
+    "version": 3032,
+    "db_random_id": 969977871,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 36. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2259152798222,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2259152798222,
+    "property": 1413705326,
+    "new_value": "Ulvene",
+    "version": 3032,
+    "db_random_id": 203979215,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 37. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 4004812191316571,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 4004812191316571,
+    "property": 1413705326,
+    "new_value": "Tigrene",
+    "version": 3032,
+    "db_random_id": 802891680,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 38. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2340757176865,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2340757176865,
+    "property": 1413705326,
+    "new_value": "De Stribede",
+    "version": 3032,
+    "db_random_id": 968458782,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 39. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 3996986760901437,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 3996986760901437,
+    "property": 1413705326,
+    "new_value": "Hestene",
+    "version": 3032,
+    "db_random_id": 946839358,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 40. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2366526980647,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2366526980647,
+    "property": 1413703796,
+    "new_value": "SIF",
+    "version": 3032,
+    "db_random_id": 924311676,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 41. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 3980863453668499,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 3980863453668499,
+    "property": 1413705326,
+    "new_value": "De lyseblå",
+    "version": 3032,
+    "db_random_id": 379702748,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 42. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 9199819950174,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 9199819950174,
+    "property": 1413705326,
+    "new_value": "Jyllands Rubin",
+    "version": 3032,
+    "db_random_id": 733949190,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 43. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2181843386876,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2181843386876,
+    "property": 1413705326,
+    "new_value": "Englene",
+    "version": 3032,
+    "db_random_id": 199295568,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 44. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 116116742976866192,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 116116742976866192,
+    "property": 1413705326,
+    "new_value": "Svanerne",
+    "version": 3032,
+    "db_random_id": 400001864,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 45. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 3995221529342370,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 3995221529342370,
+    "property": 1413705326,
+    "new_value": "Gul Blå Vikinger",
+    "version": 3032,
+    "db_random_id": 42069499,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 46. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2065879269857,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2065879269857,
+    "property": 1413705326,
+    "new_value": "Den Gule Fare",
+    "version": 3032,
+    "db_random_id": 21703235,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 47. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 9088150800452,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 9088150800452,
+    "property": 1131638381,
+    "new_value": "Jammerbugt",
+    "version": 3032,
+    "db_random_id": 998675989,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 48. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2289217569301,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2289217569301,
+    "property": 1413705326,
+    "new_value": "De Kongeblå",
+    "version": 3032,
+    "db_random_id": 921424155,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 49. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2314987373083,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2314987373083,
+    "property": 1413705326,
+    "new_value": "Alliancen",
+    "version": 3032,
+    "db_random_id": 248252102,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+
+### 50. `record/list[db_changes]/record`
+
+```json
+{
+  "path": "record/list[db_changes]/record",
+  "tag": "record",
+  "id": 2061584302560,
+  "type": 3,
+  "fields": {
+    "database_table_type": 3,
+    "db_unique_id": 2061584302560,
+    "property": 1413705326,
+    "new_value": "Akademikerne",
+    "version": 3032,
+    "db_random_id": 232374958,
+    "is_client_field": true,
+    "is_language_field": true
+  }
+}
+```
+

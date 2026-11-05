@@ -4,6 +4,25 @@ Phân tích cấu trúc và các record mang ý nghĩa `add/update/delete/remove
 
 ## Chạy
 
+### Lệnh đã cấu hình sẵn
+
+Từ thư mục `fm-lnc`, chạy:
+
+```powershell
+.\run-analyze-xml.bat
+```
+
+Lệnh mặc định đọc `..\fm24.xml` và ghi báo cáo vào `fm24-changes.md`.
+Để phân tích file khác:
+
+```powershell
+.\run-analyze-xml.bat "D:\path\to\file.xml"
+```
+
+Trong VS Code có thể nhấn `Ctrl+Shift+P` → `Tasks: Run Task` → `FM24: Analyze XML`.
+
+### Chạy trực tiếp bằng Python
+
 Xuất JSON ra terminal:
 
 ```powershell
