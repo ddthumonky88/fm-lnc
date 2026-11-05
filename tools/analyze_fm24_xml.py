@@ -92,7 +92,7 @@ def change_summary(element: ET.Element, path: list[str]) -> dict[str, Any]:
     }
 
 
-def analyze(path: Path, sample_limit: int) -> dict[str, Any]:
+def analyze(path: Path, sample_limit: int, all_changes_path: Path | None = None) -> dict[str, Any]:
     prefix = path.read_bytes()[:4096].upper()
     if b"<!DOCTYPE" in prefix or b"<!ENTITY" in prefix:
         raise ValueError("DTD/ENTITY declarations are not supported")
@@ -113,59 +113,72 @@ def analyze(path: Path, sample_limit: int) -> dict[str, Any]:
     total_change_candidates = 0
     root_tag = ""
 
-    for event, element in ET.iterparse(path, events=("start", "end")):
-        tag = local_name(element.tag)
-        if event == "start":
+    changes_file = None
+    if all_changes_path is not None:
+        all_changes_path.parent.mkdir(parents=True, exist_ok=True)
+        changes_file = all_changes_path.open("w", encoding="utf-8", newline="\n")
+
+    try:
+        for event, element in ET.iterparse(path, events=("start", "end")):
+            tag = local_name(element.tag)
+            if event == "start":
+                element_id = element.attrib.get("id") or element.attrib.get("name")
+                stack.append(f"{tag}[{element_id}]" if element_id else tag)
+                if not root_tag:
+                    root_tag = tag
+                continue
+
+            tag_counts[tag] += 1
             element_id = element.attrib.get("id") or element.attrib.get("name")
-            stack.append(f"{tag}[{element_id}]" if element_id else tag)
-            if not root_tag:
-                root_tag = tag
-            continue
+            if element_id:
+                id_counts[element_id] += 1
+            if tag == "record":
+                total_records += 1
+            elif tag == "list":
+                total_lists += 1
 
-        tag_counts[tag] += 1
-        element_id = element.attrib.get("id") or element.attrib.get("name")
-        if element_id:
-            id_counts[element_id] += 1
-        if tag == "record":
-            total_records += 1
-        elif tag == "list":
-            total_lists += 1
+            child_ids = {
+                str(child.attrib.get("id", "")).lower()
+                for child in list(element)
+                if child.attrib.get("id")
+            }
+            is_fm_db_change = tag == "record" and {
+                "database_table_type",
+                "property",
+                "new_value",
+            }.issubset(child_ids)
+            record = record_to_dict(element) if is_fm_db_change else {}
+            if is_fm_db_change:
+                total_change_candidates += 1
+                change_type = first_value(record, TYPE_FIELDS) or element_id or tag
+                change_types[str(change_type)] += 1
+                table_type = str(record.get("database_table_type", "unknown"))
+                property_id = str(record.get("property", "unknown"))
+                property_counts[(table_type, property_id)] += 1
+                version_counts[str(record.get("version", "unknown"))] += 1
+                object_id = record.get("db_unique_id") or record.get("db_random_id") or "unknown"
+                changed_objects.add((table_type, str(object_id)))
+                client_field_count += int(record.get("is_client_field") is True)
+                language_field_count += int(record.get("is_language_field") is True)
+                new_value_element = next(
+                    (child for child in list(element) if child.attrib.get("id") == "new_value"),
+                    None,
+                )
+                value_type_counts[local_name(new_value_element.tag) if new_value_element is not None else "unknown"] += 1
+                detail = None
+                if changes_file is not None or len(samples) < sample_limit:
+                    detail = change_summary(element, stack.copy())
+                if changes_file is not None and detail is not None:
+                    changes_file.write(json.dumps(detail, ensure_ascii=False, separators=(",", ":")) + "\n")
+                if len(samples) < sample_limit and detail is not None:
+                    samples.append(detail)
 
-        child_ids = {
-            str(child.attrib.get("id", "")).lower()
-            for child in list(element)
-            if child.attrib.get("id")
-        }
-        is_fm_db_change = tag == "record" and {
-            "database_table_type",
-            "property",
-            "new_value",
-        }.issubset(child_ids)
-        record = record_to_dict(element) if is_fm_db_change else {}
-        candidate = is_fm_db_change
-        if candidate:
-            total_change_candidates += 1
-            change_type = first_value(record, TYPE_FIELDS) or element_id or tag
-            change_types[str(change_type)] += 1
-            table_type = str(record.get("database_table_type", "unknown"))
-            property_id = str(record.get("property", "unknown"))
-            property_counts[(table_type, property_id)] += 1
-            version_counts[str(record.get("version", "unknown"))] += 1
-            object_id = record.get("db_unique_id") or record.get("db_random_id") or "unknown"
-            changed_objects.add((table_type, str(object_id)))
-            client_field_count += int(record.get("is_client_field") is True)
-            language_field_count += int(record.get("is_language_field") is True)
-            new_value_element = next(
-                (child for child in list(element) if child.attrib.get("id") == "new_value"),
-                None,
-            )
-            value_type_counts[local_name(new_value_element.tag) if new_value_element is not None else "unknown"] += 1
-            if len(samples) < sample_limit:
-                samples.append(change_summary(element, stack.copy()))
-
-        stack.pop()
-        if tag == "record":
-            element.clear()
+            stack.pop()
+            if tag == "record":
+                element.clear()
+    finally:
+        if changes_file is not None:
+            changes_file.close()
 
     properties_by_table: dict[str, dict[str, int]] = {}
     for (table_type, property_id), count in property_counts.most_common():
@@ -247,6 +260,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     parser.add_argument("--output", type=Path, help="Write the report to this file")
     parser.add_argument("--samples", type=int, default=25, help="Maximum sampled changes (default: 25)")
+    parser.add_argument(
+        "--bundle",
+        type=Path,
+        help="Write summary.md, summary.json and every change record as changes.jsonl into this directory",
+    )
     return parser.parse_args()
 
 
@@ -256,10 +274,20 @@ def main() -> int:
         print(f"ERROR: XML file not found: {args.xml}", file=sys.stderr)
         return 2
     try:
-        report = analyze(args.xml, max(0, args.samples))
+        all_changes_path = args.bundle / "changes.jsonl" if args.bundle else None
+        report = analyze(args.xml, max(0, args.samples), all_changes_path)
     except (ET.ParseError, OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
+
+    if args.bundle:
+        args.bundle.mkdir(parents=True, exist_ok=True)
+        (args.bundle / "summary.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        (args.bundle / "summary.md").write_text(markdown_report(report) + "\n", encoding="utf-8")
+        print(f"Complete report written to: {args.bundle.resolve()}")
+        return 0
 
     content = markdown_report(report) if args.format == "markdown" else json.dumps(report, ensure_ascii=False, indent=2)
     if args.output:

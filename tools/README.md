@@ -12,7 +12,11 @@ Từ thư mục `fm-lnc`, chạy:
 .\run-analyze-xml.bat
 ```
 
-Lệnh mặc định đọc `..\fm24.xml` và ghi báo cáo vào `fm24-changes.md`.
+Lệnh mặc định đọc `..\fm24.xml` và tổng hợp toàn bộ kết quả vào `fm24-report`:
+
+- `summary.md`: báo cáo dễ đọc.
+- `summary.json`: toàn bộ số liệu thống kê.
+- `changes.jsonl`: tất cả change record, mỗi dòng là một JSON độc lập.
 Để phân tích file khác:
 
 ```powershell
@@ -20,6 +24,12 @@ Lệnh mặc định đọc `..\fm24.xml` và ghi báo cáo vào `fm24-changes.m
 ```
 
 Trong VS Code có thể nhấn `Ctrl+Shift+P` → `Tasks: Run Task` → `FM24: Analyze XML`.
+
+Chạy bundle trực tiếp bằng Python:
+
+```powershell
+python .\tools\analyze_fm24_xml.py ..\fm24.xml --bundle .\fm24-report --samples 50
+```
 
 ### Chạy trực tiếp bằng Python
 

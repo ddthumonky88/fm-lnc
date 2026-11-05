@@ -30,6 +30,7 @@ fm-lnc-fe/.env.local
 # Logs
 logs/
 *.log
+fm24-report/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

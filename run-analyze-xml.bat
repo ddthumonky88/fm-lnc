@@ -30,12 +30,15 @@ if not defined PYTHON_EXE (
 )
 
 echo Dang phan tich: %XML_FILE%
-echo Bao cao: %~dp0fm24-changes.md
+echo Thu muc bao cao: %~dp0fm24-report
 echo.
 
-"%PYTHON_EXE%" %PYTHON_ARGS% "%~dp0tools\analyze_fm24_xml.py" "%XML_FILE%" --format markdown --output "%~dp0fm24-changes.md" --samples 50
+"%PYTHON_EXE%" %PYTHON_ARGS% "%~dp0tools\analyze_fm24_xml.py" "%XML_FILE%" --bundle "%~dp0fm24-report" --samples 50
 if errorlevel 1 exit /b %ERRORLEVEL%
 
 echo.
-echo Hoan tat: %~dp0fm24-changes.md
+echo Hoan tat:
+echo - %~dp0fm24-report\summary.md
+echo - %~dp0fm24-report\summary.json
+echo - %~dp0fm24-report\changes.jsonl
 exit /b 0
