@@ -76,7 +76,32 @@ public class HierarchyController {
         n.put("confed",confed); n.put("nationData",nation); children.add(n);
       }
       roots.add(node(confed.toLowerCase(),"["+confed+"] "+confedName(confed),confed,confedName(confed),1,true,children));
-    } return roots;
+    }
+    if(type.equalsIgnoreCase("city")){
+      List<Map<String,Object>> cityTree=new ArrayList<>();
+      cityTree.add(roots.get(0));
+      for(int rootIndex=1;rootIndex<roots.size();rootIndex++){
+        Object rawNations=roots.get(rootIndex).get("children");
+        if(!(rawNations instanceof List<?> nations)) continue;
+        for(Object rawNation:nations){
+          if(!(rawNation instanceof Map<?,?> rawNationMap)) continue;
+          @SuppressWarnings("unchecked") Map<String,Object> nationNode=(Map<String,Object>)rawNationMap;
+          nationNode.put("level",1);
+          Object rawRegions=nationNode.get("children");
+          if(rawRegions instanceof List<?> regions){
+            for(Object rawRegion:regions){
+              if(rawRegion instanceof Map<?,?> rawRegionMap){
+                @SuppressWarnings("unchecked") Map<String,Object> regionNode=(Map<String,Object>)rawRegionMap;
+                regionNode.put("level",2);
+              }
+            }
+          }
+          cityTree.add(nationNode);
+        }
+      }
+      return cityTree;
+    }
+    return roots;
   }
 
   @PostMapping("/nations/search") public Map<String,Object> nations(@RequestParam Map<String,String> q,@RequestBody(required=false) Map<String,Object> f){return page("nations",merge(q,f),"COALESCE(name_sh,name_lg)");}

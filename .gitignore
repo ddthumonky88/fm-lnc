@@ -31,6 +31,7 @@ fm-lnc-fe/.env.local
 logs/
 *.log
 fm24-report/
+*.sqlite.tmp
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
