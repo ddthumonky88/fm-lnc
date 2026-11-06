@@ -1,0 +1,9 @@
+.vercel
+.vercel-*
+.npm-cache
+.env*
+**/node_modules
+**/.next
+**/target
+*.log
+
