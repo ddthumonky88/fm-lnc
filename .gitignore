@@ -37,6 +37,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Local Vercel CLI state
+fm-lnc-be-java/.vercel/
+fm-lnc-be-java/.vercel-npm-cache/
+fm-lnc-be-java/.vercel-cli-cache/
+fm-lnc-be-java/.vercel-user-data/
+fm-lnc-be-java/.vercel-deploy-src/
+
 # OS Files
 .DS_Store
 Thumbs.db
